@@ -13,7 +13,25 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    
+    // Method to handle successful responses
+    protected function success($message, $data = [], $status = 200)
+    {
+        return response()->json([
+            'status' => 'success',
+            'message' => $message,
+            'data' => $data
+        ], $status);
+    }
+
+    // Method to handle error responses
+    protected function error($message, $errors = [], $status = 422)
+    {
+        return response()->json([
+            'status' => 'error',
+            'message' => $message,
+            'errors' => $errors
+        ], $status);
+    }
     public function individualRegister(Request $request)
     {
         $request->validate([
