@@ -5,16 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Person extends Model
+class Individual extends Model
 {
     use HasFactory;
     protected $fillable = [
         'user_id',
         'azon_id',
-        'title',
-        'first_name',
-        'last_name',
-        'gender',
+        'full_name',
         'status',
     ];
 }

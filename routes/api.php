@@ -9,3 +9,6 @@ use App\Http\Controllers\AuthController;
 // })->middleware('auth:sanctum');
 
 Route::post('org_register', [AuthController::class, 'orgRegister']);
+Route::post('individual_register', [AuthController::class, 'individualRegister']);
+Route::post('login', [AuthController::class, 'login']);
+
