@@ -35,18 +35,15 @@ class OrganisationController extends Controller
      * Display the specified resource.
      */
     public function show($id)
-    {
-        {
-            $organisation = Organisation::where('user_id', $id)->first();
-    
-            if (!$organisation) {
-                return response()->json(['error' => 'Organisation not found'], 404);
-            }
-    
-            return response()->json($organisation);
-        }
-    }
+{
+    $organisation = Organisation::find($id);
 
+    if ($organisation) {
+        return response()->json(['status' => true, 'data' => $organisation]);
+    } else {
+        return response()->json(['status' => false, 'message' => 'Organisation not found']);
+    }
+}
     /**
      * Show the form for editing the specified resource.
      */

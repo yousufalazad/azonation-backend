@@ -139,8 +139,13 @@ class AuthController extends Controller
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->plainTextToken;
 
+        //$organisation = Organisation::where('user_id',$user->id)->orderBy('id', 'desc')->first();
+        //$individual = Individual::where('user_id',$user->id)->orderBy('id', 'desc')->first();
+
         return $this->success('Successfully logged in', [
             'user_id' => $user->id,
+            //'full_name' => $individual->full_name,
+            //'org_name' => $organisation->org_name,
             'email' => $user->email,
             'type' => $user->type,
             'accessToken' => $token,

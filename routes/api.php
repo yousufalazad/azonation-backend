@@ -12,4 +12,4 @@ use App\Http\Controllers\OrganisationController;
 Route::post('org_register', [AuthController::class, 'orgRegister']);
 Route::post('individual_register', [AuthController::class, 'individualRegister']);
 Route::post('login', [AuthController::class, 'login']);
-Route::get('organisation/${orgId}', [OrganisationController::class, 'show']);
+Route::resource('organisation_data', OrganisationController::class);
