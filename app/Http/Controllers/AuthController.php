@@ -32,6 +32,7 @@ class AuthController extends Controller
             'errors' => $errors
         ], $status);
     }
+    // Method to handle individual registration creation
     public function individualRegister(Request $request)
     {
         $request->validate([
@@ -47,7 +48,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // Create a new person record associated with the user
+        // Create a new individual record associated with the user
         Individual::create([
             'user_id' => $user->id,
             'full_name' => $request->full_name,
@@ -70,7 +71,7 @@ class AuthController extends Controller
 
         $user = User::create([
             'org_name'  => $request->name,
-            'type' => 2, //type=2 indicating person user in user tabel
+            'type' => 2, //type= 2 indicating org user in user tabel
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -124,7 +125,7 @@ class AuthController extends Controller
     }
 
     public function login(Request $request)
-    {   
+    {
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
@@ -175,63 +176,58 @@ class AuthController extends Controller
         // throw ValidationException::withMessages([
         //     'email' => ['The provided credentials are incorrect.'],
         // ]);
+        //}
+        // public function login(Request $request)
+        // {
+        //     $request->validate([
+        //         'email' => 'required|string|email',
+        //         'password' => 'required|string',
+        //     ]);
+
+        //     // if (!Auth::attempt($request->only('email', 'password'))) {
+        //     //     throw ValidationException::withMessages([
+        //     //         'email' => ['The provided credentials are incorrect.'],
+        //     //     ]);
+        //     // }
+
+        //     if (Auth::attempt($request->only('email', 'password'))) {
+        //         $user = Auth::user();
+
+        //         // Determine the user type (assuming 'type' is a field in the 'users' table)
+        //         $userType = $user->type;
+
+        //        $token = $user->createToken('auth_token')->plainTextToken;
+
+        //         return response()->json([
+        //             'token' => $token,
+        //             'type' => $userType, // Include the user type in the response
+        //         ]);
+        //     }
+
+        //     throw ValidationException::withMessages([
+        //         'email' => ['The provided credentials are incorrect.'],
+        //     ]);
+
+        //     // $user = $request->user();
+
+        //     // // Determine the user type (assuming 'type' is a field in the 'users' table)
+        //     // $userType = $user->type;
+
+        //     // $token = $user->createToken('auth_token')->plainTextToken;
+
+        //     // return response()->json([
+        //     //     'token' => $token,
+        //     //     'type' => $userType, // Include the user type in the response
+        //     // ]);
     }
-    // public function login(Request $request)
-    // {
-    //     $request->validate([
-    //         'email' => 'required|string|email',
-    //         'password' => 'required|string',
-    //     ]);
 
-    //     // if (!Auth::attempt($request->only('email', 'password'))) {
-    //     //     throw ValidationException::withMessages([
-    //     //         'email' => ['The provided credentials are incorrect.'],
-    //     //     ]);
-    //     // }
 
-    //     if (Auth::attempt($request->only('email', 'password'))) {
-    //         $user = Auth::user();
-
-    //         // Determine the user type (assuming 'type' is a field in the 'users' table)
-    //         $userType = $user->type;
-
-    //        $token = $user->createToken('auth_token')->plainTextToken;
-
-    //         return response()->json([
-    //             'token' => $token,
-    //             'type' => $userType, // Include the user type in the response
-    //         ]);
-    //     }
-
-    //     throw ValidationException::withMessages([
-    //         'email' => ['The provided credentials are incorrect.'],
-    //     ]);
-
-    //     // $user = $request->user();
-
-    //     // // Determine the user type (assuming 'type' is a field in the 'users' table)
-    //     // $userType = $user->type;
-
-    //     // $token = $user->createToken('auth_token')->plainTextToken;
-
-    //     // return response()->json([
-    //     //     'token' => $token,
-    //     //     'type' => $userType, // Include the user type in the response
-    //     // ]);
-    // }
-
-    
     public function user(Request $request)
     {
         return response()->json($request->user());
     }
-
-    /**
-     * Log the user out (Revoke the token).
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    
+    // Method to handle logout process
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
