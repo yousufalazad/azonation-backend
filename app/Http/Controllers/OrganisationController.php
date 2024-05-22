@@ -36,7 +36,7 @@ class OrganisationController extends Controller
      */
     public function show($id)
 {
-    $organisation = Organisation::find($id);
+    $organisation = Organisation::where('user_id', $id)->first();
 
     if ($organisation) {
         return response()->json(['status' => true, 'data' => $organisation]);

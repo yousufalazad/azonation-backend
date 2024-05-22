@@ -34,9 +34,15 @@ class IndividualController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Individual $individual)
+    public function show($id)
     {
-        //
+        $individualData = Individual::where('user_id', $id)->first();
+    
+        if ($individualData) {
+            return response()->json(['status' => true, 'data' => $individualData]);
+        } else {
+            return response()->json(['status' => false, 'message' => 'Individual data not found']);
+        }
     }
 
     /**
