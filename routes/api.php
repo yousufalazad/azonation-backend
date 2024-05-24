@@ -17,3 +17,4 @@ Route::post('login', [AuthController::class, 'login']);
 Route::resource('organisation_data', OrganisationController::class);
 Route::resource('individual_data', IndividualController::class);
 Route::resource('org_member_list', OrgMemberListController::class);
+   

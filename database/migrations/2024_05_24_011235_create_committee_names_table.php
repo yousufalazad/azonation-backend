@@ -11,14 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('org_member_lists', function (Blueprint $table) {
+        Schema::create('committee_names', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('org_id'); // Foreign key to org table
-            $table->unsignedBigInteger('individual_id'); // Foreign key to users table
+            $table->string('name');
+            $table->string('short_description')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->string('note')->nullable();
             $table->tinyInteger('status')->nullable()->default(0);
             $table->timestamps();
 
-           // Define foreign key constraint
+            // Define foreign key constraint
            $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
         });
     }
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('org_member_lists');
+        Schema::dropIfExists('committee_names');
     }
 };
