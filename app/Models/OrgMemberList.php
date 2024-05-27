@@ -11,6 +11,8 @@ class OrgMemberList extends Model
     protected $fillable = [
         'org_id',
         'individual_id',
+        'joining_date',
+        'end_date',
         'status',
     ];
 }
