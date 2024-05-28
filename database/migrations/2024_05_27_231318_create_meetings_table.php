@@ -13,7 +13,22 @@ return new class extends Migration
     {
         Schema::create('meetings', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('org_id'); // Foreign key to org table
+            $table->string('name_for_admin')->nullable();
+            $table->string('name')->nullable();
+            $table->date('date')->nullable();
+            $table->date('time')->nullable();
+            $table->string('description')->nullable();
+            $table->string('place')->nullable();
+            $table->string('agenda')->nullable();
+            $table->string('requirements')->nullable();
+            $table->string('note')->nullable();
+            $table->tinyInteger('status')->nullable()->default(0);
+            $table->tinyInteger('conduct_type')->nullable()->default(0);
             $table->timestamps();
+
+            // Define foreign key constraint
+           $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
         });
     }
 
