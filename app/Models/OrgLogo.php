@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class OrgLogo extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'org_id',
+        'image',
+    ];
 }
