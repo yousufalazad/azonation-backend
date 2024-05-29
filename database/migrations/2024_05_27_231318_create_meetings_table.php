@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('org_id'); // Foreign key to org table
             $table->string('name_for_admin')->nullable();
             $table->string('name')->nullable();
+            $table->string('subject')->nullable();
             $table->date('date')->nullable();
             $table->date('time')->nullable();
             $table->string('description')->nullable();
@@ -24,7 +25,7 @@ return new class extends Migration
             $table->string('requirements')->nullable();
             $table->string('note')->nullable();
             $table->tinyInteger('status')->nullable()->default(0);
-            $table->tinyInteger('conduct_type')->nullable()->default(0);
+            $table->tinyInteger('conduct_type')->nullable()->default(0); //0=null, 1=in_person, 2=remote, 3=hybrid
             $table->timestamps();
 
             // Define foreign key constraint

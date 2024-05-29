@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('meeting_minutes', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('meeting_id'); // Foreign key to meetings table
+            $table->string('minutes')->nullable();
+            $table->string('decisions')->nullable();
+            $table->string('note')->nullable();
+            $table->tinyInteger('status')->nullable()->default(0);
             $table->timestamps();
+
+            // Define foreign key constraint
+           $table->foreign('meeting_id')->references('id')->on('meetings')->onDelete('cascade');
         });
     }
 
