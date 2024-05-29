@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('meeting_notifications', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('meeting_id'); // Foreign key to org table
+            $table->unsignedBigInteger('meeting_id'); // Foreign key to meeting table
             $table->boolean('in_app_notification')->nullable();
             $table->boolean('app_inbox')->nullable();
             $table->boolean('email')->nullable();
@@ -25,6 +25,7 @@ return new class extends Migration
 
             // Define foreign key constraint
            $table->foreign('meeting_id')->references('id')->on('meetings')->onDelete('cascade');
+
         });
     }
 
