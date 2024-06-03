@@ -9,6 +9,16 @@ use Illuminate\Http\Request;
 
 class OrgMemberListController extends Controller
 {
+
+    public function getMembersByOrgId($orgId)
+    {
+        // Assuming you have a relationship between OrgMember and Individual models
+        $members = OrgMemberList::where('org_id', $orgId)
+            // ->with('individual') // Assuming 'individual' is the relationship method
+            ->get();
+
+        return response()->json($members);
+    }
     /**
      * Display a listing of the resource.
      */
