@@ -11,8 +11,11 @@ class OrgMemberList extends Model
     protected $fillable = [
         'org_id',
         'individual_id',
-        'joining_date',
-        'end_date',
         'status',
     ];
+
+    public function individual()
+    {
+        return $this->belongsTo(Individual::class, 'individual_id', 'id');
+    }
 }

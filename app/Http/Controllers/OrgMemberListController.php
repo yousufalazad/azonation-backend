@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrgMemberList;
-use App\Models\Organisation;
-use App\Models\Individual;
 use Illuminate\Http\Request;
 
 class OrgMemberListController extends Controller
@@ -12,12 +10,15 @@ class OrgMemberListController extends Controller
 
     public function getMembersByOrgId($orgId)
     {
-        // Assuming you have a relationship between OrgMember and Individual models
+        
         $members = OrgMemberList::where('org_id', $orgId)
-            // ->with('individual') // Assuming 'individual' is the relationship method
-            ->get();
+        ->with('individual')
+        ->get();
 
-        return response()->json($members);
+        return response()->json([
+        'status' => true,
+        'data' => $members
+    ]);
     }
     /**
      * Display a listing of the resource.

@@ -21,6 +21,6 @@ Route::resource('org_member_list', OrgMemberListController::class);
 Route::post('/search_individuals', [IndividualController::class, 'search']);
 Route::post('/add_member', [IndividualController::class, 'addMember']);
 
-Route::get('/org_members/{orgId}', [OrgMemberListController::class, 'getMembersByOrgId']);
+Route::get('/org-members-list/{orgId}', [OrgMemberListController::class, 'getMembersByOrgId']);
 
    
