@@ -20,17 +20,13 @@ class OrgMemberListController extends Controller
         'data' => $members
     ]);
     }
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
     {
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    
     public function create()
     {
         //

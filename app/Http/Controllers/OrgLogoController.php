@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 class OrgLogoController extends Controller
 {
+    
     /**
      * Display a listing of the resource.
      */
@@ -28,7 +29,7 @@ class OrgLogoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //store
     }
 
     /**
