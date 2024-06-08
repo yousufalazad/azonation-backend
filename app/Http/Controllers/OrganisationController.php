@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Organisation;
 use Illuminate\Http\Request;
-
+use App\Models\Organisation;
+use App\Models\OrgLogo;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon; // Import Carbon for timestamp
 class OrganisationController extends Controller
 {
     
@@ -16,6 +19,49 @@ class OrganisationController extends Controller
             'data' => $data
         ], $status);
     }
+
+     // getLogo
+     public function getLogo($orgId)
+     {
+         $logo = OrgLogo::where('org_id', $orgId)->first();
+         $imageUrl = $logo ? Storage::url($logo->image) : null;
+     
+         return response()->json([
+             'status' => true,
+             'data' => ['image' => $imageUrl]
+         ]);
+     }
+     
+     // getLogo update 
+     public function updateLogo(Request $request, $orgId)
+     {
+         $request->validate([
+             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+         ]);
+ 
+         $organisation = Organisation::find($orgId);
+         if (!$organisation) {
+             return response()->json(['status' => false, 'message' => 'Organization not found'], 404);
+         }
+ 
+         $image = $request->file('image');
+         $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+         $extension = $image->getClientOriginalExtension();
+         $timestamp = Carbon::now()->format('YmdHis');
+         $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
+ 
+         $path = $image->storeAs('logos', $newFileName, 'public');
+ 
+         // Save the logo path to org_logos table
+         $orgLogo = new OrgLogo();
+         $orgLogo->org_id = $orgId;
+         $orgLogo->image = $path;
+         $orgLogo->save();
+ 
+         $imageUrl = Storage::url($path);
+ 
+         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
+     }
     /**
      * Display a listing of the resource.
      */
