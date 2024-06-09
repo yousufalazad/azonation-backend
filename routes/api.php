@@ -19,8 +19,8 @@ Route::resource('organisation_data', OrganisationController::class);
 Route::resource('individual_data', IndividualController::class);
 Route::resource('org_member_list', OrgMemberListController::class);
 
-Route::get('/organisation/logo/{orgId}', [OrgLogoController::class, 'getLogo']);
-Route::post('/organisation/logo/{orgId}', [OrgLogoController::class, 'updateLogo']);
+Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLogo']);
+Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);
 
 Route::post('/search_individuals', [IndividualController::class, 'search']);
 Route::post('/add_member', [IndividualController::class, 'addMember']);

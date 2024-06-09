@@ -23,7 +23,7 @@ class OrganisationController extends Controller
      // getLogo
      public function getLogo($orgId)
      {
-         $logo = OrgLogo::where('org_id', $orgId)->first();
+         $logo = OrgLogo::where('org_id', $orgId)->orderBy('id', 'desc')->first();
          $imageUrl = $logo ? Storage::url($logo->image) : null;
      
          return response()->json([
@@ -52,14 +52,20 @@ class OrganisationController extends Controller
  
          $path = $image->storeAs('logos', $newFileName, 'public');
  
+         $orgLogo = OrgLogo::where('org_id', $orgId)->orderBy('id', 'desc')->first();
+         if ($orgLogo) {
+             //ekhane delete korte hobe save korar agee
+             $orgLogo->org_id = $orgId;
+             $orgLogo->image = $path;
+             $orgLogo->save();
+         }else{
          // Save the logo path to org_logos table
          $orgLogo = new OrgLogo();
          $orgLogo->org_id = $orgId;
          $orgLogo->image = $path;
          $orgLogo->save();
- 
+         }
          $imageUrl = Storage::url($path);
- 
          return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
      }
     /**
