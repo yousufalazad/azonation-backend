@@ -22,4 +22,9 @@ class OrgMemberList extends Model
     {
         return $this->belongsTo(Individual::class, 'individual_id', 'id');
     }
+
+    public function connectedorg()
+    {
+        return $this->belongsTo(Organisation::class, 'org_id', 'id');
+    }
 }

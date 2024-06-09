@@ -8,9 +8,10 @@ use App\Models\OrgLogo;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon; // Import Carbon for timestamp
+
+
 class OrganisationController extends Controller
 {
-    
     protected function success($message, $data = [], $status = 200)
     {
         return response()->json([
