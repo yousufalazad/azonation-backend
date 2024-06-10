@@ -51,7 +51,7 @@ class OrganisationController extends Controller
          $timestamp = Carbon::now()->format('YmdHis');
          $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
  
-         $path = $image->storeAs('logos', $newFileName, 'public');
+         $path = $image->storeAs('org/profilelogos', $newFileName, 'public');
  
          $orgLogo = OrgLogo::where('org_id', $orgId)->orderBy('id', 'desc')->first();
          if ($orgLogo) {
