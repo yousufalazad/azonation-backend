@@ -9,6 +9,7 @@ class CommitteeName extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'orgId',
         'name',
         'short_description',
         'start_date',

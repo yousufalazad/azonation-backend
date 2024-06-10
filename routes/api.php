@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrganisationController;
 use App\Http\Controllers\IndividualController;
 use App\Http\Controllers\OrgMemberListController;
+use App\Http\Controllers\CommitteeNameController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -27,3 +28,5 @@ Route::resource('org_member_list', OrgMemberListController::class);
 Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLogo']);
 Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);
 Route::get('/org-members-list/{orgId}', [OrgMemberListController::class, 'getMembersByOrgId']);
+
+Route::post('create_committee', [CommitteeNameController::class, 'committeeStore']);

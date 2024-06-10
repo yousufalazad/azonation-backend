@@ -26,11 +26,27 @@ class CommitteeNameController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
-    }
-
+    
+     public function committeeStore(Request $request)
+     {
+         $request->validate([
+             'name' => 'required|string',
+         ]);
+         
+         // Create a new committee record associated with the organisation
+             CommitteeName::create([
+             'org_id' => $request->orgId,
+             'name' => $request->name,
+             'short_description' => $request->short_description,
+             'start_date' => $request->start_date,
+             'end_date' => $request->end_date,
+             'note' => $request->note,
+             'status' => $request->status,
+         ]);
+ 
+         // Return a success response
+         return response()->json(['message' => 'Committee created successfully', 200]);
+     }
     /**
      * Display the specified resource.
      */
