@@ -27,5 +27,3 @@ Route::resource('org_member_list', OrgMemberListController::class);
 Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLogo']);
 Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);
 Route::get('/org-members-list/{orgId}', [OrgMemberListController::class, 'getMembersByOrgId']);
-
-   

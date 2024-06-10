@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('org_id'); // Foreign key to org table
             $table->unsignedBigInteger('individual_id'); // Foreign key to users table
             $table->string('existing_org_membership_id')->nullable();
-            $table->tinyInteger('membership_type')->nullable()->default(0);
+            $table->unsignedBigInteger('membership_type')->nullable()->default(0);
             $table->date('joining_date')->nullable();
             $table->date('end_date')->nullable();
             $table->tinyInteger('status')->nullable()->default(0);
