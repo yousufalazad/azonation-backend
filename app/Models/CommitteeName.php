@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class CommitteeName extends Model
 {
     use HasFactory;
+   
     protected $fillable = [
-        'orgId',
+        'org_id',
         'name',
         'short_description',
         'start_date',
         'end_date',
         'note',
-        'status',
+        'status'
     ];
 }

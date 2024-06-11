@@ -29,4 +29,5 @@ Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLog
 Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);
 Route::get('/org-members-list/{orgId}', [OrgMemberListController::class, 'getMembersByOrgId']);
 
-Route::post('create_committee', [CommitteeNameController::class, 'committeeStore']);
+Route::post('create_committee_store', [CommitteeNameController::class, 'committeeStore']);
+Route::get('org-committee-list/{orgId}', [CommitteeNameController::class, 'getCommitteeListByOrgId']);
