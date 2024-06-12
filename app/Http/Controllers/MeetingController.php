@@ -7,12 +7,18 @@ use Illuminate\Http\Request;
 
 class MeetingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    
+    
+    public function index($orgId)
     {
-        //
+        $meetingList = Meeting::where('org_id', $orgId)
+        ->orderBy('id', 'asc')
+        ->get();
+
+    return response()->json([
+        'status' => true,
+        'data' => $meetingList
+    ]);
     }
 
     /**
@@ -28,7 +34,29 @@ class MeetingController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string',
+        ]);
+
+        // Create a new meeting record associated with the organisation
+        Meeting::create([
+            'org_id' => $request->orgId,
+            'name' => $request->name,
+            'name_for_admin' => $request->name_for_admin,
+            'subject' => $request->subject,
+            'date' => $request->date,
+            'time' => $request->time,
+            'description' => $request->description,
+            'address' => $request->address,
+            'agenda' => $request->agenda,
+            'requirements' => $request->requirements,
+            'note' => $request->note,
+            'status' => $request->status,
+            'conduct_type' => $request->conduct_type,
+        ]);
+
+        // Return a success response
+        return response()->json(['message' => 'Meeting created successfully', 200]);
     }
 
     /**

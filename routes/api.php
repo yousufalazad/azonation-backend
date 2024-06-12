@@ -7,6 +7,7 @@ use App\Http\Controllers\OrganisationController;
 use App\Http\Controllers\IndividualController;
 use App\Http\Controllers\OrgMemberListController;
 use App\Http\Controllers\CommitteeNameController;
+use App\Http\Controllers\MeetingController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -31,3 +32,6 @@ Route::get('/org-members-list/{orgId}', [OrgMemberListController::class, 'getMem
 
 Route::post('create_committee_store', [CommitteeNameController::class, 'committeeStore']);
 Route::get('org-committee-list/{orgId}', [CommitteeNameController::class, 'getCommitteeListByOrgId']);
+
+Route::post('create-meeting-store', [MeetingController::class, 'store']);
+Route::get('meeting-list/{orgId}', [MeetingController::class, 'index']);
