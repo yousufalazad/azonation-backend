@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrgMembershipTypeList;
+use App\Models\CountryCode;
 use Illuminate\Http\Request;
 
-class OrgMembershipTypeListController extends Controller
+class CountryCodeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class OrgMembershipTypeListController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(OrgMembershipTypeList $orgMembershipTypeList)
+    public function show(CountryCode $countryCode)
     {
         //
     }
@@ -42,7 +42,7 @@ class OrgMembershipTypeListController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OrgMembershipTypeList $orgMembershipTypeList)
+    public function edit(CountryCode $countryCode)
     {
         //
     }
@@ -50,7 +50,7 @@ class OrgMembershipTypeListController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, OrgMembershipTypeList $orgMembershipTypeList)
+    public function update(Request $request, CountryCode $countryCode)
     {
         //
     }
@@ -58,7 +58,7 @@ class OrgMembershipTypeListController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrgMembershipTypeList $orgMembershipTypeList)
+    public function destroy(CountryCode $countryCode)
     {
         //
     }

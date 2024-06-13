@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('meeting_conduct_types', function (Blueprint $table) {
+        Schema::create('membership_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name'); //0=not selected, Honorary Member, Lifetime Member, General Member, Associate Member, Temporary Member, Prospective Member, Not A Member
             $table->timestamps();
         });
     }
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('meeting_conduct_types');
+        Schema::dropIfExists('membership_types');
     }
 };

@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('meeting_conduct_types', function (Blueprint $table) {
+        Schema::create('country_codes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('country_name');
+            $table->string('country_code');
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('meeting_conduct_types');
+        Schema::dropIfExists('country_codes');
     }
 };
