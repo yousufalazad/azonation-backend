@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PhoneNumber;
+use App\Models\OrgTimeZone;
 use Illuminate\Http\Request;
 
-class PhoneNumberController extends Controller
+class OrgTimeZoneController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class PhoneNumberController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PhoneNumber $phoneNumber)
+    public function show(OrgTimeZone $orgTimeZone)
     {
         //
     }
@@ -42,7 +42,7 @@ class PhoneNumberController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PhoneNumber $phoneNumber)
+    public function edit(OrgTimeZone $orgTimeZone)
     {
         //
     }
@@ -50,7 +50,7 @@ class PhoneNumberController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PhoneNumber $phoneNumber)
+    public function update(Request $request, OrgTimeZone $orgTimeZone)
     {
         //
     }
@@ -58,7 +58,7 @@ class PhoneNumberController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PhoneNumber $phoneNumber)
+    public function destroy(OrgTimeZone $orgTimeZone)
     {
         //
     }

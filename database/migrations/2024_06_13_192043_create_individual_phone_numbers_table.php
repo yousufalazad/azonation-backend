@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('phone_numbers', function (Blueprint $table) {
+        Schema::create('individual_phone_numbers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('org_id'); // Foreign key to organisations table
+            $table->unsignedBigInteger('individual_id'); // Foreign key to organisations table
             $table->unsignedBigInteger('country_code_id');
-            $table->tinyInteger('phone_number');
+            $table->tinyInteger('phone_number')->unique();
             $table->tinyInteger('phone_type')->nullable()->default(0); //Type of phone number (1=Mobile, 2=Home, 3=Work)
             $table->boolean('status')->nullable(); // for verification status, yes/no
             $table->timestamps();
 
             // Define foreign key constraint
-           $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
+           $table->foreign('individual_id')->references('id')->on('individuals')->onDelete('cascade');
            $table->foreign('country_code_id')->references('id')->on('country_codes');
         });
     }
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('phone_numbers');
+        Schema::dropIfExists('individual_phone_numbers');
     }
 };

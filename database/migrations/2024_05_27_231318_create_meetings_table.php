@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name_for_admin')->nullable();
             $table->string('subject')->nullable();
             $table->date('date')->nullable();
-            $table->date('time')->nullable();
+            $table->time('time')->nullable();
             $table->string('description')->nullable();
             $table->string('address')->nullable();
             $table->string('agenda')->nullable();
