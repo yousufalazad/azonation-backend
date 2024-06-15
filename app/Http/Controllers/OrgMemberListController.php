@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrgMemberList;
+use App\Models\Individual;
 use Illuminate\Http\Request;
 
 class OrgMemberListController extends Controller
@@ -10,23 +11,60 @@ class OrgMemberListController extends Controller
 
     public function getMembersByOrgId($orgId)
     {
-        
+
         $members = OrgMemberList::where('org_id', $orgId)
-        ->with('individual')
-        ->get();
+            ->with('individual')
+            ->get();
 
         return response()->json([
-        'status' => true,
-        'data' => $members
-    ]);
+            'status' => true,
+            'data' => $members
+        ]);
     }
-    
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $results = Individual::where('id', 'like', "%{$query}%")
+            ->orWhere('user_id', 'like', "%{$query}%")
+            ->orWhere('azon_id', 'like', "%{$query}%")
+            ->orWhere('full_name', 'like', "%{$query}%")
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $results
+        ]);
+    }
+
+    public function addMember(Request $request)
+    {
+        $validated = $request->validate([
+            // 'org_id' => 'required',
+            // 'individual_id' => 'required',
+            'org_id' => 'required|exists:organisations,id',
+            'individual_id' => 'required|exists:individuals,id',
+        ]);
+
+        OrgMemberList::create([
+            'org_id' => $validated['org_id'],
+            'individual_id' => $validated['individual_id'],
+            'status' => 1
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Member added successfully'
+        ]);
+    }
+
     public function index()
     {
         //
     }
 
-    
+
     public function create()
     {
         //
@@ -43,13 +81,13 @@ class OrgMemberListController extends Controller
         // ]);
 
         // Create a new individual record associated with the user
-        
-        
+
+
         OrgMemberList::create([
             'org_id' => $request->org_id,
             'individual_id' => $request->individual_id,
             //'status' => $request->status,
-            
+
         ]);
 
         // Return a success response

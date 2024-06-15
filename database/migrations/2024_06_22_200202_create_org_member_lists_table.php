@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('org_id'); // Foreign key to org table
             $table->unsignedBigInteger('individual_id'); // Foreign key to users table
             $table->string('existing_org_membership_id')->nullable();
-            $table->unsignedBigInteger('membership_type')->nullable(); // Foreign key to membership_types table
+            $table->unsignedBigInteger('membership_type_id')->nullable(); // Foreign key to membership_types table
             $table->date('joining_date')->nullable();
             $table->date('end_date')->nullable();
             $table->tinyInteger('status')->nullable()->default(0);
@@ -25,7 +25,7 @@ return new class extends Migration
            // Define foreign key constraint
            $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
            $table->foreign('individual_id')->references('id')->on('individuals');
-           $table->foreign('membership_type')->references('id')->on('membership_types');
+           $table->foreign('membership_type_id')->references('id')->on('membership_types');
 
         });
     }

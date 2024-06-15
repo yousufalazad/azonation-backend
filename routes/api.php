@@ -8,6 +8,7 @@ use App\Http\Controllers\IndividualController;
 use App\Http\Controllers\OrgMemberListController;
 use App\Http\Controllers\CommitteeNameController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\OrgEventController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -17,8 +18,8 @@ Route::post('org_register', [AuthController::class, 'orgRegister']);
 Route::post('individual_register', [AuthController::class, 'individualRegister']);
 Route::post('login', [AuthController::class, 'login']);
 
-Route::post('/search_individuals', [IndividualController::class, 'search']);
-Route::post('/add_member', [IndividualController::class, 'addMember']);
+Route::post('/search_org_members', [OrgMemberListController::class, 'search']);
+Route::post('/add_member', [OrgMemberListController::class, 'addMember']);
 Route::resource('individual_data', IndividualController::class);
 Route::get('/profileimage/{individualId}', [IndividualController::class, 'getProfileImage']);
 Route::post('/profileimage/{individualId}', [IndividualController::class, 'updateProfileImage']);
@@ -35,3 +36,6 @@ Route::get('org-committee-list/{orgId}', [CommitteeNameController::class, 'getCo
 
 Route::post('create-meeting-store', [MeetingController::class, 'store']);
 Route::get('meeting-list/{orgId}', [MeetingController::class, 'index']);
+
+Route::post('create-event', [OrgEventController::class, 'store']);
+Route::get('org-event-list/{orgId}', [OrgEventController::class, 'index']);

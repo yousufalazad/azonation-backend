@@ -12,7 +12,7 @@ class OrgMemberList extends Model
         'org_id',
         'individual_id',
         'existing_org_membership_id',
-        'membership_type',
+        'membership_type_id',
         'joining_date',
         'end_date',
         'status',

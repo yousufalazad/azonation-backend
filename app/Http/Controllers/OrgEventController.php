@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Meeting;
+use App\Models\OrgEvent;
 use Illuminate\Http\Request;
 
-class MeetingController extends Controller
+class OrgEventController extends Controller
 {
-
-
     public function index($orgId)
     {
-        $meetingList = Meeting::where('org_id', $orgId)
+        $eventList = OrgEvent::where('org_id', $orgId)
             ->orderBy('id', 'asc')
             ->get();
 
         return response()->json([
             'status' => true,
-            'data' => $meetingList
+            'data' => $eventList
         ]);
     }
 
@@ -35,20 +33,20 @@ class MeetingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string',
+            'title' => 'required|string',
         ]);
 
-        // Create a new meeting record associated with the organisation
-        Meeting::create([
+        // Create a new event record associated with the organisation
+        OrgEvent::create([
             'org_id' => $request->orgId,
+            'title' => $request->title,
             'name' => $request->name,
-            'name_for_admin' => $request->name_for_admin,
-            'subject' => $request->subject,
+            'short_description' => $request->short_description,
+            'description' => $request->description,
             'date' => $request->date,
             'time' => $request->time,
-            'description' => $request->description,
-            'address' => $request->address,
-            'agenda' => $request->agenda,
+            'venue_name' => $request->venue_name,
+            'venue_address' => $request->venue_address,
             'requirements' => $request->requirements,
             'note' => $request->note,
             'status' => $request->status,
@@ -56,13 +54,13 @@ class MeetingController extends Controller
         ]);
 
         // Return a success response
-        return response()->json(['message' => 'Meeting created successfully', 200]);
+        return response()->json(['message' => 'Event created successfully', 200]);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Meeting $meeting)
+    public function show(OrgEvent $orgEvent)
     {
         //
     }
@@ -70,7 +68,7 @@ class MeetingController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Meeting $meeting)
+    public function edit(OrgEvent $orgEvent)
     {
         //
     }
@@ -78,7 +76,7 @@ class MeetingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Meeting $meeting)
+    public function update(Request $request, OrgEvent $orgEvent)
     {
         //
     }
@@ -86,7 +84,7 @@ class MeetingController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Meeting $meeting)
+    public function destroy(OrgEvent $orgEvent)
     {
         //
     }
