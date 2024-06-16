@@ -7,12 +7,16 @@ use Illuminate\Http\Request;
 
 class OrgProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index($orgId)
     {
-        //
+        $projectList = OrgProject::where('org_id', $orgId)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $projectList
+        ]);
     }
 
     /**
@@ -28,7 +32,30 @@ class OrgProjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required|string',
+        ]);
+
+        // Create a new event record associated with the organisation
+        OrgProject::create([
+            'org_id' => $request->orgId,
+            'title' => $request->title,
+            'short_description' => $request->short_description,
+            'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'venue_name' => $request->venue_name,
+            'venue_address' => $request->venue_address,
+            'requirements' => $request->requirements,
+            'note' => $request->note,
+            'status' => $request->status,
+            'conduct_type' => $request->conduct_type,
+        ]);
+
+        // Return a success response
+        return response()->json(['message' => 'Project created successfully', 200]);
     }
 
     /**

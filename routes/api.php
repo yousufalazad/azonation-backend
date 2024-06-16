@@ -9,6 +9,7 @@ use App\Http\Controllers\OrgMemberListController;
 use App\Http\Controllers\CommitteeNameController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\OrgEventController;
+use App\Http\Controllers\OrgProjectController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -39,3 +40,6 @@ Route::get('meeting-list/{orgId}', [MeetingController::class, 'index']);
 
 Route::post('create-event', [OrgEventController::class, 'store']);
 Route::get('org-event-list/{orgId}', [OrgEventController::class, 'index']);
+
+Route::get('org-project-list/{orgId}', [OrgProjectController::class, 'index']);
+Route::post('create-project', [OrgProjectController::class, 'store']);
