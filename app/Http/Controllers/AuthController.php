@@ -60,6 +60,71 @@ class AuthController extends Controller
         return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
     }
 
+    public function orgProfileUpdate(Request $request, $id)
+{
+    // Validate the request data
+    $request->validate([
+        'org_name' => 'required|string|max:255',
+        'short_description' => 'required|string|max:1000',
+    ]);
+
+    // Find the organisation by ID
+    $organisation = Organisation::find($id);
+
+    // Check if the organisation exists
+    if (!$organisation) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Organisation not found',
+        ], 404);
+    }
+
+    // Update the organisation's details
+    $organisation->update([
+        'org_name' => $request->org_name,
+        'short_description' => $request->short_description,
+    ]);
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Organisation profile updated successfully',
+    ]);
+}
+
+
+    // public function orgProfileUpdate(Request $request, $id)
+    // {
+    //     // $request->validate([
+    //     //     'org_name' => 'string',
+    //     //     'short_description' => 'string',
+    //     //     'status' => 'string',
+    //     // ]);
+
+    //     // Find the organisation by its ID
+    //     $organisation = Organisation::find($id);
+
+    //     // Check if the organisation exists
+    //     if (!$organisation) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Organisation not found',
+    //         ], 404);
+    //     }
+
+    //     // Update the organisation with the provided data
+    //     $organisation->update([
+    //         'org_name' => $request->org_name,
+    //         'short_description' => $request->short_description,
+    //         // 'status' => $request->status,
+    //     ]);
+
+    //     // Return a success response
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Organisation profile updated successfully',
+    //     ]);
+    // }
+
     public function orgRegister(Request $request)
     {
 
@@ -226,7 +291,7 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
-    
+
     // Method to handle logout process
     public function logout(Request $request)
     {

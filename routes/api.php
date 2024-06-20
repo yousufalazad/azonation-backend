@@ -16,6 +16,7 @@ use App\Http\Controllers\OrgProjectController;
 // })->middleware('auth:sanctum');
 
 Route::post('org_register', [AuthController::class, 'orgRegister']);
+Route::put('org_profile_update/{id}', [AuthController::class, 'orgProfileUpdate']);
 Route::post('individual_register', [AuthController::class, 'individualRegister']);
 Route::post('login', [AuthController::class, 'login']);
 
