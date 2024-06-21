@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\designation;
+use App\Models\Designation;
 use Illuminate\Http\Request;
 
 class DesignationController extends Controller
@@ -34,7 +34,7 @@ class DesignationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(designation $designation)
+    public function show(Designation $designation)
     {
         //
     }
@@ -42,7 +42,7 @@ class DesignationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(designation $designation)
+    public function edit(Designation $designation)
     {
         //
     }
@@ -50,7 +50,7 @@ class DesignationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, designation $designation)
+    public function update(Request $request, Designation $designation)
     {
         //
     }
@@ -58,7 +58,7 @@ class DesignationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(designation $designation)
+    public function destroy(Designation $designation)
     {
         //
     }

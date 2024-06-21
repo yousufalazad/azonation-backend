@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('committee_name_id'); // Foreign key to org table
             $table->unsignedBigInteger('user_id');
-            $table->string('designation')->nullable();
+            $table->unsignedBigInteger('designation_id')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('note')->nullable();
@@ -24,6 +24,7 @@ return new class extends Migration
 
             // Define foreign key constraint
            $table->foreign('committee_name_id')->references('id')->on('committee_names')->onDelete('cascade');
+           $table->foreign('designation_id')->references('id')->on('designations')->onDelete('cascade');
         });
     }
 
