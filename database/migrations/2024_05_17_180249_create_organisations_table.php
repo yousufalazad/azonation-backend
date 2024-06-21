@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('organisations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id'); // Foreign key to users table
-            $table->integer('azon_id')->nullable(); // Creates 'azon_id' column as a custom auto-incrementing column, like Azon ID
+            $table->bigInteger('azon_id')->nullable(); // Creates 'azon_id' column as a custom auto-incrementing column, like Azon ID
             $table->string('org_name');
             $table->string('short_description')->nullable();
             $table->tinyInteger('status')->nullable()->default(0);
