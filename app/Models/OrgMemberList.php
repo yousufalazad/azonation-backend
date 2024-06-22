@@ -15,7 +15,7 @@ class OrgMemberList extends Model
         'membership_type_id',
         'joining_date',
         'end_date',
-        'status',
+        'status'
     ];
 
     public function individual()

@@ -34,9 +34,13 @@ class OrgPhoneNumberController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(OrgPhoneNumber $orgPhoneNumber)
+    public function show($id)
     {
-        //
+        $orgPhoneNumber = OrgPhoneNumber::find($id);
+        return response()->json([
+            'status' => true,
+            'data' => $orgPhoneNumber
+        ]);
     }
 
     /**
@@ -50,9 +54,14 @@ class OrgPhoneNumberController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, OrgPhoneNumber $orgPhoneNumber)
+    public function update(Request $request, $id)
     {
-        //
+        $orgPhoneNumber = OrgPhoneNumber::find($id);
+        $orgPhoneNumber->update($request->all());
+        return response()->json([
+            'status' => true,
+            'data' => $orgPhoneNumber
+        ]);
     }
 
     /**

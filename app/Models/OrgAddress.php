@@ -8,4 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class OrgAddress extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'org_id',
+        'address_line',
+        'city',
+        'state_or_region',
+        'postal_code',
+        'country_id'
+    ];
 }

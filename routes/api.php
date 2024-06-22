@@ -8,6 +8,8 @@ use App\Http\Controllers\IndividualController;
 use App\Http\Controllers\OrgMemberListController;
 use App\Http\Controllers\CommitteeNameController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\OrgAddressController;
+use App\Http\Controllers\OrgPhoneNumberController;
 use App\Http\Controllers\OrgEventController;
 use App\Http\Controllers\OrgProjectController;
 
@@ -28,14 +30,24 @@ Route::get('/connected-org-list/{individualId}', [IndividualController::class, '
 
 
 
-//API for org
+//API for org profile information
 Route::resource('organisation_data', OrganisationController::class);
 Route::get('/organisation/{id}', [OrganisationController::class, 'index']);
 Route::put('/organisation/{id}', [OrganisationController::class, 'update']);
 
+//API for org address
+Route::get('/organisation-address/{id}', [OrgAddressController::class, 'show']);
+Route::put('/organisation-address/{id}', [OrgAddressController::class, 'update']);
+
+//API for org phone number
+Route::get('/org-phone-number/{id}', [OrgPhoneNumberController::class, 'show']);
+Route::put('/org-phone-number/{id}', [OrgPhoneNumberController::class, 'update']);
+
+//API for org membership
 Route::post('/search_org_members', [OrgMemberListController::class, 'search']);
 Route::post('/add_member', [OrgMemberListController::class, 'addMember']);
 
+//API for
 Route::resource('org_member_list', OrgMemberListController::class);
 Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLogo']);
 Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);

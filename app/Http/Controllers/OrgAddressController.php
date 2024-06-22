@@ -34,9 +34,13 @@ class OrgAddressController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(OrgAddress $orgAddress)
+    public function show($id)
     {
-        //
+        $orgAddress = OrgAddress::find($id);
+        return response()->json([
+            'status' => true,
+            'data' => $orgAddress
+        ]);
     }
 
     /**
@@ -50,9 +54,14 @@ class OrgAddressController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, OrgAddress $orgAddress)
+    public function update(Request $request, $id)
     {
-        //
+        $orgAddress = OrgAddress::find($id);
+        $orgAddress->update($request->all());
+        return response()->json([
+            'status' => true,
+            'data' => $orgAddress
+        ]);
     }
 
     /**
