@@ -9,6 +9,7 @@ use App\Http\Controllers\OrgMemberListController;
 use App\Http\Controllers\CommitteeNameController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\OrgAddressController;
+use App\Http\Controllers\OrgAdministratorController;
 use App\Http\Controllers\OrgPhoneNumberController;
 use App\Http\Controllers\OrgEventController;
 use App\Http\Controllers\OrgProjectController;
@@ -35,6 +36,19 @@ Route::resource('organisation_data', OrganisationController::class);
 Route::get('/organisation/{id}', [OrganisationController::class, 'index']);
 Route::put('/organisation/{id}', [OrganisationController::class, 'update']);
 
+//API for org membership
+Route::post('/search_org_members', [OrgMemberListController::class, 'search']);
+Route::post('/add_member', [OrgMemberListController::class, 'addMember']);
+Route::get('/org-members-list/{orgId}', [OrgMemberListController::class, 'getMembersByOrgId']);
+
+
+//for Org Administrator
+Route::post('/search-individual', [OrgAdministratorController::class, 'search']);
+Route::post('/add_administrator', [OrgAdministratorController::class, 'store']);
+Route::get('/org-administrator/{orgId}', [OrgAdministratorController::class, 'show']);
+Route::put('/update-administrator/{orgId}', [OrgAdministratorController::class, 'update']);
+
+
 //API for org address
 Route::get('/organisation-address/{id}', [OrgAddressController::class, 'show']);
 Route::put('/organisation-address/{id}', [OrgAddressController::class, 'update']);
@@ -43,15 +57,12 @@ Route::put('/organisation-address/{id}', [OrgAddressController::class, 'update']
 Route::get('/org-phone-number/{id}', [OrgPhoneNumberController::class, 'show']);
 Route::put('/org-phone-number/{id}', [OrgPhoneNumberController::class, 'update']);
 
-//API for org membership
-Route::post('/search_org_members', [OrgMemberListController::class, 'search']);
-Route::post('/add_member', [OrgMemberListController::class, 'addMember']);
+
 
 //API for
 Route::resource('org_member_list', OrgMemberListController::class);
 Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLogo']);
 Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);
-Route::get('/org-members-list/{orgId}', [OrgMemberListController::class, 'getMembersByOrgId']);
 
 
 Route::post('create_committee_store', [CommitteeNameController::class, 'committeeStore']);

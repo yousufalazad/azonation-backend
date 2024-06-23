@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('note')->nullable();
             $table->tinyInteger('status')->nullable()->default(0);
             $table->timestamps();
-
+ 
             // Define foreign key constraint
            $table->foreign('committee_name_id')->references('id')->on('committee_names')->onDelete('cascade');
            $table->foreign('designation_id')->references('id')->on('designations')->onDelete('cascade');

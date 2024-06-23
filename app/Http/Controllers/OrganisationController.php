@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OrgAdministrator;
 use Illuminate\Http\Request;
 use App\Models\Organisation;
 use App\Models\OrgLogo;
@@ -69,9 +70,7 @@ class OrganisationController extends Controller
         $imageUrl = Storage::url($path);
         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
     }
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index($id)
     {
         $organisation = Organisation::find($id);

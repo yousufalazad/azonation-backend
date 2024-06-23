@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('org_phone_numbers', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('org_id'); // Foreign key to organisations table
-            $table->unsignedBigInteger('country_code_id');
+            $table->unsignedBigInteger('dialing_code_id');
             $table->tinyInteger('phone_number');
             $table->tinyInteger('phone_type')->nullable()->default(0); //Type of phone number (1=Mobile, 2=Home, 3=Work)
             $table->boolean('status')->nullable(); // for verification status, yes/no
