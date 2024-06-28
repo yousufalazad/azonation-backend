@@ -57,7 +57,12 @@ class AuthController extends Controller
         ]);
 
         // Return a success response
-        return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
+        //return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
+        return response()->json([
+            'status' => true,
+            'message' => 'Individual registration successful',
+            'data' => $user
+        ]);
     }
 
     public function orgRegister(Request $request)
@@ -81,47 +86,11 @@ class AuthController extends Controller
             'org_name' => $request->org_name,
         ]);
 
-
-        return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
-        // if ($user->id) {
-        //     $tokenResult = $user->createToken('Personal Access Token');
-        //     $token = $tokenResult->plainTextToken;
-
-        //     return $this->success('Successfully created user!', [
-        //         'accessToken' => $token,
-        //     ]);
-        // } else {
-        //     return $this->error('Provide proper details');
-        // }
-
-
-        // // Validate the incoming request data
-        // $request->validate([
-        //     'email' => 'required|string|email|max:255|unique:users', // Validate email format and uniqueness
-        //     'password' => 'required|string|min:8', // Validate password length
-        // ]);
-
-        // // Check if type is 2 (indicating organization registration)
-        // if ($request->type == 2) {
-        //     // Create a new user record
-        //     $user = User::create([
-        //         'type' => $request->type,
-        //         'email' => $request->email,
-        //         'password' => Hash::make($request->password),
-        //     ]);
-
-        //     // Create a new organization record associated with the user
-        //     Organisation::create([
-        //         'user_id' => $user->id,
-        //         'org_name' => $request->org_name,
-        //     ]);
-
-        //     // Return a success response
-        //     return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
-        // }
-
-        // // If type is not 1, return an error response (if needed)
-        // return response()->json(['message' => 'Invalid registration type'], 422);
+        return response()->json([
+            'status' => true,
+            'message' => 'Organisation registration successful',
+            'data' => $user
+        ]);
     }
 
     public function login(Request $request)
@@ -133,20 +102,15 @@ class AuthController extends Controller
 
         $credentials = request(['email', 'password']);
         if (!Auth::attempt($credentials)) {
-            return $this->error('Unauthorized');
+            return $this->error('Unauthorized user');
         }
 
         $user = $request->user();
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->plainTextToken;
 
-        //$organisation = Organisation::where('user_id',$user->id)->orderBy('id', 'desc')->first();
-        //$individual = Individual::where('user_id',$user->id)->orderBy('id', 'desc')->first();
-
         return $this->success('Successfully logged in', [
             'user_id' => $user->id,
-            //'full_name' => $individual->full_name,
-            //'org_name' => $organisation->org_name,
             'email' => $user->email,
             'type' => $user->type,
             'accessToken' => $token,
