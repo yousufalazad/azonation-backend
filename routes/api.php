@@ -40,6 +40,7 @@ Route::put('/organisation/{id}', [OrganisationController::class, 'update']);
 Route::post('/search_org_members', [OrgMemberListController::class, 'search']);
 Route::post('/add_member', [OrgMemberListController::class, 'addMember']);
 Route::get('/org-members-list/{orgId}', [OrgMemberListController::class, 'getMembersByOrgId']);
+Route::get('/total-org-member-count/{orgId}', [OrgMemberListController::class, 'totalOrgMemberCount']);
 
 
 //for Org Administrator
@@ -78,17 +79,3 @@ Route::get('org-project-list/{orgId}', [OrgProjectController::class, 'index']);
 Route::post('create-project', [OrgProjectController::class, 'store']);
 
 //API for superadmin
-
-
-
-
-
-
-
-
-
-
-
-
-
-

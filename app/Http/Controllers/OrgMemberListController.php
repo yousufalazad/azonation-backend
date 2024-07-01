@@ -9,6 +9,18 @@ use Illuminate\Http\Request;
 class OrgMemberListController extends Controller
 {
 
+    public function totalOrgMemberCount($orgId)
+    {
+        //$orgTotalMemberCount = OrgMemberList::select('db_table_name.*')->where('org_id', $orgId)->get();
+        //$orgTotalMemberCount = OrgMemberList::select('id','name', '--')->where('org_id', $orgId)->get();
+
+        $totalOrgMemberCount = OrgMemberList::where('org_id', $orgId)->count();
+
+        return response()->json([
+            'status' => true,
+            'totalOrgMemberCount' => $totalOrgMemberCount
+        ]);
+    }
     public function getMembersByOrgId($orgId)
     {
 
