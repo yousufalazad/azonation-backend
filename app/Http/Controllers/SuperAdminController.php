@@ -34,11 +34,17 @@ class SuperAdminController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(SuperAdmin $superAdmin)
+    
+    public function show($id)
     {
-        //
-    }
+        $superAdminUserData = SuperAdmin::where('user_id', $id)->first();
 
+        if ($superAdminUserData) {
+            return response()->json(['status' => true, 'data' => $superAdminUserData]);
+        } else {
+            return response()->json(['status' => false, 'message' => 'SuperAdmin not found']);
+        }
+    }
     /**
      * Show the form for editing the specified resource.
      */
