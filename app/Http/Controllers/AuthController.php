@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Organisation;
 use App\Models\Individual;
+use App\Models\SuperAdmin;
 use Illuminate\Validation\ValidationException;
 
 
@@ -89,6 +90,34 @@ class AuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Organisation registration successful',
+            'data' => $user
+        ]);
+    }
+
+    public function superAdminRegister(Request $request)
+    {
+
+        $request->validate([
+            'admin_name' => 'required|string',
+            'email' => 'required|string|email|max:50|unique:users',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::create([
+            'admin_name'  => $request->admin_name,
+            'type' => 3, //type= 2 indicating org user in user tabel
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        SuperAdmin::create([
+            'user_id' => $user->id,
+            'admin_name' => $request->admin_name,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'SuperAdmin registration successful',
             'data' => $user
         ]);
     }

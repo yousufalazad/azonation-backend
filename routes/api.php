@@ -13,6 +13,9 @@ use App\Http\Controllers\OrgAdministratorController;
 use App\Http\Controllers\OrgPhoneNumberController;
 use App\Http\Controllers\OrgEventController;
 use App\Http\Controllers\OrgProjectController;
+use App\Http\Controllers\SuperAdminController;
+use App\Models\OrgAdministrator;
+use GuzzleHttp\Promise\Create;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -21,6 +24,7 @@ use App\Http\Controllers\OrgProjectController;
 //API for auth
 Route::post('individual_register', [AuthController::class, 'individualRegister']);
 Route::post('org_register', [AuthController::class, 'orgRegister']);
+Route::post('superadmin_register', [AuthController::class, 'superAdminRegister']);
 Route::post('login', [AuthController::class, 'login']);
 
 //API for individuals
@@ -30,11 +34,13 @@ Route::post('/profileimage/{individualId}', [IndividualController::class, 'updat
 Route::get('/connected-org-list/{individualId}', [IndividualController::class, 'getOrganisationByIndividualId']);
 
 
-
 //API for org profile information
 Route::resource('organisation_data', OrganisationController::class);
 Route::get('/organisation/{id}', [OrganisationController::class, 'index']);
 Route::put('/organisation/{id}', [OrganisationController::class, 'update']);
+
+//API for SuperAdmin
+// Route::post('/superadmin_register', [SuperAdminController::class, 'index']);
 
 //API for org membership
 Route::post('/search_org_members', [OrgMemberListController::class, 'search']);
