@@ -40,7 +40,7 @@ Route::get('/organisation/{id}', [OrganisationController::class, 'index']);
 Route::put('/organisation/{id}', [OrganisationController::class, 'update']);
 
 //API for SuperAdmin
-// Registratration from AuthController
+// Registration from AuthController
 Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show']);
 
 
