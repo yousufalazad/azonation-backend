@@ -35,9 +35,10 @@ Route::get('/connected-org-list/{individualId}', [IndividualController::class, '
 
 
 //API for org profile information
-Route::resource('organisation_data', OrganisationController::class);
-Route::get('/organisation/{id}', [OrganisationController::class, 'index']);
+Route::get('/organisation/{orgId}', [OrganisationController::class, 'show']);
 Route::put('/organisation/{id}', [OrganisationController::class, 'update']);
+Route::get('/get_organisation_data/{userId}', [OrganisationController::class, 'getOrgData']);
+
 
 //API for SuperAdmin
 // Registration from AuthController

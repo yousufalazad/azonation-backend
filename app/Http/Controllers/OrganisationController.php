@@ -71,14 +71,14 @@ class OrganisationController extends Controller
         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
     }
 
-    public function index($id)
-    {
-        $organisation = Organisation::find($id);
-        return response()->json([
-            'status' => true,
-            'data' => $organisation
-        ]);
-    }
+    // public function index()
+    // {
+    //     $organisation = Organisation::get();
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $organisation
+    //     ]);
+    // }
 
     /**
      * Show the form for creating a new resource.
@@ -99,10 +99,22 @@ class OrganisationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+      //Find org data after org login only
+     public function getOrgData($userId)
     {
-        $organisation = Organisation::where('user_id', $id)->first();
-
+        $organisation = Organisation::where('user_id', $userId)->first();
+        
+        if ($organisation) {
+            return response()->json(['status' => true, 'data' => $organisation]);
+        } else {
+            return response()->json(['status' => false, 'message' => 'Organisation not found']);
+        }
+    }
+      //Find org data after any update
+    public function show($orgId)
+    {
+        $organisation = Organisation::where('id', $orgId)->first();
+        
         if ($organisation) {
             return response()->json(['status' => true, 'data' => $organisation]);
         } else {
