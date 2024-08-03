@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrganisationController;
@@ -14,12 +13,7 @@ use App\Http\Controllers\OrgPhoneNumberController;
 use App\Http\Controllers\OrgEventController;
 use App\Http\Controllers\OrgProjectController;
 use App\Http\Controllers\SuperAdminController;
-use App\Models\OrgAdministrator;
-use GuzzleHttp\Promise\Create;
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
 
 //API for auth
 Route::post('individual_register', [AuthController::class, 'individualRegister']);
