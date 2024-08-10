@@ -22,7 +22,7 @@ return new class extends Migration
 
             // Define foreign key constraint
            $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
-           $table->foreign('country_code_id')->references('id')->on('country_codes');
+           $table->foreign('dialing_code_id')->references('id')->on('country_codes');
         });
     }
 

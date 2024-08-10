@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrgAdministrator;
 use Illuminate\Http\Request;
 use App\Models\Organisation;
 use App\Models\OrgLogo;
