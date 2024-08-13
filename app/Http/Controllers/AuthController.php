@@ -9,7 +9,10 @@ use App\Models\User;
 use App\Models\Organisation;
 use App\Models\Individual;
 use App\Models\SuperAdmin;
-use Illuminate\Validation\ValidationException;
+
+use App\Mail\IndividualUserRegisteredMail;
+use App\Mail\OrgUserRegisteredMail;
+use Illuminate\Support\Facades\Mail;
 
 
 class AuthController extends Controller
@@ -50,12 +53,15 @@ class AuthController extends Controller
         ]);
 
         // Create a new individual record associated with the user
-        Individual::create([
+        $individual = Individual::create([
             'user_id' => $user->id,
             'full_name' => $request->full_name,
             // 'azon_id' => $request->azon_id,
             //'status' => $request->status,
         ]);
+
+        // Send the email
+        Mail::to($user->email)->send(new IndividualUserRegisteredMail($individual));
 
         // Return a success response
         //return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
@@ -76,16 +82,18 @@ class AuthController extends Controller
         ]);
 
         $user = User::create([
-            'org_name'  => $request->name,
             'type' => 2, //type= 2 indicating org user in user tabel
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        Organisation::create([
+        $org = Organisation::create([
             'user_id' => $user->id,
             'org_name' => $request->org_name,
         ]);
+
+        // Send the email
+        Mail::to($user->email)->send(new OrgUserRegisteredMail($org));
 
         return response()->json([
             'status' => true,
