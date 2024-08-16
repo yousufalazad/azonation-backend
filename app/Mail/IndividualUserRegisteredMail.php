@@ -13,16 +13,16 @@ class IndividualUserRegisteredMail extends Mailable
 
     public $user;
 
-    
+
     public function __construct($user)
     {
         $this->user = $user;
     }
-    
+
     public function build()
     {
         return $this->subject('Welcome to Our Application')
-                    ->view('emails.individual.individual_user_registered')
-                    ->with(['user' => $this->user]);
+            ->view('emails.individual.individual_user_registered')
+            ->with(['user' => $this->user]);
     }
 }
