@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Individual;
+use App\Http\Controllers\Controller;
 use App\Models\Individual;
 use App\Models\OrgMemberList;
 use App\Models\ProfileImage;

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\IndividualCountry;
+namespace App\Http\Controllers\Org;
+use App\Http\Controllers\Controller;
+use App\Models\MeetingAttendance;
 use Illuminate\Http\Request;
 
-class IndividualCountryController extends Controller
+class MeetingAttendanceController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class IndividualCountryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(IndividualCountry $individualCountry)
+    public function show(MeetingAttendance $meetingAttendance)
     {
         //
     }
@@ -42,7 +42,7 @@ class IndividualCountryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(IndividualCountry $individualCountry)
+    public function edit(MeetingAttendance $meetingAttendance)
     {
         //
     }
@@ -50,7 +50,7 @@ class IndividualCountryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, IndividualCountry $individualCountry)
+    public function update(Request $request, MeetingAttendance $meetingAttendance)
     {
         //
     }
@@ -58,7 +58,7 @@ class IndividualCountryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(IndividualCountry $individualCountry)
+    public function destroy(MeetingAttendance $meetingAttendance)
     {
         //
     }

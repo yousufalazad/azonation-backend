@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\CommitteeMember;
+namespace App\Http\Controllers\Org;
+use App\Http\Controllers\Controller;
+use App\Models\MeetingConductType;
 use Illuminate\Http\Request;
 
-class CommitteeMemberController extends Controller
+class MeetingConductTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class CommitteeMemberController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(CommitteeMember $committeeMember)
+    public function show(MeetingConductType $meetingConductType)
     {
         //
     }
@@ -42,7 +42,7 @@ class CommitteeMemberController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CommitteeMember $committeeMember)
+    public function edit(MeetingConductType $meetingConductType)
     {
         //
     }
@@ -50,7 +50,7 @@ class CommitteeMemberController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, CommitteeMember $committeeMember)
+    public function update(Request $request, MeetingConductType $meetingConductType)
     {
         //
     }
@@ -58,7 +58,7 @@ class CommitteeMemberController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CommitteeMember $committeeMember)
+    public function destroy(MeetingConductType $meetingConductType)
     {
         //
     }

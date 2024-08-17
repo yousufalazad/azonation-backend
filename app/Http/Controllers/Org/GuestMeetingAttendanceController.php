@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\MeetingNotification;
+namespace App\Http\Controllers\Org;
+use App\Http\Controllers\Controller;
+use App\Models\GuestMeetingAttendance;
 use Illuminate\Http\Request;
 
-class MeetingNotificationController extends Controller
+class GuestMeetingAttendanceController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class MeetingNotificationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(MeetingNotification $meetingNotification)
+    public function show(GuestMeetingAttendance $guestMeetingAttendance)
     {
         //
     }
@@ -42,7 +42,7 @@ class MeetingNotificationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(MeetingNotification $meetingNotification)
+    public function edit(GuestMeetingAttendance $guestMeetingAttendance)
     {
         //
     }
@@ -50,7 +50,7 @@ class MeetingNotificationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, MeetingNotification $meetingNotification)
+    public function update(Request $request, GuestMeetingAttendance $guestMeetingAttendance)
     {
         //
     }
@@ -58,7 +58,7 @@ class MeetingNotificationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(MeetingNotification $meetingNotification)
+    public function destroy(GuestMeetingAttendance $guestMeetingAttendance)
     {
         //
     }

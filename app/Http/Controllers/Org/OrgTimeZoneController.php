@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\MeetingMinutes;
+namespace App\Http\Controllers\Org;
+use App\Http\Controllers\Controller;
+use App\Models\OrgTimeZone;
 use Illuminate\Http\Request;
 
-class MeetingMinutesController extends Controller
+class OrgTimeZoneController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class MeetingMinutesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(MeetingMinutes $meetingMinutes)
+    public function show(OrgTimeZone $orgTimeZone)
     {
         //
     }
@@ -42,7 +42,7 @@ class MeetingMinutesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(MeetingMinutes $meetingMinutes)
+    public function edit(OrgTimeZone $orgTimeZone)
     {
         //
     }
@@ -50,7 +50,7 @@ class MeetingMinutesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, MeetingMinutes $meetingMinutes)
+    public function update(Request $request, OrgTimeZone $orgTimeZone)
     {
         //
     }
@@ -58,7 +58,7 @@ class MeetingMinutesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(MeetingMinutes $meetingMinutes)
+    public function destroy(OrgTimeZone $orgTimeZone)
     {
         //
     }

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\Designation;
+namespace App\Http\Controllers\SuperAdmin;
+use App\Http\Controllers\Controller;
+use App\Models\SuperAdmin;
 use Illuminate\Http\Request;
 
-class DesignationController extends Controller
+class SuperAdminController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,15 +34,21 @@ class DesignationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Designation $designation)
+    
+    public function show($id)
     {
-        //
-    }
+        $superAdminUserData = SuperAdmin::where('user_id', $id)->first();
 
+        if ($superAdminUserData) {
+            return response()->json(['status' => true, 'data' => $superAdminUserData]);
+        } else {
+            return response()->json(['status' => false, 'message' => 'SuperAdmin not found']);
+        }
+    }
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Designation $designation)
+    public function edit(SuperAdmin $superAdmin)
     {
         //
     }
@@ -50,7 +56,7 @@ class DesignationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Designation $designation)
+    public function update(Request $request, SuperAdmin $superAdmin)
     {
         //
     }
@@ -58,7 +64,7 @@ class DesignationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Designation $designation)
+    public function destroy(SuperAdmin $superAdmin)
     {
         //
     }

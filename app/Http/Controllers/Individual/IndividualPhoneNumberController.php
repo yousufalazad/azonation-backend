@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\IndividualTimeZone;
+namespace App\Http\Controllers\Individual;
+use App\Http\Controllers\Controller;
+use App\Models\IndividualPhoneNumber;
 use Illuminate\Http\Request;
 
-class IndividualTimeZoneController extends Controller
+class IndividualPhoneNumberController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class IndividualTimeZoneController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(IndividualTimeZone $individualTimeZone)
+    public function show(IndividualPhoneNumber $individualPhoneNumber)
     {
         //
     }
@@ -42,7 +42,7 @@ class IndividualTimeZoneController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(IndividualTimeZone $individualTimeZone)
+    public function edit(IndividualPhoneNumber $individualPhoneNumber)
     {
         //
     }
@@ -50,7 +50,7 @@ class IndividualTimeZoneController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, IndividualTimeZone $individualTimeZone)
+    public function update(Request $request, IndividualPhoneNumber $individualPhoneNumber)
     {
         //
     }
@@ -58,7 +58,7 @@ class IndividualTimeZoneController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(IndividualTimeZone $individualTimeZone)
+    public function destroy(IndividualPhoneNumber $individualPhoneNumber)
     {
         //
     }

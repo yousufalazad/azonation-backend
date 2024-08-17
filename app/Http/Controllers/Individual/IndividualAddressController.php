@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\MeetingConductType;
+namespace App\Http\Controllers\Individual;
+use App\Http\Controllers\Controller;
+use App\Models\IndividualAddress;
 use Illuminate\Http\Request;
 
-class MeetingConductTypeController extends Controller
+class IndividualAddressController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class MeetingConductTypeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(MeetingConductType $meetingConductType)
+    public function show(IndividualAddress $individualAddress)
     {
         //
     }
@@ -42,7 +42,7 @@ class MeetingConductTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(MeetingConductType $meetingConductType)
+    public function edit(IndividualAddress $individualAddress)
     {
         //
     }
@@ -50,7 +50,7 @@ class MeetingConductTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, MeetingConductType $meetingConductType)
+    public function update(Request $request, IndividualAddress $individualAddress)
     {
         //
     }
@@ -58,7 +58,7 @@ class MeetingConductTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(MeetingConductType $meetingConductType)
+    public function destroy(IndividualAddress $individualAddress)
     {
         //
     }

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\OrgTimeZone;
+namespace App\Http\Controllers\Individual;
+use App\Http\Controllers\Controller;
+use App\Models\IndividualCountry;
 use Illuminate\Http\Request;
 
-class OrgTimeZoneController extends Controller
+class IndividualCountryController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class OrgTimeZoneController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(OrgTimeZone $orgTimeZone)
+    public function show(IndividualCountry $individualCountry)
     {
         //
     }
@@ -42,7 +42,7 @@ class OrgTimeZoneController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OrgTimeZone $orgTimeZone)
+    public function edit(IndividualCountry $individualCountry)
     {
         //
     }
@@ -50,7 +50,7 @@ class OrgTimeZoneController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, OrgTimeZone $orgTimeZone)
+    public function update(Request $request, IndividualCountry $individualCountry)
     {
         //
     }
@@ -58,7 +58,7 @@ class OrgTimeZoneController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrgTimeZone $orgTimeZone)
+    public function destroy(IndividualCountry $individualCountry)
     {
         //
     }

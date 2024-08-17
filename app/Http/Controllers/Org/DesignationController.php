@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\GuestMeetingAttendance;
+namespace App\Http\Controllers\Org;
+use App\Http\Controllers\Controller;
+use App\Models\Designation;
 use Illuminate\Http\Request;
 
-class GuestMeetingAttendanceController extends Controller
+class DesignationController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class GuestMeetingAttendanceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(GuestMeetingAttendance $guestMeetingAttendance)
+    public function show(Designation $designation)
     {
         //
     }
@@ -42,7 +42,7 @@ class GuestMeetingAttendanceController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(GuestMeetingAttendance $guestMeetingAttendance)
+    public function edit(Designation $designation)
     {
         //
     }
@@ -50,7 +50,7 @@ class GuestMeetingAttendanceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, GuestMeetingAttendance $guestMeetingAttendance)
+    public function update(Request $request, Designation $designation)
     {
         //
     }
@@ -58,7 +58,7 @@ class GuestMeetingAttendanceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(GuestMeetingAttendance $guestMeetingAttendance)
+    public function destroy(Designation $designation)
     {
         //
     }

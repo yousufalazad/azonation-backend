@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\OrgPhoneNumber;
+namespace App\Http\Controllers\Individual;
+use App\Http\Controllers\Controller;
+use App\Models\IndividualTimeZone;
 use Illuminate\Http\Request;
 
-class OrgPhoneNumberController extends Controller
+class IndividualTimeZoneController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,19 +34,15 @@ class OrgPhoneNumberController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(IndividualTimeZone $individualTimeZone)
     {
-        $orgPhoneNumber = OrgPhoneNumber::find($id);
-        return response()->json([
-            'status' => true,
-            'data' => $orgPhoneNumber
-        ]);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OrgPhoneNumber $orgPhoneNumber)
+    public function edit(IndividualTimeZone $individualTimeZone)
     {
         //
     }
@@ -54,20 +50,15 @@ class OrgPhoneNumberController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, IndividualTimeZone $individualTimeZone)
     {
-        $orgPhoneNumber = OrgPhoneNumber::find($id);
-        $orgPhoneNumber->update($request->all());
-        return response()->json([
-            'status' => true,
-            'data' => $orgPhoneNumber
-        ]);
+        //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrgPhoneNumber $orgPhoneNumber)
+    public function destroy(IndividualTimeZone $individualTimeZone)
     {
         //
     }

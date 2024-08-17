@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\IndividualPhoneNumber;
+namespace App\Http\Controllers\Org;
+use App\Http\Controllers\Controller;
+use App\Models\MeetingAttendanceType;
 use Illuminate\Http\Request;
 
-class IndividualPhoneNumberController extends Controller
+class MeetingAttendanceTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class IndividualPhoneNumberController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(IndividualPhoneNumber $individualPhoneNumber)
+    public function show(MeetingAttendanceType $meetingAttendanceType)
     {
         //
     }
@@ -42,7 +42,7 @@ class IndividualPhoneNumberController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(IndividualPhoneNumber $individualPhoneNumber)
+    public function edit(MeetingAttendanceType $meetingAttendanceType)
     {
         //
     }
@@ -50,7 +50,7 @@ class IndividualPhoneNumberController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, IndividualPhoneNumber $individualPhoneNumber)
+    public function update(Request $request, MeetingAttendanceType $meetingAttendanceType)
     {
         //
     }
@@ -58,7 +58,7 @@ class IndividualPhoneNumberController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(IndividualPhoneNumber $individualPhoneNumber)
+    public function destroy(MeetingAttendanceType $meetingAttendanceType)
     {
         //
     }

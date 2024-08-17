@@ -2,17 +2,17 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\OrganisationController;
-use App\Http\Controllers\IndividualController;
-use App\Http\Controllers\OrgMemberListController;
-use App\Http\Controllers\CommitteeNameController;
+use App\Http\Controllers\Org\OrganisationController;
+use App\Http\Controllers\Individual\IndividualController;
+use App\Http\Controllers\Org\OrgMemberListController;
+use App\Http\Controllers\Org\CommitteeNameController;
 use App\Http\Controllers\Org\MeetingController;
 use App\Http\Controllers\Org\OrgAddressController;
-use App\Http\Controllers\OrgAdministratorController;
-use App\Http\Controllers\OrgPhoneNumberController;
-use App\Http\Controllers\OrgEventController;
-use App\Http\Controllers\OrgProjectController;
-use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\Org\OrgAdministratorController;
+use App\Http\Controllers\Org\OrgPhoneNumberController;
+use App\Http\Controllers\Org\OrgEventController;
+use App\Http\Controllers\Org\OrgProjectController;
+use App\Http\Controllers\SuperAdmin\SuperAdminController;
 
 
 //API for auth

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\IndividualAddress;
+namespace App\Http\Controllers\Org;
+use App\Http\Controllers\Controller;
+use App\Models\MembershipType;
 use Illuminate\Http\Request;
 
-class IndividualAddressController extends Controller
+class MembershipTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class IndividualAddressController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(IndividualAddress $individualAddress)
+    public function show(MembershipType $membershipType)
     {
         //
     }
@@ -42,7 +42,7 @@ class IndividualAddressController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(IndividualAddress $individualAddress)
+    public function edit(MembershipType $membershipType)
     {
         //
     }
@@ -50,7 +50,7 @@ class IndividualAddressController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, IndividualAddress $individualAddress)
+    public function update(Request $request, MembershipType $membershipType)
     {
         //
     }
@@ -58,7 +58,7 @@ class IndividualAddressController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(IndividualAddress $individualAddress)
+    public function destroy(MembershipType $membershipType)
     {
         //
     }
