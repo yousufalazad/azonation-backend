@@ -13,18 +13,18 @@ class OrgUserRegisteredMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
+    public $org;
 
     
-    public function __construct($user)
+    public function __construct($org)
     {
-        $this->user = $user;
+        $this->org = $org;
     }
     
     public function build()
     {
         return $this->subject('Welcome to Our Application (org)')
                     ->view('emails.org.org_user_registered')
-                    ->with(['user' => $this->user]);
+                    ->with(['org' => $this->org]);
     }
 }

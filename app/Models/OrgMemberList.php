@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class OrgMemberList extends Model
 {
     use HasFactory;
+    protected $guarded = [];
     protected $fillable = [
         'org_id',
         'individual_id',

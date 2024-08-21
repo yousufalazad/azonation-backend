@@ -38,6 +38,11 @@ Route::get('/get_organisation_data/{userId}', [OrganisationController::class, 'g
 // Registration from AuthController
 Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show']);
 
+//ORG 
+
+//Notification
+Route::get('/mark-as-read', [OrgMemberListController::class,'markAsRead']);
+
 
 //API for org membership
 Route::post('/search_org_members', [OrgMemberListController::class, 'search']);

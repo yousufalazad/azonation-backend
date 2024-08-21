@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Org;
 use App\Http\Controllers\Controller;
 use App\Models\OrgMemberList;
-use App\Models\Individual;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Notifications\MemberAddSuccessful;
+use App\Models\User;
+use App\Models\Individual;
+use App\Models\Organisation;
 
 class OrgMemberListController extends Controller
 {
@@ -59,16 +63,33 @@ class OrgMemberListController extends Controller
             'individual_id' => 'required|exists:individuals,id',
         ]);
 
-        OrgMemberList::create([
+        $OrgMemberList = OrgMemberList::create([
             'org_id' => $validated['org_id'],
             'individual_id' => $validated['individual_id'],
             'status' => 1
         ]);
+        
+        User::find(Auth::user()->id)->notify(new MemberAddSuccessful($OrgMemberList));
+        
 
         return response()->json([
             'status' => true,
             'message' => 'Member added successfully'
         ]);
+
+        
+        // $getUserId = Organisation::where('org_id', $request->org_id)->get();
+        // $getUserIdfromUserTable = User::where('id', $getUserId->user_id);
+        // User::find($getUserIdfromUserTable->id)->notify(new MemberAddSuccessful($OrgMemberList->individual_id));
+        
+
+        //        User::find(Auth::user()->id)->notify(new MemberAddSuccessful($OrgMemberList->individual_id));
+    }
+
+    //Notification for add member, member mark as read
+    public function markAsRead(){
+        Auth::user()->unreadNotifications->markAsRead();
+        return redirect()->back();
     }
 
     public function index()
