@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Org;
+
 use App\Http\Controllers\Controller;
 use App\Models\OrgMemberList;
 use Illuminate\Support\Facades\Auth;
@@ -68,33 +69,45 @@ class OrgMemberListController extends Controller
             'individual_id' => $validated['individual_id'],
             'status' => 1
         ]);
-        
-        User::find(Auth::user()->id)->notify(new MemberAddSuccessful($OrgMemberList));
-        
+
+        $getUserId = Organisation::where('id', $OrgMemberList->org_id)->first('user_id');
+        User::find($getUserId->user_id)->notify(new MemberAddSuccessful($OrgMemberList->individual_id));
 
         return response()->json([
             'status' => true,
             'message' => 'Member added successfully'
         ]);
-
-        
-        // $getUserId = Organisation::where('org_id', $request->org_id)->get();
-        // $getUserIdfromUserTable = User::where('id', $getUserId->user_id);
-        // User::find($getUserIdfromUserTable->id)->notify(new MemberAddSuccessful($OrgMemberList->individual_id));
-        
-
-        //        User::find(Auth::user()->id)->notify(new MemberAddSuccessful($OrgMemberList->individual_id));
     }
 
     //Notification for add member, member mark as read
-    public function markAsRead(){
-        Auth::user()->unreadNotifications->markAsRead();
-        return redirect()->back();
+    // public function markAsRead()
+    // {
+    //     Auth::user()->unreadNotifications->markAsRead();
+    //     return redirect()->back();
+    // }
+
+    public function getUnreadNotifications($orgId)
+    {
+        $orgId=26;
+        return response()->json([
+            //'notifications' => Auth::user()->unreadNotifications
+            'notifications' => $orgId()->unreadNotifications
+        ]);
     }
+
+    public function markAsRead($orgId)
+    {
+        $orgId=26;
+
+        //Auth::user()->unreadNotifications->markAsRead();
+        $orgId()->unreadNotifications->markAsRead();
+        return response()->json(['status' => 'success']);
+    }
+
 
     public function index()
     {
-        //
+
     }
 
 

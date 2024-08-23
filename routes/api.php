@@ -14,6 +14,9 @@ use App\Http\Controllers\Org\OrgEventController;
 use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 
+use App\Http\Controllers\NotificationController;
+
+
 
 //API for auth
 Route::post('individual_register', [AuthController::class, 'individualRegister']);
@@ -42,6 +45,9 @@ Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show'])
 
 //Notification
 Route::get('/mark-as-read', [OrgMemberListController::class,'markAsRead']);
+Route::get('/notifications/unread/{orgId}', [OrgMemberListController::class,'getUnreadNotifications']);
+Route::post('/notifications/mark-as-read/{orgId}', [OrgMemberListController::class, 'markAsRead']);
+
 
 
 //API for org membership

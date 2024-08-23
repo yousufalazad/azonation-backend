@@ -25,7 +25,7 @@ class MemberAddSuccessful extends Notification
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
         return ['mail', 'database'];
     }
@@ -33,7 +33,7 @@ class MemberAddSuccessful extends Notification
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable)
     {
         return (new MailMessage)
                     ->line('The introduction to the notification.')
@@ -46,7 +46,7 @@ class MemberAddSuccessful extends Notification
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+    public function toArray($notifiable)
     {
         return [
             'data' =>' You are added in xyz organisation successfully'
