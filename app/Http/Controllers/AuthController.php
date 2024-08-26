@@ -47,7 +47,7 @@ class AuthController extends Controller
 
         // Create a new user record
         $user = User::create([
-            'type' => 1, //type=1 indicating individual type user in user tabel
+            'type' => 'individual', // User type => individual
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -82,7 +82,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::create([
-            'type' => 2, //type= 2 indicating org user in user tabel
+            'type' => 'organisation', //type= organisation indicating org user in user tabel
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -113,7 +113,7 @@ class AuthController extends Controller
 
         $user = User::create([
             'admin_name'  => $request->admin_name,
-            'type' => 3, //type= 2 indicating org user in user tabel
+            'type' => 'superadmin', //type= superadmin indicating org user in user tabel
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
