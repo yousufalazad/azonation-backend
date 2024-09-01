@@ -41,7 +41,7 @@ class CommitteeNameController extends Controller
     {
         //
     }
-    public function committeeStore(Request $request)
+    public function Store(Request $request)
     {
         $request->validate([
             'name' => 'required|string',
