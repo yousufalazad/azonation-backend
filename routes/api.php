@@ -15,13 +15,10 @@ use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 
 use App\Http\Controllers\NotificationController;
-
-
+use App\Http\Controllers\OrgProfileController;
 
 //API for auth
-Route::post('individual_register', [AuthController::class, 'individualRegister']);
-Route::post('org_register', [AuthController::class, 'orgRegister']);
-Route::post('superadmin_register', [AuthController::class, 'superAdminRegister']);
+Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 //API for individuals
@@ -32,9 +29,9 @@ Route::get('/connected-org-list/{individualId}', [IndividualController::class, '
 
 
 //API for org profile information
-Route::get('/organisation/{orgId}', [OrganisationController::class, 'show']);
-Route::put('/organisation/{id}', [OrganisationController::class, 'update']);
-Route::get('/get_organisation_data/{userId}', [OrganisationController::class, 'getOrgData']);
+Route::get('/org-profile/{orgId}', [OrgProfileController::class, 'show']);
+Route::put('/org-profile/{id}', [OrgProfileController::class, 'update']);
+Route::get('/org-profile-data/{userId}', [OrgProfileController::class, 'getOrgData']);
 
 
 //API for SuperAdmin
@@ -51,10 +48,10 @@ Route::post('/notifications/mark-as-read/{orgId}', [OrgMemberListController::cla
 
 
 //API for org membership
-Route::post('/search_org_members', [OrgMemberListController::class, 'search']);
+Route::post('/search_individual', [OrgMemberListController::class, 'search']);
 Route::post('/add_member', [OrgMemberListController::class, 'addMember']);
-Route::get('/org-members-list/{orgId}', [OrgMemberListController::class, 'getMembersByOrgId']);
-Route::get('/total-org-member-count/{orgId}', [OrgMemberListController::class, 'totalOrgMemberCount']);
+Route::get('/org-member-list/{userId}', [OrgMemberListController::class, 'getMemberList']);
+Route::get('/total-org-member-count/{userId}', [OrgMemberListController::class, 'totalOrgMemberCount']);
 
 
 //for Org Administrator

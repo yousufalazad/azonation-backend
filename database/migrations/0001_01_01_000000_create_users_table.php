@@ -11,29 +11,36 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Create the users table
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('type');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+
+            $table->integer('azon_id')->unique()->nullable()->comment('Unique ID from an external system');
+            $table->enum('type', ['individual', 'organisation', 'superadmin', 'guest'])->default('guest')->comment('Type of user account');
+            $table->string('name')->comment('Name of the user');
+            $table->string('image')->nullable()->comment('Profile image URL');
+            $table->string('email')->unique()->comment('Email address');
+            $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');
+            $table->string('password')->comment('Password hash');
+            $table->rememberToken()->comment('Token for "remember me" functionality');
             $table->timestamps();
         });
 
+        // Create the password_reset_tokens table
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
+            $table->string('email')->primary()->comment('Email address associated with the reset token');
+            $table->string('token')->comment('Reset token');
+            $table->timestamp('created_at')->nullable()->comment('Token creation timestamp');
         });
 
+        // Create the sessions table
         Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
+            $table->string('id')->primary()->comment('Session ID');
+            $table->foreignId('user_id')->nullable()->index()->constrained()->onDelete('cascade')->comment('Foreign key to users table');
+            $table->string('ip_address', 45)->nullable()->comment('IP address of the user');
+            $table->text('user_agent')->nullable()->comment('User agent string');
+            $table->longText('payload')->comment('Session data');
+            $table->integer('last_activity')->index()->comment('Timestamp of last activity');
         });
     }
 
@@ -42,8 +49,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
+        // Drop tables in reverse order of creation
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

@@ -20,7 +20,7 @@ class OrganisationController extends Controller
             'data' => $data
         ], $status);
     }
- 
+
     // getLogo
     public function getLogo($orgId)
     {
@@ -84,11 +84,7 @@ class OrganisationController extends Controller
      */
     public function create()
     {
-        
-        //=====================================================
-        // Controller name would be OrgProfileController
-        //===================================================== 
-
+        //
     }
 
     /**

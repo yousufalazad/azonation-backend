@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Org;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AddMemberSuccessMail;
+use Illuminate\Support\Facades\Mail;
+
 use App\Models\OrgMemberList;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -11,25 +14,29 @@ use App\Models\User;
 use App\Models\Individual;
 use App\Models\Organisation;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
 class OrgMemberListController extends Controller
 {
+    use Notifiable;
 
-    public function totalOrgMemberCount($orgId)
+    public function totalOrgMemberCount($userId)
     {
         //$orgTotalMemberCount = OrgMemberList::select('db_table_name.*')->where('org_id', $orgId)->get();
         //$orgTotalMemberCount = OrgMemberList::select('id','name', '--')->where('org_id', $orgId)->get();
 
-        $totalOrgMemberCount = OrgMemberList::where('org_id', $orgId)->count();
+        $totalOrgMemberCount = OrgMemberList::where('org_type_user_id', $userId)->count();
 
         return response()->json([
             'status' => true,
             'totalOrgMemberCount' => $totalOrgMemberCount
         ]);
     }
-    public function getMembersByOrgId($orgId)
+    public function getMemberList($userId)
     {
 
-        $members = OrgMemberList::where('org_id', $orgId)
+        $members = OrgMemberList::where('org_type_user_id', $userId)
             ->with('individual')
             ->get();
 
@@ -43,11 +50,24 @@ class OrgMemberListController extends Controller
     {
         $query = $request->input('query');
 
-        $results = Individual::where('id', 'like', "%{$query}%")
-            ->orWhere('user_id', 'like', "%{$query}%")
-            ->orWhere('azon_id', 'like', "%{$query}%")
-            ->orWhere('full_name', 'like', "%{$query}%")
+        $results = User::where('type', 'individual') // Add this condition to filter by user type
+            ->where(function ($q) use ($query) { // Group the conditions to be applied
+                $q->where('azon_id', 'like', "%{$query}%")
+                    ->orWhere('name', 'like', "%{$query}%")
+                    ->orWhere('email', 'like', "%{$query}%");
+            })
             ->get();
+
+        // $results = User::where('type', 'individual')
+        // ->where('azon_id', 'like', "%{$query}%")
+        // ->orWhere('name', 'like', "%{$query}%")
+        // ->orWhere('email', 'like', "%{$query}%")
+        // ->get();
+
+        // $results = User::where('azon_id', 'like', "%{$query}%")
+        //     ->orWhere('name', 'like', "%{$query}%")
+        //     ->orWhere('email', 'like', "%{$query}%")
+        //     ->get();
 
         return response()->json([
             'status' => true,
@@ -56,59 +76,37 @@ class OrgMemberListController extends Controller
     }
 
     public function addMember(Request $request)
-    {
-        $validated = $request->validate([
-            // 'org_id' => 'required',
-            // 'individual_id' => 'required',
-            'org_id' => 'required|exists:organisations,id',
-            'individual_id' => 'required|exists:individuals,id',
-        ]);
+{
+    $validated = $request->validate([
+        'org_type_user_id' => 'required|exists:users,id',
+        'individual_type_user_id' => 'required|exists:users,id',
+    ]);
 
-        $OrgMemberList = OrgMemberList::create([
-            'org_id' => $validated['org_id'],
-            'individual_id' => $validated['individual_id'],
-            'status' => 1
-        ]);
+    $OrgMemberList = OrgMemberList::create([
+        'org_type_user_id' => $validated['org_type_user_id'],
+        'individual_type_user_id' => $validated['individual_type_user_id'],
+        'status' => 1
+    ]);
 
-        $getUserId = Organisation::where('id', $OrgMemberList->org_id)->first('user_id');
-        User::find($getUserId->user_id)->notify(new MemberAddSuccessful($OrgMemberList->individual_id));
+    // Retrieve the individual user and the organization name
+    $individualUser = User::find($validated['individual_type_user_id']);
+    $orgUser = User::find($validated['org_type_user_id']);
+    $orgName = $orgUser ? $orgUser->name : 'The Organization'; // Adjust according to your org naming conventions
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Member added successfully'
-        ]);
+    if ($individualUser) {
+        // Send the email to the individual user
+        Mail::to($individualUser->email)->send(new AddMemberSuccessMail($individualUser->name, $orgName));
     }
 
-    //Notification for add member, member mark as read
-    // public function markAsRead()
-    // {
-    //     Auth::user()->unreadNotifications->markAsRead();
-    //     return redirect()->back();
-    // }
-
-    public function getUnreadNotifications($orgId)
-    {
-        $orgId=26;
-        return response()->json([
-            //'notifications' => Auth::user()->unreadNotifications
-            'notifications' => $orgId()->unreadNotifications
-        ]);
-    }
-
-    public function markAsRead($orgId)
-    {
-        $orgId=26;
-
-        //Auth::user()->unreadNotifications->markAsRead();
-        $orgId()->unreadNotifications->markAsRead();
-        return response()->json(['status' => 'success']);
-    }
+    return response()->json([
+        'status' => true,
+        'message' => 'Member added successfully',
+    ]);
+}
 
 
-    public function index()
-    {
 
-    }
+    public function index() {}
 
 
     public function create()
@@ -121,23 +119,7 @@ class OrgMemberListController extends Controller
      */
     public function store(Request $request)
     {
-        // $request->validate([
-        //     'org_id' => 'required|integer',
-        //     'org_id' => 'required|integer',
-        // ]);
-
-        // Create a new individual record associated with the user
-
-
-        OrgMemberList::create([
-            'org_id' => $request->org_id,
-            'individual_id' => $request->individual_id,
-            //'status' => $request->status,
-
-        ]);
-
-        // Return a success response
-        //return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
+        
     }
 
     /**

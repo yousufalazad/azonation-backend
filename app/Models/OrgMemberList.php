@@ -10,8 +10,8 @@ class OrgMemberList extends Model
     use HasFactory;
     protected $guarded = [];
     protected $fillable = [
-        'org_id',
-        'individual_id',
+        'org_type_user_id',
+        'individual_type_user_id',
         'existing_org_membership_id',
         'membership_type_id',
         'joining_date',
@@ -21,11 +21,11 @@ class OrgMemberList extends Model
 
     public function individual()
     {
-        return $this->belongsTo(Individual::class, 'individual_id', 'id');
+        return $this->belongsTo(User::class, 'individual_type_user_id', 'id');
     }
 
     public function connectedorg()
     {
-        return $this->belongsTo(Organisation::class, 'org_id', 'id');
+        return $this->belongsTo(User::class, 'org_type_user_id', 'id');
     }
 }

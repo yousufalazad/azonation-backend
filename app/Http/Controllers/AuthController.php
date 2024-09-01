@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SuperAdminUserRegisteredMail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use App\Models\Organisation;
-use App\Models\Individual;
-use App\Models\SuperAdmin;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use App\Mail\IndividualUserRegisteredMail;
 use App\Mail\OrgUserRegisteredMail;
-use Illuminate\Support\Facades\Mail;
+
 
 
 class AuthController extends Controller
@@ -37,97 +35,47 @@ class AuthController extends Controller
         ], $status);
     }
     // Method to handle individual registration creation
-    public function individualRegister(Request $request)
+    public function register(Request $request)
     {
         $request->validate([
-            'full_name' => 'required|string',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'name' => 'required|string|max:100',
+            'email' => 'required|string|email|max:100|unique:users',
+            'password' => 'required|string|min:3',
+            'type' => 'required|string|max:12',
+            // 'azon_id' => 'numeric',
         ]);
 
         // Create a new user record
+        // User profile photo/logo path will store in ther user table
         $user = User::create([
-            'type' => 'individual', // User type => individual
+            'name' => $request->name,
             'email' => $request->email,
+            'type' => $request->type,
+            'image' => $request->image,
             'password' => Hash::make($request->password),
-        ]);
-
-        // Create a new individual record associated with the user
-        $individual = Individual::create([
-            'user_id' => $user->id,
-            'full_name' => $request->full_name,
             // 'azon_id' => $request->azon_id,
-            //'status' => $request->status,
         ]);
 
-        // Send the email
-        Mail::to($user->email)->send(new IndividualUserRegisteredMail($individual));
+        // Send email function call
+        $this->sendEmail($user);
 
         // Return a success response
-        //return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
         return response()->json([
             'status' => true,
-            'message' => 'Individual registration successful',
+            'message' => 'Registration successful',
             'data' => $user
         ]);
     }
 
-    public function orgRegister(Request $request)
+    public function sendEmail($user)
     {
-
-        $request->validate([
-            'org_name' => 'required|string',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string',
-        ]);
-
-        $user = User::create([
-            'type' => 'organisation', //type= organisation indicating org user in user tabel
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $org = Organisation::create([
-            'user_id' => $user->id,
-            'org_name' => $request->org_name,
-        ]);
-
-        // Send the email
-        Mail::to($user->email)->send(new OrgUserRegisteredMail($org));
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation registration successful',
-            'data' => $user
-        ]);
-    }
-
-    public function superAdminRegister(Request $request)
-    {
-
-        $request->validate([
-            'admin_name' => 'required|string',
-            'email' => 'required|string|email|max:50|unique:users',
-            'password' => 'required|string',
-        ]);
-
-        $user = User::create([
-            'admin_name'  => $request->admin_name,
-            'type' => 'superadmin', //type= superadmin indicating org user in user tabel
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        SuperAdmin::create([
-            'user_id' => $user->id,
-            'admin_name' => $request->admin_name,
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'SuperAdmin registration successful',
-            'data' => $user
-        ]);
+        if ($user->type == 'individual') {
+            Mail::to($user->email)->send(new IndividualUserRegisteredMail($user));
+        } elseif ($user->type == 'organisation') {
+            Mail::to($user->email)->send(new OrgUserRegisteredMail($user));
+        }elseif ($user->type == 'superadmin') {
+           Mail::to($user->email)->send(new SuperAdminUserRegisteredMail($user));
+        }
     }
 
     public function login(Request $request)
@@ -147,82 +95,16 @@ class AuthController extends Controller
         $token = $tokenResult->plainTextToken;
 
         return $this->success('Successfully logged in', [
-            'user_id' => $user->id,
+            'id' => $user->id,
+            'name' => $user->name,
             'email' => $user->email,
             'type' => $user->type,
             'accessToken' => $token,
             'token_type' => 'Bearer',
         ]);
-
-
-        // $request->validate([
-        //     'email' => 'required|string|email',
-        //     'password' => 'required|string',
-        // ]);
-
-        // if (Auth::attempt($request->only('email', 'password'))) {
-        //     $user = Auth::user();
-
-        //     // Determine the user type (assuming 'type' is a field in the 'users' table)
-        //     $userType = $user->type;
-
-        //     $token = $user->createToken('auth_token')->plainTextToken;
-
-        //     return response()->json([
-        //         'token' => $token,
-        //         'type' => $userType, // Include the user type in the response
-        //     ]);
-        // }
-
-        // throw ValidationException::withMessages([
-        //     'email' => ['The provided credentials are incorrect.'],
-        // ]);
-        //}
-        // public function login(Request $request)
-        // {
-        //     $request->validate([
-        //         'email' => 'required|string|email',
-        //         'password' => 'required|string',
-        //     ]);
-
-        //     // if (!Auth::attempt($request->only('email', 'password'))) {
-        //     //     throw ValidationException::withMessages([
-        //     //         'email' => ['The provided credentials are incorrect.'],
-        //     //     ]);
-        //     // }
-
-        //     if (Auth::attempt($request->only('email', 'password'))) {
-        //         $user = Auth::user();
-
-        //         // Determine the user type (assuming 'type' is a field in the 'users' table)
-        //         $userType = $user->type;
-
-        //        $token = $user->createToken('auth_token')->plainTextToken;
-
-        //         return response()->json([
-        //             'token' => $token,
-        //             'type' => $userType, // Include the user type in the response
-        //         ]);
-        //     }
-
-        //     throw ValidationException::withMessages([
-        //         'email' => ['The provided credentials are incorrect.'],
-        //     ]);
-
-        //     // $user = $request->user();
-
-        //     // // Determine the user type (assuming 'type' is a field in the 'users' table)
-        //     // $userType = $user->type;
-
-        //     // $token = $user->createToken('auth_token')->plainTextToken;
-
-        //     // return response()->json([
-        //     //     'token' => $token,
-        //     //     'type' => $userType, // Include the user type in the response
-        //     // ]);
     }
 
-
+    //WHY THIS FUNCTION??????????
     public function user(Request $request)
     {
         return response()->json($request->user());
