@@ -9,9 +9,9 @@ class CommitteeNameController extends Controller
 {
 
 
-    public function getCommitteeListByOrgId($orgId)
+    public function getCommitteeListByUserId($userId)
     {
-        $committeeList = CommitteeName::where('org_id', $orgId)
+        $committeeList = CommitteeName::where('user_id', $userId)
             ->orderBy('id', 'asc')
             ->get();
 
@@ -41,7 +41,7 @@ class CommitteeNameController extends Controller
     {
         //
     }
-    public function Store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string',
@@ -49,7 +49,7 @@ class CommitteeNameController extends Controller
 
         // Create a new committee record associated with the organisation
         CommitteeName::create([
-            'org_id' => $request->orgId,
+            'user_id' => $request->userId,
             'name' => $request->name,
             'short_description' => $request->short_description,
             'start_date' => $request->start_date,

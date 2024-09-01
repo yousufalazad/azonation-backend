@@ -13,17 +13,16 @@ return new class extends Migration
     {
         Schema::create('committee_names', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('org_id'); // Foreign key to org table
+            $table->foreignId('user_id') // Foreign key to users table
+                  ->constrained('users')
+                  ->onDelete('cascade');
             $table->string('name');
             $table->string('short_description')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->string('note')->nullable();
-            $table->tinyInteger('status')->nullable()->default(0);
+            $table->text('note')->nullable(); // Changed to text for potentially longer notes
+            $table->tinyInteger('status')->default(0)->nullable();
             $table->timestamps();
-
-            // Define foreign key constraint
-           $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
         });
     }
 
