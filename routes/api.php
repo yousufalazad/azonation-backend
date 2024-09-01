@@ -41,9 +41,17 @@ Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show'])
 //ORG 
 
 //Notification
-Route::get('/mark-as-read', [OrgMemberListController::class,'markAsRead']);
-Route::get('/notifications/unread/{orgId}', [OrgMemberListController::class,'getUnreadNotifications']);
-Route::post('/notifications/mark-as-read/{orgId}', [OrgMemberListController::class, 'markAsRead']);
+// Route::get('/mark-as-read', [OrgMemberListController::class,'markAsRead']);
+// Route::get('/notifications/unread/{userId}', [OrgMemberListController::class,'getUnreadNotifications']);
+// Route::post('/notifications/mark-as-read/{orgId}', [OrgMemberListController::class, 'markAsRead']);
+
+//Notification
+// Route::get('/mark-as-read', [NotificationController::class,'markAsRead']);
+// Fetch notifications for a specific user
+Route::get('/notifications/get-all/{userId}', [NotificationController::class, 'getNotifications']);
+// Mark all notifications as read for a specific user
+Route::get('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
+
 
 
 
@@ -77,8 +85,8 @@ Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLog
 Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);
 
 
-Route::post('create_committee_store', [CommitteeNameController::class, 'committeeStore']);
-Route::get('org-committee-list/{orgId}', [CommitteeNameController::class, 'getCommitteeListByOrgId']);
+Route::post('create_committee_store', [CommitteeNameController::class, 'store']);
+Route::get('org-committee-list/{userId}', [CommitteeNameController::class, 'getCommitteeListByUserId']);
 
 Route::post('create-meeting-store', [MeetingController::class, 'store']);
 Route::get('meeting-list/{orgId}', [MeetingController::class, 'index']);

@@ -13,7 +13,7 @@ use App\Notifications\MemberAddSuccessful;
 use App\Models\User;
 use App\Models\Individual;
 use App\Models\Organisation;
-
+use App\Notifications\AddMemberSuccess;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -97,6 +97,9 @@ class OrgMemberListController extends Controller
         // Send the email to the individual user
         Mail::to($individualUser->email)->send(new AddMemberSuccessMail($individualUser->name, $orgName));
     }
+
+    User::find($individualUser->id)->notify(new AddMemberSuccess($orgName));
+
 
     return response()->json([
         'status' => true,
