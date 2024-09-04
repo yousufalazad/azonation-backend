@@ -51,6 +51,8 @@ Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show'])
 Route::get('/notifications/get-all/{userId}', [NotificationController::class, 'getNotifications']);
 // Mark all notifications as read for a specific user
 Route::get('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
+// Mark all notifications as read for a specific user
+Route::get('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
 
 
 
