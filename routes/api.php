@@ -22,10 +22,11 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 //API for individuals
-Route::resource('individual_data', IndividualController::class);
-Route::get('/profileimage/{individualId}', [IndividualController::class, 'getProfileImage']);
-Route::post('/profileimage/{individualId}', [IndividualController::class, 'updateProfileImage']);
-Route::get('/connected-org-list/{individualId}', [IndividualController::class, 'getOrganisationByIndividualId']);
+//Route::resource('individual_data', IndividualController::class);
+Route::get('/individual_profile_data/{userId}', [IndividualController::class, 'getProfileImage']);
+Route::get('/profileimage/{userId}', [IndividualController::class, 'getProfileImage']);
+Route::post('/profileimage/{userId}', [IndividualController::class, 'updateProfileImage']);
+Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrganisationByIndividualId']);
 
 
 //API for org profile information
