@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('committee_names', function (Blueprint $table) {
+        Schema::create('committees', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id') // Foreign key to users table
                   ->constrained('users')
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('committee_names');
+        Schema::dropIfExists('committees');
     }
 };

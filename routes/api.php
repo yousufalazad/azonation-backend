@@ -5,7 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Org\OrganisationController;
 use App\Http\Controllers\Individual\IndividualController;
 use App\Http\Controllers\Org\OrgMemberListController;
-use App\Http\Controllers\Org\CommitteeNameController;
+use App\Http\Controllers\Org\CommitteeController;
 use App\Http\Controllers\Org\MeetingController;
 use App\Http\Controllers\Org\OrgAddressController;
 use App\Http\Controllers\Org\OrgAdministratorController;
@@ -80,9 +80,9 @@ Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLog
 Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);
 
 //Committee
-Route::post('create_committee_store', [CommitteeNameController::class, 'store']);
-Route::put('update_committee/{id}', [CommitteeNameController::class, 'update']);
-Route::get('org-committee-list/{userId}', [CommitteeNameController::class, 'getCommitteeListByUserId']);
+Route::post('create_committee', [CommitteeController::class, 'store']);
+Route::put('update_committee/{id}', [CommitteeController::class, 'update']);
+Route::get('org-committee-list/{userId}', [CommitteeController::class, 'getCommitteeListByUserId']);
 
 //Meeting
 Route::post('create-meeting-store', [MeetingController::class, 'store']);
