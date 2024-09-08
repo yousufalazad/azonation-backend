@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+//Represents the membership of individuals in an organization.
 class OrgMemberList extends Model
 {
     use HasFactory;
-    protected $guarded = [];
     protected $fillable = [
         'org_type_user_id',
         'individual_type_user_id',
@@ -18,13 +19,18 @@ class OrgMemberList extends Model
         'end_date',
         'status'
     ];
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 
-    public function individual()
+    //Get the organization user related to this membership.
+    public function individual(): BelongsTo
     {
         return $this->belongsTo(User::class, 'individual_type_user_id', 'id');
     }
 
-    public function connectedorg()
+    public function connectedorg(): BelongsTo
     {
         return $this->belongsTo(User::class, 'org_type_user_id', 'id');
     }

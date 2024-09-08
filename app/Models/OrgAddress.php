@@ -16,4 +16,9 @@ class OrgAddress extends Model
         'postal_code',
         'country_id'
     ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

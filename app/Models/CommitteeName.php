@@ -18,4 +18,9 @@ class CommitteeName extends Model
         'note',
         'status'
     ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

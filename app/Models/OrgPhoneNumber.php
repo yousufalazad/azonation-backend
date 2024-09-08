@@ -15,4 +15,9 @@ class OrgPhoneNumber extends Model
         'phone_type',
         'status'
     ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

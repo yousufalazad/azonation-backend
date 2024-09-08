@@ -56,8 +56,6 @@ Route::get('/notifications/mark-all-as-read/{userId}', [NotificationController::
 Route::get('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
 
 
-
-
 //API for org membership
 Route::post('/search_individual', [OrgMemberListController::class, 'search']);
 Route::post('/add_member', [OrgMemberListController::class, 'addMember']);
