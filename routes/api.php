@@ -42,17 +42,11 @@ Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show'])
 //ORG 
 
 //Notification
-// Route::get('/mark-as-read', [OrgMemberListController::class,'markAsRead']);
-// Route::get('/notifications/unread/{userId}', [OrgMemberListController::class,'getUnreadNotifications']);
-// Route::post('/notifications/mark-as-read/{orgId}', [OrgMemberListController::class, 'markAsRead']);
-
-//Notification
-// Route::get('/mark-as-read', [NotificationController::class,'markAsRead']);
 // Fetch notifications for a specific user
 Route::get('/notifications/get-all/{userId}', [NotificationController::class, 'getNotifications']);
 // Mark all notifications as read for a specific user
 Route::get('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
-// Mark all notifications as read for a specific user
+// Mark a notifications as read for a specific user
 Route::get('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
 
 
@@ -85,16 +79,21 @@ Route::resource('org_member_list', OrgMemberListController::class);
 Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLogo']);
 Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);
 
-
+//Committee
 Route::post('create_committee_store', [CommitteeNameController::class, 'store']);
+Route::put('update_committee/{id}', [CommitteeNameController::class, 'update']);
 Route::get('org-committee-list/{userId}', [CommitteeNameController::class, 'getCommitteeListByUserId']);
 
+//Meeting
 Route::post('create-meeting-store', [MeetingController::class, 'store']);
 Route::get('meeting-list/{orgId}', [MeetingController::class, 'index']);
 
+//Event
 Route::post('create-event', [OrgEventController::class, 'store']);
 Route::get('org-event-list/{orgId}', [OrgEventController::class, 'index']);
 
+
+//Project
 Route::get('org-project-list/{orgId}', [OrgProjectController::class, 'index']);
 Route::post('create-project', [OrgProjectController::class, 'store']);
 
