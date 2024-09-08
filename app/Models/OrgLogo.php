@@ -12,4 +12,8 @@ class OrgLogo extends Model
         'org_id',
         'image',
     ];
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

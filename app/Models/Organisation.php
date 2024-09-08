@@ -15,4 +15,9 @@ class Organisation extends Model
         'short_description',
         'status',
     ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

@@ -16,6 +16,11 @@ class OrgAdministrator extends Model
         'status'
     ];
 
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
+
     public function individual()
     {
         return $this->belongsTo(Individual::class, 'individual_id', 'id');

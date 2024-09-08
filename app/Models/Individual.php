@@ -14,4 +14,9 @@ class Individual extends Model
         'full_name',
         'status',
     ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

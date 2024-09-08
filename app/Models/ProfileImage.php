@@ -12,4 +12,9 @@ class ProfileImage extends Model
         'individual_id',
         'image',
     ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

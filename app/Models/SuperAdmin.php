@@ -19,4 +19,9 @@ class SuperAdmin extends Model
         'end_date',
         'status',
     ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

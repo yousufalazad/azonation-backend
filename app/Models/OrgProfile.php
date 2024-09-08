@@ -14,4 +14,9 @@ class OrgProfile extends Model
         'detail_description',
         'status',
     ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

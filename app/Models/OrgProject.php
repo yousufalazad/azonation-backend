@@ -24,4 +24,9 @@ class OrgProject extends Model
         'status',
         'conduct_type'
     ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }
