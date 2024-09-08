@@ -49,7 +49,7 @@ class CommitteeNameController extends Controller
 
         // Create a new committee record associated with the organisation
         CommitteeName::create([
-            'user_id' => $request->userId,
+            'user_id' => $request->user_id,
             'name' => $request->name,
             'short_description' => $request->short_description,
             'start_date' => $request->start_date,
@@ -80,10 +80,38 @@ class CommitteeNameController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, CommitteeName $committeeName)
-    {
-        //
+    public function update(Request $request, $id)
+{
+    // Validate the incoming request data
+    $validatedData = $request->validate([
+        'name' => 'required|string',
+        'short_description' => 'nullable|string',
+        'start_date' => 'nullable|date',
+        'end_date' => 'nullable|date',
+        'note' => 'nullable|string',
+        'status' => 'nullable|boolean',
+    ]);
+
+    // Find the committee record associated with the user
+    $committee = CommitteeName::where('id', $id)->first();
+
+    if (!$committee) {
+        return response()->json(['message' => 'Committee not found'], 404);
     }
+
+    // Update the committee record
+    $committee->update([
+        'name' => $validatedData['name'],
+        'short_description' => $validatedData['short_description'],
+        'start_date' => $validatedData['start_date'],
+        'end_date' => $validatedData['end_date'],
+        'note' => $validatedData['note'],
+        'status' => $validatedData['status'],
+    ]);
+
+    // Return a success response
+    return response()->json(['message' => 'Committee updated successfully'], 200);
+}
 
     /**
      * Remove the specified resource from storage.
