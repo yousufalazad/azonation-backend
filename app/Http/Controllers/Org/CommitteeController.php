@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Org;
 use App\Http\Controllers\Controller;
-use App\Models\CommitteeName;
+use App\Models\Committee;
 use Illuminate\Http\Request;
 
-class CommitteeNameController extends Controller
+class CommitteeController extends Controller
 {
-
-
+    
     public function getCommitteeListByUserId($userId)
     {
-        $committeeList = CommitteeName::where('user_id', $userId)
+        $committeeList = Committee::where('user_id', $userId)
             ->orderBy('id', 'asc')
             ->get();
 
@@ -31,16 +30,14 @@ class CommitteeNameController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-
-
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function create()
     {
         //
     }
+
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -48,7 +45,7 @@ class CommitteeNameController extends Controller
         ]);
 
         // Create a new committee record associated with the organisation
-        CommitteeName::create([
+        Committee::create([
             'user_id' => $request->user_id,
             'name' => $request->name,
             'short_description' => $request->short_description,
@@ -61,10 +58,11 @@ class CommitteeNameController extends Controller
         // Return a success response
         return response()->json(['message' => 'Committee created successfully', 200]);
     }
+
     /**
      * Display the specified resource.
      */
-    public function show(CommitteeName $committeeName)
+    public function show(Committee $committee)
     {
         //
     }
@@ -72,7 +70,7 @@ class CommitteeNameController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CommitteeName $committeeName)
+    public function edit(Committee $committee)
     {
         //
     }
@@ -81,42 +79,41 @@ class CommitteeNameController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-{
-    // Validate the incoming request data
-    $validatedData = $request->validate([
-        'name' => 'required|string',
-        'short_description' => 'nullable|string',
-        'start_date' => 'nullable|date',
-        'end_date' => 'nullable|date',
-        'note' => 'nullable|string',
-        'status' => 'nullable|boolean',
-    ]);
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            'short_description' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'note' => 'nullable|string',
+            'status' => 'nullable|boolean',
+        ]);
 
-    // Find the committee record associated with the user
-    $committee = CommitteeName::where('id', $id)->first();
+        // Find the committee record associated with the user
+        $committee = Committee::where('id', $id)->first();
 
-    if (!$committee) {
-        return response()->json(['message' => 'Committee not found'], 404);
+        if (!$committee) {
+            return response()->json(['message' => 'Committee not found'], 404);
+        }
+
+        // Update the committee record
+        $committee->update([
+            'name' => $validatedData['name'],
+            'short_description' => $validatedData['short_description'],
+            'start_date' => $validatedData['start_date'],
+            'end_date' => $validatedData['end_date'],
+            'note' => $validatedData['note'],
+            'status' => $validatedData['status'],
+        ]);
+
+        // Return a success response
+        return response()->json(['message' => 'Committee updated successfully'], 200);
     }
-
-    // Update the committee record
-    $committee->update([
-        'name' => $validatedData['name'],
-        'short_description' => $validatedData['short_description'],
-        'start_date' => $validatedData['start_date'],
-        'end_date' => $validatedData['end_date'],
-        'note' => $validatedData['note'],
-        'status' => $validatedData['status'],
-    ]);
-
-    // Return a success response
-    return response()->json(['message' => 'Committee updated successfully'], 200);
-}
-
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CommitteeName $committeeName)
+    public function destroy(Committee $committee)
     {
         //
     }
