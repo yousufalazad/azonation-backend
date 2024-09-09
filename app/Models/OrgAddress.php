@@ -9,7 +9,7 @@ class OrgAddress extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'org_id',
+        'user_id',
         'address_line',
         'city',
         'state_or_region',

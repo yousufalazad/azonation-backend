@@ -65,6 +65,7 @@ Route::put('/update-administrator/{orgId}', [OrgAdministratorController::class, 
 
 
 //API for org address
+Route::post('/organisation-address/{userId}', [OrgAddressController::class, 'create']);
 Route::get('/organisation-address/{id}', [OrgAddressController::class, 'show']);
 Route::put('/organisation-address/{id}', [OrgAddressController::class, 'update']);
 
@@ -85,7 +86,7 @@ Route::put('update_committee/{id}', [CommitteeController::class, 'update']);
 Route::get('org-committee-list/{userId}', [CommitteeController::class, 'getCommitteeListByUserId']);
 
 //Meeting
-Route::post('create-meeting-store', [MeetingController::class, 'store']);
+Route::post('create-meeting', [MeetingController::class, 'store']);
 Route::get('meeting-list/{orgId}', [MeetingController::class, 'index']);
 
 //Event
@@ -94,7 +95,8 @@ Route::get('org-event-list/{orgId}', [OrgEventController::class, 'index']);
 
 
 //Project
-Route::get('org-project-list/{orgId}', [OrgProjectController::class, 'index']);
+Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
 Route::post('create-project', [OrgProjectController::class, 'store']);
+Route::put('update-project/{id}', [OrgProjectController::class, 'update']);
 
 //API for superadmin
