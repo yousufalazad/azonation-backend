@@ -8,34 +8,48 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Creates the 'org_projects' table.
      */
     public function up(): void
     {
         Schema::create('org_projects', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('org_id'); // Foreign key to org table
-            $table->string('title');
-            $table->string('short_description')->nullable();
-            $table->string('description')->nullable();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
-            $table->string('venue_name')->nullable();
-            $table->string('venue_address')->nullable();
-            $table->string('requirements')->nullable();
-            $table->string('note')->nullable();
-            $table->tinyInteger('status')->nullable()->default(0);
-            $table->tinyInteger('conduct_type')->nullable()->default(0); //0=null, 1=in_person, 2=remote, 3=hybrid
-            $table->timestamps();
+            $table->id(); // Primary key
+            
+            // Foreign key referencing the users table (owner of the project)
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade'); // Cascade on delete to remove associated projects
+            
+            // Project details
+            $table->string('title'); // Project title (required)
+            $table->string('short_description')->nullable(); // Optional short description
+            $table->text('description')->nullable(); // Optional full description
 
-            // Define foreign key constraint
-           $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
+            // Project dates and times
+            $table->date('start_date')->nullable(); // Optional start date
+            $table->date('end_date')->nullable(); // Optional end date
+            $table->time('start_time')->nullable(); // Optional start time
+            $table->time('end_time')->nullable(); // Optional end time
+
+            // Venue details for in-person projects
+            $table->string('venue_name')->nullable(); // Optional venue name
+            $table->string('venue_address')->nullable(); // Optional venue address
+
+            // Additional optional fields
+            $table->text('requirements')->nullable(); // Optional requirements for the project
+            $table->text('note')->nullable(); // Optional additional notes
+
+            // Status and conduct type (in-person, remote, hybrid)
+            $table->tinyInteger('status')->default(0)->comment('0=Inactive, 1=Active')->nullable();
+            $table->tinyInteger('conduct_type')->default(0)->comment('0=None, 1=In-person, 2=Remote, 3=Hybrid')->nullable();
+
+            $table->timestamps(); // Created at and updated at timestamps
         });
     }
 
     /**
      * Reverse the migrations.
+     * Drops the 'org_projects' table.
      */
     public function down(): void
     {

@@ -9,9 +9,9 @@ class MeetingController extends Controller
 {
 
 
-    public function index($orgId)
+    public function index($user_id)
     {
-        $meetingList = Meeting::where('org_id', $orgId)
+        $meetingList = Meeting::where('user_id', $user_id)
             ->orderBy('id', 'asc')
             ->get();
 
@@ -40,9 +40,9 @@ class MeetingController extends Controller
 
         // Create a new meeting record associated with the organisation
         Meeting::create([
-            'org_id' => $request->orgId,
+            'user_id' => $request->user_id,
             'name' => $request->name,
-            'name_for_admin' => $request->name_for_admin,
+            'short_name' => $request->short_name,
             'subject' => $request->subject,
             'date' => $request->date,
             'time' => $request->time,

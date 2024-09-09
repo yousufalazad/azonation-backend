@@ -9,7 +9,7 @@ class OrgProject extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'org_id',
+        'user_id',
         'title',
         'short_description',
         'description',
