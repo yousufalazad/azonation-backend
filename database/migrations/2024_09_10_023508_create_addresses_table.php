@@ -8,13 +8,10 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * This method is responsible for creating the 'org_addresses' table. 
-     * It includes a foreign key reference to the 'users' and 'country_names' tables.
      */
     public function up(): void
     {
-        Schema::create('org_addresses', function (Blueprint $table) {
+        Schema::create('addresses', function (Blueprint $table) {
             $table->id();
 
             // Foreign key to 'users' table
@@ -40,11 +37,9 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * This method is responsible for dropping the 'org_addresses' table if the migration is rolled back.
      */
     public function down(): void
     {
-        Schema::dropIfExists('org_addresses');
+        Schema::dropIfExists('addresses');
     }
 };
