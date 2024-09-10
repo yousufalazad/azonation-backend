@@ -15,7 +15,7 @@ use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\OrgProfileController;
+use App\Http\Controllers\Org\OrgProfileController;
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
@@ -29,10 +29,7 @@ Route::post('/profileimage/{userId}', [IndividualController::class, 'updateProfi
 Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrganisationByIndividualId']);
 
 
-//API for org profile information
-Route::get('/org-profile/{orgId}', [OrgProfileController::class, 'show']);
-Route::put('/org-profile/{id}', [OrgProfileController::class, 'update']);
-Route::get('/org-profile-data/{userId}', [OrgProfileController::class, 'getOrgData']);
+
 
 
 //API for SuperAdmin
@@ -48,6 +45,12 @@ Route::get('/notifications/get-all/{userId}', [NotificationController::class, 'g
 Route::get('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
 // Mark a notifications as read for a specific user
 Route::get('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
+
+//API for org profile information
+Route::get('/org-profile-data/{userId}', [OrgProfileController::class, 'index']);
+Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update']);
+Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
+Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
 
 
 //API for org membership
@@ -73,12 +76,6 @@ Route::put('/organisation-address/{id}', [OrgAddressController::class, 'update']
 Route::get('/org-phone-number/{id}', [OrgPhoneNumberController::class, 'show']);
 Route::put('/org-phone-number/{id}', [OrgPhoneNumberController::class, 'update']);
 
-
-
-//API for
-Route::resource('org_member_list', OrgMemberListController::class);
-Route::get('/organisation/logo/{orgId}', [OrganisationController::class, 'getLogo']);
-Route::post('/organisation/logo/{orgId}', [OrganisationController::class, 'updateLogo']);
 
 //Committee
 Route::post('create_committee', [CommitteeController::class, 'store']);

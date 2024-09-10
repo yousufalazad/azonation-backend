@@ -80,8 +80,6 @@ class OrgProjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        
-        
         // Find the project by ID
         $project = OrgProject::find($id);
 
