@@ -13,18 +13,23 @@ return new class extends Migration
     {
         Schema::create('committee_members', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('committee_name_id'); // Foreign key to org table
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('designation_id')->nullable();
+            $table->foreignId('committee_id')
+                ->constrained('committees')
+                ->onDelete('cascade');
+            
+                $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade');
+
+                
+            $table->foreignId('designation_id')
+                ->constrained('designations');
+
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('note')->nullable();
             $table->tinyInteger('status')->nullable()->default(0);
             $table->timestamps();
- 
-            // Define foreign key constraint
-           $table->foreign('committee_name_id')->references('id')->on('committee_names')->onDelete('cascade');
-           $table->foreign('designation_id')->references('id')->on('designations')->onDelete('cascade');
         });
     }
 

@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('org_events', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('org_id'); // Foreign key to org table
+            // Foreign key to 'users' table
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade'); // Cascade on delete to remove associated addresses when user is deleted
+
+
             $table->string('title');
             $table->string('name')->nullable();
             $table->string('short_description')->nullable();
@@ -28,8 +33,7 @@ return new class extends Migration
             $table->tinyInteger('conduct_type')->nullable()->default(0); //0=null, 1=in_person, 2=remote, 3=hybrid
             $table->timestamps();
 
-            // Define foreign key constraint
-           $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
+          
         });
     }
     /**

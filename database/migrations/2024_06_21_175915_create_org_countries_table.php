@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('org_countries', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('org_id'); // Foreign key to individuals table
-            $table->unsignedBigInteger('country_id')->nullable();
-            $table->timestamps();
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade');
 
-            // Define foreign key constraint
-           $table->foreign('org_id')->references('id')->on('organisations')->onDelete('cascade');
-           $table->foreign('country_id')->references('id')->on('country_names')->onDelete('cascade');
+                $table->foreignId('country_id')
+                ->constrained('country_names');
+            $table->timestamps();
         });
     }
 
