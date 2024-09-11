@@ -37,9 +37,13 @@ class PhoneNumberController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PhoneNumber $phoneNumber)
+    public function show($userId)
     {
-        //
+        $PhoneNumber = PhoneNumber::where('user_id', $userId)->first();
+        return response()->json([
+            'status' => true,
+            'data' => $PhoneNumber
+        ]);
     }
 
     /**
