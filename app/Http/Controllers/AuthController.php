@@ -110,6 +110,40 @@ class AuthController extends Controller
         return response()->json($request->user());
     }
 
+    public function userNameUpdate(Request $request, $userId){
+        $request->validate([
+            'name' =>'required|string|max:100',
+        ]);
+        // $id=Auth::user()->id;
+        // $id = Auth::id();
+        $user = User::where('id', $userId)->first();
+        $user->name = $request->name;
+        $user->save();
+
+        return response()->json([
+           'status' => true,
+           'message' => 'Name updated successfully',
+            'data' => $user
+        ]);
+    }
+
+    public function userEmailUpdate(Request $request, $userId){
+        $request->validate([
+            'email' =>'required|string|max:100',
+        ]);
+
+        $user = User::where('id', $userId)->first();
+        $user->email = $request->email;
+        $user->save();
+
+        return response()->json([
+           'status' => true,
+           'message' => 'Email updated successfully',
+            'data' => $user
+        ]);
+    }
+    
+
     // Method to handle logout process
     public function logout(Request $request)
     {
