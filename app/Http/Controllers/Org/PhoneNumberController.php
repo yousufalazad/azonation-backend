@@ -61,8 +61,8 @@ class PhoneNumberController extends Controller
     {
         // Validate the request data
         $validatedData = $request->validate([
-            'dialing_code_id' => 'nullable|string',
-            'phone_number' => 'nullable|string',
+            'dialing_code_id' => 'nullable|integer',
+            'phone_number' => 'nullable|integer',
             'phone_type' => 'nullable',
             'status' => 'nullable|boolean',
             

@@ -19,6 +19,8 @@ use App\Http\Controllers\Org\OrgProfileController;
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::put('update-username/{userId}', [AuthController::class, 'userNameUpdate']);
+Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
 
 //API for individuals
 //Route::resource('individual_data', IndividualController::class);
