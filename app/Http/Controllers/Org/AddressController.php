@@ -29,23 +29,23 @@ class AddressController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required',
-        ]);
+        // $request->validate([
+        //     'user_id' => 'required',
+        // ]);
 
-        // Create a new committee record associated with the organisation
-        Address::create([
-            'user_id' => $request->user_id,
-            'address_line_one' => $request->address_line_one,
-            'address_line_two' => $request->address_line_two,
-            'city' => $request->city,
-            'state_or_region' => $request->state_or_region,
-            'postal_code' => $request->postal_code,
-            'country_id' => $request->country_id,
-        ]);
+        // // Create a new committee record associated with the organisation
+        // Address::create([
+        //     'user_id' => $request->user_id,
+        //     'address_line_one' => $request->address_line_one,
+        //     'address_line_two' => $request->address_line_two,
+        //     'city' => $request->city,
+        //     'state_or_region' => $request->state_or_region,
+        //     'postal_code' => $request->postal_code,
+        //     'country_id' => $request->country_id,
+        // ]);
 
-        // Return a success response
-        return response()->json(['message' => 'Address created successfully', 200]);
+        // // Return a success response
+        // return response()->json(['message' => 'Address created successfully', 200]);
     }
 
     /**
@@ -88,10 +88,7 @@ class AddressController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function dupupdate(Request $request, Address $address)
-    {
-        //
-    }
+    
     public function update(Request $request, int $userId): JsonResponse
     {
         // Validate the request data
