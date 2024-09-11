@@ -2,14 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Org\OrganisationController;
 use App\Http\Controllers\Individual\IndividualController;
 use App\Http\Controllers\Org\OrgMemberListController;
 use App\Http\Controllers\Org\CommitteeController;
 use App\Http\Controllers\Org\MeetingController;
 use App\Http\Controllers\Org\AddressController;
 use App\Http\Controllers\Org\OrgAdministratorController;
-use App\Http\Controllers\Org\OrgPhoneNumberController;
+use App\Http\Controllers\Org\PhoneNumberController;
 use App\Http\Controllers\Org\OrgEventController;
 use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
@@ -27,9 +26,6 @@ Route::get('/individual_profile_data/{userId}', [IndividualController::class, 'g
 Route::get('/profileimage/{userId}', [IndividualController::class, 'getProfileImage']);
 Route::post('/profileimage/{userId}', [IndividualController::class, 'updateProfileImage']);
 Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrganisationByIndividualId']);
-
-
-
 
 
 //API for SuperAdmin
@@ -68,14 +64,14 @@ Route::put('/update-administrator/{orgId}', [OrgAdministratorController::class, 
 
 
 //API for org address
-Route::get('address/{userId}', [AddressController::class, 'getAddress']);
+Route::get('address/{userId}', [AddressController::class, 'show']);
 //Route::post('address', [AddressController::class, 'store']);
 Route::put('address/{userId}', [AddressController::class, 'update']);
 
 
 //API for org phone number
-Route::get('org-phone-number/{id}', [OrgPhoneNumberController::class, 'show']);
-Route::put('org-phone-number/{id}', [OrgPhoneNumberController::class, 'update']);
+Route::get('phone-number/{userId}', [PhoneNumberController::class, 'show']);
+Route::put('phone-number/{userId}', [PhoneNumberController::class, 'update']);
 
 
 //Committee

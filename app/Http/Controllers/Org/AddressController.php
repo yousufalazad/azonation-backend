@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Org;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
+
 use App\Models\Address;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
 
 class AddressController extends Controller
@@ -54,15 +55,6 @@ class AddressController extends Controller
     public function show($userId)
     {
         $address = Address::where('user_id', $userId)->first();
-        return response()->json([
-            'status' => true,
-            'data' => $address
-        ]);
-    }
-
-    public function getAddress($userId)
-    {
-        $address = Address::where('user_id', $userId)->first();
 
         if ($address) {
             return response()->json([
@@ -76,6 +68,7 @@ class AddressController extends Controller
             ], 404);
         }
     }
+
 
     /**
      * Show the form for editing the specified resource.
