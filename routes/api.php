@@ -65,7 +65,7 @@ Route::put('/update-administrator/{orgId}', [OrgAdministratorController::class, 
 
 //API for org address
 Route::get('address/{userId}', [AddressController::class, 'show']);
-//Route::post('address', [AddressController::class, 'store']);
+Route::post('address', [AddressController::class, 'store']);
 Route::put('address/{userId}', [AddressController::class, 'update']);
 
 
