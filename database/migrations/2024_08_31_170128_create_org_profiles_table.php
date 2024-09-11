@@ -32,7 +32,7 @@ return new class extends Migration
             $table->text('areas_of_focus')->nullable(); // Areas of focus for the organization
             $table->text('causes')->nullable(); // Causes the organization supports
             $table->text('impact')->nullable(); // The organization's impact
-            $table->text('why_join_our_organisation')->nullable(); // Reasons to join the organization
+            $table->text('why_join_us')->nullable(); // Reasons to join the organization
 
             // Scope and important dates
             $table->tinyInteger('scope_of_work')->default(0)->comment('0 = local, 1 = national, 2 = international');
