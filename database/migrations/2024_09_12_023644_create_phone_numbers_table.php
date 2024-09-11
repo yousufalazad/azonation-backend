@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('org_phone_numbers', function (Blueprint $table) {
+        Schema::create('phone_numbers', function (Blueprint $table) {
             $table->id();
             
             // Foreign key linking to the users table
@@ -21,7 +21,7 @@ return new class extends Migration
 
             // Foreign key linking to the country_codes table for dialing codes
             $table->foreignId('dialing_code_id')
-                ->constrained('country_codes'); 
+                ->constrained('dialing_codes'); 
 
             // Phone number and details
             $table->string('phone_number'); // Use string for phone number to handle different formats
@@ -42,6 +42,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('org_phone_numbers');
+        Schema::dropIfExists('phone_numbers');
     }
 };

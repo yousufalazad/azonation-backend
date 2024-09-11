@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Org;
-use App\Http\Controllers\Controller;
-use App\Models\OrgAddress;
+namespace App\Http\Controllers;
+
+use App\Models\DialingCode;
 use Illuminate\Http\Request;
 
-class OrgAddressController extends Controller
+class DialingCodeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,19 +34,15 @@ class OrgAddressController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(DialingCode $dialingCode)
     {
-        $orgAddress = OrgAddress::find($id);
-        return response()->json([
-            'status' => true,
-            'data' => $orgAddress
-        ]);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OrgAddress $orgAddress)
+    public function edit(DialingCode $dialingCode)
     {
         //
     }
@@ -54,20 +50,15 @@ class OrgAddressController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, DialingCode $dialingCode)
     {
-        $orgAddress = OrgAddress::find($id);
-        $orgAddress->update($request->all());
-        return response()->json([
-            'status' => true,
-            'data' => $orgAddress
-        ]);
+        //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrgAddress $orgAddress)
+    public function destroy(DialingCode $dialingCode)
     {
         //
     }
