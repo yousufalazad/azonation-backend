@@ -7,7 +7,7 @@ use App\Http\Controllers\Individual\IndividualController;
 use App\Http\Controllers\Org\OrgMemberListController;
 use App\Http\Controllers\Org\CommitteeController;
 use App\Http\Controllers\Org\MeetingController;
-use App\Http\Controllers\Org\OrgAddressController;
+use App\Http\Controllers\Org\AddressController;
 use App\Http\Controllers\Org\OrgAdministratorController;
 use App\Http\Controllers\Org\OrgPhoneNumberController;
 use App\Http\Controllers\Org\OrgEventController;
@@ -68,13 +68,14 @@ Route::put('/update-administrator/{orgId}', [OrgAdministratorController::class, 
 
 
 //API for org address
-Route::post('/organisation-address/{userId}', [OrgAddressController::class, 'create']);
-Route::get('/organisation-address/{id}', [OrgAddressController::class, 'show']);
-Route::put('/organisation-address/{id}', [OrgAddressController::class, 'update']);
+Route::get('address/{userId}', [AddressController::class, 'getAddress']);
+Route::post('address', [AddressController::class, 'store']);
+Route::put('address/{userId}', [AddressController::class, 'update']);
+
 
 //API for org phone number
-Route::get('/org-phone-number/{id}', [OrgPhoneNumberController::class, 'show']);
-Route::put('/org-phone-number/{id}', [OrgPhoneNumberController::class, 'update']);
+Route::get('org-phone-number/{id}', [OrgPhoneNumberController::class, 'show']);
+Route::put('org-phone-number/{id}', [OrgPhoneNumberController::class, 'update']);
 
 
 //Committee
