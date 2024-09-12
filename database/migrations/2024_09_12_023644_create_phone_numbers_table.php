@@ -21,8 +21,8 @@ return new class extends Migration
 
             // Foreign key linking to the country_codes table for dialing codes
             $table->foreignId('dialing_code_id')
-                ->constrained('dialing_codes'); 
-
+                ->constrained('dialing_codes') 
+                ->onDelete('cascade');
             // Phone number and details
             $table->string('phone_number'); // Use string for phone number to handle different formats
 
