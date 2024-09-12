@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CountryName;
+use App\Models\Country;
 use Illuminate\Http\Request;
 
-class CountryNameController extends Controller
+class CountryController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class CountryNameController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(CountryName $countryName)
+    public function show(Country $country)
     {
         //
     }
@@ -42,7 +42,7 @@ class CountryNameController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CountryName $countryName)
+    public function edit(Country $country)
     {
         //
     }
@@ -50,7 +50,7 @@ class CountryNameController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, CountryName $countryName)
+    public function update(Request $request, Country $country)
     {
         //
     }
@@ -58,7 +58,7 @@ class CountryNameController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CountryName $countryName)
+    public function destroy(Country $country)
     {
         //
     }

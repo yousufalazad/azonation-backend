@@ -84,7 +84,7 @@ class PhoneNumberController extends Controller
             return response()->json([
                 'status'  => true,
                 'data'    => $phoneNumber,
-                'message' => $phoneNumber,
+                'message' => $message,
             ], 200);
         } catch (\Exception $e) {
             // Log the error for debugging

@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('country_names', function (Blueprint $table) {
+        Schema::create('countries', function (Blueprint $table) {
             $table->id();
-            $table->string('country_name')->nullable();
+            $table->string('country_name');
+            $table->string('iso_code', 3); // ISO country code
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('country_names');
+        Schema::dropIfExists('countries');
     }
 };

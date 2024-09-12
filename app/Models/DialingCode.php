@@ -10,8 +10,8 @@ class DialingCode extends Model
     use HasFactory;
 
     protected $fillable = [
-        'code',
-        'country_name',    
+        'country_id', 
+        'dialing_code',
     ];
     
     protected $hidden=[

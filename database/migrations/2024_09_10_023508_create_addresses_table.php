@@ -20,18 +20,17 @@ return new class extends Migration
                 ->onDelete('cascade'); // Cascade on delete to remove associated addresses when user is deleted
 
             // Address fields
-            $table->string('address_line_one')->nullable(); // Nullable for cases where the address might be incomplete
-            $table->string('address_line_two')->nullable(); // Nullable for cases where the address might be incomplete
-            $table->string('city')->nullable();         // City, can be null
-            $table->string('state_or_region')->nullable(); // State or region, can be null
-            $table->string('postal_code')->nullable();  // Postal code, can be null
+            $table->string('address_line_one')->nullable(); 
+            $table->string('address_line_two')->nullable();
+            $table->string('city')->nullable(); 
+            $table->string('state_or_region')->nullable(); 
+            $table->string('postal_code')->nullable(); 
 
             // Foreign key to 'country_names' table
             $table->foreignId('country_id')
-                ->constrained('country_names')
-                ->onDelete('cascade'); // Cascade on delete to handle associated addresses upon country deletion
-
-            $table->timestamps(); // Timestamps for created_at and updated_at
+                ->constrained('countries')
+                ->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
