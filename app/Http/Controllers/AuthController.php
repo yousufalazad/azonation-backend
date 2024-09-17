@@ -67,17 +67,6 @@ class AuthController extends Controller
         ]);
     }
 
-    public function sendEmail($user)
-    {
-        if ($user->type == 'individual') {
-            Mail::to($user->email)->send(new IndividualUserRegisteredMail($user));
-        } elseif ($user->type == 'organisation') {
-            Mail::to($user->email)->send(new OrgUserRegisteredMail($user));
-        }elseif ($user->type == 'superadmin') {
-           Mail::to($user->email)->send(new SuperAdminUserRegisteredMail($user));
-        }
-    }
-
     public function login(Request $request)
     {
         $request->validate([
@@ -99,10 +88,27 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'type' => $user->type,
+            
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+
             'accessToken' => $token,
             'token_type' => 'Bearer',
         ]);
     }
+
+    public function sendEmail($user)
+    {
+        if ($user->type == 'individual') {
+            Mail::to($user->email)->send(new IndividualUserRegisteredMail($user));
+        } elseif ($user->type == 'organisation') {
+            Mail::to($user->email)->send(new OrgUserRegisteredMail($user));
+        }elseif ($user->type == 'superadmin') {
+           Mail::to($user->email)->send(new SuperAdminUserRegisteredMail($user));
+        }
+    }
+
+
 
     //WHY THIS FUNCTION??????????
     public function user(Request $request)
