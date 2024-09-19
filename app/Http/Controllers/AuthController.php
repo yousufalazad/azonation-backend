@@ -88,6 +88,7 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'type' => $user->type,
+            'azon_id' => $user->azon_id,
             
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,

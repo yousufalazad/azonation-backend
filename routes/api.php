@@ -87,7 +87,7 @@ Route::get('meeting-list/{orgId}', [MeetingController::class, 'index']);
 
 //Event
 Route::post('create-event', [OrgEventController::class, 'store']);
-Route::get('org-event-list/{orgId}', [OrgEventController::class, 'index']);
+Route::get('org-event-list/{userId}', [OrgEventController::class, 'index']);
 
 
 //Project

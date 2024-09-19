@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 
 class OrgEventController extends Controller
 {
-    public function index($orgId)
+    public function index($userId)
     {
-        $eventList = OrgEvent::where('org_id', $orgId)
+        $eventList = OrgEvent::where('user_id', $userId)
             ->orderBy('id', 'asc')
             ->get();
 
@@ -35,10 +35,9 @@ class OrgEventController extends Controller
         $request->validate([
             'title' => 'required|string',
         ]);
-
         // Create a new event record associated with the organisation
         OrgEvent::create([
-            'org_id' => $request->orgId,
+            'user_id' => $request->userId,
             'title' => $request->title,
             'name' => $request->name,
             'short_description' => $request->short_description,
@@ -52,7 +51,6 @@ class OrgEventController extends Controller
             'status' => $request->status,
             'conduct_type' => $request->conduct_type,
         ]);
-
         // Return a success response
         return response()->json(['message' => 'Event created successfully', 200]);
     }
