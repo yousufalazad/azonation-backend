@@ -47,65 +47,97 @@ class OrgMemberListController extends Controller
     }
 
     public function search(Request $request)
-    {
-        $query = $request->input('query');
-
-        $results = User::where('type', 'individual') // Add this condition to filter by user type
-            ->where(function ($q) use ($query) { // Group the conditions to be applied
-                $q->where('azon_id', 'like', "%{$query}%")
-                    ->orWhere('name', 'like', "%{$query}%")
-                    ->orWhere('email', 'like', "%{$query}%");
-            })
-            ->get();
-
-        // $results = User::where('type', 'individual')
-        // ->where('azon_id', 'like', "%{$query}%")
-        // ->orWhere('name', 'like', "%{$query}%")
-        // ->orWhere('email', 'like', "%{$query}%")
-        // ->get();
-
-        // $results = User::where('azon_id', 'like', "%{$query}%")
-        //     ->orWhere('name', 'like', "%{$query}%")
-        //     ->orWhere('email', 'like', "%{$query}%")
-        //     ->get();
-
-        return response()->json([
-            'status' => true,
-            'data' => $results
-        ]);
-    }
-
-    public function addMember(Request $request)
 {
-    $validated = $request->validate([
-        'org_type_user_id' => 'required|exists:users,id',
-        'individual_type_user_id' => 'required|exists:users,id',
-    ]);
+    $query = $request->input('query');
 
-    $OrgMemberList = OrgMemberList::create([
-        'org_type_user_id' => $validated['org_type_user_id'],
-        'individual_type_user_id' => $validated['individual_type_user_id'],
-        'status' => 1
-    ]);
-
-    // Retrieve the individual user and the organization name
-    $individualUser = User::find($validated['individual_type_user_id']);
-    $orgUser = User::find($validated['org_type_user_id']);
-    $orgName = $orgUser ? $orgUser->name : 'The Organization'; // Adjust according to your org naming conventions
-
-    if ($individualUser) {
-        // Send the email to the individual user
-        Mail::to($individualUser->email)->send(new AddMemberSuccessMail($individualUser->name, $orgName));
-    }
-
-    User::find($individualUser->id)->notify(new AddMemberSuccess($orgName));
-
+    $results = User::where('type', 'individual') // Filter by user type
+        ->where(function ($q) use ($query) { // Group search conditions
+            $q->where('azon_id', 'like', "%{$query}%")
+                ->orWhere('name', 'like', "%{$query}%")
+                ->orWhere('username', 'like', "%{$query}%")
+                ->orWhere('email', 'like', "%{$query}%")
+                ->orWhereRaw("CONCAT(dialing_codes.dialing_code, phone_numbers.phone_number) LIKE ?", ["%{$query}%"]); // Search by full phone number
+        })
+        ->leftJoin('addresses', 'addresses.user_id', '=', 'users.id') // Left join addresses table
+        ->leftJoin('countries', 'countries.id', '=', 'addresses.country_id') // Left join countries table
+        ->leftJoin('phone_numbers', 'phone_numbers.user_id', '=', 'users.id') // Left join phone_numbers table
+        ->leftJoin('dialing_codes', 'dialing_codes.id', '=', 'phone_numbers.dialing_code_id') // Left join dialing_codes table
+        ->select(
+            'users.*',
+            'addresses.city',
+            'countries.country_name',
+            'dialing_codes.dialing_code',
+            'phone_numbers.phone_number'
+        )
+        ->get();
 
     return response()->json([
         'status' => true,
-        'message' => 'Member added successfully',
+        'data' => $results
     ]);
 }
+
+
+    // public function search(Request $request)
+    // {
+    //     $query = $request->input('query');
+
+    //     $results = User::where('type', 'individual') // Filter by user type
+    //         ->where(function ($q) use ($query) { // Group search conditions
+    //             $q->where('azon_id', 'like', "%{$query}%")
+    //                 ->orWhere('name', 'like', "%{$query}%")
+    //                 ->orWhere('email', 'like', "%{$query}%");
+    //         })
+    //         ->leftJoin('addresses', 'addresses.user_id', '=', 'users.id') // Left join addresses table
+    //         ->leftJoin('countries', 'countries.id', '=', 'addresses.country_id') // Left join countries table
+    //         ->leftJoin('phone_numbers', 'phone_numbers.user_id', '=', 'users.id') // Left join phone_numbers table
+    //         ->leftJoin('dialing_codes', 'dialing_codes.id', '=', 'phone_numbers.dialing_code_id') // Left join dialing_codes table
+    //         ->select(
+    //             'users.*',
+    //             'addresses.city',
+    //             'countries.country_name',
+    //             'dialing_codes.dialing_code',
+    //             'phone_numbers.phone_number'
+    //         )
+    //         ->get();
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $results
+    //     ]);
+    // }
+
+    public function addMember(Request $request)
+    {
+        $validated = $request->validate([
+            'org_type_user_id' => 'required|exists:users,id',
+            'individual_type_user_id' => 'required|exists:users,id',
+        ]);
+
+        $OrgMemberList = OrgMemberList::create([
+            'org_type_user_id' => $validated['org_type_user_id'],
+            'individual_type_user_id' => $validated['individual_type_user_id'],
+            'status' => 1
+        ]);
+
+        // Retrieve the individual user and the organization name
+        $individualUser = User::find($validated['individual_type_user_id']);
+        $orgUser = User::find($validated['org_type_user_id']);
+        $orgName = $orgUser ? $orgUser->name : 'The Organization'; // Adjust according to your org naming conventions
+
+        if ($individualUser) {
+            // Send the email to the individual user
+            Mail::to($individualUser->email)->send(new AddMemberSuccessMail($individualUser->name, $orgName));
+        }
+
+        User::find($individualUser->id)->notify(new AddMemberSuccess($orgName));
+
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Member added successfully',
+        ]);
+    }
 
 
 
@@ -120,10 +152,7 @@ class OrgMemberListController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        
-    }
+    public function store(Request $request) {}
 
     /**
      * Display the specified resource.
