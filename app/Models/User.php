@@ -22,9 +22,11 @@ class User extends Authenticatable
         'azon_id',
         'name',
         'type',
+        'username',
         'email',
         'password',
-        'image',
+        'image'
+        
         
     ];
 
