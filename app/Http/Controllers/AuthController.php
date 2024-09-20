@@ -12,7 +12,6 @@ use App\Mail\IndividualUserRegisteredMail;
 use App\Mail\OrgUserRegisteredMail;
 
 
-
 class AuthController extends Controller
 {
     // Method to handle successful responses
@@ -89,6 +88,7 @@ class AuthController extends Controller
             'email' => $user->email,
             'type' => $user->type,
             'azon_id' => $user->azon_id,
+            'username'=>$user->username,
             
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,

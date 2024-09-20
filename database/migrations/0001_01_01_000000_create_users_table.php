@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('azon_id')->unique()->nullable()->comment('Unique ID from an external system');
             $table->enum('type', ['individual', 'organisation', 'superadmin', 'guest'])->default('guest')->comment('Type of user account');
             $table->string('name')->comment('Name of the user');
-            $table->string('username')->unique()->comment('Unique username for the user');
+            $table->string('username')->unique()->nullable()->comment('Unique username for the user');
             $table->string('email')->unique()->comment('Email address');
             $table->string('image')->nullable()->comment('Profile image URL');
             $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');
