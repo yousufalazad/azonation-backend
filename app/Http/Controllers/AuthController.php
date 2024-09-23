@@ -17,11 +17,11 @@ class AuthController extends Controller
     // Method to handle successful responses
     protected function success($message, $data = [], $status = 200)
     {
-        return response()->json([
+        return response()->json(data: [
             'status' => 'success',
             'message' => $message,
             'data' => $data
-        ], $status);
+        ], status: $status);
     }
 
     // Method to handle error responses
@@ -82,7 +82,7 @@ class AuthController extends Controller
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->plainTextToken;
 
-        return $this->success('Successfully logged in', [
+        return $this->success(message: 'Successfully logged in', data: [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
@@ -109,13 +109,24 @@ class AuthController extends Controller
         }
     }
 
-
-
     //WHY THIS FUNCTION??????????
-    public function user(Request $request)
-    {
-        return response()->json($request->user());
-    }
+    // public function user(Request $request)
+    // {
+    //     return response()->json($request->user());
+    // }
+
+
+    // No need this function for updating localStorage data
+    // public function getUserDataLocalUpdate($userId){
+        
+    //     $user = User::find($userId);
+        
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'User all updated data',
+    //         'data' => $user
+    //     ]);
+    // }
 
     public function nameUpdate(Request $request, $userId){
         $request->validate([
