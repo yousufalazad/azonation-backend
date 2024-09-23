@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Org;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use App\Models\PhoneNumber;

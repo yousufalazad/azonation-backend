@@ -8,7 +8,7 @@ use App\Http\Controllers\Org\CommitteeController;
 use App\Http\Controllers\Org\MeetingController;
 use App\Http\Controllers\Org\AddressController;
 use App\Http\Controllers\Org\OrgAdministratorController;
-use App\Http\Controllers\Org\PhoneNumberController;
+use App\Http\Controllers\PhoneNumberController;
 use App\Http\Controllers\Org\OrgEventController;
 use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
@@ -22,6 +22,9 @@ Route::post('login', [AuthController::class, 'login']);
 Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
 Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
 Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
+
+//User data
+// Route::get('/user-data-local-update/{userId}', [AuthController::class, 'getUserDataLocalUpdate']);
 
 //API for individuals
 //Route::resource('individual_data', IndividualController::class);
