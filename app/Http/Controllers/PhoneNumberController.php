@@ -38,12 +38,19 @@ class PhoneNumberController extends Controller
      */
     public function show($userId)
     {
-        $PhoneNumber = PhoneNumber::where('user_id', $userId)->first();
+        $PhoneNumber = PhoneNumber::where('phone_numbers.user_id', $userId)
+        ->leftJoin('dialing_codes', 'phone_numbers.dialing_code_id', '=', 'dialing_codes.country_id') // Left join addresses table
+        ->select(
+            'phone_numbers.*',
+            'dialing_codes.*'
+        )->first();
         return response()->json([
             'status' => true,
             'data' => $PhoneNumber
         ]);
     }
+
+    
 
     /**
      * Show the form for editing the specified resource.
