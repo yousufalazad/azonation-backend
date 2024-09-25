@@ -88,8 +88,8 @@ class AuthController extends Controller
             'email' => $user->email,
             'type' => $user->type,
             'azon_id' => $user->azon_id,
-            'username'=>$user->username,
-            
+            'username' => $user->username,
+
             'created_at' => $user->created_at,
             'updated_at' => $user->updated_at,
 
@@ -104,8 +104,8 @@ class AuthController extends Controller
             Mail::to($user->email)->send(new IndividualUserRegisteredMail($user));
         } elseif ($user->type == 'organisation') {
             Mail::to($user->email)->send(new OrgUserRegisteredMail($user));
-        }elseif ($user->type == 'superadmin') {
-           Mail::to($user->email)->send(new SuperAdminUserRegisteredMail($user));
+        } elseif ($user->type == 'superadmin') {
+            Mail::to($user->email)->send(new SuperAdminUserRegisteredMail($user));
         }
     }
 
@@ -118,9 +118,9 @@ class AuthController extends Controller
 
     // No need this function for updating localStorage data
     // public function getUserDataLocalUpdate($userId){
-        
+
     //     $user = User::find($userId);
-        
+
     //     return response()->json([
     //         'status' => 'success',
     //         'message' => 'User all updated data',
@@ -128,26 +128,73 @@ class AuthController extends Controller
     //     ]);
     // }
 
-    public function nameUpdate(Request $request, $userId){
-        $request->validate([
-            'name' =>'required|string|max:100',
-        ]);
-        // $id=Auth::user()->id;
-        // $id = Auth::id();
-        $user = User::where('id', $userId)->first();
-        $user->name = $request->name;
-        $user->save();
+    // public function nameUpdate(Request $request, $userId){
+    //     $request->validate([
+    //         'name' =>'required|string|max:100',
+    //     ]);
+    //     // $id=Auth::user()->id;
+    //     // $id = Auth::id();
+    //     $user = User::where('id', $userId)->first();
+    //     $user->name = $request->name;
+    //     $user->save();
 
-        return response()->json([
-           'status' => true,
-           'message' => 'Name updated successfully',
-            'data' => $user
+    //     return response()->json([
+    //        'status' => true,
+    //        'message' => 'Name updated successfully',
+    //         'data' => $user
+    //     ]);
+    // }
+
+
+    public function nameUpdate(Request $request, $userId)
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
         ]);
+
+        try {
+            // Find the user or throw a 404 error if not found
+            $user = User::findOrFail($userId);
+
+            // Optional: Ensure only authorized users can update their name (add your own authorization logic here)
+            // if (auth()->id() !== $user->id) {
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => 'Unauthorized access',
+            //     ], 403); // 403 Forbidden status
+            // }
+
+            // Update the user's name
+            $user->name = $validated['name'];
+            $user->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Name updated successfully',
+                'data' => $user
+            ], 200); // 200 OK status
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found',
+            ], 404); // 404 Not Found status
+        } catch (\Exception $e) {
+            // Handle any other exception
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while updating the name',
+                'error' => $e->getMessage(),
+            ], 500); // 500 Internal Server Error status
+        }
     }
 
-    public function usernameUpdate(Request $request, $userId){
+
+    public function usernameUpdate(Request $request, $userId)
+    {
         $request->validate([
-            'username' =>'required|string|max:30',
+            'username' => 'required|string|max:30',
         ]);
         // $id=Auth::user()->id;
         // $id = Auth::id();
@@ -156,15 +203,16 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-           'status' => true,
-           'message' => 'Username updated successfully',
+            'status' => true,
+            'message' => 'Username updated successfully',
             'data' => $user
         ]);
     }
 
-    public function userEmailUpdate(Request $request, $userId){
+    public function userEmailUpdate(Request $request, $userId)
+    {
         $request->validate([
-            'email' =>'required|string|max:100',
+            'email' => 'required|string|max:100',
         ]);
 
         $user = User::where('id', $userId)->first();
@@ -172,12 +220,12 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-           'status' => true,
-           'message' => 'Email updated successfully',
+            'status' => true,
+            'message' => 'Email updated successfully',
             'data' => $user
         ]);
     }
-    
+
 
     // Method to handle logout process
     public function logout(Request $request)

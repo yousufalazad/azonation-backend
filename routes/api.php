@@ -75,7 +75,7 @@ Route::post('address', [AddressController::class, 'store']);
 Route::put('address/{userId}', [AddressController::class, 'update']);
 
 
-//API for org phone number
+//API for phone number
 Route::get('phone-number/{userId}', [PhoneNumberController::class, 'show']);
 Route::put('phone-number/{userId}', [PhoneNumberController::class, 'update']);
 
