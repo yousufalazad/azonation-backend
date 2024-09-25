@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use App\Models\PhoneNumber;
+use App\Models\DialingCode;
 use Illuminate\Http\Request;
 
 class PhoneNumberController extends Controller
@@ -39,10 +40,10 @@ class PhoneNumberController extends Controller
     public function show($userId)
     {
         $PhoneNumber = PhoneNumber::where('phone_numbers.user_id', $userId)
-        ->leftJoin('dialing_codes', 'phone_numbers.dialing_code_id', '=', 'dialing_codes.country_id') // Left join addresses table
+        ->leftJoin('dialing_codes', 'phone_numbers.dialing_code_id', '=', 'dialing_codes.id') // Left join addresses table
         ->select(
             'phone_numbers.*',
-            'dialing_codes.*'
+            'dialing_codes.dialing_code'
         )->first();
         return response()->json([
             'status' => true,
@@ -60,6 +61,22 @@ class PhoneNumberController extends Controller
         //
     }
 
+    public function getAllDialingCodes(){
+        
+        $allDialingCodes = DialingCode::leftJoin('countries', 'dialing_codes.country_id', '=', 'countries.id')
+        ->select(
+            'dialing_codes.country_id',
+            'dialing_codes.dialing_code',
+            'countries.country_name'
+        )
+        ->get();
+
+        return response()->json([
+            'status'  => true,
+            'data'    => $allDialingCodes,
+        ], 200);
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -68,9 +85,9 @@ class PhoneNumberController extends Controller
         // Validate the request data
         $validatedData = $request->validate([
             'dialing_code_id' => 'nullable|integer',
-            'phone_number' => 'nullable|integer',
-            'phone_type' => 'nullable',
-            'status' => 'nullable|boolean',
+            'phone_number' => 'nullable',
+            'phone_type' => 'nullable|integer',
+            'status' => 'nullable|integer',
             
         ]);
 

@@ -78,6 +78,7 @@ Route::put('address/{userId}', [AddressController::class, 'update']);
 //API for phone number
 Route::get('phone-number/{userId}', [PhoneNumberController::class, 'show']);
 Route::put('phone-number/{userId}', [PhoneNumberController::class, 'update']);
+Route::get('dialing-codes', [PhoneNumberController::class, 'getAllDialingCodes']);
 
 
 //Committee
