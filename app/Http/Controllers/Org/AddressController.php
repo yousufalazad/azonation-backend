@@ -59,8 +59,13 @@ class AddressController extends Controller
      */
     public function show($userId)
     {
-        $address = Address::where('user_id', $userId)->first();
-
+        $address = Address::where('addresses.user_id', $userId)
+        ->leftJoin('countries', 'addresses.country_id', '=', 'countries.id')
+        ->select(
+            'addresses.*',
+            'countries.country_name'
+        )
+        ->first();
         if ($address) {
             return response()->json([
                 'status' => true,
@@ -72,6 +77,17 @@ class AddressController extends Controller
                 'message' => 'Address not found'
             ], 404);
         }
+
+        // $PhoneNumber = PhoneNumber::where('phone_numbers.user_id', $userId)
+        // ->leftJoin('dialing_codes', 'phone_numbers.dialing_code_id', '=', 'dialing_codes.country_id') // Left join addresses table
+        // ->select(
+        //     'phone_numbers.*',
+        //     'dialing_codes.*'
+        // )->first();
+        // return response()->json([
+        //     'status' => true,
+        //     'data' => $PhoneNumber
+        // ]);
     }
 
 
