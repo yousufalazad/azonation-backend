@@ -47,35 +47,35 @@ class OrgMemberListController extends Controller
     }
 
     public function search(Request $request)
-{
-    $query = $request->input('query');
+    {
+        $query = $request->input('query');
 
-    $results = User::where('type', 'individual') // Filter by user type
-        ->where(function ($q) use ($query) { // Group search conditions
-            $q->where('azon_id', 'like', "%{$query}%")
-                ->orWhere('name', 'like', "%{$query}%")
-                ->orWhere('username', 'like', "%{$query}%")
-                ->orWhere('email', 'like', "%{$query}%")
-                ->orWhereRaw("CONCAT(dialing_codes.dialing_code, phone_numbers.phone_number) LIKE ?", ["%{$query}%"]); // Search by full phone number
-        })
-        ->leftJoin('addresses', 'addresses.user_id', '=', 'users.id') // Left join addresses table
-        ->leftJoin('countries', 'countries.id', '=', 'addresses.country_id') // Left join countries table
-        ->leftJoin('phone_numbers', 'phone_numbers.user_id', '=', 'users.id') // Left join phone_numbers table
-        ->leftJoin('dialing_codes', 'dialing_codes.id', '=', 'phone_numbers.dialing_code_id') // Left join dialing_codes table
-        ->select(
-            'users.*',
-            'addresses.city',
-            'countries.country_name',
-            'dialing_codes.dialing_code',
-            'phone_numbers.phone_number'
-        )
-        ->get();
+        $results = User::where('type', 'individual') // Filter by user type
+            ->where(function ($q) use ($query) { // Group search conditions
+                $q->where('azon_id', 'like', "%{$query}%")
+                    ->orWhere('name', 'like', "%{$query}%")
+                    ->orWhere('username', 'like', "%{$query}%")
+                    ->orWhere('email', 'like', "%{$query}%")
+                    ->orWhereRaw("CONCAT(dialing_codes.dialing_code, phone_numbers.phone_number) LIKE ?", ["%{$query}%"]); // Search by full phone number
+            })
+            ->leftJoin('addresses', 'addresses.user_id', '=', 'users.id') // Left join addresses table
+            ->leftJoin('countries', 'countries.id', '=', 'addresses.country_id') // Left join countries table
+            ->leftJoin('phone_numbers', 'phone_numbers.user_id', '=', 'users.id') // Left join phone_numbers table
+            ->leftJoin('dialing_codes', 'dialing_codes.id', '=', 'phone_numbers.dialing_code_id') // Left join dialing_codes table
+            ->select(
+                'users.*',
+                'addresses.city',
+                'countries.country_name',
+                'dialing_codes.dialing_code',
+                'phone_numbers.phone_number'
+            )
+            ->get();
 
-    return response()->json([
-        'status' => true,
-        'data' => $results
-    ]);
-}
+        return response()->json([
+            'status' => true,
+            'data' => $results
+        ]);
+    }
 
 
     // public function search(Request $request)
