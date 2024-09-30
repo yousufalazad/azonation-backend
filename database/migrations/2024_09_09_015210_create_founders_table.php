@@ -20,6 +20,10 @@ return new class extends Migration
                 ->constrained('users')
                 ->onDelete('cascade'); // Cascade on delete to remove associated founders
 
+                $table->foreignId('founder_user_id')
+                ->constrained('users')
+                ->onDelete('cascade'); 
+
             // Founder details
             $table->string('name')->nullable(); // Optional name of the founder
             $table->string('designation')->nullable(); // Optional designation of the founder
