@@ -14,6 +14,7 @@ use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Org\FounderController;
 use App\Http\Controllers\Org\OrgProfileController;
 
 //API for auth
@@ -98,6 +99,13 @@ Route::get('org-event-list/{userId}', [OrgEventController::class, 'index']);
 //Project
 Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
 Route::post('create-project', [OrgProjectController::class, 'store']);
-Route::put('update-project/{id}', [OrgProjectController::class, 'update']);
+Route::put('update-project/{userId}', [OrgProjectController::class, 'update']);
+
+// Founder
+Route::post('create-founder', [FounderController::class, 'store']);
+Route::get('get-founder/{userId}', [FounderController::class, 'index']);
+Route::put('update-founder/{userId}', [FounderController::class, 'update']);
+
+
 
 //API for superadmin
