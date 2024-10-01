@@ -127,9 +127,40 @@ class FounderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Founder $founder)
+    // public function update(Request $request, Founder $founder)
+    // {
+    //     //
+    // }
+
+    public function update(Request $request, $id)
     {
-        //
+        // Validate the incoming request
+        $request->validate([
+            'designation' => 'string|max:50',
+        ]);
+
+        try {
+            // Find the founder by ID
+            $founder = Founder::findOrFail($id);
+
+            // Update the founder's designation
+            $founder->designation = $request->input('designation');
+            $founder->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Founder designation updated successfully.',
+                'data' => $founder
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Handle the error and send response
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update founder designation.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

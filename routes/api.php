@@ -104,7 +104,7 @@ Route::put('update-project/{userId}', [OrgProjectController::class, 'update']);
 // Founder
 Route::post('create-founder', [FounderController::class, 'store']);
 Route::get('get-founder/{userId}', [FounderController::class, 'index']);
-Route::put('update-founder/{userId}', [FounderController::class, 'update']);
+Route::put('update-founder/{id}', [FounderController::class, 'update']);
 
 
 
