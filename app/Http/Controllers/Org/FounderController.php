@@ -61,8 +61,8 @@ class FounderController extends Controller
         $validated = $request->validate([
             'user_id' => 'exists:users,id',
             'founder_user_id' => 'nullable',
-            'name' => 'string',
-            'designation' => 'string',
+            'name' => 'string|max:50',
+            'designation' => 'string|max:50',
             ]);
 
         $founder = Founder::create([
@@ -136,6 +136,7 @@ class FounderController extends Controller
     {
         // Validate the incoming request
         $request->validate([
+            'name' => 'string|max:50',
             'designation' => 'string|max:50',
         ]);
 
@@ -144,6 +145,7 @@ class FounderController extends Controller
             $founder = Founder::findOrFail($id);
 
             // Update the founder's designation
+            $founder->name = $request->input('name');
             $founder->designation = $request->input('designation');
             $founder->save();
 
