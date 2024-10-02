@@ -13,6 +13,21 @@ return new class extends Migration
     {
         Schema::create('time_zone_setups', function (Blueprint $table) {
             $table->id();
+
+            // Time zone identifier (e.g., 'America/New_York', 'UTC')
+            $table->string('time_zone')
+                  ->comment('The name of the time zone (e.g., America/New_York, UTC)');
+
+            // Offset from UTC (e.g., '-05:00' for New York during standard time)
+            $table->string('offset')
+                  ->comment('The UTC offset for the time zone (e.g., -05:00)');
+
+            // Optional description field
+            $table->text('description')
+                  ->nullable()
+                  ->comment('Optional description or notes about the time zone');
+
+            // Timestamps for created_at and updated_at
             $table->timestamps();
         });
     }

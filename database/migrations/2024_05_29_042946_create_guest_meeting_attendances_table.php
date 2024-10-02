@@ -13,18 +13,37 @@ return new class extends Migration
     {
         Schema::create('guest_meeting_attendances', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('meeting_id'); // Foreign key to meetings table
-            $table->string('guest_name')->nullable();
-            $table->string('description')->nullable();
-            $table->tinyInteger('attendance_type')->nullable()->default(0); //0=null, 1=in_person, 2=remote, 3=hybrid
-            $table->date('date')->nullable();
-            $table->date('time')->nullable();
-            $table->string('note')->nullable();
-            $table->tinyInteger('status')->nullable()->default(0);
-            $table->timestamps();
 
-            // Define foreign key constraint
-           $table->foreign('meeting_id')->references('id')->on('meetings')->onDelete('cascade');
+            // Foreign key to the meetings table using foreignId and constrained
+            $table->foreignId('meeting_id')
+                  ->constrained('meetings')
+                  ->cascadeOnUpdate()
+                  ->cascadeOnDelete()
+                  ->comment('Foreign key referencing the meetings table');
+
+            // Guest details and meeting attendance information
+            $table->string('guest_name')->nullable()->comment('Name of the guest attending the meeting');
+            $table->text('description')->nullable()->comment('Description or details about the guest');
+            
+            // Attendance type: 0 = null, 1 = in_person, 2 = remote, 3 = hybrid
+            $table->enum('attendance_type', [0, 1, 2, 3])
+                  ->default(0)
+                  ->nullable()
+                  ->comment('Attendance type: 0 = null, 1 = in_person, 2 = remote, 3 = hybrid');
+
+            // Date and time of attendance
+            $table->date('date')->nullable()->comment('Date of guest attendance');
+            $table->time('time')->nullable()->comment('Time of guest attendance');
+
+            // Notes and status
+            $table->text('note')->nullable()->comment('Additional notes regarding the guest attendance');
+            $table->enum('status', [0, 1])
+                  ->default(0)
+                  ->nullable()
+                  ->comment('Attendance status: 0 = inactive, 1 = active');
+
+            // Timestamps for created_at and updated_at
+            $table->timestamps();
         });
     }
 

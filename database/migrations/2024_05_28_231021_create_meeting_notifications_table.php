@@ -13,19 +13,27 @@ return new class extends Migration
     {
         Schema::create('meeting_notifications', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('meeting_id'); // Foreign key to meeting table
-            $table->boolean('in_app_notification')->nullable();
-            $table->boolean('app_inbox')->nullable();
-            $table->boolean('email')->nullable();
-            $table->boolean('mobile_sms')->nullable();
-            $table->boolean('whatsApp')->nullable();
-            $table->boolean('other')->nullable();
-            $table->date('date')->nullable();
+
+            // Foreign key to the meetings table using foreignId and constrained
+            $table->foreignId('meeting_id')
+                  ->constrained('meetings')
+                  ->cascadeOnUpdate()
+                  ->cascadeOnDelete()
+                  ->comment('Foreign key referencing the meetings table');
+
+            // Notification channels
+            $table->boolean('in_app_notification')->default(false)->comment('Whether an in-app notification is sent');
+            $table->boolean('app_inbox')->default(false)->comment('Whether the notification is sent to app inbox');
+            $table->boolean('email')->default(false)->comment('Whether an email notification is sent');
+            $table->boolean('mobile_sms')->default(false)->comment('Whether an SMS notification is sent');
+            $table->boolean('whatsapp')->default(false)->comment('Whether a WhatsApp notification is sent');
+            $table->boolean('other')->default(false)->comment('Any other notification method');
+
+            // Notification date
+            $table->date('date')->nullable()->comment('The date the notification is sent');
+
+            // Timestamps for created_at and updated_at
             $table->timestamps();
-
-            // Define foreign key constraint
-           $table->foreign('meeting_id')->references('id')->on('meetings')->onDelete('cascade');
-
         });
     }
 

@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('meeting_attendance_types', function (Blueprint $table) {
             $table->id();
+
+            // Name of the attendance type (e.g., in-person, remote, hybrid)
+            $table->string('name')
+                  ->unique()
+                  ->comment('Unique name representing the meeting attendance type');
+
+            // Timestamps for created_at and updated_at
             $table->timestamps();
         });
     }
