@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('meeting_conduct_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+
+            // Name of the conduct type (e.g., in-person, virtual)
+            $table->string('name')
+                  ->unique()
+                  ->comment('Unique name representing the meeting conduct type');
+
+            // Timestamps for created_at and updated_at
             $table->timestamps();
         });
     }

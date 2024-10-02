@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('membership_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); //0=not selected, Honorary Member, Lifetime Member, General Member, Associate Member, Temporary Member, Prospective Member, Not A Member
+
+            // Name of the membership type (e.g., Honorary Member, Lifetime Member, General Member)
+            $table->string('name')
+                  ->unique()
+                  ->comment('Unique name representing the membership type: Honorary Member, Lifetime Member, General Member, Associate Member, Temporary Member, Prospective Member, Not A Member');
+
+            // Timestamps for created_at and updated_at
             $table->timestamps();
         });
     }

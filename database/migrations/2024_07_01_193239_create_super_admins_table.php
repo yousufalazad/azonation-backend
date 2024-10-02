@@ -13,19 +13,57 @@ return new class extends Migration
     {
         Schema::create('super_admins', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id'); // Foreign key to users table
-            $table->bigInteger('azon_id')->nullable(); // Creates 'azon_id' column as a custom auto-incrementing column, like Azon ID
-            $table->string('admin_name')->nullable();
-            $table->string('short_description')->nullable();
-            $table->string('note')->nullable();
-            $table->string('supervision')->nullable();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->tinyInteger('status')->nullable()->default(0);
+
+            // Foreign key to users table
+            $table->foreignId('user_id')
+                  ->constrained('users')
+                  ->onDelete('cascade')
+                  ->comment('Reference to the user associated with the super admin');
+
+            // Custom auto-incrementing column, like Azon ID
+            $table->bigInteger('azon_id')
+                  ->nullable()
+                  ->unique()
+                  ->comment('Custom unique identifier for the super admin');
+
+            // Name of the super admin
+            $table->string('admin_name')
+                  ->nullable()
+                  ->comment('Name of the super admin');
+
+            // Short description of the super admin
+            $table->string('short_description')
+                  ->nullable()
+                  ->comment('Short description of the super admin');
+
+            // Additional notes
+            $table->string('note')
+                  ->nullable()
+                  ->comment('Any additional notes related to the super admin');
+
+            // Supervision details
+            $table->string('supervision')
+                  ->nullable()
+                  ->comment('Details about supervision responsibilities');
+
+            // Start date of supervision
+            $table->date('start_date')
+                  ->nullable()
+                  ->comment('Start date of the super admin role');
+
+            // End date of supervision
+            $table->date('end_date')
+                  ->nullable()
+                  ->comment('End date of the super admin role');
+
+            // Status of the super admin (e.g., active, inactive)
+            $table->tinyInteger('status')
+                  ->nullable()
+                  ->default(0)
+                  ->comment('Status of the super admin (0=inactive, 1=active)');
+
+            // Timestamps for created_at and updated_at
             $table->timestamps();
- 
-           // Define foreign key constraint
-           $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
