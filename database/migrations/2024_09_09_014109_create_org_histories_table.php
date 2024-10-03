@@ -23,6 +23,7 @@ return new class extends Migration
 
             // Organization history details
             $table->string('title')->nullable(); // Optional title for the history
+            $table->string('image')->nullable(); // Optional image for the history
             $table->longText('history')->nullable(); // Detailed history of the organization
 
             // Status of the history record

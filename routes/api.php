@@ -17,6 +17,29 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Org\FounderController;
 use App\Http\Controllers\Org\OrgProfileController;
 
+use App\Http\Controllers\SuccessStoryController;
+use App\Http\Controllers\StrategicPlanController;
+use App\Http\Controllers\OrgHistoryController;
+
+// OrgHistoryController
+Route::get('/get-org-histories', [OrgHistoryController::class, 'index']);
+Route::post('/create-org-history', [OrgHistoryController::class, 'store']);
+Route::put('/update-org-history/{id}', [OrgHistoryController::class, 'update']);
+Route::delete('/delete-org-history/{id}', [OrgHistoryController::class, 'destroy']);
+
+// StrategicPlanController
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/get-strategic-plans', [StrategicPlanController::class, 'index']);
+    Route::post('/create-strategic-plan', [StrategicPlanController::class, 'store']);
+    Route::put('/update-strategic-plan/{id}', [StrategicPlanController::class, 'update']);
+    Route::delete('/delete-strategic-plan/{id}', [StrategicPlanController::class, 'destroy']);
+});
+// SuccessStoryController
+Route::get('/get-records', [SuccessStoryController::class, 'index']);
+Route::post('/create-record', [SuccessStoryController::class, 'store']);
+Route::put('/update-record/{id}', [SuccessStoryController::class, 'update']);
+Route::delete('/delete-record/{id}', [SuccessStoryController::class, 'destroy']);
+
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);

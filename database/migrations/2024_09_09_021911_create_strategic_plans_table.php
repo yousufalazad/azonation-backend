@@ -22,6 +22,8 @@ return new class extends Migration
 
             // Strategic plan details
             $table->string('title')->nullable(); // Title of the strategic plan
+            $table->string('image')->nullable(); // image of the strategic plan
+
             $table->longText('plan')->nullable(); // Detailed content of the strategic plan
             $table->date('start_date')->nullable(); // Start date of the plan
             $table->date('end_date')->nullable(); // End date of the plan
