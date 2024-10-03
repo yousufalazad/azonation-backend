@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\SuccessStory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class SuccessStoryController extends Controller
 {
@@ -34,26 +33,18 @@ class SuccessStoryController extends Controller
         $validated = $request->validate([
             'user_id' => 'required',
             'title' => 'required|string|max:255',
-            'story' => 'required|string',
+            'story' => 'required|string|max:5000',
             'status' => 'required|boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validate image file
         ]);
 
         try {
-            // Handle image upload
-            $imagePath = null;
-            if ($request->hasFile('image')) {
-                // Save image to storage and get the path
-                $imagePath = $request->file('image')->store('images', 'public');
-            }
-
             // Create a new success story
             $story = new SuccessStory();
             $story->user_id = $validated['user_id']; // Save the user who is adding the story
             $story->title = $validated['title'];
             $story->story = $validated['story'];
             $story->status = $validated['status'];
-            $story->image_path = $imagePath; // Store the image path in the database
+            // image
             $story->save();
 
             return response()->json([
@@ -77,7 +68,6 @@ class SuccessStoryController extends Controller
             'title' => 'required|string|max:255',
             'story' => 'required|string',
             'status' => 'required|boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validate image file
         ]);
 
         try {
@@ -89,18 +79,6 @@ class SuccessStoryController extends Controller
                     'status' => false,
                     'message' => 'Record not found.'
                 ], 404);
-            }
-
-            // Handle image upload
-            if ($request->hasFile('image')) {
-                // Delete the old image if it exists
-                if ($story->image) {
-                    Storage::disk('public')->delete($story->image);
-                }
-
-                // Save the new image
-                $imagePath = $request->file('image')->store('images', 'public');
-                $story->image = $imagePath;
             }
 
             // Update story details
@@ -133,11 +111,6 @@ class SuccessStoryController extends Controller
                     'status' => false,
                     'message' => 'Record not found.'
                 ], 404);
-            }
-
-            // Delete the image from storage if it exists
-            if ($story->image_path) {
-                Storage::disk('public')->delete($story->image_path);
             }
 
             // Delete the success story

@@ -22,6 +22,7 @@ return new class extends Migration
 
             // Success story details
             $table->string('title')->nullable(); // Optional title for the success story
+            $table->string('image')->nullable(); // Optional image for the success story
             $table->longText('story')->nullable(); // Detailed success story content
 
             // Status of the success story
