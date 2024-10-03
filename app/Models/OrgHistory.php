@@ -14,7 +14,8 @@ class OrgHistory extends Model
         'title',
         'history',
         'status',
-        'image'
+        'image',
+        'document'
     ];
 
     // If you have a relationship to the user model

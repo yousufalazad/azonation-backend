@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\OrgHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class OrgHistoryController extends Controller
 {
@@ -29,6 +27,47 @@ class OrgHistoryController extends Controller
     }
 
     // Store a new organizational history record
+    // public function store(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|exists:users,id',
+    //         'title' => 'required|string|max:255',
+    //         // 'image'
+    //         'history' => 'required|string|max:10000',
+    //         'status' => 'required|boolean',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Validation failed',
+    //             'errors' => $validator->errors(),
+    //         ], 400);
+    //     }
+
+    //     try {
+    //         $orgHistory = OrgHistory::create([
+    //             'user_id' => $request->user_id,
+    //             'title' => $request->title,
+    //             'history' => $request->history,
+    //             'status' => $request->status,
+    //             // 'image' => $request->image,
+    //         ]);
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'message' => 'Organizational history created successfully.',
+    //             'data' => $orgHistory,
+    //         ], 201);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Failed to create record.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function store(Request $request)
     {
         // Validate the incoming request
@@ -38,21 +77,13 @@ class OrgHistoryController extends Controller
             'history' => 'required|string',
             'status' => 'required|boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validating image file
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Validating document file
         ]);
 
         // Handle the image upload if present
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imageFile = $request->file('image');
-            $imagePath = $imageFile->storeAs('org/logos', Carbon::now()->format('YmdHis') . '_' . $imageFile->getClientOriginalName(), 'public');
-        }
-
-        // Handle the document upload if present
-        $documentPath = null;
-        if ($request->hasFile('document')) {
-            $documentFile = $request->file('document');
-            $documentPath = $documentFile->storeAs('org/docs', Carbon::now()->format('YmdHis') . '_' . $documentFile->getClientOriginalName(), 'public');
+            // Store the image in the 'public/org_histories' directory and get the file path
+            $imagePath = $request->file('image')->store('org_histories', 'public');
         }
 
         // Create the new organization history record
@@ -62,7 +93,6 @@ class OrgHistoryController extends Controller
         $orgHistory->history = $validatedData['history'];
         $orgHistory->status = $validatedData['status'];
         $orgHistory->image = $imagePath; // Store the image path if available
-        $orgHistory->document = $documentPath; // Store the document path if available
         $orgHistory->save(); // Save the record in the database
 
         // Return a response, typically a JSON response for API-based applications
@@ -76,46 +106,46 @@ class OrgHistoryController extends Controller
     // Update an existing organizational history record
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
+        $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'history' => 'required|string',
             'status' => 'required|boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Optional validation for image
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Optional validation for document
+            // 'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Optional validation for image
         ]);
-
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+    
         try {
             $orgHistory = OrgHistory::findOrFail($id);
-
-            // Handle the image upload if present
-            if ($request->hasFile('image')) {
-                // Delete the old image if present
-                if ($orgHistory->image) {
-                    Storage::delete('public/' . $orgHistory->image);
-                }
-                $imageFile = $request->file('image');
-                $orgHistory->image = $imageFile->storeAs('org/logos', Carbon::now()->format('YmdHis') . '_' . $imageFile->getClientOriginalName(), 'public');
-            }
-
-            // Handle the document upload if present
-            if ($request->hasFile('document')) {
-                // Delete the old document if present
-                if ($orgHistory->document) {
-                    Storage::delete('public/' . $orgHistory->document);
-                }
-                $documentFile = $request->file('document');
-                $orgHistory->document = $documentFile->storeAs('org/docs', Carbon::now()->format('YmdHis') . '_' . $documentFile->getClientOriginalName(), 'public');
-            }
-
+    
+            // Check if an image was uploaded
+            // if ($request->hasFile('image')) {
+            //     $image = $request->file('image');
+            //     $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+            //     $extension = $image->getClientOriginalExtension();
+            //     $timestamp = Carbon::now()->format('YmdHis');
+            //     $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
+    
+            //     $path = $image->storeAs('org/history', $newFileName, 'public');
+            //     $orgHistory->image = $path; // Update the image path only if image is uploaded
+            // }
+    
             // Update other fields
             $orgHistory->update([
-                'user_id' => $validatedData['user_id'],
-                'title' => $validatedData['title'],
-                'history' => $validatedData['history'],
-                'status' => $validatedData['status'],
+                'user_id' => $request->user_id,
+                'title' => $request->title,
+                'history' => $request->history,
+                'status' => $request->status,
+                // 'image' => $orgHistory->image,
             ]);
-
+    
             return response()->json([
                 'status' => true,
                 'message' => 'Organizational history updated successfully.',
@@ -129,21 +159,11 @@ class OrgHistoryController extends Controller
             ], 500);
         }
     }
-
     // Delete an organizational history record
     public function destroy($id)
     {
         try {
             $orgHistory = OrgHistory::findOrFail($id);
-
-            // Delete the image and document if they exist
-            if ($orgHistory->image) {
-                Storage::delete('public/' . $orgHistory->image);
-            }
-            if ($orgHistory->document) {
-                Storage::delete('public/' . $orgHistory->document);
-            }
-
             $orgHistory->delete();
 
             return response()->json([

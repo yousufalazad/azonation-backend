@@ -25,7 +25,7 @@ class OrgProfile extends Model
         'scope_of_work',
         'organising_date',
         'foundation_date',
-        'status',
+        'status'
     ];
 
     protected $hidden=[
