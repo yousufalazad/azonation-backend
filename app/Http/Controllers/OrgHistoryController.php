@@ -35,10 +35,10 @@ class OrgHistoryController extends Controller
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
-            'history' => 'required|string',
-            'status' => 'required|boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validating image file
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Validating document file
+            'history' => 'required|string|max:20000',
+            'status' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512', // Validating image file
+            'document' => 'nullable|file|mimes:pdf,doc,docx|max:1024', // Validating document file
         ]);
 
         // Handle the image upload if present
@@ -79,10 +79,10 @@ class OrgHistoryController extends Controller
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
-            'history' => 'required|string',
-            'status' => 'required|boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Optional validation for image
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Optional validation for document
+            'history' => 'required|string|max:20000',
+            'status' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512', // Validating image file
+            'document' => 'nullable|file|mimes:pdf,doc,docx|max:1024', // Validating document file
         ]);
 
         try {
