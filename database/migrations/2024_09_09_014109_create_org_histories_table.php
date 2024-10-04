@@ -22,9 +22,10 @@ return new class extends Migration
                 ->onDelete('cascade'); // Cascade on delete to remove associated history
 
             // Organization history details
-            $table->string('title')->nullable(); // Optional title for the history
+            $table->string('title', 255)->nullable(); // Limit title to 255 characters
             $table->string('image')->nullable(); // Optional image for the history
-            $table->longText('history')->nullable(); // Detailed history of the organization
+            $table->longText('history')->nullable(); // Detailed history of the organization, limit handled in app layer
+            $table->string('document')->nullable(); // File path for the document, 1 MB limit handled in app layer
 
             // Status of the history record
             $table->tinyInteger('status')->default(0)->comment('0 = inactive, 1 = active');
