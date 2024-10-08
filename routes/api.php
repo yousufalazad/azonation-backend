@@ -20,6 +20,7 @@ use App\Http\Controllers\Org\OrgProfileController;
 use App\Http\Controllers\SuccessStoryController;
 use App\Http\Controllers\StrategicPlanController;
 use App\Http\Controllers\OrgHistoryController;
+use App\Http\Controllers\YearPlanController;
 
 // OrgHistoryController
 Route::get('/get-org-histories', [OrgHistoryController::class, 'index']);
@@ -27,13 +28,23 @@ Route::post('/create-org-history', [OrgHistoryController::class, 'store']);
 Route::put('/update-org-history/{id}', [OrgHistoryController::class, 'update']);
 Route::delete('/delete-org-history/{id}', [OrgHistoryController::class, 'destroy']);
 
-// StrategicPlanController
-Route::middleware('auth:sanctum')->group(function () {
+//Year plan
+    Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/get-year-plans', [YearPlanController::class, 'index']);
+    Route::get('/year-plan/{id}', [YearPlanController::class, 'show']);
+    Route::post('/create-year-plan', [YearPlanController::class, 'store']);
+    Route::put('/update-year-plan/{id}', [YearPlanController::class, 'update']);
+    Route::delete('/delete-year-plan/{id}', [YearPlanController::class, 'destroy']);
+});
+
+// StrategicPlan
+    Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-strategic-plans', [StrategicPlanController::class, 'index']);
     Route::post('/create-strategic-plan', [StrategicPlanController::class, 'store']);
     Route::put('/update-strategic-plan/{id}', [StrategicPlanController::class, 'update']);
     Route::delete('/delete-strategic-plan/{id}', [StrategicPlanController::class, 'destroy']);
 });
+
 // SuccessStoryController
 Route::get('/get-records', [SuccessStoryController::class, 'index']);
 Route::post('/create-record', [SuccessStoryController::class, 'store']);
