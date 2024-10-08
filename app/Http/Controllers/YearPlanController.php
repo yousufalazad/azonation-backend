@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Log; // Include Log facade
 
 class YearPlanController extends Controller
 {
+    /**
+     * Display a listing of the year plans.
+     */
     public function index()
     {
         try {
@@ -27,12 +30,11 @@ class YearPlanController extends Controller
     {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
-            // 'title' => ''required|string|max:100',',
             'start_year' => 'required|string|max:4',
             'end_year' => 'required|string|max:4',
-            'goals' => 'required|nullable|string',
+            'goals' => 'nullable|string',
             'activities' => 'nullable|string',
-            'budget' => 'numeric|min:0',
+            'budget' => 'required|numeric|min:0',
             'start_date' => 'required|date|before_or_equal:end_date',
             'end_date' => 'required|date',
             'privacy_setup_id' => 'required|integer|in:1,2,3',
@@ -44,7 +46,7 @@ class YearPlanController extends Controller
             // Convert ISO date strings to 'Y-m-d' format
            // $validatedData['start_date'] = Carbon::parse($validatedData['start_date'])->format('Y-m-d');
             //$validatedData['end_date'] = Carbon::parse($validatedData['end_date'])->format('Y-m-d');
-            
+
             $yearPlan = YearPlan::create($validatedData);
             return response()->json(['status' => true, 'message' => 'Year plan added successfully!', 'data' => $yearPlan], 201);
         } catch (\Exception $e) {
