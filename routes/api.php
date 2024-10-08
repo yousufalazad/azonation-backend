@@ -21,6 +21,24 @@ use App\Http\Controllers\SuccessStoryController;
 use App\Http\Controllers\StrategicPlanController;
 use App\Http\Controllers\OrgHistoryController;
 use App\Http\Controllers\YearPlanController;
+use App\Http\Controllers\OrgRecognitionController;
+use App\Http\Controllers\OrgAccountController;
+
+//Accounts
+
+
+// Group routes for authenticated users
+Route::middleware('auth:sanctum')->group(function () {
+    // Fetch all transactions
+    Route::get('/get-transactions', [OrgAccountController::class, 'getTransactions']);
+    // Create a new transaction
+    Route::post('/create-transaction', [OrgAccountController::class, 'createTransaction']);
+    // Update an existing transaction
+    Route::put('/update-transaction/{id}', [OrgAccountController::class, 'updateTransaction']);
+    // Delete a transaction
+    Route::delete('/delete-transaction/{id}', [OrgAccountController::class, 'deleteTransaction']);
+});
+
 
 // OrgHistoryController
 Route::get('/get-org-histories', [OrgHistoryController::class, 'index']);
@@ -35,6 +53,14 @@ Route::delete('/delete-org-history/{id}', [OrgHistoryController::class, 'destroy
     Route::post('/create-year-plan', [YearPlanController::class, 'store']);
     Route::put('/update-year-plan/{id}', [YearPlanController::class, 'update']);
     Route::delete('/delete-year-plan/{id}', [YearPlanController::class, 'destroy']);
+});
+
+// OrgRecognitionController
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/get-recognitions', [OrgRecognitionController::class, 'index']);
+    Route::post('/create-recognition', [OrgRecognitionController::class, 'store']);
+    Route::put('/update-recognition/{id}', [OrgRecognitionController::class, 'update']);
+    Route::delete('/delete-recognition/{id}', [OrgRecognitionController::class, 'destroy']);
 });
 
 // StrategicPlan

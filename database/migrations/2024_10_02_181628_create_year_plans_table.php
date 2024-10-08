@@ -50,10 +50,10 @@ return new class extends Migration
                 ->comment('The status of the year plan.');
 
             // Start and end dates of the year plan
-            $table->timestamp('start_date')
+            $table->date('start_date')
                 ->nullable()
                 ->comment('The start date of the year plan.');
-            $table->timestamp('end_date')
+            $table->date('end_date')
                 ->nullable()
                 ->comment('The end date of the year plan.');
 

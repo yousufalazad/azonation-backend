@@ -8,4 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class OrgRecognition extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'title',
+        'description',
+        'recognition_date',
+        'privacy_setup_id',
+        'status',
+    ];
 }
