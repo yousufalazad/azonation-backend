@@ -19,6 +19,12 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->comment('Creator or responsible user for the transaction.');
 
+            // Foreign key referencing the account_funds table
+            $table->foreignId('account_fund_id')
+            ->constrained('account_funds')
+            ->onDelete('cascade')
+            ->comment('Relation with fund for every transaction.');
+
             $table->date('transaction_date');
             
             // Enum for transaction type (income or expense)
