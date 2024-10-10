@@ -32,6 +32,8 @@ class OrgAccountController extends Controller
     {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
+            'account_fund_id' => 'required|exists:account_funds,id',
+            //'transaction_id' => 'required|numeric',
             'transaction_date' => 'required|date',
             'transaction_type' => 'required|in:income,expense',
             'transaction_amount' => 'required|numeric|min:0',
@@ -41,6 +43,7 @@ class OrgAccountController extends Controller
         try {
             $transaction = OrgAccount::create([
                 'user_id' => $validatedData['user_id'],
+                'account_fund_id' => $validatedData['account_fund_id'],
                 'transaction_date' => $validatedData['transaction_date'],
                 'transaction_type' => $validatedData['transaction_type'],
                 'transaction_amount' => $validatedData['transaction_amount'],
@@ -65,6 +68,8 @@ class OrgAccountController extends Controller
     {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
+            'account_fund_id' => 'required|exists:account_funds,id',
+            //'transaction_id' => 'required|numeric',
             'transaction_date' => 'required|date',
             'transaction_type' => 'required|in:income,expense',
             'transaction_amount' => 'required|numeric|min:0',
