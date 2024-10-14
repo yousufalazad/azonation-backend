@@ -231,128 +231,13 @@ class AuthController extends Controller
         ]);
     }
 
-    //     public function updatePassword(Request $request, $userId)
-    // {
-    //     // Validate the request
-    //     $validator = Validator::make($request->all(), [
-    //         'old_password' => 'required|string',
-    //         'password' => 'required|string|min:8|confirmed', // Ensure password confirmation matches
-    //     ]);
 
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'errors' => $validator->errors(),
-    //         ], 422);
-    //     }
-
-    //     try {
-    //        // Check if the authenticated user matches the $userId or is authorized to update
-    //         if (auth()->id() != $userId) {
-    //             return response()->json([
-    //                 'status' => false,
-    //                 'message' => 'Unauthorized to update this user\'s password.',
-    //             ], 403); // Forbidden status code
-    //         }
-
-    //         // Find the user by ID
-    //         $user = User::findOrFail($userId); // Throws an exception if user is not found
-
-    //         // Check if the old password matches
-    //         if (!Hash::check($request->old_password, $user->password)) {
-    //             return response()->json([
-    //                 'status' => false,
-    //                 'message' => 'The current password is incorrect.',
-    //             ], 422);
-    //         }
-
-    //         // Update the user's password
-    //         $user->password = Hash::make($request->password);
-    //         $user->save();
-
-    //         return response()->json([
-    //             'status' => true,
-    //             'message' => 'Password updated successfully.',
-    //         ], 200);
-
-    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-    //         // Handle user not found
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'User not found.',
-    //         ], 422);
-    //     } catch (\Exception $e) {
-    //         // Handle any other exception that occurs during the process
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'An error occurred while updating the password: ' . $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
-    //----------------------------------------------------------------
-
-    //Password update
-    // public function updatePassword(Request $request, $userId)
-    // {
-    //     // Validate the request
-    //     $validator = Validator::make($request->all(), [
-    //         'password' => 'required|string|min:8',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'errors' => $validator->errors(),
-    //         ], 422);
-    //     }
-
-    //     try {
-    //         // Find the user by ID
-    //         $user = User::findOrFail($userId); // This will throw an exception if the user is not found
-
-    //         // Update the user's password
-    //         $user->password = Hash::make($request->password);
-    //         $user->save();
-
-    //         return response()->json([
-    //             'status' => true,
-    //             'message' => 'Password updated successfully.',
-    //         ], 200);
-    //     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-    //         // Handle user not found
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'User not found.',
-    //         ], 422);
-    //     } catch (\Exception $e) {
-    //         // Handle any other exception that occurs during the process
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'An error occurred while updating the password: ' . $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
-    //----------------------------------------------------------------
-    //not checking $userId vs auth()
+    // Password update
     public function updatePassword(Request $request, $userId)
     {
         // Validate the request
-        // $validator = Validator::make($request->all(), [
-        //     'old_password' => 'required|string|min:8',
-        //     'password' => 'required|string|min:8|confirmed', // Use 'confirmed' to ensure password confirmation matches
-        // ]);
-        // if ($validator->fails()) {
-        //     return $this->error('Validation Error', $validator->errors());
-        // }
-
-
-        // Validate the incoming request
         $validator = Validator::make($request->all(), [
-            'old_password' => 'required|string|min:8',
-            'password' => 'required|confirmed|string|min:8',
-            //|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|regex:/[!@#$%^&*(),.?":{}|<>]/
+            'password' => 'required|string|min:8',
         ]);
 
         if ($validator->fails()) {
@@ -364,20 +249,7 @@ class AuthController extends Controller
 
         try {
             // Find the user by ID
-            $user = User::findOrFail($userId);
-
-            // Check if the old password matches
-            // if (!Hash::check($request->old_password, $user->password)) {
-            //     return response()->json(['errors' => ['oldPassword' => ['Current password does not match.']]], 422);
-            // }
-
-            // Check if the old password matches
-            if (!Hash::check($request->old_password, $user->password)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'The current password is incorrect.',
-                ], 422);
-            }
+            $user = User::findOrFail($userId); // This will throw an exception if the user is not found
 
             // Update the user's password
             $user->password = Hash::make($request->password);
@@ -401,26 +273,6 @@ class AuthController extends Controller
             ], 500);
         }
     }
-
-    //----------------------------------------------------------------
-    //with auth()->user() (need to test this code for auth())
-    //     public function updatePassword(Request $request)
-    // {
-    //     $request->validate([
-    //         'old_password' => 'required',
-    //         'password' => 'required|string|min:8|confirmed',  // Include new password validation
-    //     ]);
-
-    //     // Check if old password is correct
-    //     if (!Hash::check($request->old_password, auth()->user()->password)) {
-    //         return response()->json(['status' => false, 'message' => 'Current password is incorrect.'], 422);
-    //     }
-
-    //     // Update the password
-    //     auth()->user()->update(['password' => Hash::make($request->password)]);
-
-    //     return response()->json(['status' => true, 'message' => 'Password updated successfully.']);
-    // }
 
     // Method to handle logout process
     public function logout(Request $request)
