@@ -198,12 +198,17 @@ class AuthController extends Controller
 
     public function usernameUpdate(Request $request, $userId)
     {
+        // Validate that the username is required, a string, max 30 characters, and unique
         $request->validate([
-            'username' => 'required|string|max:30',
+            'username' => 'required|string|max:30|unique:users,username,' . $userId,
         ]);
         // $id=Auth::user()->id;
         // $id = Auth::id();
-        $user = User::where('id', $userId)->first();
+        
+        // Retrieve the user by ID
+        $user = User::findOrFail($userId);
+
+        // Update the username
         $user->username = $request->username;
         $user->save();
 
@@ -350,7 +355,8 @@ class AuthController extends Controller
 
         // Validate the incoming request
         $validator = Validator::make($request->all(), [
-            'old_password' => 'required|string|min:8',
+            // 'old_password' => 'required|string|min:8',
+            'old_password' => 'required',
             'password' => 'required|confirmed|string|min:8',
             //|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|regex:/[!@#$%^&*(),.?":{}|<>]/
         ]);
