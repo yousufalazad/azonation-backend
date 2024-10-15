@@ -81,8 +81,8 @@ Route::delete('/delete-record/{id}', [SuccessStoryController::class, 'destroy'])
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
-Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
 Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
+Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
 Route::put('update-password/{userId}', [AuthController::class, 'updatePassword']);
 
 //User data
