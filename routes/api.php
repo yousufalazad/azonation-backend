@@ -24,6 +24,10 @@ use App\Http\Controllers\YearPlanController;
 use App\Http\Controllers\OrgRecognitionController;
 use App\Http\Controllers\OrgAccountController;
 
+//Org office record
+use App\Http\Controllers\OrgOfficeRecordController;
+
+
 //Accounts
 
 
@@ -115,6 +119,12 @@ Route::get('/org-profile-data/{userId}', [OrgProfileController::class, 'index'])
 Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update']);
 Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
 Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
+
+//Office record
+Route::get('/get-office-records', [OrgOfficeRecordController::class, 'index']);
+Route::post('/create-office-record', [OrgOfficeRecordController::class, 'store']);
+Route::put('/update-office-record/{id}', [OrgOfficeRecordController::class, 'update']);
+Route::delete('/delete-office-record/{id}', [OrgOfficeRecordController::class, 'destroy']);
 
 
 //API for org membership
