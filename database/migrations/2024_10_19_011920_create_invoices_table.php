@@ -20,7 +20,7 @@ return new class extends Migration
 
             // Foreign key linking to the 'billings' table
             $table->foreignId('billing_id')
-                ->constrained('billings')
+                ->constrained()
                 ->onDelete('cascade')
                 ->comment('Foreign key linking to the billings table, cascades on delete');
 
@@ -61,7 +61,7 @@ return new class extends Migration
             //Hidden admin notes
             $table->string('hidden_admin_note')->comment('Hidden admin note for understanding');
 
-            $table->timestamps(); 
+            $table->timestamps();
         });
     }
 

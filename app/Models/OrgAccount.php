@@ -9,14 +9,14 @@ class OrgAccount extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'transaction_id',
         'user_id',
-        //'transaction_id',
+        'title',
         'account_fund_id',
         'transaction_date',
         'transaction_type',
         'transaction_amount',
         'balance',
-        'title',
         'description'
     ];
 

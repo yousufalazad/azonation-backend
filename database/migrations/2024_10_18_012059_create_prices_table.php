@@ -14,14 +14,15 @@ return new class extends Migration
     {
         Schema::create('prices', function (Blueprint $table) {
             $table->id();
-            
+
             // Foreign key to the 'packages' table
             $table->foreignId('package_id')
-                  ->constrained()
-                  ->onDelete('set null')
-                  ->unique() // Ensure that each package_id can only appear once
-                  ->comment('Foreign key linking to the packages table, cascades on delete');
-            
+                ->nullable()
+                ->constrained()
+                ->onDelete('set null')
+                ->unique() // Ensure that each package_id can only appear once
+                ->comment('Foreign key linking to the packages table, cascades on delete');
+
             // Tier pricing with notes on corresponding regions
             $table->decimal('tier1', 10, 2)->comment('Price for Tier 1: Rest of the World');
             $table->decimal('tier2', 10, 2)->comment('Price for Tier 2: UK');
@@ -40,10 +41,10 @@ return new class extends Migration
             $table->decimal('tier15', 10, 2)->comment('Price for Tier 15: Middle East');
             $table->decimal('tier16', 10, 2)->comment('Price for Tier 16: Asia (excluding Bangladesh, China and India)');
             $table->decimal('tier17', 10, 2)->comment('Price for Tier 17: Africa');
-            
+
             // Status column to indicate if the pricing for the package is currently active
             $table->boolean('status')->default(true)->comment('Indicates if the pricing is active (true) or inactive (false)');
-            
+
             // Timestamps for created_at and updated_at
             $table->timestamps(); //Timestamps for when the price entry was created and last updated
         });

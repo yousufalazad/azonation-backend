@@ -17,10 +17,11 @@ return new class extends Migration
 
             // Foreign key to the 'prices' table
             $table->foreignId('price_id')
-                  ->constrained()
-                  ->onDelete('set null')
-                  ->unique() // Ensure that each price_id can only appear once
-                  ->comment('Foreign key linking to the prices table, cascades on delete');
+                ->nullable()
+                ->constrained()
+                ->onDelete('set null')
+                ->unique() // Ensure that each price_id can only appear once
+                ->comment('Foreign key linking to the prices table, cascades on delete');
 
             // Name of the currency (e.g., US Dollar, British Pound)
             $table->string('name')->comment('Full name of the currency (e.g., US Dollar, British Pound)');

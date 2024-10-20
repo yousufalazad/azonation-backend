@@ -23,6 +23,7 @@ use App\Http\Controllers\OrgHistoryController;
 use App\Http\Controllers\YearPlanController;
 use App\Http\Controllers\OrgRecognitionController;
 use App\Http\Controllers\OrgAccountController;
+use App\Http\Controllers\OrgReportController;
 
 //Org office record
 use App\Http\Controllers\OrgOfficeRecordController;
@@ -105,6 +106,10 @@ Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrg
 Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show']);
 
 //ORG 
+
+
+Route::get('/reports', [OrgReportController::class, 'index']);
+
 
 //Notification
 // Fetch notifications for a specific user
