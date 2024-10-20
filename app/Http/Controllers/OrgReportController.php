@@ -2,40 +2,75 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrgAccount;
-use App\Models\OrgReport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class OrgReportController extends Controller
 {
-    public function index()
+    public function getIncomeReport(Request $request)
+    {
+        try {
+            // Get the current date and subtract 12 months
+            $endDate = Carbon::now();
+            $startDate = $endDate->copy()->subMonths(12);
+
+            // Fetch income data for the past 12 months grouped by year and month
+            $incomeData = DB::table('org_accounts')
+                ->select(
+                    DB::raw('YEAR(transaction_date) as year'),
+                    DB::raw('MONTH(transaction_date) as month'),
+                    DB::raw('SUM(transaction_amount) as total_income')
+                )
+                ->whereBetween('transaction_date', [$startDate, $endDate])
+                ->groupBy('year', 'month')
+                ->orderByRaw('YEAR(transaction_date) ASC, MONTH(transaction_date) ASC') // Order by year and month
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $incomeData
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error fetching report data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getExpenseReport(Request $request)
 {
     try {
-        // Get today's date and date 12 months ago
-        $startDate = Carbon::now()->subMonths(12);
+        // Get the current date and subtract 12 months
         $endDate = Carbon::now();
+        $startDate = $endDate->copy()->subMonths(12);
 
-        // Fetch the total income per month over the past 12 months
-        $incomeReports = OrgAccount::selectRaw('YEAR(`transaction_date`) as year, MONTH(`transaction_date`) as month, SUM(`transaction_amount`) as total_income')
-            ->where('transaction_type', 'income')
+        // Fetch expense data for the past 12 months grouped by year and month
+        $expenseData = DB::table('org_accounts')
+            ->select(
+                DB::raw('YEAR(transaction_date) as year'),
+                DB::raw('MONTH(transaction_date) as month'),
+                DB::raw('SUM(transaction_amount) as total_expense') // Sum for expenses
+            )
+            ->where('transaction_type', 'expense') // Filter for expenses
             ->whereBetween('transaction_date', [$startDate, $endDate])
-            ->groupByRaw('YEAR(`transaction_date`), MONTH(`transaction_date`)')
-            ->orderByRaw('YEAR(`transaction_date`), MONTH(`transaction_date`)')
+            ->groupBy('year', 'month')
+            ->orderByRaw('YEAR(transaction_date) ASC, MONTH(transaction_date) ASC') // Order by year and month
             ->get();
 
-        // If data is successfully fetched, return it with a success status
         return response()->json([
             'status' => true,
-            'data' => $incomeReports,
-        ], 200);
+            'data' => $expenseData
+        ]);
 
     } catch (\Exception $e) {
-        // Handle any errors and return a failure response
         return response()->json([
             'status' => false,
-            'message' => 'Failed to fetch income report data.',
-            'error' => $e->getMessage(), // Optionally, include the exception message for debugging
+            'message' => 'Error fetching report data',
+            'error' => $e->getMessage()
         ], 500);
     }
 }

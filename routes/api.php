@@ -107,8 +107,10 @@ Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show'])
 
 //ORG 
 
+//Reporting
+Route::get('/reports', [OrgReportController::class, 'getIncomeReport']);
+Route::get('/org-expense-reports', [OrgReportController::class, 'getExpenseReport']);
 
-Route::get('/reports', [OrgReportController::class, 'index']);
 
 
 //Notification
