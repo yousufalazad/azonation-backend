@@ -14,24 +14,25 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            
+
             // Foreign key to the 'users' table
             $table->foreignId('user_id')
-                  ->constrained()
-                  ->onDelete('cascade')
-                  ->unique() // Ensure that each user can only have one subscription
-                  ->comment('Foreign key linking to the users table. Each user can only have one active subscription, cascades on delete');
+                ->constrained()
+                ->onDelete('cascade')
+                ->unique() // Ensure that each user can only have one subscription
+                ->comment('Foreign key linking to the users table. Each user can only have one active subscription, cascades on delete');
 
             // Foreign key to the 'packages' table
             $table->foreignId('package_id')
-                  ->constrained('packages')
-                  ->onDelete('set null')
-                  ->comment('Foreign key linking to the packages table, cascades on delete');
+                ->nullable()
+                ->constrained()
+                ->onDelete('set null')
+                ->comment('Foreign key linking to the packages table, cascades on delete');
 
             $table->timestamp('start_date')->comment('The date when the subscription started');
 
             $table->timestamp('end_date')->nullable()->comment('The date when the subscription will end');
-            
+
             // Subscription status (active/inactive)
             $table->boolean('status')->default(true)->comment('Indicates if the subscription is active (true) or inactive (false)');
 

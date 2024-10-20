@@ -17,15 +17,16 @@ return new class extends Migration
 
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')
+                ->nullable()
                 ->constrained()
                 ->onDelete('set null')
                 ->comment('Foreign key linking to the users table, cascades on delete if the user is removed.');
-            
+
             // Store the org name as static data for future reference
             $table->string('user_name')
-            ->nullable()
-            ->comment('Stores the user name for future reference even if the user is deleted');
-            
+                ->nullable()
+                ->comment('Stores the user name for future reference even if the user is deleted');
+
 
             // The start and end period for the billing cycle
             $table->date('start_period')->comment('The start date of the billing period.');

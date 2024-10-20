@@ -17,29 +17,30 @@ return new class extends Migration
 
             // Foreign key to the 'invoices' table
             $table->foreignId('invoice_id')
-                  ->constrained('invoices')
-                  ->onDelete('set null')
-                  ->comment('Foreign key linking to the invoices table, cascades on delete');
+                ->nullable()
+                ->constrained()
+                ->onDelete('set null')
+                ->comment('Foreign key linking to the invoices table, cascades on delete');
 
             // Payment gateway used for the transaction
             $table->string('gateway')->comment('Payment gateway used for the transaction (e.g., PayPal, Stripe, etc.)');
-            
+
             // Transaction ID from the payment gateway
             $table->string('transaction_id')->nullable()->comment('Unique transaction ID from the payment gateway');
-            
+
             // Status of the payment process
             $table->enum('status', ['initiated', 'completed', 'failed', 'pending', 'refunded'])
-                  ->default('initiated')
-                  ->comment('The status of the payment: initiated, completed, failed, pending, or refunded');
+                ->default('initiated')
+                ->comment('The status of the payment: initiated, completed, failed, pending, or refunded');
 
             // Payment method used by the customer
             $table->enum('payment_method', ['card', 'bank_transfer', 'cash', 'mobile_payment', 'crypto'])
-                  ->default('card')
-                  ->comment('Payment method used for the transaction: card, bank transfer, cash, mobile payment, or cryptocurrency');
+                ->default('card')
+                ->comment('Payment method used for the transaction: card, bank transfer, cash, mobile payment, or cryptocurrency');
 
             // Total amount paid in the transaction
             $table->decimal('amount_paid', 10, 2)->comment('Total amount paid for the invoice');
-            
+
             // Optional notes or comments regarding the payment
             $table->text('note')->nullable()->comment('Optional note regarding the payment');
 
