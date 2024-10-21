@@ -1,89 +1,94 @@
 <?php
-
 namespace App\Http\Controllers\Org;
 use App\Http\Controllers\Controller;
-use App\Models\OrgEvent;
+
+use App\Models\OrgEvent; // Ensure this is the model for your OrgEvents
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class OrgEventController extends Controller
 {
-    public function index($userId)
+    // Fetch all OrgEvents
+    public function getEvents($userId)
     {
-        $eventList = OrgEvent::where('user_id', $userId)
-            ->orderBy('id', 'asc')
-            ->get();
+        $events = OrgEvent::where('user_id', $userId)->get();
 
-        return response()->json([
-            'status' => true,
-            'data' => $eventList
+        return response()->json(['status' => true, 'data' => $events]);
+    }
+
+    // Create a new OrgEvent
+    public function createEvent(Request $request)
+    {
+        // Validate the request data
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            // 'short_description' => 'nullable|string|max:500',
+            // 'description' => 'nullable|string',
+            // 'date' => 'required|date',
+            // 'time' => 'required|date_format:H:i',
+            // 'venue_name' => 'nullable|string|max:255',
+            // 'venue_address' => 'nullable|string|max:255',
+            // 'requirements' => 'nullable|string',
+            // 'note' => 'nullable|string',
+            // 'status' => 'required|integer|in:0,1', // 0 for Active, 1 for Disabled
+            // 'conduct_type' => 'required|integer|in:1,2', // 1 for In Person, 2 for Online
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
+        }
+
+        // Create the event
+        $event = OrgEvent::create($request->all());
+
+        return response()->json(['status' => true, 'message' => 'Event created successfully.', 'data' => $event], 201);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Update an existing event
+    public function updateEvent(Request $request, $id)
     {
-        //
-    }
+        $event = OrgEvent::find($id);
+        if (!$event) {
+            return response()->json(['status' => false, 'message' => 'Event not found.'], 404);
+        }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string',
+        // Validate the request data
+        $validator = Validator::make($request->all(), [
+            'title' => 'sometimes|required|string|max:255',
+            'name' => 'sometimes|required|string|max:255',
+            // 'short_description' => 'nullable|string|max:500',
+            // 'description' => 'nullable|string',
+            // 'date' => 'sometimes|required|date',
+            // 'time' => 'sometimes|required|date_format:H:i',
+            // 'venue_name' => 'nullable|string|max:255',
+            // 'venue_address' => 'nullable|string|max:255',
+            // 'requirements' => 'nullable|string',
+            // 'note' => 'nullable|string',
+            // 'status' => 'sometimes|required|integer|in:0,1',
+            // 'conduct_type' => 'sometimes|required|integer|in:1,2',
         ]);
-        // Create a new event record associated with the organisation
-        OrgEvent::create([
-            'user_id' => $request->userId,
-            'title' => $request->title,
-            'name' => $request->name,
-            'short_description' => $request->short_description,
-            'description' => $request->description,
-            'date' => $request->date,
-            'time' => $request->time,
-            'venue_name' => $request->venue_name,
-            'venue_address' => $request->venue_address,
-            'requirements' => $request->requirements,
-            'note' => $request->note,
-            'status' => $request->status,
-            'conduct_type' => $request->conduct_type,
-        ]);
-        // Return a success response
-        return response()->json(['message' => 'Event created successfully', 200]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
+        }
+
+        // Update the event
+        $event->update($request->all());
+
+        return response()->json(['status' => true, 'message' => 'Event updated successfully.', 'data' => $event]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(OrgEvent $orgEvent)
+    // Delete an event
+    public function deleteEvent($id)
     {
-        //
-    }
+        $event = OrgEvent::find($id);
+        if (!$event) {
+            return response()->json(['status' => false, 'message' => 'Event not found.'], 404);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(OrgEvent $orgEvent)
-    {
-        //
-    }
+        $event->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, OrgEvent $orgEvent)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(OrgEvent $orgEvent)
-    {
-        //
+        return response()->json(['status' => true, 'message' => 'Event deleted successfully.']);
     }
 }

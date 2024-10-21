@@ -113,26 +113,8 @@ class CommitteeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Committee $committee)
     {
-        try {
-            // Find the committee by ID
-            $committee = Committee::findOrFail($id);
-
-            // Delete the committee
-            $committee->delete();
-
-            // Return a success response
-            return response()->json([
-                'status' => true,
-                'message' => 'Committee deleted successfully.'
-            ], 200);
-        } catch (\Exception $e) {
-            // Handle the case where deletion fails
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.'
-            ], 500);
-        }
+        //
     }
 }

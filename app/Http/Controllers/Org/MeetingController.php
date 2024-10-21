@@ -2,92 +2,106 @@
 
 namespace App\Http\Controllers\Org;
 use App\Http\Controllers\Controller;
+
 use App\Models\Meeting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class MeetingController extends Controller
 {
-
-
-    public function index($user_id)
+    // Fetch all meetings
+    public function index()
     {
-        $meetingList = Meeting::where('user_id', $user_id)
-            ->orderBy('id', 'asc')
-            ->get();
-
-        return response()->json([
-            'status' => true,
-            'data' => $meetingList
-        ]);
+        $meetings = Meeting::all();
+        return response()->json(['status' => true, 'data' => $meetings]);
+    }
+    public function getOrgMeeting($userId)
+    {
+        $meetings = Meeting::where('user_id', $userId)->get();
+        return response()->json(['status' => true, 'data' => $meetings]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Create a new meeting
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'name' => 'required|string|max:255',
+            // 'short_name' => 'required|string|max:100',
+            // 'subject' => 'required|string|max:255',
+            // 'date' => 'required|date',
+            // 'time' => 'required|date_format:H:i',
+            // 'description' => 'required|string',
+            // 'address' => 'required|string',
+            // 'agenda' => 'required|string|max:255',
+            // 'requirements' => 'required|string|max:255',
+            // 'note' => 'nullable|string|max:255',
+            // 'status' => 'required|boolean',
+            // 'conduct_type' => 'nullable|string|max:100',
         ]);
 
-        // Create a new meeting record associated with the organisation
-        Meeting::create([
-            'user_id' => $request->user_id,
-            'name' => $request->name,
-            'short_name' => $request->short_name,
-            'subject' => $request->subject,
-            'date' => $request->date,
-            'time' => $request->time,
-            'description' => $request->description,
-            'address' => $request->address,
-            'agenda' => $request->agenda,
-            'requirements' => $request->requirements,
-            'note' => $request->note,
-            'status' => $request->status,
-            'conduct_type' => $request->conduct_type,
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
+        }
+
+        $meeting = Meeting::create($request->all());
+        return response()->json(['status' => true, 'message' => 'Meeting created successfully', 'data' => $meeting], 201);
+    }
+
+    // Get a specific meeting
+    public function show($id)
+    {
+        $meeting = Meeting::find($id);
+
+        if (!$meeting) {
+            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        }
+
+        return response()->json(['status' => true, 'data' => $meeting]);
+    }
+
+    // Update a meeting
+    public function update(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'name' => 'required|string|max:255',
+            // 'short_name' => 'required|string|max:100',
+            // 'subject' => 'required|string|max:255',
+            // 'date' => 'required|date',
+            // 'time' => 'required|date_format:H:i',
+            // 'description' => 'required|string',
+            // 'address' => 'required|string',
+            // 'agenda' => 'required|string|max:255',
+            // 'requirements' => 'required|string|max:255',
+            // 'note' => 'nullable|string|max:255',
+            // 'status' => 'required|boolean',
+            // 'conduct_type' => 'nullable|string|max:100',
         ]);
 
-        // Return a success response
-        return response()->json(['message' => 'Meeting created successfully', 200]);
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
+        }
+
+        $meeting = Meeting::find($id);
+        if (!$meeting) {
+            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        }
+
+        $meeting->update($request->all());
+        return response()->json(['status' => true, 'message' => 'Meeting updated successfully', 'data' => $meeting]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Meeting $meeting)
+    // Delete a meeting
+    public function destroy($id)
     {
-        //
-    }
+        $meeting = Meeting::find($id);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Meeting $meeting)
-    {
-        //
-    }
+        if (!$meeting) {
+            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Meeting $meeting)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Meeting $meeting)
-    {
-        //
+        $meeting->delete();
+        return response()->json(['status' => true, 'message' => 'Meeting deleted successfully']);
     }
 }
