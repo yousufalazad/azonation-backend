@@ -52,7 +52,7 @@ Route::put('/update-org-history/{id}', [OrgHistoryController::class, 'update']);
 Route::delete('/delete-org-history/{id}', [OrgHistoryController::class, 'destroy']);
 
 //Year plan
-    Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-year-plans', [YearPlanController::class, 'index']);
     Route::get('/year-plan/{id}', [YearPlanController::class, 'show']);
     Route::post('/create-year-plan', [YearPlanController::class, 'store']);
@@ -69,7 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // StrategicPlan
-    Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-strategic-plans', [StrategicPlanController::class, 'index']);
     Route::post('/create-strategic-plan', [StrategicPlanController::class, 'store']);
     Route::put('/update-strategic-plan/{id}', [StrategicPlanController::class, 'update']);
@@ -161,17 +161,31 @@ Route::get('dialing-codes', [PhoneNumberController::class, 'getAllDialingCodes']
 
 
 //Committee
+Route::get('org-committee-list/{userId}', [CommitteeController::class, 'getCommitteeListByUserId']);
 Route::post('create_committee', [CommitteeController::class, 'store']);
 Route::put('update_committee/{id}', [CommitteeController::class, 'update']);
-Route::get('org-committee-list/{userId}', [CommitteeController::class, 'getCommitteeListByUserId']);
+Route::delete('org-committee/{id}', [CommitteeController::class, 'destroy']);
 
 //Meeting
-Route::post('create-meeting', [MeetingController::class, 'store']);
-Route::get('meeting-list/{orgId}', [MeetingController::class, 'index']);
+Route::get('/get-meetings', [MeetingController::class, 'index']);
+Route::get('/meetings/{id}', [MeetingController::class, 'show']);
+Route::get('/get-org-meetings/{userID}', [MeetingController::class, 'getOrgMeeting']);
+Route::post('/create-meeting', [MeetingController::class, 'store']);
+Route::put('/update-meeting/{id}', [MeetingController::class, 'update']);
+Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
+
 
 //Event
-Route::post('create-event', [OrgEventController::class, 'store']);
-Route::get('org-event-list/{userId}', [OrgEventController::class, 'index']);
+// Route::post('create-event', [OrgEventController::class, 'store']);
+// Route::get('org-event-list/{userId}', [OrgEventController::class, 'index']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/get-events/{userId}', [OrgEventController::class, 'getEvents']);
+    Route::post('/create-event', [OrgEventController::class, 'createEvent']);
+    Route::put('/update-event/{id}', [OrgEventController::class, 'updateEvent']);
+    Route::delete('/delete-event/{id}', [OrgEventController::class, 'deleteEvent']);
+});
+
 
 
 //Project
