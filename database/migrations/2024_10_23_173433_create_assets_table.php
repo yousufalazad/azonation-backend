@@ -14,6 +14,12 @@ return new class extends Migration
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
 
+            // Foreign key to the 'users' table
+            $table->foreignId('user_id')
+                ->constrained()
+                ->onDelete('cascade')
+                ->comment('Org user for the asset.');
+
             // Name of the asset
             $table->string('name', 100)
                 ->comment('Name of the asset.');
@@ -23,85 +29,75 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Short description of the asset.');
 
+            // Type of the asset
+            $table->boolean('is_long_term')
+                ->nullable()
+                ->default(null)
+                ->comment('Indicates if the asset is long-term (true) or short-term (false).');
+
             // Quantity of the asset
             $table->integer('quantity')
                 ->default(1)
                 ->comment('Quantity of the asset.');
 
             // Approximate value of the asset
-            $table->decimal('value_amount', 13, 2)
+            $table->decimal('value_amount', 15, 2)
                 ->nullable()
                 ->comment('Approximate monetary value of the asset.');
 
             // In-kind value (non-monetary value) of the asset
-            $table->decimal('inkind_value', 13, 2)
+            $table->decimal('inkind_value', 15, 2)
                 ->nullable()
                 ->comment('In-kind value of the asset.');
 
-            // Foreign key to the user responsible for the asset
-            $table->foreignId('responsible_person_id')
+            // Weather asset is tangible asset
+            $table->boolean('is_tangible')
                 ->nullable()
-                ->constrained('users')
-                ->onDelete('set null')
-                ->comment('User responsible for the asset.');
-
-            // Date when the asset was assigned
-            $table->date('assign_start_date')
-                ->nullable()
-                ->comment('The date the asset was assigned.');
-
-            // Date when asset assignment ends
-            $table->date('assign_end_date')
-                ->nullable()
-                ->comment('The date the asset assignment ends.');
-
-            // Any additional notes regarding the asset
-            $table->text('note')
-                ->nullable()
-                ->comment('Any additional notes about the asset.');
-
-            // Status of the asset (e.g., active, inactive, under maintenance)
-            $table->enum('current_status', [
-                'draft',
-                'under_maintenance',
-                'disposed',
-                'lost',
-                'stolen',
-                'damaged',
-                'unknown',
-                'other',
-                'returned',
-                'reserved',
-                'in_use',
-                'pending_disposal',
-                'decommissioned',
-                'out_for_repair',
-                'in_storage',
-                'awaiting_inspection',
-                'transferred',
-                'leased',
-                'recalled',
-                'quarantined',
-                'expired',
-                'missing',
-                'being_audited',
-                'repaired',
-            ])
-                ->default('in_use')
-                ->comment('Current status of the asset.');
-
-
+                ->default(null)
+                ->comment('Indicates if the asset is tangible (true) or intangible (false).');
+            
             //Foreign key referencing the privacy setups table (privacy settings)
             $table->foreignId('privacy_setup_id')
                 ->constrained('privacy_setups')
                 ->onDelete('cascade')
                 ->comment('Privacy level of the asset (e.g., public, private, only members. etc).');
 
-            $table->boolean('active_status')
+            $table->boolean('is_active')
                 ->default(true)
                 ->comment('Indicates whether the asset is currently active.');
 
             $table->timestamps();
+
+
+            // // Status of the asset end of the assignment    
+            // $table->enum('asset_lifecycle_statuses_id', [
+            //     'draft',
+            //     'under_maintenance',
+            //     'disposed',
+            //     'lost',
+            //     'stolen',
+            //     'damaged',
+            //     'unknown',
+            //     'other',
+            //     'returned',
+            //     'reserved',
+            //     'in_use',
+            //     'pending_disposal',
+            //     'decommissioned',
+            //     'out_for_repair',
+            //     'in_storage',
+            //     'awaiting_inspection',
+            //     'transferred',
+            //     'leased',
+            //     'recalled',
+            //     'quarantined',
+            //     'expired',
+            //     'missing',
+            //     'being_audited',
+            //     'repaired',
+            // ])
+            //     ->default('in_use')
+            //     ->comment('Current status of the asset.');
         });
     }
 

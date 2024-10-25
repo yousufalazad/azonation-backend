@@ -21,30 +21,38 @@ return new class extends Migration
                 ->comment('The asset that is being assigned.');
 
             // Foreign key to the user responsible for the assignment
-            $table->foreignId('responsible_person_id')
+            $table->foreignId('responsible_user_id')
                 ->nullable()
                 ->constrained('users')
                 ->onDelete('set null')
                 ->comment('User responsible for the asset assignment.');
 
             // Assignment start date
-            $table->date('assign_start_date')
+            $table->date('assignment_start_date')
                 ->nullable()
-                ->comment('Date when the asset was assigned.');
+                ->comment('Date when the asset assignment started.');
 
             // Assignment end date
-            $table->date('assign_end_date')
+            $table->date('assignment_end_date')
                 ->nullable()
                 ->comment('Date when the asset assignment ended.');
 
-            // Status of the asset during this log (active, inactive, maintenance, disposed)
-            $table->enum('status', ['active', 'inactive', 'under_maintenance', 'disposed'])
-                ->comment('The status of the asset at the time of the log.');
+            // Status of the asset end of the assignment 
+            $table->foreignId('asset_lifecycle_statuses_id')
+            ->nullable()
+            ->constrained('asset_lifecycle_statuses')
+            ->onDelete('set null')
+            ->comment('Current status of the asset.');
 
-            // Optional notes regarding the assignment or status change
-            $table->text('note')
-                ->nullable()
-                ->comment('Any additional notes about the assignment or status change.');
+             // Any additional notes regarding the asset
+             $table->string('note', 255)
+             ->nullable()
+             ->comment('Any additional notes about the asset.');
+
+            // Status of the asset
+            $table->boolean('is_active')
+                ->default(true)
+                ->comment('Indicates whether the asset is currently active.');
 
             // Log created/updated timestamps
             $table->timestamps();

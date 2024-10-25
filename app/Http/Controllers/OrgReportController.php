@@ -45,7 +45,7 @@ class OrgReportController extends Controller
 {
     try {
         // Get the current date and subtract 12 months
-        $endDate = Carbon::now();
+        $endDate = Carbon::now();             
         $startDate = $endDate->copy()->subMonths(12);
 
         // Fetch expense data for the past 12 months grouped by year and month
