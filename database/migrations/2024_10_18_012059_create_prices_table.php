@@ -24,23 +24,26 @@ return new class extends Migration
                 ->comment('Foreign key linking to the packages table, cascades on delete');
 
             // Tier pricing with notes on corresponding regions
-            $table->decimal('tier1', 10, 2)->comment('Price for Tier 1: Rest of the World');
-            $table->decimal('tier2', 10, 2)->comment('Price for Tier 2: UK');
-            $table->decimal('tier3', 10, 2)->comment('Price for Tier 3: America');
-            $table->decimal('tier4', 10, 2)->comment('Price for Tier 4: Canada');
-            $table->decimal('tier5', 10, 2)->comment('Price for Tier 5: European Union');
-            $table->decimal('tier6', 10, 2)->comment('Price for Tier 6: Bangladesh');
-            $table->decimal('tier7', 10, 2)->comment('Price for Tier 7: China');
-            $table->decimal('tier8', 10, 2)->comment('Price for Tier 8: India');
-            $table->decimal('tier9', 10, 2)->comment('Price for Tier 9: Japan');
-            $table->decimal('tier10', 10, 2)->comment('Price for Tier 10: Singapore');
-            $table->decimal('tier11', 10, 2)->comment('Price for Tier 11: Russia');
-            $table->decimal('tier12', 10, 2)->comment('Price for Tier 12: Australia and New Zealand');
-            $table->decimal('tier13', 10, 2)->comment('Price for Tier 13: Nordic countries (Sweden, Norway, Finland, Denmark)');
-            $table->decimal('tier14', 10, 2)->comment('Price for Tier 14: South America');
-            $table->decimal('tier15', 10, 2)->comment('Price for Tier 15: Middle East');
-            $table->decimal('tier16', 10, 2)->comment('Price for Tier 16: Asia (excluding Bangladesh, China and India)');
-            $table->decimal('tier17', 10, 2)->comment('Price for Tier 17: Africa');
+            $table->decimal('tier1', 10, 2)->comment('Price for: Rest of the World, currency: USD');
+            $table->decimal('tier2', 10, 2)->comment('Price for: UK, currency: GBP');
+            $table->decimal('tier3', 10, 2)->comment('Price for: USA, currency: USD');
+            $table->decimal('tier4', 10, 2)->comment('Price for: Canada, currency: CAD');
+            $table->decimal('tier5', 10, 2)->comment('Price for: European Union, currency: EUR');
+            $table->decimal('tier6', 10, 2)->comment('Price for: China, currency: CNY');
+            $table->decimal('tier7', 10, 2)->comment('Price for: Bangladesh, currency: BDT');
+            $table->decimal('tier8', 10, 2)->comment('Price for: India, currency: INR');
+            $table->decimal('tier9', 10, 2)->comment('Price for: Japan, currency: JPY');
+            $table->decimal('tier10', 10, 2)->comment('Price for: Malaysia, currency: MYR');
+            $table->decimal('tier11', 10, 2)->comment('Price for: Russia, currency: RUB');
+            $table->decimal('tier12', 10, 2)->comment('Price for: Australia and New Zealand, currency: AUD');
+            $table->decimal('tier13', 10, 2)->comment('Price for: Nordic countries (Sweden, Norway, Finland, Denmark), currency: EUR');
+            $table->decimal('tier14', 10, 2)->comment('Price for: South America, currency: USD');
+            $table->decimal('tier15', 10, 2)->comment('Price for: Middle East, currency: USD');
+            $table->decimal('tier16', 10, 2)->comment('Price for: Asia (excluding Bangladesh, China, Malaysia and India), currency: USD');
+            $table->decimal('tier17', 10, 2)->comment('Price for: Africa, currency: USD');
+            $table->decimal('tier18', 10, 2)->comment('Price for: , currency: USD');
+            $table->decimal('tier19', 10, 2)->comment('Price for: , currency: USD');
+            $table->decimal('tier20', 10, 2)->comment('Price for: , currency: USD');
 
             // Status column to indicate if the pricing for the package is currently active
             $table->boolean('status')->default(true)->comment('Indicates if the pricing is active (true) or inactive (false)');
