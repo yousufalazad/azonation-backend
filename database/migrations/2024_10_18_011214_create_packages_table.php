@@ -51,6 +51,9 @@ return new class extends Migration
             // Add web link option for package listing
             $table->boolean('web_profile')->default(false)->comment('Web profile to the package page for additional info');
             
+            // Status column to indicate if the package is currently active or not
+            $table->boolean('status')->default(true)->comment('Indicates if the pricing is active (true) or inactive (false)');
+
             $table->timestamps();
         });
     }

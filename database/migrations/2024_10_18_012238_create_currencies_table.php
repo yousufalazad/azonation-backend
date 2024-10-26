@@ -15,14 +15,6 @@ return new class extends Migration
         Schema::create('currencies', function (Blueprint $table) {
             $table->id();
 
-            // Foreign key to the 'prices' table
-            $table->foreignId('price_id')
-                ->nullable()
-                ->constrained()
-                ->onDelete('set null')
-                ->unique() // Ensure that each price_id can only appear once
-                ->comment('Foreign key linking to the prices table, cascades on delete');
-
             // Name of the currency (e.g., US Dollar, British Pound)
             $table->string('name')->comment('Full name of the currency (e.g., US Dollar, British Pound)');
 
@@ -36,7 +28,7 @@ return new class extends Migration
             $table->string('unit_name')->nullable()->comment('Name of the fractional currency unit (e.g., cent for USD, pence for GBP)');
 
             // Exchange rate to a reference currency (optional, but globally useful for calculations)
-            $table->decimal('exchange_rate', 15, 6)->nullable()->comment('Exchange rate of this currency relative to the USD');
+            //$table->decimal('exchange_rate', 15, 6)->nullable()->comment('Exchange rate of this currency relative to the USD');
 
             // Currency status (active/inactive)
             $table->boolean('status')->default(true)->comment('Status of the currency (true = active, false = inactive)');
