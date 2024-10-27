@@ -25,7 +25,6 @@ class MeetingController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             // 'short_name' => 'required|string|max:100',
             // 'subject' => 'required|string|max:255',
@@ -43,8 +42,9 @@ class MeetingController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
         }
-
-        $meeting = Meeting::create($request->all());
+        $input = $request->all();
+        $input['user_id'] = $request->user()->id; // Assuming the user is authenticated and has an id. You'll need to modify this depending on your application.
+        $meeting = Meeting::create($input);
         return response()->json(['status' => true, 'message' => 'Meeting created successfully', 'data' => $meeting], 201);
     }
 

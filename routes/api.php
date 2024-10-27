@@ -166,13 +166,7 @@ Route::post('create_committee', [CommitteeController::class, 'store']);
 Route::put('update_committee/{id}', [CommitteeController::class, 'update']);
 Route::delete('org-committee/{id}', [CommitteeController::class, 'destroy']);
 
-//Meeting
-Route::get('/get-meetings', [MeetingController::class, 'index']);
-Route::get('/meetings/{id}', [MeetingController::class, 'show']);
-Route::get('/get-org-meetings/{userID}', [MeetingController::class, 'getOrgMeeting']);
-Route::post('/create-meeting', [MeetingController::class, 'store']);
-Route::put('/update-meeting/{id}', [MeetingController::class, 'update']);
-Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
+
 
 
 //Event
@@ -184,6 +178,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-event', [OrgEventController::class, 'createEvent']);
     Route::put('/update-event/{id}', [OrgEventController::class, 'updateEvent']);
     Route::delete('/delete-event/{id}', [OrgEventController::class, 'deleteEvent']);
+
+    //Meeting
+    Route::get('/get-meetings', [MeetingController::class, 'index']);
+    Route::get('/meetings/{id}', [MeetingController::class, 'show']);
+    Route::get('/get-org-meetings/{userID}', [MeetingController::class, 'getOrgMeeting']);
+    Route::post('/create-meeting', [MeetingController::class, 'store']);
+    Route::put('/update-meeting/{id}', [MeetingController::class, 'update']);
+    Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
 });
 
 

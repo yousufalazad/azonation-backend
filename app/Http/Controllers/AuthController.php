@@ -74,10 +74,12 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
+            'remember_token' => 'required|boolean',
         ]);
 
         $credentials = request(['email', 'password']);
-        if (!Auth::attempt($credentials)) {
+        $remember_token = $request->remember_token;
+        if (!Auth::attempt($credentials, $remember_token)) {
             return $this->error('Unauthorized user');
         }
 
