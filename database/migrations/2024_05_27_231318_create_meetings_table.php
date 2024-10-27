@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('meetings', function (Blueprint $table) {
             $table->id(); // Primary key
-            
+
             // Foreign key linking to the users table (user who created the meeting)
             $table->foreignId('user_id')
                 ->constrained('users')
