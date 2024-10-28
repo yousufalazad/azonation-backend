@@ -6,10 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     * This migration creates the 'currencies' table, which defines different currencies and links them to pricing tiers.
-     */
     public function up(): void
     {
         Schema::create('currencies', function (Blueprint $table) {
