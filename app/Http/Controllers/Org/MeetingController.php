@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Org;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Meeting;
@@ -10,16 +11,18 @@ use Illuminate\Support\Facades\Validator;
 class MeetingController extends Controller
 {
     // Fetch all meetings
-    public function index()
+    // public function index()
+    // {
+    //     $meetings = Meeting::all();
+    //     return response()->json(['status' => true, 'data' => $meetings]);
+    // }
+    public function getOrgMeeting(Request $request)
     {
-        $meetings = Meeting::all();
+        $user_id = $request->user()->id; // Retrieve the authenticated user's ID
+        $meetings = Meeting::where('user_id', $user_id)->get();
         return response()->json(['status' => true, 'data' => $meetings]);
     }
-    public function getOrgMeeting($userId)
-    {
-        $meetings = Meeting::where('user_id', $userId)->get();
-        return response()->json(['status' => true, 'data' => $meetings]);
-    }
+
 
     // Create a new meeting
     public function store(Request $request)

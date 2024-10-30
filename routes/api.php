@@ -32,10 +32,19 @@ use App\Http\Controllers\OrgOfficeRecordController;
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::post('logout', [AuthController::class, 'logout']);
+
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+
+    //Meeting
+    Route::get('/get-meetings', [MeetingController::class, 'index']);
+    Route::get('/meetings/{id}', [MeetingController::class, 'show']);
+    Route::get('/get-org-meetings', [MeetingController::class, 'getOrgMeeting']);
+    Route::post('/create-meeting', [MeetingController::class, 'store']);
+    Route::put('/update-meeting/{id}', [MeetingController::class, 'update']);
+    Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
 
     // ------------------- Individual----------------------------------------------------------------
     Route::get('/individual_profile_data/{userId}', [IndividualController::class, 'getProfileImage']);
@@ -146,13 +155,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-event/{id}', [OrgEventController::class, 'updateEvent']);
     Route::delete('/delete-event/{id}', [OrgEventController::class, 'deleteEvent']);
 
-    //Meeting
-    Route::get('/get-meetings', [MeetingController::class, 'index']);
-    Route::get('/meetings/{id}', [MeetingController::class, 'show']);
-    Route::get('/get-org-meetings/{userID}', [MeetingController::class, 'getOrgMeeting']);
-    Route::post('/create-meeting', [MeetingController::class, 'store']);
-    Route::put('/update-meeting/{id}', [MeetingController::class, 'update']);
-    Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
+    
 
     //Project
     Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
