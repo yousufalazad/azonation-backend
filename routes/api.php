@@ -27,7 +27,8 @@ use App\Http\Controllers\OrgReportController;
 
 //Org office record
 use App\Http\Controllers\OrgOfficeRecordController;
-
+// Billing
+use App\Http\Controllers\PackageController;
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
@@ -155,8 +156,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-event/{id}', [OrgEventController::class, 'updateEvent']);
     Route::delete('/delete-event/{id}', [OrgEventController::class, 'deleteEvent']);
 
-    
-
     //Project
     Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
     Route::post('create-project', [OrgProjectController::class, 'store']);
@@ -166,6 +165,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('create-founder', [FounderController::class, 'store']);
     Route::get('get-founder/{userId}', [FounderController::class, 'index']);
     Route::put('update-founder/{id}', [FounderController::class, 'update']);
+
+
+    //Billing
+    Route::get('packages', [PackageController::class, 'index']);
 
 
     // ------------------- SuperAdmin----------------------------------------------------------------
