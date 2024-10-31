@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
 
             // Unique Invoice ID (could be used for referencing invoices)
-            $table->string('invoice_number')->unique()->comment('Unique invoice identifier');
+            $table->string('invoice_id')->unique()->comment('Unique invoice identifier');
 
             // Foreign key linking to the 'billings' table
             $table->foreignId('billing_id')
@@ -30,19 +30,13 @@ return new class extends Migration
             $table->date('due_date')->comment('Payment due date for the invoice');
 
             // Financial details
-            $table->decimal('sub_total', 10, 2)->comment('Invoice sub total before VAT/TAX');
-            $table->decimal('discount', 10, 2)->nullable()->default(0)->comment('Discount applied to the invoice');
+            $table->decimal('sub_total', 10, 2)->comment('Invoice sub total before VAT/TAX, amount comes from billing table, total billed amount');
             $table->string('discount_title')->nullable()->comment('Description or title for the discount');
+            $table->decimal('discount', 10, 2)->nullable()->default(0)->comment('Discount applied to the invoice');
             $table->decimal('tax', 10, 2)->nullable()->default(0)->comment('Applicable TAX or VAT on the invoice');
+            $table->decimal('credit', 10, 2)->nullable()->default(0)->comment('Deduction from account credit balance');
             $table->decimal('total', 10, 2)->comment('Total amount after applying discount and TAX/VAT');
-
-            // Invoice item details
-            $table->string('item_name')->comment('Description or name of the service/item billed');
-            $table->integer('total_active_members')->default(0)->comment('Total number of active members associated with the billing period');
-            $table->integer('total_days')->default(0)->comment('Total number of days for which the service is being billed');
-            $table->decimal('rate', 10, 2)->comment('Rate per day per active member');
-            $table->decimal('amount', 10, 2)->comment('Calculated total amount based on rate, members, and days');
-
+            
             // Optional note and description fields for more context
             $table->text('note')->nullable()->comment('Optional note for additional details');
             $table->text('description')->nullable()->comment('Optional description of the invoice');

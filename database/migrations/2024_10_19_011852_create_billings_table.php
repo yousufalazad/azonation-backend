@@ -27,20 +27,19 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Stores the user name for future reference even if the user is deleted');
 
-
             // The start and end period for the billing cycle
             $table->date('start_period')->comment('The start date of the billing period.');
             $table->date('end_period')->comment('The end date of the billing period.');
 
-
-            // Number of days within the billing period
-            $table->integer('days')->comment('The number of days in the billing period.');
-
-            // Rate applied per member per day (rate can change depending on region or plan)
-            $table->decimal('rate', 10, 2)->comment('The rate applied per active member per day in unit price. like cent or pence');
-
-            // Total amount billed (calculated as total_active_member * days * rate)
-            $table->decimal('amount', 15, 2)->comment('The total amount calculated for the billing period.');
+            $table->string('item_name')->comment('Description or name of the service/item billed');
+            
+            //from billable_day_counts table (sum of every day total within bill period)
+            $table->integer('active_members_sum')->default(0)->comment('Sum of everyday active members count within the billing period, data comes from billable_day_counts table');
+            
+            //total number of days within the bill period
+            $table->integer('total_days')->default(0)->comment('Total number of days for which the service is being billed');
+            $table->decimal('rate', 10, 2)->comment('Rate per day per active member');
+            $table->decimal('bill_amount', 10, 2)->comment('Calculated total amount based on rate, members, and days');
 
             // Status to track whether the billing record is issued, unissued, pending, cancelled, or a draft
             $table->enum('bill_status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
