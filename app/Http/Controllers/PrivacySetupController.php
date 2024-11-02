@@ -12,7 +12,13 @@ class PrivacySetupController extends Controller
      */
     public function index()
     {
-        //
+        $privacySetups = PrivacySetup::where('status', 1)
+            ->orderBy('id', 'asc')
+            ->get();
+        return response()->json([
+            'status' => true,
+            'data' => $privacySetups
+        ]);
     }
 
     /**

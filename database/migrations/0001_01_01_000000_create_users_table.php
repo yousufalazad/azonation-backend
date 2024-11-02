@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('username')->unique()->nullable()->comment('Unique username for the user');
             $table->string('email')->unique()->comment('Email address');
             $table->string('image')->nullable()->comment('Profile image URL');
+            $table->uuid('verification_token')->nullable()->unique()->comment('Email verification token');
             $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');
             $table->string('password')->comment('Password hash');
             $table->rememberToken()->comment('Token for "remember me" functionality');

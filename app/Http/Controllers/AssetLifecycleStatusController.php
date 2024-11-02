@@ -12,7 +12,13 @@ class AssetLifecycleStatusController extends Controller
      */
     public function index()
     {
-        //
+        $assetLifecycleStatus = AssetLifecycleStatus::where('is_active', 1)
+            ->orderBy('id', 'asc')
+            ->get();
+        return response()->json([
+            'status' => true,
+            'data' => $assetLifecycleStatus
+        ]);
     }
 
     /**
