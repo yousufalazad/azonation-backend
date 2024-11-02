@@ -12,6 +12,8 @@ use App\Mail\IndividualUserRegisteredMail;
 use App\Mail\OrgUserRegisteredMail;
 // use App\Http\Controllers\Validator;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Carbon;
+
 
 
 
@@ -36,6 +38,24 @@ class AuthController extends Controller
             'errors' => $errors
         ], $status);
     }
+
+    public function verify($uuid)
+    {
+        // Find the user by UUID in the database
+        $user = User::where('verification_token', $uuid)->first();
+
+        if (!$user) {
+            return redirect('/')->with('error', 'Invalid verification link.');
+        }
+
+        // Update the email_verified_at column
+        $user->email_verified_at = Carbon::now();
+        $user->verification_token = null; // Optionally remove the token
+        $user->save();
+
+        return redirect('/')->with('success', 'Your email has been verified!');
+    }
+
     // Method to handle individual registration creation
     public function register(Request $request)
     {

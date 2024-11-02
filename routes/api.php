@@ -24,6 +24,9 @@ use App\Http\Controllers\YearPlanController;
 use App\Http\Controllers\OrgRecognitionController;
 use App\Http\Controllers\OrgAccountController;
 use App\Http\Controllers\OrgReportController;
+use App\Http\Controllers\AssetController;
+use App\Http\Controllers\PrivacySetupController;
+use App\Http\Controllers\AssetLifecycleStatusController;
 
 //Org office record
 use App\Http\Controllers\OrgOfficeRecordController;
@@ -33,6 +36,8 @@ use App\Http\Controllers\PackageController;
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
+
 
 
 
@@ -165,6 +170,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('create-founder', [FounderController::class, 'store']);
     Route::get('get-founder/{userId}', [FounderController::class, 'index']);
     Route::put('update-founder/{id}', [FounderController::class, 'update']);
+
+    //Asset
+    Route::get('/get-assets/{userId}', [AssetController::class, 'index']);
+    Route::post('/create-asset', [AssetController::class, 'store']);
+    Route::put('/update-asset/{id}', [AssetController::class, 'update']);
+    Route::delete('/delete-asset/{id}', [AssetController::class, 'destroy']);
+
+    // privacy_setups
+    Route::get('privacy-setups', [PrivacySetupController::class, 'index']);
+    // asset_lifecycle_setups
+    Route::get('asset-lifecycle-setups', [AssetLifecycleStatusController::class, 'index']);
+
 
 
     //Billing
