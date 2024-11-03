@@ -176,7 +176,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('update-founder/{id}', [FounderController::class, 'update']);
 
     //Asset
-    Route::get('/get-assets/{userId}', [AssetController::class, 'index']);
+    Route::get('/get-assets/{userId}', [AssetController::class, 'getAsset']);
+
     Route::post('/create-asset', [AssetController::class, 'store']);
     Route::put('/update-asset/{id}', [AssetController::class, 'update']);
     Route::delete('/delete-asset/{id}', [AssetController::class, 'destroy']);
