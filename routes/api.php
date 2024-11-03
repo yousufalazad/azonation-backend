@@ -35,6 +35,7 @@ use App\Http\Controllers\OrgOfficeRecordController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ActiveMemberCountController;
+use App\Http\Controllers\InvoiceController;
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
@@ -194,9 +195,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('subscription', [SubscriptionController::class, 'store']);
     Route::put('subscription/{id}', [SubscriptionController::class, 'update']);
     Route::delete('subscription{id}', [SubscriptionController::class, 'destroy']);
-
     Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
+    Route::get('/invoices', [InvoiceController::class, 'index']);
 
 
     // ------------------- SuperAdmin----------------------------------------------------------------

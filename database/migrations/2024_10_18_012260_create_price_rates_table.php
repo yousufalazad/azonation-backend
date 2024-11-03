@@ -8,11 +8,10 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * This migration creates the 'prices' table, which links to different packages and sets region-specific pricing.
      */
     public function up(): void
     {
-        Schema::create('prices', function (Blueprint $table) {
+        Schema::create('price_rates', function (Blueprint $table) {
             $table->id();
 
             // Foreign key to the 'packages' table
@@ -49,16 +48,15 @@ return new class extends Migration
             $table->boolean('status')->default(true)->comment('Indicates if the pricing is active (true) or inactive (false)');
 
             // Timestamps for created_at and updated_at
-            $table->timestamps(); //Timestamps for when the price entry was created and last updated
+            $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
-     * Drops the 'prices' table if needed.
      */
     public function down(): void
     {
-        Schema::dropIfExists('prices');
+        Schema::dropIfExists('price_rates');
     }
 };
