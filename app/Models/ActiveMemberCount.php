@@ -5,19 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Subscription extends Model
+class ActiveMemberCount extends Model
 {
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'package_id',
-        'start_date',
-        'end_date',
-        'status'
+        'date',
+        'active_member',
+        'is_billable'
     ];
 
-    protected $hidden = [
+    protected $hidden=[
         'created_at',
         'updated_at'
     ];
 }
+
