@@ -10,9 +10,19 @@ class InvoiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+         // Get the authenticated user
+         $user_id = $request->user()->id;
+
+        // Fetch invoices related to the authenticated user
+        $invoices = Invoice::where('user_id', $user_id)->get();
+
+        // Return the invoices data as a JSON response
+        return response()->json([
+            'status' => true,
+            'data' => $invoices,
+        ]);
     }
 
     /**
