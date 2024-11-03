@@ -30,8 +30,11 @@ use App\Http\Controllers\AssetLifecycleStatusController;
 
 //Org office record
 use App\Http\Controllers\OrgOfficeRecordController;
+
 // Billing
 use App\Http\Controllers\PackageController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\ActiveMemberCountController;
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
@@ -45,8 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
     //Meeting
-    Route::get('/get-meetings', [MeetingController::class, 'index']);
-    Route::get('/meetings/{id}', [MeetingController::class, 'show']);
+    // Route::get('/get-meetings', [MeetingController::class, 'index']);
+    // Route::get('/meetings/{id}', [MeetingController::class, 'show']);
     Route::get('/get-org-meetings', [MeetingController::class, 'getOrgMeeting']);
     Route::post('/create-meeting', [MeetingController::class, 'store']);
     Route::put('/update-meeting/{id}', [MeetingController::class, 'update']);
@@ -186,6 +189,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Billing
     Route::get('packages', [PackageController::class, 'index']);
+
+    Route::get('subscription', [SubscriptionController::class, 'show']);
+    Route::post('subscription', [SubscriptionController::class, 'store']);
+    Route::put('subscription/{id}', [SubscriptionController::class, 'update']);
+    Route::delete('subscription{id}', [SubscriptionController::class, 'destroy']);
+
+    Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
+    Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
 
 
     // ------------------- SuperAdmin----------------------------------------------------------------
