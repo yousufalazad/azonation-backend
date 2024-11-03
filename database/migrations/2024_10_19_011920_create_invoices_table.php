@@ -16,8 +16,15 @@ return new class extends Migration
             $table->id();
 
             // Unique Invoice ID (could be used for referencing invoices)
-            $table->string('invoice_id')->unique()->comment('Unique invoice identifier');
+            $table->string('invoice_id', 10)->unique()->comment('Unique invoice identifier');
 
+            // Foreign key linking to the 'users' table
+            $table->foreignId('user_id')
+                ->constrained()
+                ->onDelete('cascade')
+                ->comment('Foreign key linking to the users table, cascades on delete if the user is removed.');
+
+                
             // Foreign key linking to the 'billings' table
             $table->foreignId('billing_id')
                 ->constrained()
