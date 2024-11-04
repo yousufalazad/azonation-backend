@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
 
             // Unique Invoice ID (could be used for referencing invoices)
-            $table->string('invoice_id', 10)->unique()->comment('Unique invoice identifier');
+            $table->string('invoice_id', 11)->unique()->comment('Unique invoice identifier');
 
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')
@@ -31,6 +31,9 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->comment('Foreign key linking to the billings table, cascades on delete');
 
+            $table->string('item', 100)->comment('Item name');
+            $table->string('description', 100)->nullable()->comment('Optional description of the invoice');
+
             // Dates for invoice generation, issue and payment due
             $table->date('generate_date')->comment('Date when the invoice was generated');
             $table->date('issue_date')->comment('Date when the invoice was issued');
@@ -38,15 +41,14 @@ return new class extends Migration
 
             // Financial details
             $table->decimal('sub_total', 10, 2)->comment('Invoice sub total before VAT/TAX, amount comes from billing table, total billed amount');
-            $table->string('discount_title')->nullable()->comment('Description or title for the discount');
+            $table->string('discount_title', 50)->nullable()->comment('Description or title for the discount');
             $table->decimal('discount', 10, 2)->nullable()->default(0)->comment('Discount applied to the invoice');
             $table->decimal('tax', 10, 2)->nullable()->default(0)->comment('Applicable TAX or VAT on the invoice');
             $table->decimal('credit', 10, 2)->nullable()->default(0)->comment('Deduction from account credit balance');
             $table->decimal('total', 10, 2)->comment('Total amount after applying discount and TAX/VAT');
             
             // Optional note and description fields for more context
-            $table->text('note')->nullable()->comment('Optional note for additional details');
-            $table->text('description')->nullable()->comment('Optional description of the invoice');
+            $table->string('note', 100)->nullable()->comment('Optional note for additional details');
 
             // Publishing status of the invoice
             $table->boolean('published')->default(false)->comment('Flag to indicate if the invoice is published (true) or in draft (false)');

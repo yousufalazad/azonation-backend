@@ -101,6 +101,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-record/{id}', [SuccessStoryController::class, 'update']);
     Route::delete('/delete-record/{id}', [SuccessStoryController::class, 'destroy']);
 
+    
+
+
     //update org user info  
     Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
     Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
@@ -128,7 +131,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Office record
     Route::get('/get-office-records', [OrgOfficeRecordController::class, 'index']);
     Route::post('/create-office-record', [OrgOfficeRecordController::class, 'store']);
-    Route::put('/update-office-record/{id}', [OrgOfficeRecordController::class, 'update']);
+    Route::put('/update-office-record/{id}', action: [OrgOfficeRecordController::class, 'update']);
     Route::delete('/delete-office-record/{id}', [OrgOfficeRecordController::class, 'destroy']);
 
     //API for org membership
