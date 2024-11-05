@@ -15,42 +15,59 @@ return new class extends Migration
         Schema::create('billings', function (Blueprint $table) {
             $table->id();
 
+            // Unique Invoice ID
+            $table->string('billing_code', 15)->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-BILL.');
+
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')
                 ->nullable()
                 ->constrained()
                 ->onDelete('set null')
-                ->comment('Foreign key linking to the users table, cascades on delete if the user is removed.');
+                ->comment('References the user for billing. Null if user is deleted.');
 
-            // Store the org name as static data for future reference
+            // Store user details statically for historical reference
             $table->string('user_name')
                 ->nullable()
-                ->comment('Stores the user name for future reference even if the user is deleted');
+                ->comment('User name snapshot for billing reference');
 
-            // The start and end period for the billing cycle
-            $table->date('start_period')->comment('The start date of the billing period.');
-            $table->date('end_period')->comment('The end date of the billing period.');
+            // Brief description of the bill
+            $table->string('description', 255)
+            ->nullable()
+            ->comment('Optional detailed description of the bill.');
 
-            $table->string('item_name')->comment('Description or name of the service/item billed');
-            
-            //from billable_day_counts table (sum of every day total within bill period)
-            $table->integer('active_members_sum')->default(0)->comment('Sum of everyday active members count within the billing period, data comes from billable_day_counts table');
-            
-            //total number of days within the bill period
-            $table->integer('total_days')->default(0)->comment('Total number of days for which the service is being billed');
-            $table->decimal('rate', 10, 2)->comment('Rate per day per active member');
-            $table->decimal('bill_amount', 10, 2)->comment('Calculated total amount based on rate, members, and days');
+            $table->string('billing_address')
+                ->nullable()
+                ->comment('User billing address snapshot for reference');
 
-            // Status to track whether the billing record is issued, unissued, pending, cancelled, or a draft
-            $table->enum('bill_status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
+            // Billing item details
+            $table->string('item_name')->comment('Name or description of the billed item or service');
+
+            // Billing period
+            $table->date('period_start')->comment('Billing period start date');
+            $table->date('period_end')->comment('Billing period end date');
+
+            // Service and billing month details
+            $table->string('service_month')->comment('Month in which the service was consumed');
+            $table->string('billing_month')->comment('Month in which the bill is generated');
+
+            // Member count data from active_member_counts table
+            $table->integer('active_member_count')->default(0)->comment('Daily total active members within billing period');
+            $table->integer('billable_active_member_count')->default(0)->comment('Total billable active members within billing period');
+
+            // Billing rate and calculation
+            $table->decimal('member_daily_rate', 10, 2)->comment('Daily rate per active member');
+            $table->decimal('total_bill_amount', 10, 2)->comment('Total bill amount based on rate, members, and days');
+
+            // Billing status and administrative note
+            $table->enum('status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
                 ->default('issued')
-                ->comment('The status of the billing: issued, unissued, pending, cancelled, or draft');
+                ->comment('Billing status: issued, unissued, pending, cancelled, or draft');
 
-            // Bill status (active/inactive)
-            $table->boolean('status')->default(true)->comment('Indicates if the bill is active (true) or inactive (false)');
+            $table->string('admin_notes', 100)->nullable()->comment('Administrative notes for reference');
 
+            // Active or inactive status flag
+            $table->boolean('is_active')->default(true)->comment('Indicates if the billing record is active');
 
-            // Timestamp columns
             $table->timestamps();
         });
     }

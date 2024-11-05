@@ -23,29 +23,30 @@ class SubscriptionController extends Controller
         ]);
     }
     // Fetch all subscriptions
-    // public function index()
-    // {
-    //     // return Subscription::all();
-    //     try {
-    //         // Fetch active packages
-    //         $subscription = Subscription::where('status', true)->get();
+    public function index()
+    {
+        //for SUPERADMIN 
+        //return Subscription::all();
+        try {
+            // Fetch active packages
+            $subscription = Subscription::where('status', true)->get();
 
-    //         // Return JSON response with status and data
-    //         return response()->json([
-    //             'status' => true,
-    //             'data' => $subscription,
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         // Log the exception for debugging
-    //         Log::error('Error fetching packages: ' . $e->getMessage());
+            // Return JSON response with status and data
+            return response()->json([
+                'status' => true,
+                'data' => $subscription,
+            ]);
+        } catch (\Exception $e) {
+            // Log the exception for debugging
+            Log::error('Error fetching packages: ' . $e->getMessage());
 
-    //         // Return JSON response with error status
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'An error occurred while fetching packages.',
-    //         ], 500);
-    //     }
-    // }
+            // Return JSON response with error status
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching packages.',
+            ], 500);
+        }
+    }
 
     // Store a new subscription
     public function store(Request $request)
@@ -60,6 +61,7 @@ class SubscriptionController extends Controller
     // Show a specific subscription
     public function show(Request $request)
     {
+        //for USER
         try {
             $user_id = $request->user()->id; // Retrieve the authenticated user's ID
             $subscription = Subscription::where('user_id', $user_id)->get();

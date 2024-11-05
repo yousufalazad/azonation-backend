@@ -11,51 +11,48 @@ use Illuminate\Support\Facades\DB;
 class AssetController extends Controller
 {
 
-    /**
-     * Display a listing of assets.
-     */
-    public function getAsset(Request $request)
-    {
-        $user_id = $request->user()->id; // Retrieve the authenticated user's ID
-        $assets = DB::connection()->select("CALL GetAssetDetailsByUserID(?)", array($user_id));
-
-        //$assets = Asset::leftJoin('asset_assignment_logs', 'assets.id', '=', 'asset_assignment_logs.asset_id')->get();
-        return response()->json(['status' => true, 'data' => $assets], 200);
-    }
+    //STORE PROCEDURE, Not executed right now, for future
     // public function getAsset(Request $request)
     // {
     //     $user_id = $request->user()->id; // Retrieve the authenticated user's ID
+    //     $assets = DB::connection()->select("CALL GetAssetDetailsByUserID(?)", array($user_id));
 
-    //     $assets = DB::table('assets as a')
-    //         ->select(
-    //             'a.user_id as user_id',
-    //             'a.name as name',
-    //             'a.description as description',
-    //             'a.is_long_term as is_long_term',
-    //             'a.quantity as quantity',
-    //             'a.value_amount as value_amount',
-    //             'a.inkind_value as inkind_value',
-    //             'a.is_tangible as is_tangible',
-    //             'ps.name as privacy_setup_name',
-    //             'a.is_active as is_active',
-    //             'u.name as responsible_user_name',
-    //             'aal.assignment_start_date as assignment_start_date',
-    //             'aal.assignment_end_date as assignment_end_date',
-    //             'als.name as asset_lifecycle_statuses_name',
-    //             'aal.note as note'
-    //         )
-    //         ->join('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
-    //         ->join('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
-    //         ->join('users as u', 'aal.responsible_user_id', '=', 'u.id')
-    //         ->join('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
-    //         ->where('a.user_id', '=', $user_id)
-    //         ->get();
-
+    //     //$assets = Asset::leftJoin('asset_assignment_logs', 'assets.id', '=', 'asset_assignment_logs.asset_id')->get();
     //     return response()->json(['status' => true, 'data' => $assets], 200);
     // }
-    /**
-     * Store a new asset and assignment log.
-     */
+
+    public function getAsset(Request $request)
+    {
+        $user_id = $request->user()->id; // Retrieve the authenticated user's ID
+
+        $assets = DB::table('assets as a')
+            ->select(
+                'a.user_id as user_id',
+                'a.name as name',
+                'a.description as description',
+                'a.is_long_term as is_long_term',
+                'a.quantity as quantity',
+                'a.value_amount as value_amount',
+                'a.inkind_value as inkind_value',
+                'a.is_tangible as is_tangible',
+                'ps.name as privacy_setup_name',
+                'a.is_active as is_active',
+                'u.name as responsible_user_name',
+                'aal.assignment_start_date as assignment_start_date',
+                'aal.assignment_end_date as assignment_end_date',
+                'als.name as asset_lifecycle_statuses_name',
+                'aal.note as note'
+            )
+            ->join('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
+            ->join('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
+            ->join('users as u', 'aal.responsible_user_id', '=', 'u.id')
+            ->join('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
+            ->where('a.user_id', '=', $user_id)
+            ->get();
+
+        return response()->json(['status' => true, 'data' => $assets], 200);
+    }
+    
     public function store(Request $request)
     {
         $validated = $request->validate([

@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\OrgAccount;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
 
 class OrgAccountController extends Controller
 {
@@ -12,7 +13,7 @@ class OrgAccountController extends Controller
     public function getTransactions()
     {
         try {
-            $transactions = OrgAccount::orderBy('transaction_date', 'desc')
+            $transactions = OrgAccount::orderBy('date', 'desc')
                 ->get();
 
             return response()->json([
@@ -20,12 +21,17 @@ class OrgAccountController extends Controller
                 'data' => $transactions
             ], 200);
         } catch (\Exception $e) {
+            // Log the exception for debugging
+            Log::error('Error fetching packages: ' . $e->getMessage());
+
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.'
             ], 500);
         }
     }
+
+    
 
     // Create a new transaction
     // public function createTransaction(Request $request)
@@ -35,9 +41,9 @@ class OrgAccountController extends Controller
     //         //'account_fund_id' => 'required|exists:account_funds,id',
     //         //'transaction_id' => 'required|alphanumeric',
     //         'transaction_date' => 'required|date',
-    //         'transaction_type' => 'required|in:income,expense',
-    //         'transaction_amount' => 'required|numeric|min:0',
-    //         'description' => 'required|string|max:255'
+    //         'type' => 'required|in:income,expense',
+    //         'amount' => 'required|numeric|min:0',
+    //         'description' => 'string|max:255'
     //     ]);
 
     //     try {
@@ -46,8 +52,8 @@ class OrgAccountController extends Controller
     //             //'transaction_id' => $validatedData['transaction_id'],
     //             //'account_fund_id' => $validatedData['account_fund_id'],
     //             'transaction_date' => $validatedData['transaction_date'],
-    //             'transaction_type' => $validatedData['transaction_type'],
-    //             'transaction_amount' => $validatedData['transaction_amount'],
+    //             'type' => $validatedData['type'],
+    //             'amount' => $validatedData['amount'],
     //             'description' => $validatedData['description'] ?? null
     //         ]);
 
@@ -64,40 +70,42 @@ class OrgAccountController extends Controller
     //     }
     // }
 
+    
+
     public function createTransaction(Request $request)
 {
     $validatedData = $request->validate([
         'user_id' => 'required|exists:users,id',
-        //'account_fund_id' => 'required|exists:account_funds,id',
-        'transaction_date' => 'required|date',
-        'title' => 'required|string|max:100',
-        'transaction_type' => 'required|in:income,expense',
-        'transaction_amount' => 'required|numeric|min:0',
+        'fund_id' => 'required|exists:account_funds,id',
+        'date' => 'required|date',
+        'transaction_title' => 'required|string|max:100',
+        'type' => 'required|in:income,expense',
+        'amount' => 'required|numeric|min:0',
         'description' => 'string|max:255'
     ]);
 
     try {
         // Get the last balance (if any) from the previous transaction
         $lastTransaction = OrgAccount::where('user_id', $validatedData['user_id'])
-                                      ->latest('transaction_date')
+                                      ->latest('date')
                                       ->first();
 
-        $previousBalance = $lastTransaction ? $lastTransaction->balance : 0;
+        $previousBalance = $lastTransaction ? $lastTransaction->balance_after : 0;
 
         // Calculate new balance based on transaction type
-        $newBalance = ($validatedData['transaction_type'] === 'income') 
-                        ? $previousBalance + $validatedData['transaction_amount']
-                        : $previousBalance - $validatedData['transaction_amount'];
+        $newBalance = ($validatedData['type'] === 'income') 
+                        ? $previousBalance + $validatedData['amount']
+                        : $previousBalance - $validatedData['amount'];
 
         // Create the new transaction
         $transaction = OrgAccount::create([
             'user_id' => $validatedData['user_id'],
-            //'account_fund_id' => $validatedData['account_fund_id'],
-            'transaction_date' => $validatedData['transaction_date'],
-            'title' => $validatedData['title'],
-            'transaction_type' => $validatedData['transaction_type'],
-            'transaction_amount' => $validatedData['transaction_amount'],
-            'balance' => $newBalance, // Store the calculated balance
+            'fund_id' => $validatedData['fund_id'],
+            'date' => $validatedData['date'],
+            'transaction_title' => $validatedData['transaction_title'],
+            'type' => $validatedData['type'],
+            'amount' => $validatedData['amount'],
+            'balance_after' => $newBalance, // Store the calculated balance
             'description' => $validatedData['description']
         ]);
 
@@ -119,15 +127,15 @@ class OrgAccountController extends Controller
     // Update an existing transaction
     // public function updateTransaction(Request $request, $id)
     // {
-    //     $validatedData = $request->validate([
-    //         'user_id' => 'required|exists:users,id',
-    //         'account_fund_id' => 'required|exists:account_funds,id',
-    //         //'transaction_id' => 'required|numeric',
-    //         'transaction_date' => 'required|date',
-    //         'transaction_type' => 'required|in:income,expense',
-    //         'transaction_amount' => 'required|numeric|min:0',
-    //         'description' => 'required|string'
-    //     ]);
+    //    $validatedData = $request->validate([
+    //     'user_id' => 'required|exists:users,id',
+    //     //'fund_id' => 'required|exists:account_funds,id',
+    //     'date' => 'required|date',
+    //     'transaction_title' => 'required|string|max:100',
+    //     'type' => 'required|in:income,expense',
+    //     'amount' => 'required|numeric|min:0',
+    //     'description' => 'string|max:255'
+    // ]);
 
     //     try {
     //         $transaction = OrgAccount::where('id', $id)->first();

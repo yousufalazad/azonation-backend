@@ -15,55 +15,52 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
 
-            // Unique Invoice ID (could be used for referencing invoices)
-            $table->string('invoice_id', 11)->unique()->comment('Unique invoice identifier');
+            // Unique Invoice ID
+            $table->string('invoice_code', 15)->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-INV.');
 
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')
+                ->nullable()
                 ->constrained()
-                ->onDelete('cascade')
-                ->comment('Foreign key linking to the users table, cascades on delete if the user is removed.');
+                ->onDelete('set null')
+                ->comment('Reference to the user who owns the invoice');
 
-                
-            // Foreign key linking to the 'billings' table
             $table->foreignId('billing_id')
                 ->constrained()
                 ->onDelete('cascade')
-                ->comment('Foreign key linking to the billings table, cascades on delete');
+                ->comment('Reference to the associated billing entry');
 
-            $table->string('item', 100)->comment('Item name');
-            $table->string('description', 100)->nullable()->comment('Optional description of the invoice');
+            // Item and description
+            $table->string('item_name', 100)->comment('Name of the invoiced item or service');
+            $table->string('item_description', 100)->nullable()->comment('Description of the item or service, if needed');
 
-            // Dates for invoice generation, issue and payment due
-            $table->date('generate_date')->comment('Date when the invoice was generated');
-            $table->date('issue_date')->comment('Date when the invoice was issued');
-            $table->date('due_date')->comment('Payment due date for the invoice');
+            // Date columns
+            $table->date('generated_at')->comment('Date when the invoice was generated');
+            $table->date('issued_at')->comment('Date when the invoice was issued');
+            $table->date('due_at')->comment('Payment due date');
 
             // Financial details
-            $table->decimal('sub_total', 10, 2)->comment('Invoice sub total before VAT/TAX, amount comes from billing table, total billed amount');
-            $table->string('discount_title', 50)->nullable()->comment('Description or title for the discount');
-            $table->decimal('discount', 10, 2)->nullable()->default(0)->comment('Discount applied to the invoice');
-            $table->decimal('tax', 10, 2)->nullable()->default(0)->comment('Applicable TAX or VAT on the invoice');
-            $table->decimal('credit', 10, 2)->nullable()->default(0)->comment('Deduction from account credit balance');
-            $table->decimal('total', 10, 2)->comment('Total amount after applying discount and TAX/VAT');
-            
-            // Optional note and description fields for more context
-            $table->string('note', 100)->nullable()->comment('Optional note for additional details');
+            $table->decimal('subtotal_amount', 10, 2)->comment('Subtotal before discounts and taxes');
+            $table->string('discount_description', 50)->nullable()->comment('Title or description of the discount');
+            $table->decimal('discount_value', 10, 2)->nullable()->default(0)->comment('Discount amount applied to the invoice');
+            $table->decimal('tax_amount', 10, 2)->nullable()->default(0)->comment('Total tax applied');
+            $table->decimal('credit_applied', 10, 2)->nullable()->default(0)->comment('Credit amount applied from the user’s balance');
+            $table->decimal('total_amount_due', 10, 2)->comment('Final amount due after discounts and taxes');
 
-            // Publishing status of the invoice
-            $table->boolean('published')->default(false)->comment('Flag to indicate if the invoice is published (true) or in draft (false)');
+            // Additional fields
+            $table->string('additional_note', 100)->nullable()->comment('Optional additional notes for the invoice');
 
-            // Status of the invoice (e.g., paid, unpaid, etc.)
-            $table->enum('status', ['paid', 'unpaid', 'cancelled', 'refunded', 'collections', 'payment_pending', 'on_process'])
+            // Publishing and status fields
+            $table->boolean('is_published')->default(false)->comment('Indicates if the invoice is published');
+            $table->enum('payment_status', ['paid', 'unpaid', 'cancelled', 'refunded', 'collections', 'payment_pending', 'processing'])
                 ->default('unpaid')
                 ->comment('Current payment status of the invoice');
 
-            // Reason for the action status
-            $table->string('action_status_reason')->nullable()->comment('Reason for the current status (e.g., overdue payment, user request, etc.)');
+            // Action reason and hidden note
+            $table->string('status_reason')->nullable()->comment('Reason for the current payment status');
+            $table->string('admin_note')->comment('Internal admin note for reference');
 
-            //Hidden admin notes
-            $table->string('hidden_admin_note')->comment('Hidden admin note for understanding');
-
+            // Timestamps
             $table->timestamps();
         });
     }

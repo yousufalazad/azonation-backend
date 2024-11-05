@@ -35,7 +35,9 @@ use App\Http\Controllers\OrgOfficeRecordController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ActiveMemberCountController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PriceRateController;
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
@@ -46,6 +48,7 @@ Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    
     Route::post('logout', [AuthController::class, 'logout']);
 
     //Meeting
@@ -199,12 +202,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('subscription', [SubscriptionController::class, 'store']);
     Route::put('subscription/{id}', [SubscriptionController::class, 'update']);
     Route::delete('subscription{id}', [SubscriptionController::class, 'destroy']);
+    
     Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
+    
     Route::get('/invoices', [InvoiceController::class, 'index']);
+    
+    Route::get('/billing-list', [BillingController::class, 'index']);
 
 
     // ------------------- SuperAdmin----------------------------------------------------------------
     //API for SuperAdmin
     Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show']);
+
+    //Finance
+    //Billing
+    Route::get('invoices-for-superadmin', [InvoiceController::class, 'indexForSuperAdmin']);
+    Route::get('subscription', [SubscriptionController::class, 'index']);
+
+    // PriceRate
+    Route::get('price-rate', [PriceRateController::class, 'index']);
+
 });

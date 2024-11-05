@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\PriceRate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 
 class PriceRateController extends Controller
 {
@@ -12,8 +14,27 @@ class PriceRateController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            //$user_id = $request->user()->id; // Retrieve the authenticated user's ID
+            $priceRates = PriceRate::all();
+            // Return JSON response with status and data
+            return response()->json([
+                'status' => true,
+                'data' => $priceRates,
+            ]);
+        } catch (\Exception $e) {
+            // Log the exception for debugging
+            Log::error('Error fetching PriceRate: ' . $e->getMessage());
+
+            // Return JSON response with error status
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching PriceRate.',
+            ], 500);
+        }
     }
+
+    
 
     /**
      * Show the form for creating a new resource.
