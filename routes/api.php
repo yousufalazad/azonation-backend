@@ -23,6 +23,7 @@ use App\Http\Controllers\OrgHistoryController;
 use App\Http\Controllers\YearPlanController;
 use App\Http\Controllers\OrgRecognitionController;
 use App\Http\Controllers\OrgAccountController;
+use App\Http\Controllers\AccountFundController;
 use App\Http\Controllers\OrgReportController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\PrivacySetupController;
@@ -67,11 +68,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // ------------------- Organisation----------------------------------------------------------------
-    // Transactions
+    // Accounts
     Route::get('/get-transactions', [OrgAccountController::class, 'getTransactions']);
-    Route::post('/create-transaction', [OrgAccountController::class, 'createTransaction']);
-    Route::put('/update-transaction/{id}', [OrgAccountController::class, 'updateTransaction']);
-    Route::delete('/delete-transaction/{id}', [OrgAccountController::class, 'deleteTransaction']);
+     Route::post('/create-transaction', [OrgAccountController::class, 'createTransaction']);
+     Route::put('/update-transaction/{id}', [OrgAccountController::class, 'updateTransaction']);
+     Route::delete('/delete-transaction/{id}', [OrgAccountController::class, 'deleteTransaction']);
+
+     // Funds
+     Route::get('/get-funds', [AccountFundController::class, 'index']);
+     Route::post('/create-fund', [AccountFundController::class, 'store']);
+     Route::put('/update-fund/{id}', [AccountFundController::class, 'update']);
+     Route::delete('/delete-fund/{id}', [AccountFundController::class, 'destroy']);
 
     // OrgHistoryController
     Route::get('/get-org-histories', [OrgHistoryController::class, 'index']);
@@ -103,9 +110,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-record', [SuccessStoryController::class, 'store']);
     Route::put('/update-record/{id}', [SuccessStoryController::class, 'update']);
     Route::delete('/delete-record/{id}', [SuccessStoryController::class, 'destroy']);
-
-    
-
 
     //update org user info  
     Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
@@ -224,3 +228,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('price-rate', [PriceRateController::class, 'index']);
 
 });
+
+

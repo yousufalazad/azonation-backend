@@ -125,42 +125,42 @@ class OrgAccountController extends Controller
 
 
     // Update an existing transaction
-    // public function updateTransaction(Request $request, $id)
-    // {
-    //    $validatedData = $request->validate([
-    //     'user_id' => 'required|exists:users,id',
-    //     //'fund_id' => 'required|exists:account_funds,id',
-    //     'date' => 'required|date',
-    //     'transaction_title' => 'required|string|max:100',
-    //     'type' => 'required|in:income,expense',
-    //     'amount' => 'required|numeric|min:0',
-    //     'description' => 'string|max:255'
-    // ]);
+    public function updateTransaction(Request $request, $id)
+    {
+       $validatedData = $request->validate([
+        'user_id' => 'required|exists:users,id',
+        'fund_id' => 'required|exists:account_funds,id',
+        'date' => 'required|date',
+        'transaction_title' => 'required|string|max:100',
+        'type' => 'required|in:income,expense',
+        'amount' => 'required|numeric|min:0',
+        'description' => 'string|max:255'
+    ]);
 
-    //     try {
-    //         $transaction = OrgAccount::where('id', $id)->first();
+        try {
+            $transaction = OrgAccount::where('id', $id)->first();
 
-    //         if (!$transaction) {
-    //             return response()->json([
-    //                 'status' => false,
-    //                 'message' => 'Transaction not found.'
-    //             ], 404);
-    //         }
+            if (!$transaction) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Transaction not found.'
+                ], 404);
+            }
 
-    //         $transaction->update($validatedData);
+            $transaction->update($validatedData);
 
-    //         return response()->json([
-    //             'status' => true,
-    //             'message' => 'Transaction updated successfully',
-    //             'data' => $transaction
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'An error occurred. Please try again.'
-    //         ], 500);
-    //     }
-    // }
+            return response()->json([
+                'status' => true,
+                'message' => 'Transaction updated successfully',
+                'data' => $transaction
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.'
+            ], 500);
+        }
+    }
 
     // Delete a transaction
     public function deleteTransaction($id)
