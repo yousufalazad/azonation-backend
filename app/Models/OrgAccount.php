@@ -9,21 +9,22 @@ class OrgAccount extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'transaction_id',
+        'transaction_code',
         'user_id',
-        'title',
-        'account_fund_id',
-        'transaction_date',
-        'transaction_type',
-        'transaction_amount',
-        'balance',
-        'description'
+        'transaction_title',
+        'description',
+        'fund_id',
+        'date',
+        'type',
+        'amount',
+        'balance_after'
     ];
 
     protected $hidden = [
         'created_at',
         'updated_at'
     ];
+
     // Relationship to User
     public function user()
     {
@@ -40,12 +41,12 @@ class OrgAccount extends Model
 
             // Generate a 10-character random string from the allowed characters
             $randomString = '';
-            for ($i = 0; $i < 10; $i++) {
+            for ($i = 0; $i < 14; $i++) {
                 $randomString .= $characters[random_int(0, strlen($characters) - 1)];
             }
 
             // Prefix the random string with 'T' for the final transaction ID
-            $model->transaction_id = 'T' . $randomString;
+            $model->transaction_code = 'T' . $randomString;
         });
     }
 }

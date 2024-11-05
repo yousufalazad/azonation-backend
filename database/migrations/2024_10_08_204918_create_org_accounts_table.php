@@ -14,44 +14,53 @@ return new class extends Migration
         Schema::create('org_accounts', function (Blueprint $table) {
             $table->id();
 
-            // Alphanumeric transaction_id column with a prefix 'T'
-            $table->string('transaction_id', 11)
+            // Unique alphanumeric identifier for each transaction
+            $table->string('transaction_code', 15)
                 ->unique()
-                ->comment('11-character alphanumeric transaction ID with prefix T.');
+                ->comment('Unique 13-character alphanumeric transaction ID with prefix T.');
             
-            
-            // Foreign key referencing the users table (creator or recipient of the plan)
+            // Foreign key referencing the users table (creator or responsible user)
             $table->foreignId('user_id')
-                ->constrained('users')
+                ->constrained()
                 ->onDelete('cascade')
-                ->comment('Creator or responsible user for the transaction.');
-
-            $table->string('title', 100)
-                ->comment('Title of the transaction.');
-
+                ->comment('Reference to the user associated with the transaction.');
+                
+            // Title of the transaction
+            $table->string('transaction_title', 100)
+                ->comment('Descriptive title of the transaction.');
+            
+            // Brief description of the transaction
+            $table->string('description', 255)
+            ->nullable()
+            ->comment('Optional detailed description of the transaction.');
+                
             // Foreign key referencing the account_funds table
-            $table->foreignId('account_fund_id')
+            $table->foreignId('fund_id')
                 ->constrained('account_funds')
                 ->onDelete('cascade')
-                ->comment('Relation with fund for every transaction.');
-
-            $table->date('transaction_date')
-                ->comment('Date when the transaction was made.');
-
-            // Enum for transaction type (income or expense)
-            $table->enum('transaction_type', ['income', 'expense'])
-                ->comment('Defines whether the transaction is an income or an expense.');
+                ->comment('Reference to the specific fund associated with the transaction.');
                 
-            $table->decimal('transaction_amount', 15, 2)
-                ->comment('The amount involved in the transaction.');
+            // Transaction date
+            $table->date('date')
+                ->comment('The date the transaction occurred.');
+                
+            // Type of transaction (income or expense)
+            $table->enum('type', ['income', 'expense'])
+                ->comment('Specifies if the transaction is income or expense.');
+                
+            // Amount involved in the transaction
+            $table->decimal('amount', 15, 2)
+                ->comment('Total amount of the transaction.');
+                
+            // Account balance after the transaction
+            $table->decimal('balance_after', 15, 2)
+                ->comment('Account balance following this transaction.');
 
-           // New balance column to track the balance after the transaction
-           $table->decimal('balance', 15, 2)
-           ->comment('The account balance after the transaction.');
-                
-            $table->string('description', 255)
-                ->comment('A brief description of the transaction.');
-                
+            // Fund status: 1 = Active, 0 = Inactive
+            $table->boolean('status')
+            ->default(1)
+            ->comment('Status: 1 = Active, 0 = Inactive.');
+                  
             $table->timestamps();
         });
     }
