@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Notifications\MemberAddSuccessful;
 use App\Models\User;
-use App\Models\Individual;
-use App\Models\Organisation;
 use App\Notifications\AddMemberSuccess;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;

@@ -39,13 +39,13 @@ use App\Http\Controllers\ActiveMemberCountController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PriceRateController;
+use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\UserCurrencyController;
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
-
-
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -222,11 +222,36 @@ Route::middleware('auth:sanctum')->group(function () {
     //Finance
     //Billing
     Route::get('invoices-for-superadmin', [InvoiceController::class, 'indexForSuperAdmin']);
-    Route::get('subscription', [SubscriptionController::class, 'index']);
+    Route::get('subscription-plans', [SubscriptionController::class, 'index']);
 
     // PriceRate
     Route::get('price-rate', [PriceRateController::class, 'index']);
     Route::put('price-rate/update', [PriceRateController::class, 'update']);
+
+    //Currency
+    Route::get('currencies', [CurrencyController::class, 'index']);
+    Route::post('currencies', [CurrencyController::class,'store']);
+    Route::put('currencies/{id}', [CurrencyController::class, 'update']);
+    Route::delete('currencies/{id}', [CurrencyController::class, 'destroy']);
+
+    //User currency
+    Route::get('user-currencies', [UserCurrencyController::class, 'index']);
+    Route::post('user-currencies', [UserCurrencyController::class,'store']);
+    Route::put('user-currencies/{id}', [UserCurrencyController::class, 'update']);
+    Route::delete('user-currencies/{id}', [UserCurrencyController::class, 'destroy']);
+    Route::get('individual-users', [UserCurrencyController::class, 'getIndividualUsers']);
+
+    // //Payment method
+
+    // //Payment gateway
+    // Route::get('payment-gateways', [PaymentGatewayController::class, 'index']);
+    // Route::post('payment-gateways', [PaymentGatewayController::class,'store']);
+    // Route::put('payment-gateways/{id}', [PaymentGatewayController::class, 'update']);
+    // Route::delete('payment-gateways/{id}', [PaymentGatewayController::class, 'destroy']);
+
+    // //Subscription plan
+    // Route::get('subscription-plans', [SubscriptionPlanController::class, 'index']);
+    // Route::post('subscription-plans', [SubscriptionPlanController::class,'store']);
 
 });
 
