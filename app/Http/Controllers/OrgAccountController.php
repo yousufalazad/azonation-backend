@@ -31,47 +31,6 @@ class OrgAccountController extends Controller
         }
     }
 
-    
-
-    // Create a new transaction
-    // public function createTransaction(Request $request)
-    // {
-    //     $validatedData = $request->validate([
-    //         'user_id' => 'required|exists:users,id',
-    //         //'account_fund_id' => 'required|exists:account_funds,id',
-    //         //'transaction_id' => 'required|alphanumeric',
-    //         'transaction_date' => 'required|date',
-    //         'type' => 'required|in:income,expense',
-    //         'amount' => 'required|numeric|min:0',
-    //         'description' => 'string|max:255'
-    //     ]);
-
-    //     try {
-    //         $transaction = OrgAccount::create([
-    //             'user_id' => $validatedData['user_id'],
-    //             //'transaction_id' => $validatedData['transaction_id'],
-    //             //'account_fund_id' => $validatedData['account_fund_id'],
-    //             'transaction_date' => $validatedData['transaction_date'],
-    //             'type' => $validatedData['type'],
-    //             'amount' => $validatedData['amount'],
-    //             'description' => $validatedData['description'] ?? null
-    //         ]);
-
-    //         return response()->json([
-    //             'status' => true,
-    //             'message' => 'Transaction created successfully',
-    //             'data' => $transaction
-    //         ], 201);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'An error occurred. Please try again.'
-    //         ], status: 500);
-    //     }
-    // }
-
-    
-
     public function createTransaction(Request $request)
 {
     $validatedData = $request->validate([

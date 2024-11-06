@@ -3,63 +3,101 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserCurrency;
+use App\Models\User;
+use App\Models\Currency;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class UserCurrencyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+    public function getIndividualUsers()
+    {
+
+        $individualUsers = User::where('type', 'individual')->get();
+        // $individualUsers = User::all();
+
+        return response()->json([
+            'status' => true,
+            'data' => $individualUsers
+        ]);
+    }
+
+    // Get all user currencies
     public function index()
     {
-        //
+        $userCurrencies = UserCurrency::with('user', 'currency')->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $userCurrencies,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Store a new user currency
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id|unique:user_currencies',
+            'currency_id' => 'required|exists:currencies,id',
+            'status' => 'required|boolean', // Ensure 'status' is passed in the request
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $userCurrency = UserCurrency::create($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User currency created successfully',
+            'data' => $userCurrency,
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(UserCurrency $userCurrency)
+    // Update an existing user currency
+    public function update(Request $request, $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'currency_id' => 'required|exists:currencies,id',
+            'status' => 'required|boolean', // Ensure 'status' is passed
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $userCurrency = UserCurrency::findOrFail($id);
+        $userCurrency->update([
+            'currency_id' => $request->currency_id,
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User currency updated successfully',
+            'data' => $userCurrency,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(UserCurrency $userCurrency)
+    // Delete a user currency
+    public function destroy($id)
     {
-        //
-    }
+        $userCurrency = UserCurrency::findOrFail($id);
+        $userCurrency->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, UserCurrency $userCurrency)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(UserCurrency $userCurrency)
-    {
-        //
+        return response()->json([
+            'status' => true,
+            'message' => 'User currency deleted successfully',
+        ]);
     }
 }

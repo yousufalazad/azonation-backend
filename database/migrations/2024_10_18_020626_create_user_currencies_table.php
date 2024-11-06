@@ -27,6 +27,9 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->comment('Foreign key linking to the currencies table');
 
+            // Status column to indicate if the user currencies for the billing is currently active
+            $table->boolean('status')->default(true)->comment('Indicates if the currency is active (true) or inactive (false)');
+
             $table->timestamps();
         });
     }
