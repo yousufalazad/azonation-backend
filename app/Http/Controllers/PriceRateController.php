@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\PriceRate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 
 class PriceRateController extends Controller
@@ -71,10 +73,60 @@ class PriceRateController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PriceRate $priceRate)
+   
+        public function update(Request $request)
     {
-        //
+        // Validate the input data
+        $validator = Validator::make($request->all(), [
+            'priceRates' => 'required|array',
+            'priceRates.*.id' => 'required|exists:price_rates,id',
+            'priceRates.*.region1' => 'nullable|numeric|min:0',
+            'priceRates.*.region2' => 'nullable|numeric|min:0',
+            'priceRates.*.region3' => 'nullable|numeric|min:0',
+            // Add validation rules for all regions you have
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($request->priceRates as $rateData) {
+                $priceRate = PriceRate::findOrFail($rateData['id']);
+                
+                // Update each region price field from the request
+                foreach ($rateData as $regionKey => $value) {
+                    if (str_starts_with($regionKey, 'region')) {
+                        $priceRate->{$regionKey} = $value;
+                    }
+                }
+
+                $priceRate->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Price rates updated successfully',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update price rates',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+    
 
     /**
      * Remove the specified resource from storage.
