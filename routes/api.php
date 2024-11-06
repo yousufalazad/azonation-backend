@@ -226,6 +226,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // PriceRate
     Route::get('price-rate', [PriceRateController::class, 'index']);
+    Route::put('price-rate/update', [PriceRateController::class, 'update']);
 
 });
 
