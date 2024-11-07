@@ -52,13 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('logout', [AuthController::class, 'logout']);
 
-    //Meeting
-    // Route::get('/get-meetings', [MeetingController::class, 'index']);
-    // Route::get('/meetings/{id}', [MeetingController::class, 'show']);
-    Route::get('/get-org-meetings', [MeetingController::class, 'getOrgMeeting']);
-    Route::post('/create-meeting', [MeetingController::class, 'store']);
-    Route::put('/update-meeting/{id}', [MeetingController::class, 'update']);
-    Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
+    
 
     // ------------------- Individual----------------------------------------------------------------
     Route::get('/individual_profile_data/{userId}', [IndividualController::class, 'getProfileImage']);
@@ -168,6 +162,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('create_committee', [CommitteeController::class, 'store']);
     Route::put('update_committee/{id}', [CommitteeController::class, 'update']);
     Route::delete('org-committee/{id}', [CommitteeController::class, 'destroy']);
+
+    //Meeting
+    // Route::get('/get-meetings', [MeetingController::class, 'index']);
+    Route::get('/get-meeting/{id}', [MeetingController::class, 'show']); // Fetch meeting details
+    Route::get('/get-org-meetings', [MeetingController::class, 'getOrgMeeting']);
+    Route::post('/create-meeting', [MeetingController::class, 'store']);
+    Route::put('/update-meeting/{id}', [MeetingController::class, 'update']);
+    Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
 
     //Event
     Route::get('/get-events/{userId}', [OrgEventController::class, 'getEvents']);

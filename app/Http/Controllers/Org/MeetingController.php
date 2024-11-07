@@ -54,20 +54,23 @@ class MeetingController extends Controller
     // Get a specific meeting
     public function show($id)
     {
+        // Find the meeting by ID
         $meeting = Meeting::find($id);
 
+        // Check if meeting exists
         if (!$meeting) {
             return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
         }
 
-        return response()->json(['status' => true, 'data' => $meeting]);
+        // Return the meeting data
+        return response()->json(['status' => true, 'data' => $meeting], 200);
     }
 
     // Update a meeting
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
+            // 'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             // 'short_name' => 'required|string|max:100',
             // 'subject' => 'required|string|max:255',
@@ -94,7 +97,7 @@ class MeetingController extends Controller
         $meeting->update($request->all());
         return response()->json(['status' => true, 'message' => 'Meeting updated successfully', 'data' => $meeting]);
     }
-
+    
     // Delete a meeting
     public function destroy($id)
     {
