@@ -20,15 +20,15 @@ return new class extends Migration
                 ->comment('Creator or responsible user for the transaction.');
 
             $table->string('title', 255);
-            $table->string('description', 255);
-            $table->string('document', 255);
-            $table->tinyInteger(column: 'status')->default(0)->comment('0 = only me, 1 = public');
+            $table->string('description', 255)->nullable();
+            $table->string('document', 255)->nullable();
+            $table->tinyInteger(column: 'is_active')->default(0)->comment('1 = Active, 0 = Inactive');
 
-            // Foreign key referencing the privacy setups table (privacy settings)
-            // $table->foreignId('privacy_setup_id')
-            // ->constrained('privacy_setups')
-            // ->onDelete('cascade')
-            // ->comment('Privacy level of the year plan (e.g., public, private, only members).');
+            //Foreign key referencing the privacy setups table (privacy settings)
+            $table->foreignId('privacy_setup_id')
+            ->constrained('privacy_setups')
+            ->onDelete('cascade')
+            ->comment('Privacy level of the year plan (e.g., public, private, only members).');
 
             $table->timestamps();
         });

@@ -27,6 +27,7 @@ class AssetController extends Controller
 
         $assets = DB::table('assets as a')
             ->select(
+                'a.id as id',
                 'a.user_id as user_id',
                 'a.name as name',
                 'a.description as description',
@@ -53,6 +54,47 @@ class AssetController extends Controller
         return response()->json(['status' => true, 'data' => $assets], 200);
     }
     
+    public function getAssetDetails($assetId)
+    {
+        // Find the meeting by ID
+        // $asset = Asset::find($assetId);
+        $asset = DB::table('assets as a')
+            ->select(
+                'a.id as id',
+                'a.user_id as user_id',
+                'a.name as name',
+                'a.description as description',
+                'a.is_long_term as is_long_term',
+                'a.quantity as quantity',
+                'a.value_amount as value_amount',
+                'a.inkind_value as inkind_value',
+                'a.is_tangible as is_tangible',
+                'a.privacy_setup_id as privacy_setup_id',
+                'ps.name as privacy_setup_name',
+                'a.is_active as is_active',
+                'u.name as responsible_user_name',
+                'aal.responsible_user_id as responsible_user_id',
+                'aal.asset_lifecycle_statuses_id as asset_lifecycle_statuses_id',
+                'aal.assignment_start_date as assignment_start_date',
+                'aal.assignment_end_date as assignment_end_date',
+                'als.name as asset_lifecycle_statuses_name',
+                'aal.note as note'
+            )
+            ->join('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
+            ->join('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
+            ->join('users as u', 'aal.responsible_user_id', '=', 'u.id')
+            ->join('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
+            ->where('a.id', '=', $assetId)
+            ->first();
+
+        // Check if meeting exists
+        if (!$asset) {
+            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        }
+
+        // Return the meeting data
+        return response()->json(['status' => true, 'data' => $asset], 200);
+    }
     public function store(Request $request)
     {
         $validated = $request->validate([

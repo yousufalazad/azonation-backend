@@ -9,11 +9,24 @@ use Illuminate\Support\Facades\Validator;
 class OrgEventController extends Controller
 {
     // Fetch all OrgEvents
-    public function getEvents($userId)
+    public function index($userId)
     {
         $events = OrgEvent::where('user_id', $userId)->get();
 
         return response()->json(['status' => true, 'data' => $events]);
+    }
+    public function getEvent($eventId)
+    {
+        // Find the meeting by ID
+        $event = OrgEvent::find($eventId);
+
+        // Check if meeting exists
+        if (!$event) {
+            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        }
+
+        // Return the meeting data
+        return response()->json(['status' => true, 'data' => $event], 200);
     }
 
     // Create a new OrgEvent

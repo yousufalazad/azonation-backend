@@ -24,7 +24,9 @@ return new class extends Migration
                 ->constrained('countries')
                 ->onDelete('cascade')
                 ->onUpdate('cascade'); // Ensures updates on 'countries' cascade
-            $table->string('dialing_code', 10)->index(); // Limited length and indexed for faster lookups
+           
+                $table->string('dialing_code', 10)->index(); // Limited length and indexed for faster lookups
+           
             $table->timestamps();
 
             // Add a unique constraint to avoid duplicate dialing codes for the same country
