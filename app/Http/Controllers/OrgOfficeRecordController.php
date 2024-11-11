@@ -34,6 +34,20 @@ class OrgOfficeRecordController extends Controller
         }
     }
 
+    public function getOfficeRecord($recordId)
+    {
+        // Find the meeting by ID
+        $record = OrgOfficeRecord::find($recordId);
+
+        // Check if meeting exists
+        if (!$record) {
+            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        }
+
+        // Return the meeting data
+        return response()->json(['status' => true, 'data' => $record], 200);
+    }
+
     // Store a new organizational history record
     public function store(Request $request)
     {
@@ -41,7 +55,7 @@ class OrgOfficeRecordController extends Controller
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
-            'description' => 'required|string|max:20000',
+            'description' => 'string|max:20000',
             'status' => 'required|integer',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048', // Image validation for each file
             'document' => 'nullable|file|mimes:pdf,doc,docx|max:10024', // Document validation
@@ -99,7 +113,7 @@ class OrgOfficeRecordController extends Controller
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
-            'description' => 'required|string|max:20000',
+            'description' => 'string|max:20000',
             'status' => 'required|integer',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
             'document' => 'nullable|file|mimes:pdf,doc,docx|max:10024',
@@ -171,6 +185,13 @@ class OrgOfficeRecordController extends Controller
             // Delete the image and document if they exist
             if ($OrgOfficeRecord->document) {
                 Storage::delete('public/' . $OrgOfficeRecord->document);
+            }
+
+            // Delete old images
+            $allImages = OfficeRecordImage::where('org_office_record_id', $id)->get();
+            foreach ($allImages as $singleImage) {
+                Storage::delete('public/' . $singleImage->image);
+                $singleImage->delete();
             }
 
             $OrgOfficeRecord->delete();

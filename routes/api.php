@@ -49,10 +49,10 @@ Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     Route::post('logout', [AuthController::class, 'logout']);
 
-    
+
 
     // ------------------- Individual----------------------------------------------------------------
     Route::get('/individual_profile_data/{userId}', [IndividualController::class, 'getProfileImage']);
@@ -64,15 +64,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // ------------------- Organisation----------------------------------------------------------------
     // Accounts
     Route::get('/get-transactions', [OrgAccountController::class, 'getTransactions']);
-     Route::post('/create-transaction', [OrgAccountController::class, 'createTransaction']);
-     Route::put('/update-transaction/{id}', [OrgAccountController::class, 'updateTransaction']);
-     Route::delete('/delete-transaction/{id}', [OrgAccountController::class, 'deleteTransaction']);
+    Route::post('/create-transaction', [OrgAccountController::class, 'createTransaction']);
+    Route::put('/update-transaction/{id}', [OrgAccountController::class, 'updateTransaction']);
+    Route::delete('/delete-transaction/{id}', [OrgAccountController::class, 'deleteTransaction']);
 
-     // Funds
-     Route::get('/get-funds', [AccountFundController::class, 'index']);
-     Route::post('/create-fund', [AccountFundController::class, 'store']);
-     Route::put('/update-fund/{id}', [AccountFundController::class, 'update']);
-     Route::delete('/delete-fund/{id}', [AccountFundController::class, 'destroy']);
+    // Funds
+    Route::get('/get-funds', [AccountFundController::class, 'index']);
+    Route::post('/create-fund', [AccountFundController::class, 'store']);
+    Route::put('/update-fund/{id}', [AccountFundController::class, 'update']);
+    Route::delete('/delete-fund/{id}', [AccountFundController::class, 'destroy']);
 
     // OrgHistoryController
     Route::get('/get-org-histories', [OrgHistoryController::class, 'index']);
@@ -131,6 +131,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Office record
     Route::get('/get-office-records', [OrgOfficeRecordController::class, 'index']);
+    Route::get('/get-office-record/{recordId}', [OrgOfficeRecordController::class, 'getOfficeRecord']);
     Route::post('/create-office-record', [OrgOfficeRecordController::class, 'store']);
     Route::put('/update-office-record/{id}', action: [OrgOfficeRecordController::class, 'update']);
     Route::delete('/delete-office-record/{id}', [OrgOfficeRecordController::class, 'destroy']);
@@ -172,10 +173,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
 
     //Event
-    Route::get('/get-events/{userId}', [OrgEventController::class, 'getEvents']);
+    Route::get('/get-events/{userId}', [OrgEventController::class, 'index']);
+    Route::get('/get-event/{eventId}', [OrgEventController::class, 'getEvent']);
     Route::post('/create-event', [OrgEventController::class, 'createEvent']);
-    Route::put('/update-event/{id}', [OrgEventController::class, 'updateEvent']);
-    Route::delete('/delete-event/{id}', [OrgEventController::class, 'deleteEvent']);
+    Route::put('/update-event/{eventId}', [OrgEventController::class, 'updateEvent']);
+    Route::delete('/delete-event/{eventId}', [OrgEventController::class, 'deleteEvent']);
 
     //Project
     Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
@@ -189,7 +191,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Asset
     Route::get('/get-assets/{userId}', [AssetController::class, 'getAsset']);
-
+    Route::get('/get-asset/{assetId}', [AssetController::class, 'getAssetDetails']);
     Route::post('/create-asset', [AssetController::class, 'store']);
     Route::put('/update-asset/{id}', [AssetController::class, 'update']);
     Route::delete('/delete-asset/{id}', [AssetController::class, 'destroy']);
@@ -199,8 +201,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // asset_lifecycle_setups
     Route::get('asset-lifecycle-setups', [AssetLifecycleStatusController::class, 'index']);
 
-
-
     //Billing
     Route::get('packages', [PackageController::class, 'index']);
 
@@ -208,12 +208,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('subscription', [SubscriptionController::class, 'store']);
     Route::put('subscription/{id}', [SubscriptionController::class, 'update']);
     Route::delete('subscription{id}', [SubscriptionController::class, 'destroy']);
-    
+
     Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
-    
+
     Route::get('/invoices', [InvoiceController::class, 'index']);
-    
+
     Route::get('/billing-list', [BillingController::class, 'index']);
 
 
@@ -232,13 +232,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Currency
     Route::get('currencies', [CurrencyController::class, 'index']);
-    Route::post('currencies', [CurrencyController::class,'store']);
+    Route::post('currencies', [CurrencyController::class, 'store']);
     Route::put('currencies/{id}', [CurrencyController::class, 'update']);
     Route::delete('currencies/{id}', [CurrencyController::class, 'destroy']);
 
     //User currency
     Route::get('user-currencies', [UserCurrencyController::class, 'index']);
-    Route::post('user-currencies', [UserCurrencyController::class,'store']);
+    Route::post('user-currencies', [UserCurrencyController::class, 'store']);
     Route::put('user-currencies/{id}', [UserCurrencyController::class, 'update']);
     Route::delete('user-currencies/{id}', [UserCurrencyController::class, 'destroy']);
     Route::get('individual-users', [UserCurrencyController::class, 'getIndividualUsers']);
@@ -256,5 +256,3 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::post('subscription-plans', [SubscriptionPlanController::class,'store']);
 
 });
-
-
