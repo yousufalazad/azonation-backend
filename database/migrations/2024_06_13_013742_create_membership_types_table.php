@@ -19,6 +19,8 @@ return new class extends Migration
                   ->unique()
                   ->comment('Unique name representing the membership type: Honorary Member, Lifetime Member, General Member, Associate Member, Temporary Member, Prospective Member, Not A Member');
 
+            $table->boolean('is_active')->default(true); // Indicates whether the membership_types is active or not
+            
             // Timestamps for created_at and updated_at
             $table->timestamps();
         });

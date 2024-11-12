@@ -42,6 +42,13 @@ use App\Http\Controllers\PriceRateController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\UserCurrencyController;
 
+// Master Setting
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\DialingCodeController;
+use App\Http\Controllers\Org\MeetingConductTypeController;
+use App\Http\Controllers\Org\MeetingAttendanceTypeController;
+use App\Http\Controllers\Org\MembershipTypeController;
+
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -255,4 +262,29 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::get('subscription-plans', [SubscriptionPlanController::class, 'index']);
     // Route::post('subscription-plans', [SubscriptionPlanController::class,'store']);
 
+    // Country
+    Route::get('/get-countries', [CountryController::class, 'index']);
+    Route::post('/create-country', [CountryController::class, 'store']);
+    Route::put('/update-country/{id}', [CountryController::class, 'update']);
+    Route::delete('/delete-country/{id}', [CountryController::class, 'destroy']);
+    // dialing-code
+    Route::get('/get-dialing-codes', [DialingCodeController::class, 'index']);
+    Route::post('/create-dialing-code', [DialingCodeController::class, 'store']);
+    Route::put('/update-dialing-code/{id}', [DialingCodeController::class, 'update']);
+    Route::delete('/delete-dialing-code/{id}', [DialingCodeController::class, 'destroy']);
+    // meeting-conduct-type
+    Route::get('/get-meeting-conduct-types', [MeetingConductTypeController::class, 'index']);
+    Route::post('/create-meeting-conduct-type', [MeetingConductTypeController::class, 'store']);
+    Route::put('/update-meeting-conduct-type/{id}', [MeetingConductTypeController::class, 'update']);
+    Route::delete('/delete-meeting-conduct-type/{id}', [MeetingConductTypeController::class, 'destroy']);
+    // meeting-attendance-type
+    Route::get('/get-meeting-attendance-types', [MeetingAttendanceTypeController::class, 'index']);
+    Route::post('/create-meeting-attendance-type', [MeetingAttendanceTypeController::class, 'store']);
+    Route::put('/update-meeting-attendance-type/{id}', [MeetingAttendanceTypeController::class, 'update']);
+    Route::delete('/delete-meeting-attendance-type/{id}', [MeetingAttendanceTypeController::class, 'destroy']);
+    // membership-type
+    Route::get('/get-membership-types', [MembershipTypeController::class, 'index']);
+    Route::post('/create-membership-type', [MembershipTypeController::class, 'store']);
+    Route::put('/update-membership-type/{id}', [MembershipTypeController::class, 'update']);
+    Route::delete('/delete-membership-type/{id}', [MembershipTypeController::class, 'destroy']);
 });

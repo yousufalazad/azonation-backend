@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('designations', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
+            $table->string('name')->unique();
+            $table->boolean('is_active')->default(true); // Indicates whether the designation is active or not
             $table->timestamps();
         });
     }
