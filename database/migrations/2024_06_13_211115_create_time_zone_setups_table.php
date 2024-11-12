@@ -27,6 +27,8 @@ return new class extends Migration
                   ->nullable()
                   ->comment('Optional description or notes about the time zone');
 
+            $table->boolean('is_active')->default(true); // Indicates whether the time_zone_setups is active or not
+            
             // Timestamps for created_at and updated_at
             $table->timestamps();
         });

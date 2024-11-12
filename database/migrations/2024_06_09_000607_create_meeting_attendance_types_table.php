@@ -19,7 +19,8 @@ return new class extends Migration
                   ->unique()
                   ->comment('Unique name representing the meeting attendance type');
 
-            // Timestamps for created_at and updated_at
+            $table->boolean('is_active')->default(true); // Indicates whether the meeting_attendance_types is active or not
+                  // Timestamps for created_at and updated_at
             $table->timestamps();
         });
     }

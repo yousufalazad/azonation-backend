@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('name')
                   ->unique()
                   ->comment('Unique name representing the meeting conduct type');
+            
+            $table->boolean('is_active')->default(true); // Indicates whether the meeting_conduct_types is active or not
 
             // Timestamps for created_at and updated_at
             $table->timestamps();

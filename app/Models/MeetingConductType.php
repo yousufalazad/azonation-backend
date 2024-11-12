@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class MeetingConductType extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'name', 
+        'is_active'
+    ];
 
     protected $hidden=[
         'created_at',

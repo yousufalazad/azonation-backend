@@ -25,7 +25,9 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->onUpdate('cascade'); // Ensures updates on 'countries' cascade
            
-                $table->string('dialing_code', 10)->index(); // Limited length and indexed for faster lookups
+            $table->string('dialing_code', 10)->index(); // Limited length and indexed for faster lookups
+            
+            $table->boolean('is_active')->default(true); // Indicates whether the dialing code is active or not
            
             $table->timestamps();
 

@@ -12,6 +12,7 @@ class DialingCode extends Model
     protected $fillable = [
         'country_id', 
         'dialing_code',
+        'is_active'
     ];
     
     protected $hidden=[
