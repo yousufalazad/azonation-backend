@@ -9,6 +9,13 @@ class LanguageList extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'language_name', 
+        'language_code', 
+        'default', 
+        'is_active'
+    ];
+
     protected $hidden=[
         'created_at',
         'updated_at'

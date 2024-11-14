@@ -48,6 +48,9 @@ use App\Http\Controllers\DialingCodeController;
 use App\Http\Controllers\Org\MeetingConductTypeController;
 use App\Http\Controllers\Org\MeetingAttendanceTypeController;
 use App\Http\Controllers\Org\MembershipTypeController;
+use App\Http\Controllers\Org\DesignationController;
+use App\Http\Controllers\LanguageListController;
+use App\Http\Controllers\TimeZoneSetupController;
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
@@ -287,4 +290,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-membership-type', [MembershipTypeController::class, 'store']);
     Route::put('/update-membership-type/{id}', [MembershipTypeController::class, 'update']);
     Route::delete('/delete-membership-type/{id}', [MembershipTypeController::class, 'destroy']);
+    // designation
+    Route::get('/get-designations', [DesignationController::class, 'index']);
+    Route::post('/create-designation', [DesignationController::class, 'store']);
+    Route::put('/update-designation/{id}', [DesignationController::class, 'update']);
+    Route::delete('/delete-designation/{id}', [DesignationController::class, 'destroy']);
+    // designation
+    Route::get('/get-languages', [LanguageListController::class, 'index']);
+    Route::post('/create-language', [LanguageListController::class, 'store']);
+    Route::put('/update-language/{id}', [LanguageListController::class, 'update']);
+    Route::delete('/delete-language/{id}', [LanguageListController::class, 'destroy']);
+    // time-zone-setup
+    Route::get('/get-time-zone-setups', [TimeZoneSetupController::class, 'index']);
+    Route::post('/create-time-zone-setup', [TimeZoneSetupController::class, 'store']);
+    Route::put('/update-time-zone-setup/{id}', [TimeZoneSetupController::class, 'update']);
+    Route::delete('/delete-time-zone-setup/{id}', [TimeZoneSetupController::class, 'destroy']);
 });
