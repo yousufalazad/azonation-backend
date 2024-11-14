@@ -19,7 +19,9 @@ class MeetingController extends Controller
     public function getOrgMeeting(Request $request)
     {
         $user_id = $request->user()->id; // Retrieve the authenticated user's ID
-        $meetings = Meeting::where('user_id', $user_id)->get();
+        $meetings = Meeting::select('meetings.*', 'meeting_conduct_types.id as conduct_type_id', 'meeting_conduct_types.name as conduct_type_name')
+        ->leftJoin('meeting_conduct_types', 'meetings.conduct_type', '=', 'meeting_conduct_types.id')
+        ->where('meetings.user_id', $user_id)->get();
         return response()->json(['status' => true, 'data' => $meetings]);
     }
 
@@ -55,7 +57,11 @@ class MeetingController extends Controller
     public function show($id)
     {
         // Find the meeting by ID
-        $meeting = Meeting::find($id);
+        
+        $meeting =  Meeting::select('meetings.*', 'meeting_conduct_types.id as conduct_type_id', 'meeting_conduct_types.name as conduct_type_name')
+        ->leftJoin('meeting_conduct_types', 'meetings.conduct_type', '=', 'meeting_conduct_types.id')
+        ->where('meetings.id', $id)->first();
+        // $meeting = Meeting::find($id);
 
         // Check if meeting exists
         if (!$meeting) {
