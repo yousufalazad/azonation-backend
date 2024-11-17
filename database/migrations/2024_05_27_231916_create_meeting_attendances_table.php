@@ -27,11 +27,12 @@ return new class extends Migration
                   ->cascadeOnDelete()
                   ->comment('Foreign key referencing the users table');
 
-            // Enum for attendance type: 0 = null, 1 = in_person, 2 = remote, 3 = hybrid
-            $table->enum('attendance_type', [0, 1, 2, 3])
-                  ->default(0)
-                  ->comment('0 = null, 1 = in_person, 2 = remote, 3 = hybrid')
-                  ->nullable();
+            // Foreign keys using foreignId and constrained
+            $table->foreignId('meeting_attendance_type_id')
+                  ->constrained('meeting_attendance_types')
+                  ->cascadeOnUpdate()
+                  ->cascadeOnDelete()
+                  ->comment('Foreign key referencing the meeting_attendance_types table');
 
             // Date and time for attendance
             $table->date('date')->nullable()->comment('Date of the meeting');

@@ -6,10 +6,6 @@ use App\Http\Controllers\Individual\IndividualController;
 use App\Http\Controllers\Org\OrgMemberListController;
 use App\Http\Controllers\Org\CommitteeController;
 use App\Http\Controllers\Org\MeetingController;
-
-use App\Http\Controllers\Org\MeetingMinutesController;
-use App\Http\Controllers\Org\MeetingAttendanceController;
-
 use App\Http\Controllers\Org\AddressController;
 use App\Http\Controllers\Org\OrgAdministratorController;
 use App\Http\Controllers\PhoneNumberController;
@@ -55,7 +51,6 @@ use App\Http\Controllers\Org\MembershipTypeController;
 use App\Http\Controllers\Org\DesignationController;
 use App\Http\Controllers\LanguageListController;
 use App\Http\Controllers\TimeZoneSetupController;
-use App\Http\Controllers\UserCountryController;
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
@@ -187,20 +182,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-meeting/{id}', [MeetingController::class, 'update']);
     Route::delete('/delete-meeting/{id}', [MeetingController::class, 'destroy']);
 
-    // meeting-minutes
-    Route::get('/get-meeting-minutes', [MeetingMinutesController::class, 'index']);
-    Route::get('/get-meeting-minutes/{id}', [MeetingMinutesController::class, 'show']);
-    Route::post('/create-meeting-minutes', [MeetingMinutesController::class, 'store']);
-    Route::put('/update-meeting-minutes/{id}', [MeetingMinutesController::class, 'update']);
-    Route::delete('/delete-meeting-minutes/{id}', [MeetingMinutesController::class, 'destroy']);
-    //Meeting MeetingAttendance 
-    Route::get('/get-org-user-list', [MeetingAttendanceController::class, 'getOrgUse']);
-    Route::get('/get-meeting-attendances', [MeetingAttendanceController::class, 'index']);
-    Route::get('/get-meeting-attendance/{id}', [MeetingAttendanceController::class, 'show']);
-    Route::post('/create-meeting-attendance', [MeetingAttendanceController::class, 'store']);
-    Route::put('/update-meeting-attendance/{id}', [MeetingAttendanceController::class, 'update']);
-    Route::delete('/delete-meeting-attendance/{id}', [MeetingAttendanceController::class, 'destroy']);
-
     //Event
     Route::get('/get-events/{userId}', [OrgEventController::class, 'index']);
     Route::get('/get-event/{eventId}', [OrgEventController::class, 'getEvent']);
@@ -324,10 +305,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-time-zone-setup', [TimeZoneSetupController::class, 'store']);
     Route::put('/update-time-zone-setup/{id}', [TimeZoneSetupController::class, 'update']);
     Route::delete('/delete-time-zone-setup/{id}', [TimeZoneSetupController::class, 'destroy']);
-    // time-zone-setup
-    Route::get('/get-user-list', [UserCountryController::class, 'getUser']);
-    Route::get('/get-user-countries', [UserCountryController::class, 'index']);
-    Route::post('/create-user-country', [UserCountryController::class, 'store']);
-    Route::put('/update-user-country/{id}', [UserCountryController::class, 'update']);
-    Route::delete('/delete-user-country/{id}', [UserCountryController::class, 'destroy']);
 });

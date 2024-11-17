@@ -26,7 +26,10 @@ return new class extends Migration
 
             // Date and time for the meeting
             $table->date('date')->nullable(); // Meeting date (optional)
-            $table->time('time')->nullable(); // Meeting time (optional)
+            $table->time('time')->nullable(); // Meeting time (need to change as name 'startTime')
+
+            // End time for the meeting
+            //$table->time('end_time')->nullable(); // Meeting time (optional)
             
             // Additional optional fields for meeting details
             $table->text('description')->nullable(); // Meeting description
