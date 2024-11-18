@@ -20,4 +20,10 @@ class Subscription extends Model
         'created_at',
         'updated_at'
     ];
+    
+    public function package()
+{
+    return $this->belongsTo(Package::class);
+}
+
 }
