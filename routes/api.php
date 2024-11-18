@@ -45,6 +45,8 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PriceRateController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\UserCurrencyController;
+use App\Http\Controllers\UserPriceRateController;
+
 
 // Master Setting
 use App\Http\Controllers\CountryController;
@@ -237,12 +239,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('subscription', [SubscriptionController::class, 'store']);
     Route::put('subscription/{id}', [SubscriptionController::class, 'update']);
     Route::delete('subscription{id}', [SubscriptionController::class, 'destroy']);
-
     Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
-
     Route::get('/invoices', [InvoiceController::class, 'index']);
-
     Route::get('/billing-list', [BillingController::class, 'index']);
 
 
@@ -258,6 +257,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // PriceRate
     Route::get('price-rate', [PriceRateController::class, 'index']);
     Route::put('price-rate/update', [PriceRateController::class, 'update']);
+    Route::get('/user-price-rates', [UserPriceRateController::class, 'index']);
 
     //Currency
     Route::get('currencies', [CurrencyController::class, 'index']);

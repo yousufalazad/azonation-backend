@@ -34,7 +34,10 @@ class MeetingMinutesController extends Controller
         // Validation
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
-            'minutes' => 'required',
+            'prepared_by' => 'required',
+            'reviewed_by' => 'required',
+            'privacy_setup_id' => 'required',
+            'is_active' => 'required',
             // 'decisions' => 'required',
             // 'note' => 'nullable',
             // 'start_time' => 'nullable',
@@ -58,29 +61,32 @@ class MeetingMinutesController extends Controller
 
         try {
             // Logging the inputs for debugging
-            Log::info('Meeting Minutes data: ', context: ['meeting_id' => $request->meeting_id, 'minutes' => $request->minutes]);
+            Log::info('Meeting Minutes data: ', context: ['meeting_id' => $request->meeting_id, 'prepared_by' => $request->prepared_by, 'reviewed_by' => $request->reviewed_by, 'privacy_setup_id' => $request->privacy_setup_id]);
 
             // Create the Meeting Attendance record
-            $meetingAttendances = MeetingMinutes::create([
+            $meetingMinutes = MeetingMinutes::create([
                 'meeting_id' => $request->meeting_id,
+                'prepared_by' => $request->prepared_by,
+                'reviewed_by' => $request->reviewed_by,
                 'minutes' => $request->minutes,
                 'decisions' => $request->decisions,
                 'note' => $request->note,
+                'file_attachments' => $request->file_attachments,
                 'start_time' => $request->start_time,
                 'end_time' => $request->end_time,
                 'follow_up_tasks' => $request->follow_up_tasks,
                 'tags' => $request->tags,
                 'action_items' => $request->action_items,
-                'file_attachments' => $request->file_attachments,
-                'video_link' => $request->video_link,
                 'meeting_location' => $request->meeting_location,
-                'confidentiality' => $request->confidentiality,
+                'video_link' => $request->video_link,
+                'privacy_setup_id' => $request->privacy_setup_id,
                 'approval_status' => $request->approval_status,
-                'status' => $request->status,
+                'is_publish' => $request->is_publish,
+                'is_active' => $request->is_active,
             ]);
 
             // Return success response
-            return response()->json(['status' => true, 'data' => $meetingAttendances, 'message' => 'Meeting Attendance created successfully.'], 201);
+            return response()->json(['status' => true, 'data' => $meetingMinutes, 'message' => 'Meeting Minutes created successfully.'], 201);
         } catch (\Exception $e) {
             // Log the error message for troubleshooting
             Log::error('Error creating Country: ' . $e->getMessage());
@@ -114,12 +120,10 @@ class MeetingMinutesController extends Controller
         // Validation
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
-            'user_id' => 'required',
-            'attendance_type' => 'required',
-            'date' => 'nullable',
-            'time' => 'nullable',
-            'note' => 'nullable',
-            'is_active' => 'nullable',
+            'prepared_by' => 'required',
+            'reviewed_by' => 'required',
+            'privacy_setup_id' => 'required',
+            'is_active' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -134,11 +138,22 @@ class MeetingMinutesController extends Controller
         // Update the Meeting Attendances
         $meetingAttendances->update([
             'meeting_id' => $request->meeting_id,
-            'user_id' => $request->user_id,
-            'attendance_type' => $request->attendance_type,
-            'date' => $request->date,
-            'time' => $request->time,
+            'prepared_by' => $request->prepared_by,
+            'reviewed_by' => $request->reviewed_by,
+            'minutes' => $request->minutes,
+            'decisions' => $request->decisions,
             'note' => $request->note,
+            'file_attachments' => $request->file_attachments,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'follow_up_tasks' => $request->follow_up_tasks,
+            'tags' => $request->tags,
+            'action_items' => $request->action_items,
+            'meeting_location' => $request->meeting_location,
+            'video_link' => $request->video_link,
+            'privacy_setup_id' => $request->privacy_setup_id,
+            'approval_status' => $request->approval_status,
+            'is_publish' => $request->is_publish,
             'is_active' => $request->is_active,
         ]);
 

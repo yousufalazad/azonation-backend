@@ -13,11 +13,24 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    // app/Models/User.php
+
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class);
+    }
+    
+    public function country()
+    {
+        return $this->hasOne(UserCountry::class);
+    }
+    
+    public function currency()
+    {
+        return $this->hasOne(UserCurrency::class);
+    }
+    
+
     protected $fillable = [
         'azon_id',
         'name',

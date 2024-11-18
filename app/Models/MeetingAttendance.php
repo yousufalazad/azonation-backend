@@ -11,7 +11,7 @@ class MeetingAttendance extends Model
     protected $fillable = [
         'meeting_id',
         'user_id', 
-        'attendance_type', 
+        'meeting_attendance_type_id', 
         'date', 
         'time', 
         'note', 

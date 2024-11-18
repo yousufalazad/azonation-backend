@@ -42,7 +42,7 @@ class MeetingAttendanceController extends Controller
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
             'user_id' => 'required',
-            'attendance_type' => 'required',
+            'meeting_attendance_type_id' => 'required',
             'date' => 'nullable',
             'time' => 'nullable',
             'note' => 'nullable',
@@ -55,13 +55,13 @@ class MeetingAttendanceController extends Controller
 
         try {
             // Logging the inputs for debugging
-            Log::info('Meeting Attendance data: ', ['attendance_type' => $request->attendance_type, 'user_id' => $request->user_id]);
+            Log::info('Meeting Attendance data: ', ['meeting_attendance_type_id' => $request->meeting_attendance_type_id, 'user_id' => $request->user_id]);
 
             // Create the Meeting Attendance record
             $meetingAttendances = MeetingAttendance::create([
                 'meeting_id' => $request->meeting_id,
                 'user_id' => $request->user_id,
-                'attendance_type' => $request->attendance_type,
+                'meeting_attendance_type_id' => $request->meeting_attendance_type_id,
                 'date' => $request->date,
                 'time' => $request->time,
                 'note' => $request->note,
@@ -105,7 +105,7 @@ class MeetingAttendanceController extends Controller
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
             'user_id' => 'required',
-            'attendance_type' => 'required',
+            'meeting_attendance_type_id' => 'required',
             'date' => 'nullable',
             'time' => 'nullable',
             'note' => 'nullable',
@@ -125,7 +125,7 @@ class MeetingAttendanceController extends Controller
         $meetingAttendances->update([
             'meeting_id' => $request->meeting_id,
             'user_id' => $request->user_id,
-            'attendance_type' => $request->attendance_type,
+            'meeting_attendance_type_id' => $request->meeting_attendance_type_id,
             'date' => $request->date,
             'time' => $request->time,
             'note' => $request->note,
