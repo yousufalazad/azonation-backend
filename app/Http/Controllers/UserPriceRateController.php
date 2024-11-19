@@ -62,6 +62,10 @@ private function getRegionKeyByCountry($countryId)
         1 => 'region1', // Example: Rest of the World
         2 => 'region2', // UK
         3 => 'region3', // USA
+        4 => 'region4', //
+        5 => 'region5', //
+        6 => 'region6', //
+        7 => 'region7', //
         // Add more mappings based on your region data
     ];
 
