@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class UserPriceRate extends Model
 {
     use HasFactory;
+
+    
 }
