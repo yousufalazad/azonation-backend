@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('countries', function (Blueprint $table) {
             $table->id();
-            $table->string('country_name')->unique();
+            $table->string('country_name')->unique()->comment('includes most recognised countries with ISO-3166 alpha-3 codes');
             $table->string('iso_code', 3)->unique(); // ISO country code
             $table->boolean('is_active')->default(true); // Indicates whether the country is active or not
             $table->timestamps();
