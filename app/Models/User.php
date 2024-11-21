@@ -11,25 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
-    // app/Models/User.php
-
-    public function subscription()
-    {
-        return $this->hasOne(Subscription::class);
-    }
-    
-    public function country()
-    {
-        return $this->hasOne(UserCountry::class);
-    }
-    
-    public function currency()
-    {
-        return $this->hasOne(UserCurrency::class);
-    }
-    
+    use HasApiTokens, HasFactory, Notifiable;    
 
     protected $fillable = [
         'azon_id',

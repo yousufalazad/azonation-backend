@@ -8,4 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class ProjectAttendance extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'org_project_id',
+        'user_id', 
+        'attendance_type_id',
+        // 'date', 
+        'time', 
+        'note', 
+        'is_active'
+    ];
+
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

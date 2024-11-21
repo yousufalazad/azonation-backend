@@ -8,6 +8,21 @@ use Illuminate\Http\Request;
 
 class OrgProjectController extends Controller
 {
+
+    public function getProject($projectId)
+    {
+        // Find the meeting by ID
+        $event = OrgProject::find($projectId);
+
+        // Check if meeting exists
+        if (!$event) {
+            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        }
+
+        // Return the meeting data
+        return response()->json(['status' => true, 'data' => $event], 200);
+    }
+
     public function index($userId)
     {
         $projectList = OrgProject::where('user_id', $userId)

@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Org;
+
 use App\Http\Controllers\Controller;
 use App\Models\MeetingMinutes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class MeetingMinutesController extends Controller
 {
@@ -33,75 +36,94 @@ class MeetingMinutesController extends Controller
     {
         // Validation
         $validator = Validator::make($request->all(), [
-            'meeting_id' => 'required',
-            'prepared_by' => 'required',
-            'reviewed_by' => 'required',
-            'privacy_setup_id' => 'required',
-            'is_active' => 'required',
-            // 'decisions' => 'required',
-            // 'note' => 'nullable',
-            // 'start_time' => 'nullable',
-            // 'end_time' => 'nullable',
-            // 'follow_up_tasks' => 'nullable',
-            // 'tags' => 'nullable',
-            // 'action_items' => 'nullable',
-            // 'file_attachments' => 'nullable',
-            // 'video_link' => 'nullable',
-            // 'meeting_location' => 'nullable',
-            // 'confidentiality' => 'nullable',
-            // 'approval_status' => 'nullable',
-            // 'status' => 'nullable',
-            // 'prepared_by' => 'nullable',
-            // 'reviewed_by' => 'nullable',
+            'meeting_id' => 'required|integer|exists:meetings,id',
+            'prepared_by' => 'required|integer|exists:users,id',
+            'reviewed_by' => 'required|integer|exists:users,id',
+            'privacy_setup_id' => 'required|integer|exists:privacy_setups,id',
+            'is_active' => 'required|boolean',
+            'file_attachments' => 'nullable|file|mimes:pdf,doc,docx|max:1024', // Validate document file
         ]);
 
+        // Handle validation errors
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         try {
-            // Logging the inputs for debugging
-            Log::info('Meeting Minutes data: ', context: ['meeting_id' => $request->meeting_id, 'prepared_by' => $request->prepared_by, 'reviewed_by' => $request->reviewed_by, 'privacy_setup_id' => $request->privacy_setup_id]);
+            // Handle the file upload
+            $fileAttachmentPath = null;
+            if ($request->hasFile('file_attachments')) {
+                $file = $request->file('file_attachments');
+                $fileAttachmentPath = $file->storeAs(
+                    'org/docs',
+                    now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
+                    'public'
+                );
+            }
 
-            // Create the Meeting Attendance record
-            $meetingMinutes = MeetingMinutes::create([
-                'meeting_id' => $request->meeting_id,
-                'prepared_by' => $request->prepared_by,
-                'reviewed_by' => $request->reviewed_by,
-                'minutes' => $request->minutes,
-                'decisions' => $request->decisions,
-                'note' => $request->note,
-                'file_attachments' => $request->file_attachments,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
-                'follow_up_tasks' => $request->follow_up_tasks,
-                'tags' => $request->tags,
-                'action_items' => $request->action_items,
-                'meeting_location' => $request->meeting_location,
-                'video_link' => $request->video_link,
-                'privacy_setup_id' => $request->privacy_setup_id,
-                'approval_status' => $request->approval_status,
-                'is_publish' => $request->is_publish,
-                'is_active' => $request->is_active,
-            ]);
+            // Create a new MeetingMinutes record
+            $meetingMinutes = new MeetingMinutes();
+            $meetingMinutes->meeting_id = $request->meeting_id;
+            $meetingMinutes->prepared_by = $request->prepared_by;
+            $meetingMinutes->reviewed_by = $request->reviewed_by;
+            $meetingMinutes->minutes = $request->minutes;
+            $meetingMinutes->decisions = $request->decisions;
+            $meetingMinutes->note = $request->note;
+            $meetingMinutes->file_attachments = $fileAttachmentPath; // Save file path
+            $meetingMinutes->start_time = $request->start_time;
+            $meetingMinutes->end_time = $request->end_time;
+            $meetingMinutes->follow_up_tasks = $request->follow_up_tasks;
+            $meetingMinutes->tags = $request->tags;
+            $meetingMinutes->action_items = $request->action_items;
+            $meetingMinutes->meeting_location = $request->meeting_location;
+            $meetingMinutes->video_link = $request->video_link;
+            $meetingMinutes->privacy_setup_id = $request->privacy_setup_id;
+            $meetingMinutes->approval_status = $request->approval_status;
+            $meetingMinutes->is_publish = $request->is_publish;
+            $meetingMinutes->is_active = $request->is_active;
+
+            // Save the record to the database
+            $meetingMinutes->save();
 
             // Return success response
-            return response()->json(['status' => true, 'data' => $meetingMinutes, 'message' => 'Meeting Minutes created successfully.'], 201);
+            return response()->json([
+                'status' => true,
+                'data' => $meetingMinutes,
+                'message' => 'Meeting Minutes created successfully.'
+            ], 201);
         } catch (\Exception $e) {
-            // Log the error message for troubleshooting
-            Log::error('Error creating Country: ' . $e->getMessage());
+            // Log the error for debugging
+            Log::error('Error creating Meeting Minutes: ' . $e->getMessage());
 
-            // Return error response
-            return response()->json(['status' => false, 'message' => 'Failed to create Meeting Attendance.'], status: 500);
+            // Return generic error response
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.'
+            ], 500);
         }
     }
+
+
 
     /**
      * Display the specified resource.
      */
-    public function show(MeetingMinutes $meetingMinutes)
+    public function show($id)
     {
-        //
+        $meetingMinute =  MeetingMinutes::select('meeting_minutes.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
+            ->leftJoin('privacy_setups', 'meeting_minutes.privacy_setup_id', '=', 'privacy_setups.id')
+            ->where('meeting_minutes.id', $id)->first();
+
+        // Check if meeting exists
+        if (!$meetingMinute) {
+            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        }
+
+        // Return the meeting data
+        return response()->json(['status' => true, 'data' => $meetingMinute], 200);
     }
 
     /**
@@ -119,58 +141,116 @@ class MeetingMinutesController extends Controller
     {
         // Validation
         $validator = Validator::make($request->all(), [
-            'meeting_id' => 'required',
-            'prepared_by' => 'required',
-            'reviewed_by' => 'required',
-            'privacy_setup_id' => 'required',
-            'is_active' => 'required',
+            'meeting_id' => 'required|integer|exists:meetings,id',
+            'prepared_by' => 'required|integer|exists:users,id',
+            'reviewed_by' => 'required|integer|exists:users,id',
+            'privacy_setup_id' => 'required|integer|exists:privacy_setups,id',
+            'is_active' => 'required|boolean',
+            'file_attachments' => 'nullable|file|mimes:pdf,doc,docx|max:1024', // Validate document file
         ]);
 
+        // Handle validation errors
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-        // Find the Meeting Attendances
-        $meetingAttendances = MeetingMinutes::find($id);
-        if (!$meetingAttendances) {
-            return response()->json(['status' => false, 'message' => 'Meeting Attendance not found.'], 404);
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        // Update the Meeting Attendances
-        $meetingAttendances->update([
-            'meeting_id' => $request->meeting_id,
-            'prepared_by' => $request->prepared_by,
-            'reviewed_by' => $request->reviewed_by,
-            'minutes' => $request->minutes,
-            'decisions' => $request->decisions,
-            'note' => $request->note,
-            'file_attachments' => $request->file_attachments,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'follow_up_tasks' => $request->follow_up_tasks,
-            'tags' => $request->tags,
-            'action_items' => $request->action_items,
-            'meeting_location' => $request->meeting_location,
-            'video_link' => $request->video_link,
-            'privacy_setup_id' => $request->privacy_setup_id,
-            'approval_status' => $request->approval_status,
-            'is_publish' => $request->is_publish,
-            'is_active' => $request->is_active,
-        ]);
+        try {
+            // Find the record by ID
+            $meetingMinutes = MeetingMinutes::findOrFail($id);
 
-        return response()->json(['status' => true, 'data' => $meetingAttendances, 'message' => 'Meeting Attendance updated successfully.'], 200);
+            // Handle the file upload
+            if ($request->hasFile('file_attachments')) {
+                //Delete the old file if exists
+                if ($meetingMinutes->file_attachments && Storage::exists('public/' . $meetingMinutes->file_attachments)) {
+                    Storage::delete('public/' . $meetingMinutes->file_attachments);
+                }
+
+                $file = $request->file('file_attachments');
+                $fileAttachmentPath = $file->storeAs(
+                    'org/docs',
+                    now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
+                    'public'
+                );
+
+                $meetingMinutes->file_attachments = $fileAttachmentPath; // Update file path
+            }
+
+            // Update the MeetingMinutes record
+            $meetingMinutes->meeting_id = $request->meeting_id;
+            $meetingMinutes->prepared_by = $request->prepared_by;
+            $meetingMinutes->reviewed_by = $request->reviewed_by;
+            $meetingMinutes->minutes = $request->minutes;
+            $meetingMinutes->decisions = $request->decisions;
+            $meetingMinutes->note = $request->note;
+            $meetingMinutes->start_time = $request->start_time;
+            $meetingMinutes->end_time = $request->end_time;
+            $meetingMinutes->follow_up_tasks = $request->follow_up_tasks;
+            $meetingMinutes->tags = $request->tags;
+            $meetingMinutes->action_items = $request->action_items;
+            $meetingMinutes->meeting_location = $request->meeting_location;
+            $meetingMinutes->video_link = $request->video_link;
+            $meetingMinutes->privacy_setup_id = $request->privacy_setup_id;
+            $meetingMinutes->approval_status = $request->approval_status;
+            $meetingMinutes->is_publish = $request->is_publish;
+            $meetingMinutes->is_active = $request->is_active;
+
+            // Save the updated record
+            $meetingMinutes->save();
+
+            // Return success response
+            return response()->json([
+                'status' => true,
+                'data' => $meetingMinutes,
+                'message' => 'Meeting Minutes updated successfully.'
+            ], 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Error updating Meeting Minutes: ' . $e->getMessage());
+
+            // Return generic error response
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.'
+            ], 500);
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
-    {
-        $meetingAttendance = MeetingMinutes::find($id);
-        if (!$meetingAttendance) {
-            return response()->json(['status' => false, 'message' => 'Meeting Attendance member not found.'], 404);
+{
+    try {
+        // Find the record by ID
+        $meetingMinutes = MeetingMinutes::findOrFail($id);
+
+        // Delete the file attachment if it exists
+        if ($meetingMinutes->file_attachments && Storage::exists('public/' . $meetingMinutes->file_attachments)) {
+            Storage::delete('public/' . $meetingMinutes->file_attachments);
         }
 
-        $meetingAttendance->delete();
-        return response()->json(['status' => true, 'message' => 'Meeting Attendance deleted successfully.'], 200);
+        // Delete the record from the database
+        $meetingMinutes->delete();
+
+        // Return success response
+        return response()->json([
+            'status' => true,
+            'message' => 'Meeting Minutes deleted successfully.'
+        ], 200);
+    } catch (\Exception $e) {
+        // Log the error for debugging
+        Log::error('Error deleting Meeting Minutes: ' . $e->getMessage());
+
+        // Return generic error response
+        return response()->json([
+            'status' => false,
+            'message' => 'An error occurred. Please try again.'
+        ], 500);
     }
+}
+
 }

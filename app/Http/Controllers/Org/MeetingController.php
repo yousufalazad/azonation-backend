@@ -3,72 +3,90 @@
 namespace App\Http\Controllers\Org;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\Meeting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class MeetingController extends Controller
 {
-    // Fetch all meetings
-    // public function index()
-    // {
-    //     $meetings = Meeting::all();
-    //     return response()->json(['status' => true, 'data' => $meetings]);
-    // }
+    // Fetch meetings for the authenticated user
     public function getOrgMeeting(Request $request)
     {
         $user_id = $request->user()->id; // Retrieve the authenticated user's ID
-        $meetings = Meeting::select('meetings.*', 'meeting_conduct_types.id as conduct_type_id', 'meeting_conduct_types.name as conduct_type_name')
-        ->leftJoin('meeting_conduct_types', 'meetings.conduct_type', '=', 'meeting_conduct_types.id')
-        ->where('meetings.user_id', $user_id)->get();
+
+        $meetings = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')
+            ->leftJoin('conduct_types', 'meetings.conduct_type_id', '=', 'conduct_types.id')
+            ->where('meetings.user_id', $user_id)
+            ->get();
+
         return response()->json(['status' => true, 'data' => $meetings]);
     }
-
 
     // Create a new meeting
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            // 'short_name' => 'required|string|max:100',
-            // 'subject' => 'required|string|max:255',
-            // 'date' => 'required|date',
-            // 'time' => 'required|date_format:H:i',
-            // 'description' => 'required|string',
-            // 'address' => 'required|string',
-            // 'agenda' => 'required|string|max:255',
-            // 'requirements' => 'required|string|max:255',
-            // 'note' => 'nullable|string|max:255',
-            // 'status' => 'required|boolean',
-            // 'conduct_type' => 'nullable|string|max:100',
+            'short_name' => 'nullable|string|max:100',
+            'subject' => 'nullable|string|max:255',
+            'date' => 'nullable|date',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after_or_equal:start_time',
+            'meeting_type' => 'nullable|string|max:50',
+            'timezone' => 'nullable|string|max:50',
+            'meeting_mode' => 'nullable|string|in:in-person,remote,hybrid',
+            'duration' => 'nullable|integer|min:0',
+            'priority' => 'nullable|string|in:low,medium,high,urgent',
+            'video_conference_link' => 'nullable|url',
+            'access_code' => 'nullable|string|max:50',
+            'recording_link' => 'nullable|url',
+            'meeting_host' => 'nullable|string|max:255',
+            'max_participants' => 'nullable|integer|min:1',
+            'rsvp_status' => 'nullable|array',
+            'rsvp_status.*' => 'string',
+            'participants' => 'nullable|array',
+            'participants.*' => 'string|max:255',
+            'description' => 'nullable|string',
+            'address' => 'nullable|string',
+            'agenda' => 'nullable|string',
+            'requirements' => 'nullable|string',
+            'note' => 'nullable|string',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:50',
+            'reminder_time' => 'nullable|integer|min:0',
+            'repeat_frequency' => 'nullable|string|in:daily,weekly,monthly,yearly',
+            'attachment' => 'nullable|string|max:255',
+            'conduct_type_id' => 'nullable|exists:conduct_types,id',
+            'is_active' => 'nullable|boolean',
+            'visibility' => 'nullable|string|in:private,public,members-only',
+            'cancellation_reason' => 'nullable|string|max:255',
+            'feedback_link' => 'nullable|url',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
         }
+
         $input = $request->all();
-        $input['user_id'] = $request->user()->id; // Assuming the user is authenticated and has an id. You'll need to modify this depending on your application.
+        $input['user_id'] = $request->user()->id;
+
         $meeting = Meeting::create($input);
+
         return response()->json(['status' => true, 'message' => 'Meeting created successfully', 'data' => $meeting], 201);
     }
 
     // Get a specific meeting
     public function show($id)
     {
-        // Find the meeting by ID
-        
-        $meeting =  Meeting::select('meetings.*', 'meeting_conduct_types.id as conduct_type_id', 'meeting_conduct_types.name as conduct_type_name')
-        ->leftJoin('meeting_conduct_types', 'meetings.conduct_type', '=', 'meeting_conduct_types.id')
-        ->where('meetings.id', $id)->first();
-        // $meeting = Meeting::find($id);
+        $meeting = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')
+            ->leftJoin('conduct_types', 'meetings.conduct_type_id', '=', 'conduct_types.id')
+            ->where('meetings.id', $id)
+            ->first();
 
-        // Check if meeting exists
         if (!$meeting) {
             return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
         }
 
-        // Return the meeting data
         return response()->json(['status' => true, 'data' => $meeting], 200);
     }
 
@@ -76,19 +94,41 @@ class MeetingController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            // 'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
-            // 'short_name' => 'required|string|max:100',
-            // 'subject' => 'required|string|max:255',
-            // 'date' => 'required|date',
-            // 'time' => 'required|date_format:H:i',
-            // 'description' => 'required|string',
-            // 'address' => 'required|string',
-            // 'agenda' => 'required|string|max:255',
-            // 'requirements' => 'required|string|max:255',
-            // 'note' => 'nullable|string|max:255',
-            // 'status' => 'required|boolean',
-            // 'conduct_type' => 'nullable|string|max:100',
+            'short_name' => 'nullable|string|max:100',
+            'subject' => 'nullable|string|max:255',
+            'date' => 'nullable|date',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after_or_equal:start_time',
+            'meeting_type' => 'nullable|string|max:50',
+            'timezone' => 'nullable|string|max:50',
+            'meeting_mode' => 'nullable|string|in:in-person,remote,hybrid',
+            'duration' => 'nullable|integer|min:0',
+            'priority' => 'nullable|string|in:low,medium,high,urgent',
+            'video_conference_link' => 'nullable|url',
+            'access_code' => 'nullable|string|max:50',
+            'recording_link' => 'nullable|url',
+            'meeting_host' => 'nullable|string|max:255',
+            'max_participants' => 'nullable|integer|min:1',
+            'rsvp_status' => 'nullable|array',
+            'rsvp_status.*' => 'string',
+            'participants' => 'nullable|array',
+            'participants.*' => 'string|max:255',
+            'description' => 'nullable|string',
+            'address' => 'nullable|string',
+            'agenda' => 'nullable|string',
+            'requirements' => 'nullable|string',
+            'note' => 'nullable|string',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:50',
+            'reminder_time' => 'nullable|integer|min:0',
+            'repeat_frequency' => 'nullable|string|in:daily,weekly,monthly,yearly',
+            'attachment' => 'nullable|string|max:255',
+            'conduct_type_id' => 'nullable|exists:conduct_types,id',
+            'is_active' => 'nullable|boolean',
+            'visibility' => 'nullable|string|in:private,public,members-only',
+            'cancellation_reason' => 'nullable|string|max:255',
+            'feedback_link' => 'nullable|url',
         ]);
 
         if ($validator->fails()) {
@@ -96,14 +136,16 @@ class MeetingController extends Controller
         }
 
         $meeting = Meeting::find($id);
+
         if (!$meeting) {
             return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
         }
 
         $meeting->update($request->all());
+
         return response()->json(['status' => true, 'message' => 'Meeting updated successfully', 'data' => $meeting]);
     }
-    
+
     // Delete a meeting
     public function destroy($id)
     {
@@ -114,6 +156,7 @@ class MeetingController extends Controller
         }
 
         $meeting->delete();
+
         return response()->json(['status' => true, 'message' => 'Meeting deleted successfully']);
     }
 }

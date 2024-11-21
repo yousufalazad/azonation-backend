@@ -28,12 +28,7 @@ return new class extends Migration
                 ->default(0)
                 ->comment('Total number of guests who attended the event');
             
-            // Foreign keys with proper relationships
-            $table->foreignId('event_honorary_guest_id')
-                ->constrained('event_honorary_guests')
-                ->cascadeOnDelete()
-                ->comment('Foreign key referencing the org_events table');
-
+            
             // Event content details
             $table->text('summary')->nullable()->comment('Summary or description of the event');
             $table->text('highlights')->nullable()->comment('Key highlights or notable moments of the event');
@@ -52,16 +47,8 @@ return new class extends Migration
             $table->text('next_steps')->nullable()->comment('Follow-up actions or plans after the event');
 
             // Prepared and updated by users
-            $table->foreignId('created_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete()
-                ->comment('User who prepared the event summary');
-            $table->foreignId('updated_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete()
-                ->comment('User who last updated the event summary');
+            $table->string('created_by', 30)->nullable()->comment('User who created the event summary');
+            $table->string('updated_by', 30)->nullable()->comment('User who last updated the event summary');
 
             // Privacy and status
             $table->foreignId('privacy_setup_id')

@@ -1,21 +1,24 @@
 <?php
 
-namespace App\Http\Controllers\Org;
-use App\Http\Controllers\Controller;
-use App\Models\MeetingAttendanceType;
+namespace App\Http\Controllers;
+
+use App\Models\AttendanceType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-class MeetingAttendanceTypeController extends Controller
+
+class AttendanceTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $countries = MeetingAttendanceType::all();
-        return response()->json(['status' => true, 'data' => $countries], 200);
+        $attendanceTypes = AttendanceType::all();
+        return response()->json(['status' => true, 'data' => $attendanceTypes], 200);
     }
+
+    
 
     /**
      * Show the form for creating a new resource.
@@ -44,27 +47,27 @@ class MeetingAttendanceTypeController extends Controller
             // Logging the inputs for debugging
             Log::info('Meeting Conduct Type data: ', ['name' => $request->name, 'status' => $request->status]);
 
-            // Create the MeetingAttendanceType record
-            $meetingAttendanceType = MeetingAttendanceType::create([
+            // Create the AttendanceType record
+            $attendanceType = AttendanceType::create([
                 'name' => $request->name,
                 'is_active' => $request->is_active,
             ]);
 
             // Return success response
-            return response()->json(['status' => true, 'data' => $meetingAttendanceType, 'message' => 'MeetingAttendanceType created successfully.'], 201);
+            return response()->json(['status' => true, 'data' => $attendanceType, 'message' => 'AttendanceType created successfully.'], 201);
         } catch (\Exception $e) {
             // Log the error message for troubleshooting
-            Log::error('Error creating MeetingAttendanceType: ' . $e->getMessage());
+            Log::error('Error creating AttendanceType: ' . $e->getMessage());
 
             // Return error response
-            return response()->json(['status' => false, 'message' => 'Failed to create MeetingAttendanceType.'], 500);
+            return response()->json(['status' => false, 'message' => 'Failed to create AttendanceType.'], 500);
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(MeetingAttendanceType $meetingAttendanceType)
+    public function show(AttendanceType $attendanceType)
     {
         //
     }
@@ -72,14 +75,11 @@ class MeetingAttendanceTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(MeetingAttendanceType $meetingAttendanceType)
+    public function edit(AttendanceType $attendanceType)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         // Validation
@@ -92,18 +92,18 @@ class MeetingAttendanceTypeController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
         // Find the meetingAttendanceType
-        $meetingAttendanceType = MeetingAttendanceType::find($id);
-        if (!$meetingAttendanceType) {
-            return response()->json(['status' => false, 'message' => 'MeetingAttendanceType not found.'], 404);
+        $attendanceType = AttendanceType::find($id);
+        if (!$attendanceType) {
+            return response()->json(['status' => false, 'message' => 'AttendanceType not found.'], 404);
         }
 
         // Update the meetingAttendanceType
-        $meetingAttendanceType->update([
+        $attendanceType->update([
             'name' => $request->name,
             'is_active' => $request->is_active,
         ]);
 
-        return response()->json(['status' => true, 'data' => $meetingAttendanceType, 'message' => 'MeetingAttendanceType updated successfully.'], 200);
+        return response()->json(['status' => true, 'data' => $attendanceType, 'message' => 'AttendanceType updated successfully.'], 200);
     }
 
     /**
@@ -111,12 +111,12 @@ class MeetingAttendanceTypeController extends Controller
      */
     public function destroy($id)
     {
-        $meetingAttendanceType = MeetingAttendanceType::find($id);
-        if (!$meetingAttendanceType) {
-            return response()->json(['status' => false, 'message' => 'MeetingAttendanceType not found.'], 404);
+        $attendanceType = AttendanceType::find($id);
+        if (!$attendanceType) {
+            return response()->json(['status' => false, 'message' => 'AttendanceType not found.'], 404);
         }
 
-        $meetingAttendanceType->delete();
-        return response()->json(['status' => true, 'message' => 'MeetingAttendanceType deleted successfully.'], 200);
+        $attendanceType->delete();
+        return response()->json(['status' => true, 'message' => 'AttendanceType deleted successfully.'], 200);
     }
 }

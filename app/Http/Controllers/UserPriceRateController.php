@@ -2,84 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UserPriceRate;
 use Illuminate\Http\Request;
-
-use App\Models\User;
 use App\Models\Subscription;
-use App\Models\UserCountry;
-use App\Models\UserCurrency;
 use App\Models\PriceRate;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
-
 
 class UserPriceRateController extends Controller
 {
 
-    public function getUserPriceRates()
-    {
-        try {
-            // Fetch users with relationships
-            // $users = User::with(['subscription.package', 'country', 'currency'])->get();
-            $users = User::with(['subscription.package', 'country', 'currency'])->get();
+    public function getUserPriceRates(Request $request)
+{
+    try {
+        // Retrieve the authenticated user's ID
+        $user_id = $request->user()->id;
 
+        // Fetch package_id, country_id, and currency_code for the user
+        $packageIdAndCountryData = Subscription::where('subscriptions.user_id', $user_id)
+            ->leftJoin('user_countries', 'subscriptions.user_id', '=', 'user_countries.user_id')
+            ->leftJoin('user_currencies', 'subscriptions.user_id', '=', 'user_currencies.user_id')
+            ->leftJoin('currencies', 'user_currencies.currency_id', '=', 'currencies.id')
+            ->select('subscriptions.package_id', 'user_countries.country_id', 'currencies.currency_code')
+            ->first(); // Retrieve a single record
 
-            // Fetch all price rates
-            $priceRates = PriceRate::all();
-
-            // Map data to include price rate
-            $userPriceRates = $users->map(function ($user) use ($priceRates) {
-                // Check if the user has a subscription and package
-                $packageName = optional($user->subscription)->package->name ?? 'Unknown';
-
-                // Fetch the region column dynamically based on the user's country
-                $regionKey = $this->getRegionKeyByCountry($user->country->id);
-
-                // Find the relevant price rate for the user's package
-                $priceRate = $priceRates->firstWhere('package_id', optional($user->subscription->package)->id);
-
-                return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'package' => $packageName,
-                    'country' => $user->country->name ?? 'Unknown',
-                    'currency' => $user->currency->symbol ?? '',
-                    'price_rate' => $priceRate ? $priceRate->{$regionKey} : 'N/A',
-                ];
-            });
-
-            return response()->json([
-                'status' => true,
-                'data' => $userPriceRates
-            ]);
-        } catch (\Exception $e) {
-            // Log the error for debugging purposes
-            Log::error('Error fetching user price rates: ' . $e->getMessage(), [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            // Return error details in the response
+        if (!$packageIdAndCountryData) {
             return response()->json([
                 'status' => false,
-                'error' => [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString(),
-                ]
-            ], 500); // 500 Internal Server Error
+                'message' => 'No package or country data found for the user.'
+            ], 404);
         }
+
+        // Extract package_id and country_id
+        $packageId = $packageIdAndCountryData->package_id;
+        $countryId = $packageIdAndCountryData->country_id;
+        $currencyCode = $packageIdAndCountryData->currency_code;
+
+        // Determine the regionKey based on the country_id
+        $regionKey = $this->getRegionKeyByCountry($countryId);
+
+        // Validate regionKey
+        if (!$regionKey) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unable to determine region key for the given country.'
+            ], 400);
+        }
+
+        // Fetch the price rate for the specified package and region
+        $userPriceRate = PriceRate::where('package_id', $packageId)
+            ->select($regionKey) // Fetch only the relevant region column
+            ->first();
+
+        if (!$userPriceRate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No price rate found for the provided package and region.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'id' => 1,
+                'package_id' => $packageId,
+                'region' => $regionKey,
+                'price' => $userPriceRate->$regionKey,
+                'currency_code' => $currencyCode
+            ]
+        ]);
+    } catch (\Exception $e) {
+        // Log the error for debugging purposes
+        Log::error('Error fetching user price rates: ' . $e->getMessage(), [
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        // Return error details in the response
+        return response()->json([
+            'status' => false,
+            'error' => [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]
+        ], 500);
     }
+}
 
 
 
-    private function getRegionKeyByCountry($countryId)
+    private function getRegionKeyByCountry($UserCountryId)
     {
-        switch ($countryId) {
+        switch ($UserCountryId) {
 
                 // countries.id for United Kingdom, GBP
             case 184:
@@ -220,87 +233,5 @@ class UserPriceRateController extends Controller
             default:
                 return 'region1';
         }
-    }
-
-
-
-
-
-    // public function index()
-    // {
-    //     // Fetch all necessary data with relationships
-    //     $users = User::with(['subscription.package', 'country', 'currency'])->get();
-    //     $priceRates = PriceRate::all();
-
-    //     // Map data to include price rate
-    //     $userPriceRates = $users->map(function ($user) use ($priceRates) {
-    //         $priceRate = $priceRates->firstWhere(function ($rate) use ($user) {
-
-    //             return $rate->package_id == $user->subscription->package->id &&
-    //                 $rate->country_id == $user->country->id;
-    //         });
-
-    //         return [
-    //             'id' => $user->id,
-    //             'name' => $user->name,
-    //             'package' => $user->subscription->package->name ?? 'Unknown',
-    //             'country' => $user->country->name ?? 'Unknown',
-    //             'currency' => $user->currency->symbol ?? '',
-    //             'price_rate' => $priceRate->rate ?? 'N/A',
-    //         ];
-    //     });
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => $userPriceRates
-    //     ]);
-    // }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(UserPriceRate $userPriceRate)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(UserPriceRate $userPriceRate)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, UserPriceRate $userPriceRate)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(UserPriceRate $userPriceRate)
-    {
-        //
     }
 }
