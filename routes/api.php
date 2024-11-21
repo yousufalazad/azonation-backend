@@ -13,6 +13,9 @@ use App\Http\Controllers\Org\MeetingAttendanceController;
 use App\Http\Controllers\Org\AddressController;
 use App\Http\Controllers\Org\OrgAdministratorController;
 use App\Http\Controllers\PhoneNumberController;
+use App\Http\Controllers\EventAttendanceController;
+use App\Http\Controllers\ProjectAttendanceController;
+
 use App\Http\Controllers\Org\OrgEventController;
 use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
@@ -53,6 +56,8 @@ use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DialingCodeController;
 use App\Http\Controllers\Org\MeetingConductTypeController;
 use App\Http\Controllers\Org\MeetingAttendanceTypeController;
+use App\Http\Controllers\AttendanceTypeController;
+use App\Http\Controllers\ConductTypeController;
 use App\Http\Controllers\Org\MembershipTypeController;
 use App\Http\Controllers\Org\DesignationController;
 use App\Http\Controllers\LanguageListController;
@@ -193,8 +198,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-meeting-minutes', [MeetingMinutesController::class, 'index']);
     Route::get('/get-meeting-minutes/{id}', [MeetingMinutesController::class, 'show']);
     Route::post('/create-meeting-minutes', [MeetingMinutesController::class, 'store']);
-    Route::put('/update-meeting-minutes/{id}', [MeetingMinutesController::class, 'update']);
+    Route::post('/update-meeting-minutes/{id}', [MeetingMinutesController::class, 'update']);
     Route::delete('/delete-meeting-minutes/{id}', [MeetingMinutesController::class, 'destroy']);
+    
     //Meeting MeetingAttendance 
     Route::get('/get-org-user-list', [MeetingAttendanceController::class, 'getOrgUse']);
     Route::get('/get-meeting-attendances', [MeetingAttendanceController::class, 'index']);
@@ -203,17 +209,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-meeting-attendance/{id}', [MeetingAttendanceController::class, 'update']);
     Route::delete('/delete-meeting-attendance/{id}', [MeetingAttendanceController::class, 'destroy']);
 
-    //Event
+    //Event  
     Route::get('/get-events/{userId}', [OrgEventController::class, 'index']);
     Route::get('/get-event/{eventId}', [OrgEventController::class, 'getEvent']);
     Route::post('/create-event', [OrgEventController::class, 'createEvent']);
     Route::put('/update-event/{eventId}', [OrgEventController::class, 'updateEvent']);
     Route::delete('/delete-event/{eventId}', [OrgEventController::class, 'deleteEvent']);
-
+    //Meeting EventAttendance
+    Route::get('/get-org-user-list', [EventAttendanceController::class, 'getOrgUse']);
+    Route::get('/get-event-attendances', [EventAttendanceController::class, 'index']);
+    Route::get('/get-event-attendance/{id}', [EventAttendanceController::class, 'show']);
+    Route::post('/create-event-attendance', [EventAttendanceController::class, 'store']);
+    Route::put('/update-event-attendance/{id}', [EventAttendanceController::class, 'update']);
+    Route::delete('/delete-event-attendance/{id}', [EventAttendanceController::class, 'destroy']);
     //Project
     Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
+    Route::get('/get-project/{projectId}', [OrgProjectController::class, 'getProject']);
     Route::post('create-project', [OrgProjectController::class, 'store']);
     Route::put('update-project/{userId}', [OrgProjectController::class, 'update']);
+
+    //Meeting ProjectAttendance
+    Route::get('/get-org-user-list', [ProjectAttendanceController::class, 'getOrgUse']);
+    Route::get('/get-project-attendances', [ProjectAttendanceController::class, 'index']);
+    Route::get('/get-project-attendance/{id}', [ProjectAttendanceController::class, 'show']);
+    Route::post('/create-project-attendance', [ProjectAttendanceController::class, 'store']);
+    Route::put('/update-project-attendance/{id}', [ProjectAttendanceController::class, 'update']);
+    Route::delete('/delete-project-attendance/{id}', [ProjectAttendanceController::class, 'destroy']);
 
     // Founder
     Route::post('create-founder', [FounderController::class, 'store']);
@@ -239,9 +260,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('subscription', [SubscriptionController::class, 'store']);
     Route::put('subscription/{id}', [SubscriptionController::class, 'update']);
     Route::delete('subscription{id}', [SubscriptionController::class, 'destroy']);
+
     Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
+
     Route::get('/invoices', [InvoiceController::class, 'index']);
+
     Route::get('/billing-list', [BillingController::class, 'index']);
 
 
@@ -258,6 +282,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('price-rate', [PriceRateController::class, 'index']);
     Route::put('price-rate/update', [PriceRateController::class, 'update']);
     Route::get('/user-price-rates', [UserPriceRateController::class, 'getUserPriceRates']);
+
 
     //Currency
     Route::get('currencies', [CurrencyController::class, 'index']);
@@ -294,16 +319,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-dialing-code', [DialingCodeController::class, 'store']);
     Route::put('/update-dialing-code/{id}', [DialingCodeController::class, 'update']);
     Route::delete('/delete-dialing-code/{id}', [DialingCodeController::class, 'destroy']);
-    // meeting-conduct-type
-    Route::get('/get-meeting-conduct-types', [MeetingConductTypeController::class, 'index']);
-    Route::post('/create-meeting-conduct-type', [MeetingConductTypeController::class, 'store']);
-    Route::put('/update-meeting-conduct-type/{id}', [MeetingConductTypeController::class, 'update']);
-    Route::delete('/delete-meeting-conduct-type/{id}', [MeetingConductTypeController::class, 'destroy']);
-    // meeting-attendance-type
-    Route::get('/get-meeting-attendance-types', [MeetingAttendanceTypeController::class, 'index']);
-    Route::post('/create-meeting-attendance-type', [MeetingAttendanceTypeController::class, 'store']);
-    Route::put('/update-meeting-attendance-type/{id}', [MeetingAttendanceTypeController::class, 'update']);
-    Route::delete('/delete-meeting-attendance-type/{id}', [MeetingAttendanceTypeController::class, 'destroy']);
+       
+
+    // ConductTypeController
+    Route::get('/get-conduct-types', [ConductTypeController::class, 'index']);
+    Route::post('/create-conduct-type', [ConductTypeController::class, 'store']);
+    Route::put('/update-conduct-type/{id}', [ConductTypeController::class, 'update']);
+    Route::delete('/delete-conduct-type/{id}', [ConductTypeController::class, 'destroy']);
+    
+    // AttendanceTypeController
+    Route::get('/get-attendance-types', [AttendanceTypeController::class, 'index']);
+    Route::post('/create-attendance-type', [AttendanceTypeController::class, 'store']);
+    Route::put('/update-attendance-type/{id}', [AttendanceTypeController::class, 'update']);
+    Route::delete('/delete-attendance-type/{id}', [AttendanceTypeController::class, 'destroy']);
     // membership-type
     Route::get('/get-membership-types', [MembershipTypeController::class, 'index']);
     Route::post('/create-membership-type', [MembershipTypeController::class, 'store']);

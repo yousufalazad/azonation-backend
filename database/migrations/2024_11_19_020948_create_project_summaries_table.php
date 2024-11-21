@@ -71,17 +71,10 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Planned next steps after the project');
 
-            // Metadata
-            $table->foreignId('created_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete()
-                ->comment('User who prepared the project summary');
-            $table->foreignId('updated_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete()
-                ->comment('User who last updated the project summary');
+            // Prepared and updated by users
+            $table->string('created_by', 30)->nullable()->comment('User who created the project summary');
+            $table->string('updated_by', 30)->nullable()->comment('User who last updated the project summary');
+
             $table->foreignId('privacy_setup_id')
                 ->constrained('privacy_setups')
                 ->onDelete('cascade')

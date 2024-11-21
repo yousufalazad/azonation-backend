@@ -27,10 +27,10 @@ return new class extends Migration
                   ->comment('Foreign key referencing the users table');
 
             // Foreign keys using foreignId and constrained
-            $table->foreignId('meeting_attendance_type_id')
-                  ->constrained('meeting_attendance_types')
-                  ->cascadeOnDelete()
-                  ->comment('Foreign key referencing the meeting_attendance_types table');
+            $table->foreignId('attendance_type_id')
+            ->constrained('attendance_types')
+            ->nullable()
+            ->comment('Foreign key referencing the attendance_types table');
 
             // Date and time for attendance
             $table->time('time')->nullable()->comment('Time of the meeting');
@@ -38,10 +38,10 @@ return new class extends Migration
             // Text field for additional notes
             $table->text('note')->nullable()->comment('Additional notes about the attendance');
 
-            // Enum for status: 0 = inactive, 1 = active
-            $table->enum('status', [0, 1])
+            // Enum for is_active: 0 = no, 1 = yes
+            $table->enum('is_active', [0, 1])
                   ->default(0)
-                  ->comment('0 = inactive, 1 = active')
+                  ->comment('0 = no, 1 = yes')
                   ->nullable();
 
             // Timestamps for when the record was created or updated
