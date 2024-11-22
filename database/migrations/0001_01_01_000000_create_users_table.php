@@ -25,6 +25,17 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');
             $table->string('password')->comment('Password hash');
             $table->rememberToken()->comment('Token for "remember me" functionality');
+            $table->enum('activation_status', [
+                'active', 
+                'inactive', 
+                'pending', 
+                'hold', 
+                'under_review', 
+                'suspended', 
+                'banned'
+            ])->default('active')
+              ->comment('User activation status: active, inactive, pending, hold, under review, suspended, or banned. Superadmin can modify if necessary.');
+            
             $table->timestamps();
         });
 

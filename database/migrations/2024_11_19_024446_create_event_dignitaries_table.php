@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('organisation')->nullable()->comment('Organisation of the dignitaries, if applicable');
             $table->text('details')->nullable()->comment('Additional details about the dignitaries');
             $table->string('note')->nullable()->comment('Additional notes about the dignitaries');
+           
             $table->timestamps();
         });
     }

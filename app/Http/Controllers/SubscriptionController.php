@@ -64,7 +64,10 @@ class SubscriptionController extends Controller
         //for USER
         try {
             $user_id = $request->user()->id; // Retrieve the authenticated user's ID
-            $subscription = Subscription::where('user_id', $user_id)->get();
+            $subscription = Subscription::where('user_id', $user_id)
+            ->leftJoin('packages', 'subscriptions.package_id', 'packages.id')
+            ->select('subscriptions.*', 'packages.name as package_name')
+            ->get();
             // Return JSON response with status and data
             return response()->json([
                 'status' => true,

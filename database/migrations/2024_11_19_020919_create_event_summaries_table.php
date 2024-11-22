@@ -57,7 +57,8 @@ return new class extends Migration
                 ->comment('Privacy level of the event summary (e.g., public, private, members only)');
             $table->boolean('is_active')
                 ->default(true)
-                ->comment('Indicates whether the event summary is active or inactive');
+                ->comment('Indicates whether the event summary is active or inactive')
+                ->nullable();
             $table->boolean('is_publish')
                 ->default(false)
                 ->comment('Indicates whether the event summary is published and visible to users');
