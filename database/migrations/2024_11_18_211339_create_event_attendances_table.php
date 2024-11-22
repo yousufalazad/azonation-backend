@@ -39,9 +39,9 @@ return new class extends Migration
             $table->text('note')->nullable()->comment('Additional notes about the attendance');
 
             // Enum for is_active: 0 = no, 1 = yes
-            $table->enum('is_active', [0, 1])
-                  ->default(0)
-                  ->comment('0 = no, 1 = yes')
+            $table->boolean('is_active')
+                  ->default(1)
+                  ->comment('0 = false, 1 = true')
                   ->nullable();
 
             // Timestamps for when the record was created or updated

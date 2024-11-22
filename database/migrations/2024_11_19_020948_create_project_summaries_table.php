@@ -83,7 +83,8 @@ return new class extends Migration
             // Status flags
             $table->boolean('is_active')
                 ->default(true)
-                ->comment('Indicates whether the project summary is currently active');
+                ->comment('Indicates whether the project summary is currently active')
+                ->nullable();
             $table->boolean('is_publish')
                 ->default(false)
                 ->comment('Indicates whether the project summary is published');

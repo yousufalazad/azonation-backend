@@ -17,17 +17,16 @@ return new class extends Migration
 
             // Foreign key to the 'users' table
             $table->foreignId('user_id')
-                ->constrained()
+                ->constrained('users')
                 ->onDelete('cascade')
                 ->unique() // Ensure that each user can only have one subscription
                 ->comment('Foreign key linking to the users table. Each user can only have one active subscription, cascades on delete');
 
             // Foreign key to the 'packages' table
             $table->foreignId('package_id')
-                ->nullable()
-                ->constrained()
-                ->onDelete('set null')
-                ->comment('Foreign key linking to the packages table, cascades on delete');
+                ->constrained('packages')
+                ->onDelete('restrict') // Prevent package deletion if referenced
+                ->comment('Foreign key linking to the packages table, restrict on delete');
 
             $table->timestamp('start_date')->comment('The date when the subscription started');
 

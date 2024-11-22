@@ -61,6 +61,7 @@ use App\Http\Controllers\ConductTypeController;
 use App\Http\Controllers\Org\MembershipTypeController;
 use App\Http\Controllers\Org\DesignationController;
 use App\Http\Controllers\LanguageListController;
+use App\Http\Controllers\RegionalPricingController;
 use App\Http\Controllers\TimeZoneSetupController;
 use App\Http\Controllers\UserCountryController;
 
@@ -260,6 +261,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('subscription', [SubscriptionController::class, 'store']);
     Route::put('subscription/{id}', [SubscriptionController::class, 'update']);
     Route::delete('subscription{id}', [SubscriptionController::class, 'destroy']);
+    Route::get('/user-price-rate', [RegionalPricingController::class, 'getUserPriceRate']);
 
     Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
@@ -279,10 +281,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('subscription-plans', [SubscriptionController::class, 'index']);
 
     // PriceRate
-    Route::get('price-rate', [PriceRateController::class, 'index']);
-    Route::put('price-rate/update', [PriceRateController::class, 'update']);
-    Route::get('/user-price-rates', [UserPriceRateController::class, 'getUserPriceRates']);
-
+    Route::get('price-rate', [RegionalPricingController::class, 'index']);
+    Route::put('price-rate/update', [RegionalPricingController::class, 'update']);
+    Route::get('/all-user-price-rate', [RegionalPricingController::class, 'getAllUserPriceRate']);
 
     //Currency
     Route::get('currencies', [CurrencyController::class, 'index']);
@@ -290,14 +291,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('currencies/{id}', [CurrencyController::class, 'update']);
     Route::delete('currencies/{id}', [CurrencyController::class, 'destroy']);
 
-    //User currency
-    Route::get('user-currencies', [UserCurrencyController::class, 'index']);
-    Route::post('user-currencies', [UserCurrencyController::class, 'store']);
-    Route::put('user-currencies/{id}', [UserCurrencyController::class, 'update']);
-    Route::delete('user-currencies/{id}', [UserCurrencyController::class, 'destroy']);
-    Route::get('individual-users', [UserCurrencyController::class, 'getIndividualUsers']);
-
-    // //Payment method
+    //Payment method
 
     // //Payment gateway
     // Route::get('payment-gateways', [PaymentGatewayController::class, 'index']);
