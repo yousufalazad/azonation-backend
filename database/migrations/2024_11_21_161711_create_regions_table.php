@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('regions', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique()->comment('For country wise price rate');
+            $table->string('name')->unique()->comment('Unique name to call the region');
+            $table->string('title')->unique()->comment('Title to quickly understand which areas or countries/country for this region');
             $table->timestamps();
         });
     }
