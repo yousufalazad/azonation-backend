@@ -13,10 +13,13 @@ use App\Http\Controllers\Org\MeetingAttendanceController;
 use App\Http\Controllers\Org\AddressController;
 use App\Http\Controllers\Org\OrgAdministratorController;
 use App\Http\Controllers\PhoneNumberController;
+
+//Event Controller
+use App\Http\Controllers\Org\OrgEventController;
 use App\Http\Controllers\EventAttendanceController;
+use App\Http\Controllers\EventSummaryController;
 use App\Http\Controllers\ProjectAttendanceController;
 
-use App\Http\Controllers\Org\OrgEventController;
 use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 
@@ -216,13 +219,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-event', [OrgEventController::class, 'createEvent']);
     Route::put('/update-event/{eventId}', [OrgEventController::class, 'updateEvent']);
     Route::delete('/delete-event/{eventId}', [OrgEventController::class, 'deleteEvent']);
-    //Meeting EventAttendance
+
+    // Event Attendance
     Route::get('/get-org-user-list', [EventAttendanceController::class, 'getOrgUse']);
     Route::get('/get-event-attendances', [EventAttendanceController::class, 'index']);
     Route::get('/get-event-attendance/{id}', [EventAttendanceController::class, 'show']);
     Route::post('/create-event-attendance', [EventAttendanceController::class, 'store']);
     Route::put('/update-event-attendance/{id}', [EventAttendanceController::class, 'update']);
     Route::delete('/delete-event-attendance/{id}', [EventAttendanceController::class, 'destroy']);
+
+    // event-summary
+    Route::get('/get-event-summary', [EventSummaryController::class, 'index']);
+    Route::get('/get-event-summary/{id}', [EventSummaryController::class, 'show']);
+    Route::post('/create-event-summary', [EventSummaryController::class, 'store']);
+    Route::put('/update-event-summary/{id}', [EventSummaryController::class, 'update']);
+    Route::delete('/delete-event-summary/{id}', [EventSummaryController::class, 'destroy']);
+
+
     //Project
     Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
     Route::get('/get-project/{projectId}', [OrgProjectController::class, 'getProject']);
