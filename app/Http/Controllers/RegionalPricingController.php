@@ -65,14 +65,15 @@ class RegionalPricingController extends Controller
             // Fetch all users of type 'organisation' and their price rates
             $packageRegionCurrency = User::query()
                 ->where('users.type', 'organisation') // Filter users by type
-                ->leftJoin('subscriptions', 'users.id', '=', 'subscriptions.user_id')
-                ->leftJoin('user_regions', 'users.id', '=', 'user_regions.user_id')
-                ->leftJoin('region_currencies', 'user_regions.region_id', '=', 'region_currencies.region_id')
+                ->leftJoin('user_countries', 'users.id', '=', 'user_countries.user_id') // Join country_regions table
+                ->leftJoin('country_regions', 'user_countries.country_id', '=', 'country_regions.country_id')
+                ->leftJoin('region_currencies', 'country_regions.region_id', '=', 'region_currencies.region_id')
                 ->leftJoin('currencies', 'region_currencies.currency_id', '=', 'currencies.id')
+                ->leftJoin('subscriptions', 'users.id', '=', 'subscriptions.user_id') //
                 ->leftJoin('packages', 'subscriptions.package_id', '=', 'packages.id')
                 ->leftJoin('regional_pricings', function ($join) {
                     $join->on('subscriptions.package_id', '=', 'regional_pricings.package_id')
-                        ->on('user_regions.region_id', '=', 'regional_pricings.region_id');
+                        ->on('country_regions.region_id', '=', 'regional_pricings.region_id');
                 })
                 ->select(
                     'users.id as user_id',
@@ -80,7 +81,7 @@ class RegionalPricingController extends Controller
                     'subscriptions.package_id',
                     'packages.name as package_name',
                     'subscriptions.start_date as subscription_start_date',
-                    'user_regions.region_id',
+                    'country_regions.region_id',
                     'currencies.currency_code',
                     'regional_pricings.price'
                 )
@@ -137,14 +138,14 @@ class RegionalPricingController extends Controller
         try {
             // Fetch all users' price rates
             $packageRegionCurrency = Subscription::query()
-                ->leftJoin('user_regions', 'subscriptions.user_id', '=', 'user_regions.user_id')
-                ->leftJoin('region_currencies', 'user_regions.region_id', '=', 'region_currencies.region_id')
+                ->leftJoin('country_regions', 'subscriptions.user_id', '=', 'country_regions.user_id')
+                ->leftJoin('region_currencies', 'country_regions.region_id', '=', 'region_currencies.region_id')
                 ->leftJoin('currencies', 'region_currencies.currency_id', '=', 'currencies.id')
                 ->leftJoin('packages', 'subscriptions.package_id', '=', 'packages.id')
-                ->leftJoin('users', 'user_regions.user_id', '=', 'users.id')
+                ->leftJoin('users', 'country_regions.user_id', '=', 'users.id')
                 ->leftJoin('regional_pricings', function ($join) {
                     $join->on('subscriptions.package_id', '=', 'regional_pricings.package_id')
-                        ->on('user_regions.region_id', '=', 'regional_pricings.region_id');
+                        ->on('country_regions.region_id', '=', 'regional_pricings.region_id');
                 })
                 ->select(
                     'users.name as user_name',
@@ -152,7 +153,7 @@ class RegionalPricingController extends Controller
                     'subscriptions.package_id',
                     'packages.name as package_name',
                     'subscriptions.start_date as subscription_start_date',
-                    'user_regions.region_id',
+                    'country_regions.region_id',
                     'currencies.currency_code',
                     'regional_pricings.price'
                 )
@@ -212,10 +213,10 @@ class RegionalPricingController extends Controller
 
             // Fetch user price rate
             $packageRegionCurrency = Subscription::where('subscriptions.user_id', $user_id)
-                ->leftJoin('user_regions', 'subscriptions.user_id', '=', 'user_regions.user_id')
-                ->leftJoin('region_currencies', 'user_regions.region_id', '=', 'region_currencies.region_id')
+                ->leftJoin('country_regions', 'subscriptions.user_id', '=', 'country_regions.user_id')
+                ->leftJoin('region_currencies', 'country_regions.region_id', '=', 'region_currencies.region_id')
                 ->leftJoin('currencies', 'region_currencies.currency_id', '=', 'currencies.id')
-                ->select('subscriptions.package_id', 'user_regions.region_id', 'currencies.currency_code')
+                ->select('subscriptions.package_id', 'country_regions.region_id', 'currencies.currency_code')
                 ->first(); // Retrieve a single record
 
             if (!$packageRegionCurrency) {
