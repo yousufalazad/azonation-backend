@@ -70,6 +70,10 @@ use App\Http\Controllers\RegionalPricingController;
 use App\Http\Controllers\TimeZoneSetupController;
 use App\Http\Controllers\UserCountryController;
 
+use App\Http\Controllers\RegionController;
+use App\Http\Controllers\CountryRegionController;
+use App\Http\Controllers\RegionCurrencyController;
+
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -384,4 +388,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-user-country', [UserCountryController::class, 'store']);
     Route::put('/update-user-country/{id}', [UserCountryController::class, 'update']);
     Route::delete('/delete-user-country/{id}', [UserCountryController::class, 'destroy']);
+
+    // RegionController
+    Route::get('/get-regions', [RegionController::class, 'index']);
+    Route::get('/get-region/{id}', [RegionController::class, 'show']);
+    Route::post('/create-region', [RegionController::class, 'store']);
+    Route::put('/update-region/{id}', [RegionController::class, 'update']);
+    Route::delete('/delete-region/{id}', [RegionController::class, 'destroy']);
+    // CountryRegionController
+    Route::get('/get-country-regions', [CountryRegionController::class, 'index']);
+    Route::get('/get-country-region/{id}', [CountryRegionController::class, 'show']);
+    Route::post('/create-country-region', [CountryRegionController::class, 'store']);
+    Route::put('/update-country-region/{id}', [CountryRegionController::class, 'update']);
+    Route::delete('/delete-country-region/{id}', [CountryRegionController::class, 'destroy']);
+    // RegionCurrencyController
+    Route::get('/get-region-currencies', [RegionCurrencyController::class, 'index']);
+    Route::get('/get-region-currency/{id}', [RegionCurrencyController::class, 'show']);
+    Route::post('/create-region-currency', [RegionCurrencyController::class, 'store']);
+    Route::put('/update-region-currency/{id}', [RegionCurrencyController::class, 'update']);
+    Route::delete('/delete-region-currency/{id}', [RegionCurrencyController::class, 'destroy']);
 });

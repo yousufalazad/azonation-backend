@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique()->comment('Unique name to call the region');
             $table->string('title')->unique()->comment('Title to quickly understand which areas or countries/country for this region');
+            $table->boolean(column: 'is_active')->default(value: true); // Indicates whether the time_zone_setups is active or not
             $table->timestamps();
         });
     }

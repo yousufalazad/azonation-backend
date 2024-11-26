@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('document')->nullable(); // File path for the document, 1 MB limit handled in app layer
 
             // Status of the history record
-            $table->tinyInteger('status')->default(0)->comment('0 = inactive, 1 = active');
+            $table->boolean('status')->default(1)->comment('0 = inactive, 1 = active');
 
             $table->timestamps(); // Created at and updated at timestamps
         });
