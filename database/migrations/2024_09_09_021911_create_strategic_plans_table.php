@@ -29,7 +29,7 @@ return new class extends Migration
             $table->date('end_date')->nullable(); // End date of the plan
 
             // Status of the strategic plan
-            $table->tinyInteger('status')->default(0)->comment('0 = inactive, 1 = active');
+            $table->boolean('status')->default(1)->comment('0 = inactive, 1 = active');
 
             $table->timestamps(); // Created at and updated at timestamps
         });

@@ -25,6 +25,8 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->comment('Foreign key referencing the currencies table');
 
+            $table->boolean(column: 'is_active')->default(value: true); // Indicates whether the time_zone_setups is active or not
+
             $table->timestamps();
         });
     }

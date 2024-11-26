@@ -24,12 +24,14 @@ return new class extends Migration
                 ->constrained('regions')
                 ->cascadeOnDelete()
                 ->comment('Foreign key referencing the regions table');
+                
+            $table->boolean(column: 'is_active')->default(value: true); // Indicates whether the time_zone_setups is active or not
 
             $table->timestamps();
         });
     }
 
-    /**
+    /**a
      * Reverse the migrations.
      */
     public function down(): void
