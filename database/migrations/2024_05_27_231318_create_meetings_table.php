@@ -67,7 +67,7 @@ return new class extends Migration
             $table->foreignId('conduct_type_id')
                 ->nullable()
                 ->constrained('conduct_types')
-                ->onDelete('cascade')
+                ->onDelete('set null')
                 ->comment('Type of conduct (e.g., Formal, Informal)');
 
             // Status and metadata
@@ -79,7 +79,8 @@ return new class extends Migration
             //meeting privacy settings for 
             $table->foreignId('privacy_setup_id')
                 ->constrained('privacy_setups')
-                ->onDelete('cascade')
+                ->nullable()
+                ->onDelete('set null')
                 ->comment('Meeting visibility (Public, Private, Members Only ect)');
 
             $table->text('cancellation_reason')->nullable()->comment('Reason for cancelling the meeting');

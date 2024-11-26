@@ -76,7 +76,7 @@ class RegionalPricingController extends Controller
                         ->on('country_regions.region_id', '=', 'regional_pricings.region_id');
                 })
                 ->select(
-                    'users.id as user_id',
+                    'users.id as user_id', 
                     'users.name as user_name',
                     'subscriptions.package_id',
                     'packages.name as package_name',

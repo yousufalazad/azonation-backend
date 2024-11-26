@@ -9,6 +9,16 @@ class GuestMeetingAttendance extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'meeting_id',
+        'guest_name', 
+        'about_guest', 
+        'attendance_type_id', 
+        'date', 
+        'time',
+        'note', 
+        'is_active'
+    ];
     protected $hidden=[
         'created_at',
         'updated_at'

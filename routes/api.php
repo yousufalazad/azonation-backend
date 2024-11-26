@@ -5,10 +5,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Individual\IndividualController;
 use App\Http\Controllers\Org\OrgMemberListController;
 use App\Http\Controllers\Org\CommitteeController;
-use App\Http\Controllers\Org\MeetingController;
+use App\Http\Controllers\Org\CommitteeMemberController;
 
+use App\Http\Controllers\Org\MeetingController;
 use App\Http\Controllers\Org\MeetingMinutesController;
 use App\Http\Controllers\Org\MeetingAttendanceController;
+use App\Http\Controllers\Org\GuestMeetingAttendanceController;
 
 use App\Http\Controllers\Org\AddressController;
 use App\Http\Controllers\Org\OrgAdministratorController;
@@ -85,6 +87,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profileimage/{userId}', [IndividualController::class, 'getProfileImage']);
     Route::post('/profileimage/{userId}', [IndividualController::class, 'updateProfileImage']);
     Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrganisationByIndividualId']);
+    
+    Route::get('/individual-users', [IndividualController::class, 'getIndividualUser']);
 
 
     // ------------------- Organisation----------------------------------------------------------------
@@ -166,6 +170,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/search_individual', [OrgMemberListController::class, 'search']);
     Route::post('/add_member', [OrgMemberListController::class, 'addMember']);
     Route::get('/org-member-list/{userId}', [OrgMemberListController::class, 'getMemberList']);
+    Route::get('/org-all-member-list', [OrgMemberListController::class, 'getOrgAllMemberList']);
     Route::get('/total-org-member-count/{userId}', [OrgMemberListController::class, 'totalOrgMemberCount']);
 
     //for Org Administrator
@@ -190,6 +195,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('update_committee/{id}', [CommitteeController::class, 'update']);
     Route::delete('org-committee/{id}', [CommitteeController::class, 'destroy']);
 
+    //Committee Member
+    Route::get('/get-committee-members', [CommitteeMemberController::class, 'index']);
+    Route::get('/get-committee-member/{id}', [CommitteeMemberController::class, 'show']);
+    Route::post('/create-committee-member', [CommitteeMemberController::class, 'store']);
+    Route::put('/update-committee-member/{id}', [CommitteeMemberController::class, 'update']);
+    Route::delete('/delete-committee-member/{id}', [CommitteeMemberController::class, 'destroy']);
+
     //Meeting
     // Route::get('/get-meetings', [MeetingController::class, 'index']);
     Route::get('/get-meeting/{id}', [MeetingController::class, 'show']); // Fetch meeting details
@@ -212,6 +224,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-meeting-attendance', [MeetingAttendanceController::class, 'store']);
     Route::put('/update-meeting-attendance/{id}', [MeetingAttendanceController::class, 'update']);
     Route::delete('/delete-meeting-attendance/{id}', [MeetingAttendanceController::class, 'destroy']);
+
+    //Meeting GuestMeetingAttendanceController 
+    Route::get('/get-meeting-guest-attendances', [GuestMeetingAttendanceController::class, 'index']);
+    Route::get('/get-meeting-guest-attendance/{id}', [GuestMeetingAttendanceController::class, 'show']);
+    Route::post('/create-meeting-guest-attendance', [GuestMeetingAttendanceController::class, 'store']);
+    Route::put('/update-meeting-guest-attendance/{id}', [GuestMeetingAttendanceController::class, 'update']);
+    Route::delete('/delete-meeting-guest-attendance/{id}', [GuestMeetingAttendanceController::class, 'destroy']);
 
     //Event  
     Route::get('/get-events/{userId}', [OrgEventController::class, 'index']);

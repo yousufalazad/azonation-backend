@@ -6,7 +6,7 @@ use App\Models\Individual;
 use App\Models\OrgMemberList;
 use App\Models\ProfileImage;
 use Illuminate\Http\Request;
-use App\Models\Organisation;
+use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon; // Import Carbon for timestamp
@@ -21,6 +21,15 @@ class IndividualController extends Controller
             'message' => $message,
             'data' => $data
         ], $status);
+    }
+
+    public function getIndividualUser()
+    {
+        $individualUsers = User::where('type', 'individual')->get();
+        return response()->json([
+            'status' => true,
+            'data' => $individualUsers
+        ]);
     }
 
     // getProfilePicture

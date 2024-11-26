@@ -17,6 +17,7 @@ return new class extends Migration
             // Foreign key to meetings table
             $table->foreignId('meeting_id')
                 ->constrained('meetings')
+                ->unique()
                 ->cascadeOnDelete()
                 ->comment('Foreign key referencing the meetings table');
 
@@ -54,7 +55,8 @@ return new class extends Migration
             //meeting minutes privacy settings for members and admin
             $table->foreignId('privacy_setup_id')
             ->constrained('privacy_setups')
-            ->onDelete('cascade')
+            ->nullable()
+            ->onDelete('set null')
             ->comment('Privacy level of the asset (e.g., public, private, only members. etc).');
 
             //Approval status from members

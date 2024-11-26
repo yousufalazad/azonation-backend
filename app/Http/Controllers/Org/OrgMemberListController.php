@@ -19,6 +19,23 @@ class OrgMemberListController extends Controller
 {
     use Notifiable;
 
+    public function getOrgAllMemberList(Request $request)
+    {
+        $userId = $request->user()->id;
+        $getOrgAllMemberList = OrgMemberList::leftJoin('users', 'org_member_lists.individual_type_user_id', 'users.id')
+            ->where('org_type_user_id', $userId)
+            ->where('status', '1')
+            ->select(
+                'users.id as user_id',
+                'users.name as user_name'
+            )
+            ->get();
+        return response()->json([
+            'status' => true,
+            'data' => $getOrgAllMemberList
+        ]);
+    }
+
     public function totalOrgMemberCount($userId)
     {
         //$orgTotalMemberCount = OrgMemberList::select('db_table_name.*')->where('org_id', $orgId)->get();

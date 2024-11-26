@@ -9,8 +9,9 @@ class CommitteeMember extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'committee_id',
         'user_id',
-        'designation',
+        'designation_id',
         'start_date',
         'end_date',
         'note',
