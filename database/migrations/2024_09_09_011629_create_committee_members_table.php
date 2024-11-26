@@ -16,12 +16,12 @@ return new class extends Migration
             $table->foreignId('committee_id')
                 ->constrained('committees')
                 ->onDelete('cascade');
-            
-                $table->foreignId('user_id')
+
+            $table->foreignId('user_id')
                 ->constrained('users')
                 ->onDelete('cascade');
 
-                
+
             $table->foreignId('designation_id')
                 ->constrained('designations');
 

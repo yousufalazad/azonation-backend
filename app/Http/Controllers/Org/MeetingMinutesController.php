@@ -218,39 +218,37 @@ class MeetingMinutesController extends Controller
         }
     }
 
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
-{
-    try {
-        // Find the record by ID
-        $meetingMinutes = MeetingMinutes::findOrFail($id);
+    {
+        try {
+            // Find the record by ID
+            $meetingMinutes = MeetingMinutes::findOrFail($id);
 
-        // Delete the file attachment if it exists
-        if ($meetingMinutes->file_attachments && Storage::exists('public/' . $meetingMinutes->file_attachments)) {
-            Storage::delete('public/' . $meetingMinutes->file_attachments);
+            // Delete the file attachment if it exists
+            if ($meetingMinutes->file_attachments && Storage::exists('public/' . $meetingMinutes->file_attachments)) {
+                Storage::delete('public/' . $meetingMinutes->file_attachments);
+            }
+
+            // Delete the record from the database
+            $meetingMinutes->delete();
+
+            // Return success response
+            return response()->json([
+                'status' => true,
+                'message' => 'Meeting Minutes deleted successfully.'
+            ], 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Error deleting Meeting Minutes: ' . $e->getMessage());
+
+            // Return generic error response
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.'
+            ], 500);
         }
-
-        // Delete the record from the database
-        $meetingMinutes->delete();
-
-        // Return success response
-        return response()->json([
-            'status' => true,
-            'message' => 'Meeting Minutes deleted successfully.'
-        ], 200);
-    } catch (\Exception $e) {
-        // Log the error for debugging
-        Log::error('Error deleting Meeting Minutes: ' . $e->getMessage());
-
-        // Return generic error response
-        return response()->json([
-            'status' => false,
-            'message' => 'An error occurred. Please try again.'
-        ], 500);
     }
-}
-
 }

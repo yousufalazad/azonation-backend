@@ -23,13 +23,13 @@ return new class extends Migration
 
             // Guest details and meeting attendance information
             $table->string('guest_name')->nullable()->comment('Name of the guest attending the meeting');
-            $table->text('description')->nullable()->comment('Description or details about the guest');
+            $table->text('about_guest')->nullable()->comment('Description or details about the guest');
             
-            // Attendance type: 0 = null, 1 = in_person, 2 = remote, 3 = hybrid
-            $table->enum('attendance_type', [0, 1, 2, 3])
-                  ->default(0)
-                  ->nullable()
-                  ->comment('Attendance type: 0 = null, 1 = in_person, 2 = remote, 3 = hybrid');
+            // Foreign keys using foreignId and constrained
+            $table->foreignId('attendance_type_id')
+                    ->constrained('attendance_types')
+                    ->nullable()
+                    ->comment('Foreign key referencing the attendance_types table');
 
             // Date and time of attendance
             $table->date('date')->nullable()->comment('Date of guest attendance');
@@ -37,10 +37,11 @@ return new class extends Migration
 
             // Notes and status
             $table->text('note')->nullable()->comment('Additional notes regarding the guest attendance');
-            $table->enum('status', [0, 1])
-                  ->default(0)
-                  ->nullable()
-                  ->comment('Attendance status: 0 = inactive, 1 = active');
+            // Enum for status: 0 = inactive, 1 = active
+            $table->enum('is_active', [0, 1])
+                  ->default(1)
+                  ->comment('0 = inactive, 1 = active')
+                  ->nullable();
 
             // Timestamps for created_at and updated_at
             $table->timestamps();
