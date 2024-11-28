@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\PrivacySetup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class PrivacySetupController extends Controller
 {
@@ -12,7 +14,7 @@ class PrivacySetupController extends Controller
      */
     public function index()
     {
-        $privacySetups = PrivacySetup::where('status', 1)
+        $privacySetups = PrivacySetup::where('is_active', 1)
             ->orderBy('id', 'asc')
             ->get();
         return response()->json([
@@ -34,7 +36,37 @@ class PrivacySetupController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validation
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'is_active' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        try {
+            // Logging the inputs for debugging
+            Log::info('Privacy Setup data: ', ['name' => $request->name, 'description' => $request->description]);
+
+            // Create the PrivacySetup record
+            $privacySetup = PrivacySetup::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'is_active' => $request->is_active,
+            ]);
+
+            // Return success response
+            return response()->json(['status' => true, 'data' => $privacySetup, 'message' => 'Privacy Setup created successfully.'], 201);
+        } catch (\Exception $e) {
+            // Log the error message for troubleshooting
+            Log::error('Error creating Privacy Setup: ' . $e->getMessage());
+
+            // Return error response
+            return response()->json(['status' => false, 'message' => 'Failed to create Privacy Setup.'], 500);
+        }
     }
 
     /**
@@ -56,16 +88,45 @@ class PrivacySetupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PrivacySetup $privacySetup)
+    public function update(Request $request, $id)
     {
-        //
+        // Validation
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'is_active' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }
+        // Find the country
+        $privacySetup = PrivacySetup::find($id);
+        if (!$privacySetup) {
+            return response()->json(['status' => false, 'message' => 'Privacy Setup not found.'], 404);
+        }
+
+        // Update the country
+        $privacySetup->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'is_active' => $request->is_active,
+        ]);
+
+        return response()->json(['status' => true, 'data' => $privacySetup, 'message' => 'Privacy Setup updated successfully.'], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PrivacySetup $privacySetup)
+    public function destroy($id)
     {
-        //
+        $privacySetup = PrivacySetup::find($id);
+        if (!$privacySetup) {
+            return response()->json(['status' => false, 'message' => 'Privacy Setup not found.'], 404);
+        }
+
+        $privacySetup->delete();
+        return response()->json(['status' => true, 'message' => 'Privacy Setup deleted successfully.'], 200);
     }
 }
