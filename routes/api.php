@@ -20,7 +20,10 @@ use App\Http\Controllers\PhoneNumberController;
 use App\Http\Controllers\Org\OrgEventController;
 use App\Http\Controllers\EventAttendanceController;
 use App\Http\Controllers\EventSummaryController;
+
+//Project
 use App\Http\Controllers\ProjectAttendanceController;
+use App\Http\Controllers\ProjectSummaryController;
 
 use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
@@ -273,6 +276,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-project-attendance/{id}', [ProjectAttendanceController::class, 'update']);
     Route::delete('/delete-project-attendance/{id}', [ProjectAttendanceController::class, 'destroy']);
 
+    //Project Summery
+    Route::get('/get-project-summary', [ProjectSummaryController::class, 'index']);
+    Route::get('/get-project-summary/{id}', [ProjectSummaryController::class, 'show']);
+    Route::post('/create-project-summary', [ProjectSummaryController::class, 'store']);
+    Route::put('/update-project-summary/{id}', [ProjectSummaryController::class, 'update']);
+    Route::delete('/delete-project-summary/{id}', [ProjectSummaryController::class, 'destroy']);
+
     // Founder
     Route::post('create-founder', [FounderController::class, 'store']);
     Route::get('get-founder/{userId}', [FounderController::class, 'index']);
@@ -287,6 +297,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // privacy_setups
     Route::get('privacy-setups', [PrivacySetupController::class, 'index']);
+    // privacy_setups
+    Route::get('/get-privacy-setups', [PrivacySetupController::class, 'index']);
+    Route::post('/create-privacy-setup', [PrivacySetupController::class, 'store']);
+    Route::put('/update-privacy-setup/{id}', [PrivacySetupController::class, 'update']);
+    Route::delete('/delete-privacy-setup/{id}', [PrivacySetupController::class, 'destroy']);
+
     // asset_lifecycle_setups
     Route::get('asset-lifecycle-setups', [AssetLifecycleStatusController::class, 'index']);
 

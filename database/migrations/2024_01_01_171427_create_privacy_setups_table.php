@@ -20,8 +20,7 @@ return new class extends Migration
             // Description of the privacy type
             $table->text('description')->nullable()->comment('Detailed description of the privacy setting.');
             
-            // Whether this privacy option is available globally for all organizations
-            $table->boolean('status')->default(true)->comment('Indicates if the this privacy setting is globally available or not available in the system.');
+            $table->boolean(column: 'is_active')->default(true)->comment('Whether the privacy setting is active'); 
 
             // Timestamps for created_at and updated_at
             $table->timestamps();
