@@ -23,6 +23,16 @@ class PrivacySetupController extends Controller
         ]);
     }
 
+    public function getAllPrivacySetupForSuperAdmin()
+    {
+        $privacySetups = PrivacySetup::orderBy('id', 'asc')
+            ->get();
+        return response()->json([
+            'status' => true,
+            'data' => $privacySetups
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

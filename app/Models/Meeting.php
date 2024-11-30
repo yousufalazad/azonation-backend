@@ -42,6 +42,7 @@ class Meeting extends Model
         'repeat_frequency',
         'attachment',
         'conduct_type_id',
+        'privacy_setup_id',
         'is_active',
         'visibility',
         'cancellation_reason',

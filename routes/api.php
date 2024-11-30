@@ -288,7 +288,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-founder/{userId}', [FounderController::class, 'index']);
     Route::put('update-founder/{id}', [FounderController::class, 'update']);
 
-    //Asset
+    // Asset
     Route::get('/get-assets/{userId}', [AssetController::class, 'getAsset']);
     Route::get('/get-asset/{assetId}', [AssetController::class, 'getAssetDetails']);
     Route::post('/create-asset', [AssetController::class, 'store']);
@@ -298,6 +298,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // privacy_setups
     Route::get('privacy-setups', [PrivacySetupController::class, 'index']);
     // privacy_setups
+    Route::get('/get-all-privacy-setups', [PrivacySetupController::class, 'getAllPrivacySetupForSuperAdmin']);
     Route::get('/get-privacy-setups', [PrivacySetupController::class, 'index']);
     Route::post('/create-privacy-setup', [PrivacySetupController::class, 'store']);
     Route::put('/update-privacy-setup/{id}', [PrivacySetupController::class, 'update']);

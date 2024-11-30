@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('meetings', function (Blueprint $table) {
-            $table->id()->comment('Primary key'); // Primary key
+            $table->id(); // Primary key
 
             // Foreign key linking to the users table
             $table->foreignId('user_id')
@@ -79,8 +79,6 @@ return new class extends Migration
             //meeting privacy settings for 
             $table->foreignId('privacy_setup_id')
                 ->constrained('privacy_setups')
-                ->nullable()
-                ->onDelete('set null')
                 ->comment('Meeting visibility (Public, Private, Members Only ect)');
 
             $table->text('cancellation_reason')->nullable()->comment('Reason for cancelling the meeting');
