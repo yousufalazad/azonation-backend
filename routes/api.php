@@ -10,7 +10,7 @@ use App\Http\Controllers\Org\CommitteeMemberController;
 use App\Http\Controllers\Org\MeetingController;
 use App\Http\Controllers\Org\MeetingMinutesController;
 use App\Http\Controllers\Org\MeetingAttendanceController;
-use App\Http\Controllers\Org\GuestMeetingAttendanceController;
+use App\Http\Controllers\MeetingGuestAttendanceController;
 
 use App\Http\Controllers\Org\AddressController;
 use App\Http\Controllers\Org\OrgAdministratorController;
@@ -232,12 +232,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-meeting-attendance/{id}', [MeetingAttendanceController::class, 'update']);
     Route::delete('/delete-meeting-attendance/{id}', [MeetingAttendanceController::class, 'destroy']);
 
-    //Meeting GuestMeetingAttendanceController 
-    Route::get('/get-meeting-guest-attendances', [GuestMeetingAttendanceController::class, 'index']);
-    Route::get('/get-meeting-guest-attendance/{id}', [GuestMeetingAttendanceController::class, 'show']);
-    Route::post('/create-meeting-guest-attendance', [GuestMeetingAttendanceController::class, 'store']);
-    Route::put('/update-meeting-guest-attendance/{id}', [GuestMeetingAttendanceController::class, 'update']);
-    Route::delete('/delete-meeting-guest-attendance/{id}', [GuestMeetingAttendanceController::class, 'destroy']);
+    //Meeting MeetingGuestAttendance 
+    Route::get('/get-meeting-guest-attendances', [MeetingGuestAttendanceController::class, 'index']);
+    Route::get('/get-meeting-guest-attendance/{id}', [MeetingGuestAttendanceController::class, 'show']);
+    Route::post('/create-meeting-guest-attendance', [MeetingGuestAttendanceController::class, 'store']);
+    Route::put('/update-meeting-guest-attendance/{id}', [MeetingGuestAttendanceController::class, 'update']);
+    Route::delete('/delete-meeting-guest-attendance/{id}', [MeetingGuestAttendanceController::class, 'destroy']);
 
     //Event  
     Route::get('/get-events/{userId}', [OrgEventController::class, 'index']);

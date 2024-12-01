@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Http\Controllers\Org;
+namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
-use App\Models\GuestMeetingAttendance;
+use App\Models\MeetingGuestAttendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 
-class GuestMeetingAttendanceController extends Controller
+class MeetingGuestAttendanceController extends Controller
 {
-    /**
+        /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $meetingAttendance = GuestMeetingAttendance::select('guest_meeting_attendances.*', 'attendance_types.name as attendance_types_name')
-            ->leftJoin('attendance_types', 'guest_meeting_attendances.attendance_type_id', '=', 'attendance_types.id')
+        $meetingAttendance = MeetingGuestAttendance::select('meeting_guest_attendances.*', 'attendance_types.name as attendance_types_name')
+            ->leftJoin('attendance_types', 'meeting_guest_attendances.attendance_type_id', '=', 'attendance_types.id')
             ->get();
         return response()->json(['status' => true, 'data' => $meetingAttendance], 200);
     }
@@ -54,7 +54,7 @@ class GuestMeetingAttendanceController extends Controller
             Log::info('Meeting Attendance data: ', ['attendance_type_id' => $request->attendance_type_id, 'user_id' => $request->user_id]);
 
             // Create the Meeting Attendance record
-            $meetingAttendances = GuestMeetingAttendance::create([
+            $meetingAttendances = MeetingGuestAttendance::create([
                 'meeting_id' => $request->meeting_id,
                 'guest_name' => $request->guest_name,
                 'about_guest' => $request->about_guest,
@@ -79,7 +79,7 @@ class GuestMeetingAttendanceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(GuestMeetingAttendance $guestMeetingAttendance)
+    public function show(MeetingGuestAttendance $guestMeetingAttendance)
     {
         //
     }
@@ -87,7 +87,7 @@ class GuestMeetingAttendanceController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(GuestMeetingAttendance $guestMeetingAttendance)
+    public function edit(MeetingGuestAttendance $guestMeetingAttendance)
     {
         //
     }
@@ -113,7 +113,7 @@ class GuestMeetingAttendanceController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
         // Find the Meeting Attendances
-        $meetingAttendances = GuestMeetingAttendance::find($id);
+        $meetingAttendances = MeetingGuestAttendance::find($id);
         if (!$meetingAttendances) {
             return response()->json(['status' => false, 'message' => 'Meeting Attendance not found.'], 404);
         }
@@ -138,7 +138,7 @@ class GuestMeetingAttendanceController extends Controller
      */
     public function destroy($id)
     {
-        $meetingAttendance = GuestMeetingAttendance::find($id);
+        $meetingAttendance = MeetingGuestAttendance::find($id);
         if (!$meetingAttendance) {
             return response()->json(['status' => false, 'message' => 'Meeting Attendance member not found.'], 404);
         }
