@@ -41,7 +41,7 @@ return new class extends Migration
             $table->string('transaction_id')->nullable()->comment('Unique transaction ID from the payment gateway');
 
             // Status of the payment process
-            $table->enum('status', ['initiated', 'completed', 'failed', 'pending', 'refunded'])
+            $table->enum('payment_status', ['initiated', 'completed', 'failed', 'pending', 'refunded'])
                 ->default('initiated')
                 ->comment('The status of the payment: initiated, completed, failed, pending, or refunded');
 

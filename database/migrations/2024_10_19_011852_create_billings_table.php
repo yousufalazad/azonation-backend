@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
 
             // Unique billing identifier
-            //$table->string('billing_code', 15)->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-BILL.');
+            $table->string('billing_code', 15)->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-BILL.');
             //$table->string('billing_code', 15)()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-BILL.');
 
             // Foreign key linking to the 'users' table
@@ -61,12 +61,12 @@ return new class extends Migration
             $table->date('period_end')->comment('Billing period end date');
 
             // Member count data from active_member_counts table
-            $table->integer('active_member_count', 10)->comment('Daily total active members within billing period');
-            $table->integer('billable_active_member_count', 10)->comment('Total billable active members within billing period');
+            $table->integer('total_active_member', 10)->comment('Daily total active members within billing period');
+            $table->integer('total_billable_active_member', 10)->comment('Total billable active members within billing period');
 
             // Billing rate and calculation
-            $table->decimal('daily_price_rate', 10, 2)->comment('Daily rate per active member');
-            $table->decimal('total_bill_amount', 10, 2)->comment('Total bill amount based on rate, members, and days');
+            $table->decimal('price_rate', 10, 2)->comment('Daily rate per active member');
+            $table->decimal('bill_amount', 10, 2)->comment('Total bill amount based on rate, members, and days');
 
             // Billing status and administrative note
             $table->enum('status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
