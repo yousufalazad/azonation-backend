@@ -40,24 +40,30 @@ return new class extends Migration
             $table->date('due_at')->comment('Payment due date');
 
             // Financial details
-            $table->decimal('subtotal_amount', 10, 2)->comment('Subtotal before discounts and taxes');
-            $table->string('discount_description', 50)->nullable()->comment('Title or description of the discount');
-            $table->decimal('discount_value', 10, 2)->nullable()->default(0)->comment('Discount amount applied to the invoice');
-            $table->decimal('tax_amount', 10, 2)->nullable()->default(0)->comment('Total tax applied');
+            $table->decimal('subtotal', 10, 2)->comment('Subtotal before discounts and taxes, data comes from billings table - bill_amount column');
+            $table->string('discount_title', 50)->nullable()->comment('Title or description of the discount');
+            $table->decimal('discount', 10, 2)->nullable()->default(0)->comment('Discount amount applied to the invoice');
+            $table->decimal('tax', 10, 2)->nullable()->default(0)->comment('Total tax applied');
             $table->decimal('credit_applied', 10, 2)->nullable()->default(0)->comment('Credit amount applied from the user’s balance');
-            $table->decimal('total_amount_due', 10, 2)->comment('Final amount due after discounts and taxes');
+            $table->decimal('balance', 10, 2)->comment('Final amount due after discounts, credit and taxes');
 
             // Additional fields
-            $table->string('additional_note', 100)->nullable()->comment('Optional additional notes for the invoice');
+            $table->string('invoice_note', 100)->nullable()->comment('Notes for the invoice, like Non-refundable');
 
             // Publishing and status fields
             $table->boolean('is_published')->default(false)->comment('Indicates if the invoice is published');
+            
+            // Invoice status
+            $table->enum('invoice_status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
+                ->default('issued')
+                ->comment('Invoice status: issued, unissued, pending, cancelled, or draft');
+
             $table->enum('payment_status', ['paid', 'unpaid', 'cancelled', 'refunded', 'collections', 'payment_pending', 'processing'])
                 ->default('unpaid')
                 ->comment('Current payment status of the invoice');
 
             // Action reason and hidden note
-            $table->string('status_reason')->nullable()->comment('Reason for the current payment status');
+            $table->string('payment_status_reason')->nullable()->comment('Reason for the current payment status');
             $table->string('admin_note')->comment('Internal admin note for reference');
 
             // Timestamps

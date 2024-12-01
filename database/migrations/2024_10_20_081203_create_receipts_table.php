@@ -36,7 +36,7 @@ return new class extends Migration
             // Amount received
             $table->decimal('amount_received', 15, 2)
                 ->comment('The total amount received.');
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
             // Payment method details (e.g., credit card, bank transfer, PayPal)
             $table->string('payment_method', 30)
                 ->comment('Method used for payment (e.g., credit card, PayPal, bank transfer).');
