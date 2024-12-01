@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('guest_meeting_attendances', function (Blueprint $table) {
+        Schema::create('project_guest_attendances', function (Blueprint $table) {
             $table->id();
 
             // Foreign key to the meetings table using foreignId and constrained
-            $table->foreignId('meeting_id')
-                  ->constrained('meetings')
+            $table->foreignId('org_project_id')
+                  ->constrained('org_projects')
                   ->cascadeOnUpdate()
                   ->cascadeOnDelete()
-                  ->comment('Foreign key referencing the meetings table');
+                  ->comment('Foreign key referencing the org_projects table');
 
             // Guest details and meeting attendance information
             $table->string('guest_name')->nullable()->comment('Name of the guest attending the meeting');
@@ -43,7 +43,6 @@ return new class extends Migration
                   ->comment('0 = inactive, 1 = active')
                   ->nullable();
 
-            // Timestamps for created_at and updated_at
             $table->timestamps();
         });
     }
@@ -53,6 +52,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('guest_meeting_attendances');
+        Schema::dropIfExists('project_guest_attendances');
     }
 };

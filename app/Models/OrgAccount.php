@@ -16,8 +16,7 @@ class OrgAccount extends Model
         'fund_id',
         'date',
         'type',
-        'amount',
-        'balance_after'
+        'amount'
     ];
 
     protected $hidden = [
