@@ -51,10 +51,6 @@ return new class extends Migration
             // Amount involved in the transaction
             $table->decimal('amount', 15, 2)
                 ->comment('Total amount of the transaction.');
-                
-            // Account balance after the transaction
-            $table->decimal('balance_after', 15, 2)
-                ->comment('Account balance following this transaction.');
 
             // Fund status: 1 = Active, 0 = Inactive
             $table->boolean('status')
