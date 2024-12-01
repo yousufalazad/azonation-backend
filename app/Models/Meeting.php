@@ -48,6 +48,7 @@ class Meeting extends Model
         'cancellation_reason',
         'feedback_link',
         'created_by',
+        'updated_by'
     ];
 
     /**

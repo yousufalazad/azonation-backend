@@ -79,6 +79,7 @@ return new class extends Migration
             //meeting privacy settings for 
             $table->foreignId('privacy_setup_id')
                 ->constrained('privacy_setups')
+                ->nullable()
                 ->comment('Meeting visibility (Public, Private, Members Only ect)');
 
             $table->text('cancellation_reason')->nullable()->comment('Reason for cancelling the meeting');

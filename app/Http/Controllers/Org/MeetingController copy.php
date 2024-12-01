@@ -25,51 +25,53 @@ class MeetingController extends Controller
     // Create a new meeting
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'short_name' => 'nullable|string',
-            'subject' => 'nullable|string',
-            'date' => 'nullable|date',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after_or_equal:start_time',
-            'meeting_type' => 'nullable|string|max:50',
-            'timezone' => 'nullable|string|max:50',
-            'meeting_mode' => 'nullable|string',
-            'duration' => 'nullable|integer',
-            'priority' => 'nullable|string',
-            'video_conference_link' => 'nullable|url',
-            'access_code' => 'nullable|string|max:50',
-            'recording_link' => 'nullable|url',
-            'meeting_host' => 'nullable|string',
-            'max_participants' => 'nullable|integer',
-            'rsvp_status' => 'nullable|array',
-            'rsvp_status.*' => 'string',
-            'participants' => 'nullable|array',
-            'participants.*' => 'string|max:255',
-            'description' => 'nullable|string',
-            'address' => 'nullable|string',
-            'agenda' => 'nullable|string',
-            'requirements' => 'nullable|string',
-            'note' => 'nullable|string',
-            'tags' => 'nullable|array',
-            'tags.*' => 'string|max:50',
-            'reminder_time' => 'nullable|integer',
-            'repeat_frequency' => 'nullable|string',
-            'attachment' => 'nullable|string|max:255',
-            'conduct_type_id' => 'nullable|exists:conduct_types,id',
-            'is_active' => 'nullable|boolean',
-            'visibility' => 'nullable|string',
-            'cancellation_reason' => 'nullable|string',
-            'feedback_link' => 'nullable|url',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'name' => 'required|string|max:255',
+        //     'short_name' => 'nullable|string|max:100',
+        //     'subject' => 'nullable|string|max:255',
+        //     'date' => 'nullable|date',
+        //     'start_time' => 'nullable|date_format:H:i',
+        //     'end_time' => 'nullable|date_format:H:i|after_or_equal:start_time',
+        //     'meeting_type' => 'nullable|string|max:50',
+        //     'timezone' => 'nullable|string|max:50',
+        //     'meeting_mode' => 'nullable|string|in:in-person,remote,hybrid',
+        //     'duration' => 'nullable|integer|min:0',
+        //     'priority' => 'nullable|string|in:low,medium,high,urgent',
+        //     'video_conference_link' => 'nullable|url',
+        //     'access_code' => 'nullable|string|max:50',
+        //     'recording_link' => 'nullable|url',
+        //     'meeting_host' => 'nullable|string|max:255',
+        //     'max_participants' => 'nullable|integer|min:1',
+        //     'rsvp_status' => 'nullable|array',
+        //     'rsvp_status.*' => 'string',
+        //     'participants' => 'nullable|array',
+        //     'participants.*' => 'string|max:255',
+        //     'description' => 'nullable|string',
+        //     'address' => 'nullable|string',
+        //     'agenda' => 'nullable|string',
+        //     'requirements' => 'nullable|string',
+        //     'note' => 'nullable|string',
+        //     'tags' => 'nullable|array',
+        //     'tags.*' => 'string|max:50',
+        //     'reminder_time' => 'nullable|integer|min:0',
+        //     'repeat_frequency' => 'nullable|string|in:daily,weekly,monthly,yearly',
+        //     'attachment' => 'nullable|string|max:255',
+        //     'conduct_type_id' => 'nullable|exists:conduct_types,id',
+        //     'is_active' => 'nullable|boolean',
+        //     'privacy_setup_id' => 'nullable',
+        //     'visibility' => 'nullable|string|in:private,public,members-only',
+        //     'cancellation_reason' => 'nullable|string|max:255',
+        //     'feedback_link' => 'nullable|url',
+        // ]);
 
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
-        }
+        // if ($validator->fails()) {
+        //     return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
+        // }
 
         $input = $request->all();
         $input['user_id'] = $request->user()->id;
         $input['created_by'] = $request->user()->id;
+        // $input['updated_by'] = $request->user()->id;
 
         $meeting = Meeting::create($input);
 
@@ -96,21 +98,21 @@ class MeetingController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'short_name' => 'nullable|string',
-            'subject' => 'nullable|string',
+            'short_name' => 'nullable|string|max:100',
+            'subject' => 'nullable|string|max:255',
             'date' => 'nullable|date',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i|after_or_equal:start_time',
             'meeting_type' => 'nullable|string|max:50',
             'timezone' => 'nullable|string|max:50',
-            'meeting_mode' => 'nullable|string',
-            'duration' => 'nullable|integer',
-            'priority' => 'nullable|string',
+            'meeting_mode' => 'nullable|string|in:in-person,remote,hybrid',
+            'duration' => 'nullable|integer|min:0',
+            'priority' => 'nullable|string|in:low,medium,high,urgent',
             'video_conference_link' => 'nullable|url',
             'access_code' => 'nullable|string|max:50',
             'recording_link' => 'nullable|url',
-            'meeting_host' => 'nullable|string',
-            'max_participants' => 'nullable|integer',
+            'meeting_host' => 'nullable|string|max:255',
+            'max_participants' => 'nullable|integer|min:1',
             'rsvp_status' => 'nullable|array',
             'rsvp_status.*' => 'string',
             'participants' => 'nullable|array',
@@ -122,32 +124,27 @@ class MeetingController extends Controller
             'note' => 'nullable|string',
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
-            'reminder_time' => 'nullable|integer',
-            'repeat_frequency' => 'nullable|string',
+            'reminder_time' => 'nullable|integer|min:0',
+            'repeat_frequency' => 'nullable|string|in:daily,weekly,monthly,yearly',
             'attachment' => 'nullable|string|max:255',
             'conduct_type_id' => 'nullable|exists:conduct_types,id',
             'is_active' => 'nullable|boolean',
-            'visibility' => 'nullable|string',
-            'cancellation_reason' => 'nullable|string',
+            'visibility' => 'nullable|string|in:private,public,members-only',
+            'cancellation_reason' => 'nullable|string|max:255',
             'feedback_link' => 'nullable|url',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
         }
-        
+
         $meeting = Meeting::find($id);
 
         if (!$meeting) {
             return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
         }
 
-
-        $input = $request->all();
-        $input['updated_by'] = $request->user()->id;
-
-
-        $meeting->update($input);
+        $meeting->update($request->all());
 
         return response()->json(['status' => true, 'message' => 'Meeting updated successfully', 'data' => $meeting]);
     }
