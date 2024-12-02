@@ -26,8 +26,10 @@ use App\Http\Controllers\EventGuestAttendanceController;
 //Project
 use App\Http\Controllers\ProjectAttendanceController;
 use App\Http\Controllers\ProjectSummaryController;
-
 use App\Http\Controllers\Org\OrgProjectController;
+use App\Http\Controllers\ProjectGuestAttendanceController;
+
+
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 
 use App\Http\Controllers\NotificationController;
@@ -277,13 +279,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('create-project', [OrgProjectController::class, 'store']);
     Route::put('update-project/{userId}', [OrgProjectController::class, 'update']);
 
-    //Meeting ProjectAttendance
+    //ProjectAttendance
     Route::get('/get-org-user-list', [ProjectAttendanceController::class, 'getOrgUse']);
     Route::get('/get-project-attendances', [ProjectAttendanceController::class, 'index']);
     Route::get('/get-project-attendance/{id}', [ProjectAttendanceController::class, 'show']);
     Route::post('/create-project-attendance', [ProjectAttendanceController::class, 'store']);
     Route::put('/update-project-attendance/{id}', [ProjectAttendanceController::class, 'update']);
     Route::delete('/delete-project-attendance/{id}', [ProjectAttendanceController::class, 'destroy']);
+
+    //project Guest Attendance 
+    Route::get('/get-project-guest-attendances', [ProjectGuestAttendanceController::class, 'index']);
+    Route::get('/get-project-guest-attendance/{id}', [ProjectGuestAttendanceController::class, 'show']);
+    Route::post('/create-project-guest-attendance', [ProjectGuestAttendanceController::class, 'store']);
+    Route::put('/update-project-guest-attendance/{id}', [ProjectGuestAttendanceController::class, 'update']);
+    Route::delete('/delete-project-guest-attendance/{id}', [ProjectGuestAttendanceController::class, 'destroy']);
 
     //Project Summery
     Route::get('/get-project-summary', [ProjectSummaryController::class, 'index']);
