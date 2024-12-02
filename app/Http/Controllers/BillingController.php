@@ -87,29 +87,19 @@ class BillingController extends Controller
             $currentDate->addDay();
         }
 
-        // Combine the counts with the date range
-        $fullCounts = [];
+        
         $totalActiveMembers = 0; // Initialize total active members count
-        $priceRate = 0.03; // Define the price rate
-        $approximateBill = 0; // Initialize approximate bill amount
 
         foreach ($dateRange as $date) {
             $memberCount = $activeMemberCounts->firstWhere('date', $date);
             $activeMemberCount = $memberCount ? $memberCount->active_member : 0;
-            $isBillable = $memberCount ? $memberCount->is_billable : false;
 
             // Add to total active members
             $totalActiveMembers += $activeMemberCount;
-
-            $fullCounts[] = [
-                'date' => $date,
-                'active_member' => $activeMemberCount,
-                'is_billable' => $isBillable,
-            ];
         }
 
         // Calculate the approximate bill amount until today
-        $approximateBill = $totalActiveMembers * $priceRate;
+        //$approximateBill = $totalActiveMembers * $priceRate;
 
         // Return a JSON response with the total active members and approximate bill
         // return response()->json([
@@ -194,98 +184,15 @@ class BillingController extends Controller
     }
 
     public function billAmount(Request $request, $id){
-
+        
+        //$billAmount = $totalActiveMembers * $usersPriceRate;
     }
 
     public function store(Request $request)
     {
-        
-        try {
-            // Get the authenticated user
-          $user_id = $request->user()->id;
-          $startDate = now()->startOfMonth();
-        //$endDate = now();
-        $endDate = now()->endOfMonth();
- 
-          // Fetch billing related to the authenticated user
-          //$totalBillableActiveMember = ActiveMemberCount::where('user_id', $user_id)->select('active_member_counts.active_member as daily_active_member')->get();
-          $activeMemberCounts = ActiveMemberCount::where('user_id', $user_id)
-          ->whereBetween('date', [$startDate, $endDate])
-          ->get();
 
-        // $regionalPriceRate =
-        // $regionalCurrency =
-        // $periodStart =
-        // $periodEnd =
-        // $serviceMonth = 
-        // $billingMonth =
-        // $serviceYear = 
-        // $billingYear =
- 
-        // $billAmount = 0;
-          // Return the billing data as a JSON response
-        //   return response()->json([
-        //       'status' => true,
-        //       'data' => $billingList,
-        //   ]);
-         } catch (\Exception $e) {
-             // Log the exception for debugging
-             Log::error('Error fetching packages: ' . $e->getMessage());
- 
-             // Return JSON response with error status
-             return response()->json([
-                 'status' => false,
-                 'message' => 'An error occurred while fetching packages.',
-             ], 500);
-         }
     }
-
-    // $activeMemberCounts = ActiveMemberCount::where('user_id', $user_id)
-    //     ->whereBetween('date', [$startDate, $endDate])
-    //     ->get();
-
-    // // Create a full list of dates from the start of the month to today
-    // $dateRange = [];
-    // $currentDate = $startDate->copy();
-
-    // while ($currentDate->lessThanOrEqualTo($endDate)) {
-    //     $dateRange[] = $currentDate->copy()->toDateString();
-    //     $currentDate->addDay();
-    // }
-
-    // // Combine the counts with the date range
-    // $fullCounts = [];
-    // $totalActiveMembers = 0; // Initialize total active members count
-    // $priceRate = 0.03; // Define the price rate
-    // $approximateBill = 0; // Initialize approximate bill amount
-
-    // foreach ($dateRange as $date) {
-    //     $memberCount = $activeMemberCounts->firstWhere('date', $date);
-    //     $activeMemberCount = $memberCount ? $memberCount->active_member : 0;
-    //     $isBillable = $memberCount ? $memberCount->is_billable : false;
-
-    //     // Add to total active members
-    //     $totalActiveMembers += $activeMemberCount;
-
-    //     $fullCounts[] = [
-    //         'date' => $date,
-    //         'active_member' => $activeMemberCount,
-    //         'is_billable' => $isBillable,
-    //     ];
-    // }
-
-    // // Calculate the approximate bill amount until today
-    // $approximateBill = $totalActiveMembers * $priceRate;
-
-    // // Return a JSON response with the total active members and approximate bill
-    // return response()->json([
-    //     'status' => true,
-    //     'data' => $fullCounts,
-    //     'total_active_members' => $totalActiveMembers, // Include the total in the response
-    //     'approximate_bill' => $approximateBill, // Include the approximate bill
-    //     'price_rate' => $priceRate, // Include the price rate
-    // ]);
-
+        
     /**
      * Display the specified resource.
      */

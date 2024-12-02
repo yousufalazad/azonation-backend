@@ -33,8 +33,8 @@ return new class extends Migration
             
 
                 // Service and billing month details
-            $table->string('service_month')->comment('Month in which the service was consumed');
-            $table->string('billing_month')->comment('Month in which the bill is generated');
+            $table->string('service_month')->nullable()->comment('Month in which the service was consumed');
+            $table->string('billing_month')->nullable()->comment('Month in which the bill is generated');
 
             $table->tinyInteger('service_year', 4)
                 ->nullable()
