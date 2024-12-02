@@ -20,6 +20,8 @@ use App\Http\Controllers\PhoneNumberController;
 use App\Http\Controllers\Org\OrgEventController;
 use App\Http\Controllers\EventAttendanceController;
 use App\Http\Controllers\EventSummaryController;
+use App\Http\Controllers\EventGuestAttendanceController;
+
 
 //Project
 use App\Http\Controllers\ProjectAttendanceController;
@@ -253,6 +255,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-event-attendance', [EventAttendanceController::class, 'store']);
     Route::put('/update-event-attendance/{id}', [EventAttendanceController::class, 'update']);
     Route::delete('/delete-event-attendance/{id}', [EventAttendanceController::class, 'destroy']);
+
+     //Event Guest Attendance 
+     Route::get('/get-event-guest-attendances', [EventGuestAttendanceController::class, 'index']);
+     Route::get('/get-event-guest-attendance/{id}', [EventGuestAttendanceController::class, 'show']);
+     Route::post('/create-event-guest-attendance', [EventGuestAttendanceController::class, 'store']);
+     Route::put('/update-event-guest-attendance/{id}', [EventGuestAttendanceController::class, 'update']);
+     Route::delete('/delete-event-guest-attendance/{id}', [EventGuestAttendanceController::class, 'destroy']);
 
     // event-summary
     Route::get('/get-event-summary', [EventSummaryController::class, 'index']);
