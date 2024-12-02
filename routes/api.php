@@ -57,17 +57,12 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ActiveMemberCountController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\PriceRateController;
 use App\Http\Controllers\CurrencyController;
-use App\Http\Controllers\UserCurrencyController;
-use App\Http\Controllers\UserPriceRateController;
 
 
 // Master Setting
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DialingCodeController;
-use App\Http\Controllers\Org\MeetingConductTypeController;
-use App\Http\Controllers\Org\MeetingAttendanceTypeController;
 use App\Http\Controllers\AttendanceTypeController;
 use App\Http\Controllers\ConductTypeController;
 use App\Http\Controllers\Org\MembershipTypeController;
