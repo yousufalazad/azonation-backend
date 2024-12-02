@@ -12,18 +12,22 @@ class Billing extends Model
         'billing_code',
         'user_id',
         'user_name',
+        'description',
         'billing_address',
         'item_name',
         'period_start',
         'period_end',
+        'service_month',
+        'billing_month',
         'active_member_count',
         'billable_active_member_count',
         'member_daily_rate',
         'total_bill_amount',
         'status',
         'admin_notes',
-        'is_active'
+        'is_active',
     ];
+    
 
     protected $hidden = [
         'created_at',

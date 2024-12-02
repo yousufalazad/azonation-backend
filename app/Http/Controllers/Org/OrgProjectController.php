@@ -11,16 +11,16 @@ class OrgProjectController extends Controller
 
     public function getProject($projectId)
     {
-        // Find the meeting by ID
-        $event = OrgProject::find($projectId);
+        // Find the Project by ID
+        $project = OrgProject::find($projectId);
 
-        // Check if meeting exists
-        if (!$event) {
-            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        // Check if Project exists
+        if (!$project) {
+            return response()->json(['status' => false, 'message' => 'Project not found'], 404);
         }
 
-        // Return the meeting data
-        return response()->json(['status' => true, 'data' => $event], 200);
+        // Return the Project data
+        return response()->json(['status' => true, 'data' => $project], 200);
     }
 
     public function index($userId)
@@ -71,15 +71,26 @@ class OrgProjectController extends Controller
         ]);
 
         // Return a success response
-        return response()->json(['message' => 'Project created successfully', 200]);
+        return response()->json(['status' => true, 'message' => 'Project created successfully'], 200);
+        // return response()->json(['status' => true, 'message' => 'Project created successfully', 'data' => $Project], 200);
+
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(OrgProject $orgProject)
+    public function show($projectId)
     {
-        //
+        // Find the Project by ID
+        $project = OrgProject::find($projectId);
+
+        // Check if Project exists
+        if (!$project) {
+            return response()->json(['status' => false, 'message' => 'Project not found'], 404);
+        }
+
+        // Return the Project data
+        return response()->json(['status' => true, 'data' => $project], 200);
     }
 
     /**
@@ -134,8 +145,16 @@ class OrgProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrgProject $orgProject)
+    public function destroy( $id)
     {
-        //
+        $project = OrgProject::find($id);
+
+        if (!$project) {
+            return response()->json(['status' => false, 'message' => 'Project not found'], 404);
+        }
+
+        $project->delete();
+
+        return response()->json(['status' => true, 'message' => 'Project deleted successfully']);
     }
 }
