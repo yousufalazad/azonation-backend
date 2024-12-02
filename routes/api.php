@@ -268,11 +268,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/delete-event-summary/{id}', [EventSummaryController::class, 'destroy']);
 
 
-    //Project
-    Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
-    Route::get('/get-project/{projectId}', [OrgProjectController::class, 'getProject']);
-    Route::post('create-project', [OrgProjectController::class, 'store']);
-    Route::put('update-project/{userId}', [OrgProjectController::class, 'update']);
+//Project
+Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
+Route::get('/get-project/{projectId}', [OrgProjectController::class, 'show']);
+Route::post('create-project', [OrgProjectController::class, 'store']);
+Route::put('update-project/{userId}', [OrgProjectController::class, 'update']);
+Route::delete('/delete-project/{id}', [OrgProjectController::class, 'destroy']);
 
     //ProjectAttendance
     Route::get('/get-org-user-list', [ProjectAttendanceController::class, 'getOrgUse']);
@@ -334,8 +335,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/invoices', [InvoiceController::class, 'index']);
 
-    Route::get('/billing-list', [BillingController::class, 'index']);
-
+    Route::get('billing-list', [BillingController::class, 'index']);
+    Route::get('get-billing/{id}', [BillingController::class, 'show']);
+    Route::post('create-billing', [BillingController::class, 'store']);
+    Route::put('update-billing/{id}', [BillingController::class, 'update']);
+    Route::delete('delete-billing/{id}', [BillingController::class, 'destroy']);
 
     // ------------------- SuperAdmin----------------------------------------------------------------
     //API for SuperAdmin

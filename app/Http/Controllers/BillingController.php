@@ -3,12 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Billing;
-use App\Models\ActiveMemberCount;
-use App\Models\RegionalPricing;
-use App\Models\Subscription;
-use App\Models\User;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 
 class BillingController extends Controller
@@ -64,141 +60,55 @@ class BillingController extends Controller
         //
     }
 
-    public function totalActiveMember(Request $request)
-    {
-        // Get the authenticated user
-        $user_id = $request->user()->id;
-
-        // Define the start date as the first day of the month and end date as today
-        $startDate = now()->startOfMonth();
-        $endDate = now();
-
-        // Retrieve active member counts for the logged-in user from the start of the month until today
-        $activeMemberCounts = ActiveMemberCount::where('user_id', $user_id)
-            ->whereBetween('date', [$startDate, $endDate])
-            ->get();
-
-        // Create a full list of dates from the start of the month to today
-        $dateRange = [];
-        $currentDate = $startDate->copy();
-
-        while ($currentDate->lessThanOrEqualTo($endDate)) {
-            $dateRange[] = $currentDate->copy()->toDateString();
-            $currentDate->addDay();
-        }
-
-        
-        $totalActiveMembers = 0; // Initialize total active members count
-
-        foreach ($dateRange as $date) {
-            $memberCount = $activeMemberCounts->firstWhere('date', $date);
-            $activeMemberCount = $memberCount ? $memberCount->active_member : 0;
-
-            // Add to total active members
-            $totalActiveMembers += $activeMemberCount;
-        }
-
-        // Calculate the approximate bill amount until today
-        //$approximateBill = $totalActiveMembers * $priceRate;
-
-        // Return a JSON response with the total active members and approximate bill
-        // return response()->json([
-        //     'status' => true,
-        //     'data' => $fullCounts,
-        //     'total_active_members' => $totalActiveMembers, // Include the total in the response
-        //     'approximate_bill' => $approximateBill, // Include the approximate bill
-        //     'price_rate' => $priceRate, // Include the price rate
-        // ]);
-    }
-
-    public function regionalPriceRate(Request $request){
-        try {
-            // Fetch all users of type 'organisation' and their price rates
-            $packageRegionCurrency = User::query()
-                ->where('users.type', 'organisation') // Filter users by type
-                ->leftJoin('user_countries', 'users.id', '=', 'user_countries.user_id') // Join country_regions table
-                ->leftJoin('country_regions', 'user_countries.country_id', '=', 'country_regions.country_id')
-                ->leftJoin('region_currencies', 'country_regions.region_id', '=', 'region_currencies.region_id')
-                ->leftJoin('currencies', 'region_currencies.currency_id', '=', 'currencies.id')
-                ->leftJoin('subscriptions', 'users.id', '=', 'subscriptions.user_id') //
-                ->leftJoin('packages', 'subscriptions.package_id', '=', 'packages.id')
-                ->leftJoin('regional_pricings', function ($join) {
-                    $join->on('subscriptions.package_id', '=', 'regional_pricings.package_id')
-                        ->on('country_regions.region_id', '=', 'regional_pricings.region_id');
-                })
-                ->select(
-                    'users.id as user_id', 
-                    'users.name as user_name',
-                    'subscriptions.package_id',
-                    'packages.name as package_name',
-                    'subscriptions.start_date as subscription_start_date',
-                    'country_regions.region_id',
-                    'currencies.currency_code',
-                    'regional_pricings.price'
-                )
-                ->get();
-
-            // Check if the result is empty
-            if ($packageRegionCurrency->isEmpty()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'No price rates found for organisation users.'
-                ], 404);
-            }
-
-            // Transform data for a better response format
-            $result = $packageRegionCurrency->map(function ($record) {
-                return [
-                    'user_id' => $record->user_id,
-                    'user_name' => $record->user_name,
-                    'package_id' => $record->package_id,
-                    'package_name' => $record->package_name,
-                    'subscription_start_date' => $record->subscription_start_date,
-                    'region_id' => $record->region_id,
-                    'currency_code' => $record->currency_code,
-                    'price' => $record->price,
-                ];
-            });
-
-            return response()->json([
-                'status' => true,
-                'data' => $result
-            ]);
-        } catch (\Exception $e) {
-            // Log the error for debugging purposes
-            Log::error('Error fetching organisation users price rates: ' . $e->getMessage(), [
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            // Return error details in the response
-            return response()->json([
-                'status' => false,
-                'error' => [
-                    'message' => $e->getMessage(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString(),
-                ]
-            ], 500);
-        }
-    }
-
-    public function billAmount(Request $request, $id){
-        
-        //$billAmount = $totalActiveMembers * $usersPriceRate;
-    }
-
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
+        $request->validate([
+            'billing_code' => 'required',
+        ]);
 
+        // Create a new event record associated with the organisation
+        Billing::create([
+            'billing_code' => $request->billing_code,
+            'user_id' => $request->user()->id,
+            'user_name' => $request->user()->name,
+            'description' => $request->description,
+            'billing_address' => $request->billing_address,
+            'item_name' => $request->item_name,
+            'period_start' => $request->period_start,
+            'period_end' => $request->period_end,
+            'service_month' => $request->service_month,
+            'billing_month' => $request->billing_month,
+            'active_member_count' => $request->active_member_count,
+            'billable_active_member_count' => $request->billable_active_member_count,
+            'member_daily_rate' => $request->member_daily_rate,
+            'total_bill_amount' => $request->total_bill_amount,
+            'status' => $request->status,
+            'admin_notes' => $request->admin_notes,
+            'is_active' => $request->is_active,
+        ]);        
+
+        // Return a success response
+        return response()->json(['status' => true, 'message' => 'Billing created successfully'], 200);
     }
-        
+
     /**
      * Display the specified resource.
      */
-    public function show(Billing $billing)
+    public function show($billingId)
     {
-        //
+        // Find the Project by ID
+        $billing = Billing::find($billingId);
+
+        // Check if Project exists
+        if (!$billing) {
+            return response()->json(['status' => false, 'message' => 'Project not found'], 404);
+        }
+
+        // Return the Project data
+        return response()->json(['status' => true, 'data' => $billing], 200);
     }
 
     /**
@@ -212,16 +122,53 @@ class BillingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Billing $billing)
-    {
-        //
-    }
+    public function update(Request $request, $id)
+{
+    // Validate the incoming request data
+    $request->validate([
+        'billing_code' => 'required',
+    ]);
+
+    // Find the existing billing record by ID
+    $billing = Billing::findOrFail($id);
+
+    // Update the billing record with the new data
+    $billing->update([
+        'billing_code' => $request->billing_code,
+        'description' => $request->description,
+        'billing_address' => $request->billing_address,
+        'item_name' => $request->item_name,
+        'period_start' => $request->period_start,
+        'period_end' => $request->period_end,
+        'service_month' => $request->service_month,
+        'billing_month' => $request->billing_month,
+        'active_member_count' => $request->active_member_count,
+        'billable_active_member_count' => $request->billable_active_member_count,
+        'member_daily_rate' => $request->member_daily_rate,
+        'total_bill_amount' => $request->total_bill_amount,
+        'status' => $request->status,
+        'admin_notes' => $request->admin_notes,
+        'is_active' => $request->is_active,
+    ]);
+
+    // Return a success response
+    return response()->json(['status' => true, 'message' => 'Billing updated successfully'], 200);
+}
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Billing $billing)
+    public function destroy( $id)
     {
-        //
+        $billing = Billing::find($id);
+
+        if (!$billing) {
+            return response()->json(['status' => false, 'message' => 'Project not found'], 404);
+        }
+
+        $billing->delete();
+
+        return response()->json(['status' => true, 'message' => 'Project deleted successfully']);
     }
 }
