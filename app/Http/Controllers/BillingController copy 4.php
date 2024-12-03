@@ -15,20 +15,18 @@ class BillingController extends Controller
 {
     public function totalActiveMember($userId)
     {
+
+        // Define the start date as the first day of the month and end date as today
         $startDate = now()->startOfMonth();
         $endDate = now()->endOfMonth();
+        //$endDate = now();
 
+        // Retrieve active member counts for the logged-in user from the start of the month until today
         $activeMemberCounts = ActiveMemberCount::where('user_id', $userId)
             ->whereBetween('date', [$startDate, $endDate])
             ->get();
 
-        return [
-            'total_active_members' => $activeMemberCounts->sum('active_member'),
-            'start_date' => $startDate->toDateString(),
-            'end_date' => $endDate->toDateString(),
-            'service_month' => $startDate->format('F'), // Service month name
-            'billing_month' => $startDate->addMonth()->format('F'), // Billing month
-        ];
+        return $activeMemberCounts->sum('active_member'); // Sum all active members for the user
     }
 
     public function regionalPrice($userId)
@@ -45,116 +43,87 @@ class BillingController extends Controller
             ->select('regional_pricings.price as regional_price_rate')
             ->first();
 
-        return $regionalPrice ? $regionalPrice->regional_price_rate : 0;
+        return $regionalPrice ? $regionalPrice->regional_price_rate : 0; // Return the price rate or 0 if not found
     }
 
     public function billAmountForAllUsers()
     {
         try {
-            $users = User::where('type', 'organisation')->get();
+            $users = User::where('type', 'organisation')->get(); // Fetch all organisation users
 
             $billingData = $users->map(function ($user) {
                 $userId = $user->id;
 
-                $activeMemberData = $this->totalActiveMember($userId);
-                $totalActiveMembers = $activeMemberData['total_active_members'];
-                $priceRate = $this->regionalPrice($userId);
+                // Calculate total active members for the user
+                $totalActiveMembers = $this->totalActiveMember($userId);
 
-                $billAmount = $totalActiveMembers * $priceRate;
+                // Fetch price rate for the user
+                $regionalPriceRate = $this->regionalPrice($userId);
+
+                // Calculate bill amount
+                $billAmount = $totalActiveMembers * $regionalPriceRate;
 
                 return [
                     'user_id' => $userId,
                     'user_name' => $user->name,
-                    'description' => 'Azonation subscription fee',
-                    'billing_address' => $user->name, // Assuming billing address field
-                    'item_name' => 'Azonation subscription fee',
-                    'period_start' => $activeMemberData['start_date'],
-                    'period_end' => $activeMemberData['end_date'],
-                    'service_month' => $activeMemberData['service_month'],
-                    'billing_month' => $activeMemberData['billing_month'],
-                    'total_active_member' => $totalActiveMembers,
-                    'total_billable_active_member' => $totalActiveMembers,
-                    'price_rate' => $priceRate,
+                    'total_active_members' => $totalActiveMembers,
+                    'regional_price_rate' => $regionalPriceRate,
                     'bill_amount' => $billAmount,
-                    'status' => 'issued',
-                    'admin_notes' => 'non-refundable',
-                    'is_active' => 1,
                 ];
             });
 
             return response()->json([
                 'status' => true,
-                'data' => $billingData,
+                'data' => $billingData
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    public function storeBySystem(Request $request)
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
     {
         try {
-            // $billingData = $this->billAmountForAllUsers();
+            // Get the authenticated user
+            $user_id = $request->user()->id;
 
-            // foreach ($billingData['data'] as $bill) {
-            //     Billing::create([
-            //         'user_id' => $bill['user_id'],
-            //         'user_name' => $bill['user_name'],
-            //         'description' => $bill['description'],
-            //         'billing_address' => $bill['billing_address'],
-            //         'item_name' => $bill['item_name'],
-            //         'period_start' => $bill['period_start'],
-            //         'period_end' => $bill['period_end'],
-            //         'service_month' => $bill['service_month'],
-            //         'billing_month' => $bill['billing_month'],
-            //         'total_active_member' => $bill['total_active_member'],
-            //         'total_billable_active_member' => $bill['total_billable_active_member'],
-            //         'price_rate' => $bill['price_rate'],
-            //         'bill_amount' => $bill['bill_amount'],
-            //         'status' => $bill['status'],
-            //         'admin_notes' => $bill['admin_notes'],
-            //         'is_active' => $bill['is_active'],
-            //     ]);
-            // }
-            $billingResponse = $this->billAmountForAllUsers();
-            $billingData = $billingResponse->getData(true); // Converts JSON response to an associative array
+            // Fetch billing related to the authenticated user
+            $billingList = Billing::where('user_id', $user_id)->get();
 
-            foreach ($billingData['data'] as $bill) {
-                Billing::create([
-                    'user_id' => $bill['user_id'],
-                    'user_name' => $bill['user_name'],
-                    'description' => 'Azonation subscription fee, depends on package and total member',
-                    'billing_address' => $bill['billing_address'] ?? 'Default Address', // Replace with actual logic
-                    'item_name' => 'Azonation subscription fee',
-                    'period_start' => $bill['period_start'],
-                    'period_end' => $bill['period_end'],
-                    'service_month' => $bill['service_month'],
-                    'billing_month' => $bill['billing_month'],
-                    'total_active_member' => $bill['total_active_members'],
-                    'total_billable_active_member' => $bill['total_active_members'], // Replace with appropriate logic
-                    'price_rate' => $bill['regional_price_rate'],
-                    'bill_amount' => $bill['bill_amount'],
-                    'status' => 'issued',
-                    'admin_notes' => 'non-refundable',
-                    'is_active' => 1,
-                ]);
-            }
-
-            // return response()->json([
-            //     'status' => true,
-            //     'message' => 'Billing records created successfully.',
-            // ]);
+            // Return the billing data as a JSON response
+            return response()->json([
+                'status' => true,
+                'data' => $billingList,
+            ]);
         } catch (\Exception $e) {
+            // Log the exception for debugging
+            Log::error('Error fetching packages: ' . $e->getMessage());
+
+            // Return JSON response with error status
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'message' => 'An error occurred while fetching packages.',
             ], 500);
         }
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -201,37 +170,6 @@ class BillingController extends Controller
 
         // Return a success response
         return response()->json(['status' => true, 'message' => 'Billing created successfully'], 200);
-    }
-
-    public function index(Request $request)
-    {
-        try {
-            // Get the authenticated user
-            $user_id = $request->user()->id;
-
-            // Fetch billing related to the authenticated user
-            $billingList = Billing::where('user_id', $user_id)->get();
-
-            // Return the billing data as a JSON response
-            return response()->json([
-                'status' => true,
-                'data' => $billingList,
-            ]);
-        } catch (\Exception $e) {
-            // Log the exception for debugging
-            Log::error('Error fetching packages: ' . $e->getMessage());
-
-            // Return JSON response with error status
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred while fetching packages.',
-            ], 500);
-        }
-    }
-
-    public function create()
-    {
-        //
     }
 
     /**

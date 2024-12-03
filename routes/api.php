@@ -338,6 +338,7 @@ Route::delete('/delete-project/{id}', [OrgProjectController::class, 'destroy']);
     Route::get('billing-list', [BillingController::class, 'index']);
     Route::get('get-billing/{id}', [BillingController::class, 'show']);
     Route::post('create-billing', [BillingController::class, 'store']);
+    Route::get('system-create-billing', [BillingController::class,'storeBySystem']);
     Route::put('update-billing/{id}', [BillingController::class, 'update']);
     Route::delete('delete-billing/{id}', [BillingController::class, 'destroy']);
 

@@ -44,18 +44,6 @@ class OrgAccountController extends Controller
     ]);
 
     try {
-        // Get the last balance (if any) from the previous transaction
-        // $lastTransaction = OrgAccount::where('user_id', $validatedData['user_id'])
-        //                               ->latest('date')
-        //                               ->first();
-
-        //$previousBalance = $lastTransaction ? $lastTransaction->balance_after : 0;
-
-        // Calculate new balance based on transaction type
-        // $newBalance = ($validatedData['type'] === 'income') 
-        //                 ? $previousBalance + $validatedData['amount']
-        //                 : $previousBalance - $validatedData['amount'];
-
         // Create the new transaction
         $transaction = OrgAccount::create([
             'user_id' => $validatedData['user_id'],
@@ -64,7 +52,6 @@ class OrgAccountController extends Controller
             'transaction_title' => $validatedData['transaction_title'],
             'type' => $validatedData['type'],
             'amount' => $validatedData['amount'],
-            // 'balance_after' => $newBalance, // Store the calculated balance
             'description' => $validatedData['description']
         ]);
 
