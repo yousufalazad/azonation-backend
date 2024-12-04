@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id()->comment('Primary key: auto-incremented ID');
 
             // Unique billing identifier
-            $table->string('billing_code', 15)->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-BILL.');
+            $table->string('billing_code', 15)->nullable()->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-BILL.');
 
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')
@@ -39,29 +39,31 @@ return new class extends Migration
             $table->string('billing_address', 255)->nullable()->comment('User billing address snapshot for reference');
 
             // Billing item details
-            $table->string('item_name', 255)->comment('Name or description of the billed item or service');
+            $table->string('item_name', 255)->nullable()->comment('Name or description of the billed item or service');
 
             // Billing period
-            $table->date('period_start')->comment('Billing period start date');
-            $table->date('period_end')->comment('Billing period end date');
+            $table->date('period_start')->nullable()->comment('Billing period start date');
+            $table->date('period_end')->nullable()->comment('Billing period end date');
 
             // Member count data from active_member_counts table
-            $table->integer('total_active_member')->comment('Daily total active members within billing period');
-            $table->integer('total_billable_active_member')->comment('Total billable active members within billing period');
+            $table->integer('total_active_member')->nullable()->comment('Daily total active members within billing period');
+            $table->integer('total_billable_active_member')->nullable()->comment('Total billable active members within billing period');
 
             // Billing rate and calculation
-            $table->decimal('price_rate', 10, 2)->comment('Daily rate per active member');
-            $table->decimal('bill_amount', 10, 2)->comment('Total bill amount based on rate, members, and days');
+            $table->decimal('price_rate', 10, 2)->nullable()->comment('Daily rate per active member');
+            $table->decimal('bill_amount', 10, 2)->nullable()->comment('Total bill amount based on rate, members, and days');
+            //$table->string('currency')->nullable()->comment('Currency name from region, because region currency can change any time');
 
             // Billing status and administrative note
             $table->enum('status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
-                ->default('issued')
+            ->nullable()    
+            ->default('issued')
                 ->comment('Billing status: issued, unissued, pending, cancelled, or draft');
 
             $table->string('admin_notes', 255)->nullable()->comment('Administrative notes for reference');
 
             // Active or inactive status flag
-            $table->boolean('is_active')->default(true)->comment('Indicates if the billing record is active');
+            $table->boolean('is_active')->nullable()->default(true)->comment('Indicates if the billing record is active');
 
             $table->timestamps();
         });

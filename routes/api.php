@@ -93,7 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profileimage/{userId}', [IndividualController::class, 'getProfileImage']);
     Route::post('/profileimage/{userId}', [IndividualController::class, 'updateProfileImage']);
     Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrganisationByIndividualId']);
-    
+
     Route::get('/individual-users', [IndividualController::class, 'getIndividualUser']);
 
 
@@ -222,7 +222,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-meeting-minutes', [MeetingMinutesController::class, 'store']);
     Route::post('/update-meeting-minutes/{id}', [MeetingMinutesController::class, 'update']);
     Route::delete('/delete-meeting-minutes/{id}', [MeetingMinutesController::class, 'destroy']);
-    
+
     //Meeting MeetingAttendance 
     Route::get('/get-org-user-list', [MeetingAttendanceController::class, 'getOrgUse']);
     Route::get('/get-meeting-attendances', [MeetingAttendanceController::class, 'index']);
@@ -253,12 +253,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-event-attendance/{id}', [EventAttendanceController::class, 'update']);
     Route::delete('/delete-event-attendance/{id}', [EventAttendanceController::class, 'destroy']);
 
-     //Event Guest Attendance 
-     Route::get('/get-event-guest-attendances', [EventGuestAttendanceController::class, 'index']);
-     Route::get('/get-event-guest-attendance/{id}', [EventGuestAttendanceController::class, 'show']);
-     Route::post('/create-event-guest-attendance', [EventGuestAttendanceController::class, 'store']);
-     Route::put('/update-event-guest-attendance/{id}', [EventGuestAttendanceController::class, 'update']);
-     Route::delete('/delete-event-guest-attendance/{id}', [EventGuestAttendanceController::class, 'destroy']);
+    //Event Guest Attendance 
+    Route::get('/get-event-guest-attendances', [EventGuestAttendanceController::class, 'index']);
+    Route::get('/get-event-guest-attendance/{id}', [EventGuestAttendanceController::class, 'show']);
+    Route::post('/create-event-guest-attendance', [EventGuestAttendanceController::class, 'store']);
+    Route::put('/update-event-guest-attendance/{id}', [EventGuestAttendanceController::class, 'update']);
+    Route::delete('/delete-event-guest-attendance/{id}', [EventGuestAttendanceController::class, 'destroy']);
 
     // event-summary
     Route::get('/get-event-summary', [EventSummaryController::class, 'index']);
@@ -268,12 +268,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/delete-event-summary/{id}', [EventSummaryController::class, 'destroy']);
 
 
-//Project
-Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
-Route::get('/get-project/{projectId}', [OrgProjectController::class, 'show']);
-Route::post('create-project', [OrgProjectController::class, 'store']);
-Route::put('update-project/{userId}', [OrgProjectController::class, 'update']);
-Route::delete('/delete-project/{id}', [OrgProjectController::class, 'destroy']);
+    //Project
+    Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
+    Route::get('/get-project/{projectId}', [OrgProjectController::class, 'show']);
+    Route::post('create-project', [OrgProjectController::class, 'store']);
+    Route::put('update-project/{userId}', [OrgProjectController::class, 'update']);
+    Route::delete('/delete-project/{id}', [OrgProjectController::class, 'destroy']);
 
     //ProjectAttendance
     Route::get('/get-org-user-list', [ProjectAttendanceController::class, 'getOrgUse']);
@@ -336,9 +336,10 @@ Route::delete('/delete-project/{id}', [OrgProjectController::class, 'destroy']);
     Route::get('/invoices', [InvoiceController::class, 'index']);
 
     Route::get('billing-list', [BillingController::class, 'index']);
+    Route::get('superadmin-billing-list', [BillingController::class, 'indexSuperAdmin']);
     Route::get('get-billing/{id}', [BillingController::class, 'show']);
     Route::post('create-billing', [BillingController::class, 'store']);
-    Route::get('system-create-billing', [BillingController::class,'storeBySystem']);
+    Route::get('system-create-billing', [BillingController::class, 'storeBySystem']);
     Route::put('update-billing/{id}', [BillingController::class, 'update']);
     Route::delete('delete-billing/{id}', [BillingController::class, 'destroy']);
 
@@ -384,14 +385,14 @@ Route::delete('/delete-project/{id}', [OrgProjectController::class, 'destroy']);
     Route::post('/create-dialing-code', [DialingCodeController::class, 'store']);
     Route::put('/update-dialing-code/{id}', [DialingCodeController::class, 'update']);
     Route::delete('/delete-dialing-code/{id}', [DialingCodeController::class, 'destroy']);
-       
+
 
     // ConductTypeController
     Route::get('/get-conduct-types', [ConductTypeController::class, 'index']);
     Route::post('/create-conduct-type', [ConductTypeController::class, 'store']);
     Route::put('/update-conduct-type/{id}', [ConductTypeController::class, 'update']);
     Route::delete('/delete-conduct-type/{id}', [ConductTypeController::class, 'destroy']);
-    
+
     // AttendanceTypeController
     Route::get('/get-attendance-types', [AttendanceTypeController::class, 'index']);
     Route::post('/create-attendance-type', [AttendanceTypeController::class, 'store']);
