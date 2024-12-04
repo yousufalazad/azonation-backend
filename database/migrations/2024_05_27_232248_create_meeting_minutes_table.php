@@ -56,7 +56,7 @@ return new class extends Migration
             $table->foreignId('privacy_setup_id')
             ->constrained('privacy_setups')
             ->nullable()
-            ->onDelete('set null')
+            ->onDelete('cascade')
             ->comment('Privacy level of the asset (e.g., public, private, only members. etc).');
 
             //Approval status from members
