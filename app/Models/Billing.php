@@ -20,14 +20,15 @@ class Billing extends Model
         'service_month',
         'billing_month',
         'total_active_member',
+        'total_honorary_member',
         'total_billable_active_member',
+        'subscribed_package_name',
         'price_rate',
         'bill_amount',
         'status',
         'admin_notes',
         'is_active',
     ];
-    
 
     protected $hidden = [
         'created_at',
