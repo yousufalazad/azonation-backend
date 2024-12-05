@@ -58,7 +58,7 @@ return new class extends Migration
             ->nullable()
             ->onDelete('cascade')
             ->comment('Privacy level of the asset (e.g., public, private, only members. etc).');
-
+ 
             //Approval status from members
             $table->tinyInteger('approval_status')->default(0)->comment('Approval status: 0 = Pending, 1 = Approved, 2 = Rejected');
             

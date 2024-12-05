@@ -3,20 +3,26 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\BillingController;
+use App\Http\Controllers\InvoiceController;
 use Illuminate\Console\Scheduling\Schedule;
 
-class GenerateBilling extends Command
+class GenerateInvoice extends Command
 {
-    protected $signature = 'generate:billing'; // Command name
-    protected $description = 'Generate billing for all users'; // Command description
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'generate:invoice';
+    protected $description = 'Generate invoice for all organizations';
 
+    
     public function handle()
     {
-        $controller = new BillingController();
+        $controller = new InvoiceController();
         $controller->storeBySystem(request()); // Pass an empty request if no parameters needed
 
-        $this->info('Billing records generated successfully by System.');
+        $this->info('Invoice generated successfully by System.');
         return 0;
     }
 

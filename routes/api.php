@@ -333,7 +333,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
 
-    Route::get('/invoices', [InvoiceController::class, 'index']);
+    Route::get('/invoice', [InvoiceController::class, 'index']);
+    Route::get('/invoices', [InvoiceController::class, 'indexForSuperAdmin']);
 
     Route::get('billing-list', [BillingController::class, 'index']);
     Route::get('superadmin-billing-list', [BillingController::class, 'indexSuperAdmin']);
