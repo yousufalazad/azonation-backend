@@ -55,6 +55,7 @@ use App\Http\Controllers\OrgOfficeRecordController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ActiveMemberCountController;
+use App\Http\Controllers\ActiveHonoraryMemberCountController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\CurrencyController;
@@ -75,6 +76,7 @@ use App\Http\Controllers\UserCountryController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\CountryRegionController;
 use App\Http\Controllers\RegionCurrencyController;
+use App\Models\ActiveHonoraryMemberCount;
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
@@ -330,8 +332,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('subscription{id}', [SubscriptionController::class, 'destroy']);
     Route::get('/user-price-rate', [RegionalPricingController::class, 'getUserPriceRate']);
 
-    Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
+    //Active member count
+    Route::get('/active-member-count', [ActiveMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
+
+    //Active honorary member count
+    Route::get('/active-honorary-member-count', [ActiveHonoraryMemberCountController::class, 'show']);
+    Route::get('/previous-month-bill-calculation-honorary-member', [ActiveHonoraryMemberCountController::class, 'getPreviousMonthBillCalculation']);
 
     Route::get('/invoices', [InvoiceController::class, 'indexForSuperAdmin']);
     Route::get('invoices', [InvoiceController::class, 'index']);

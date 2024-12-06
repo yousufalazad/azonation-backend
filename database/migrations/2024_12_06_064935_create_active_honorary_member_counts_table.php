@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('active_member_counts', function (Blueprint $table) {
+        Schema::create('active_honorary_member_counts', function (Blueprint $table) {
             $table->id();
-            
+
             // Foreign key to the users table
             $table->foreignId('user_id')
                 ->constrained()
@@ -25,12 +25,12 @@ return new class extends Migration
                 ->comment('The date for the recorded active member count');
 
             // Column to store the total active member count for that day
-            $table->integer('active_member')
+            $table->integer('active_honorary_member')
                 ->comment('Total active member count for billing purposes on the specified date');
 
             $table->boolean('is_billable')
-            ->comment('Yes for billable, No for not billable');
-            
+                ->comment('Yes for billable, No for not billable');
+                 
             $table->timestamps();
         });
     }
@@ -40,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('active_member_counts');
+        Schema::dropIfExists('active_honorary_member_counts');
     }
 };

@@ -47,15 +47,14 @@ return new class extends Migration
 
             // Member count data from active_member_counts table
             $table->integer('total_active_member')->nullable()->comment('Daily total active members within billing period');
-            $table->integer('total_honorary_member')->nullable()->comment('Daily total active honorary members within billing period');
+            $table->integer('total_active_honorary_member')->nullable()->comment('Daily total active honorary members within billing period');
             $table->integer('total_billable_active_member')->nullable()->comment('Total billable active members within billing period');
 
             // Billing rate and calculation
             $table->string('subscribed_package_name', length: 15)->nullable()->comment('Subscribed package name on service month');
             $table->decimal('price_rate', 10, 2)->nullable()->comment('Daily rate per active member');
-            $table->string('currency', length: 3)->nullable()->comment('Currency on service month');
+            $table->string('currency_code', length: 3)->nullable()->comment('Currency on service month');
             $table->decimal('bill_amount', 10, 2)->nullable()->comment('Total bill amount based on rate, members, and days');
-            $table->string('currency', length: 3)->nullable()->comment('Currency on service month');
 
             // Billing status and administrative note
             $table->enum('status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])

@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Billing;
 use App\Models\ActiveMemberCount;
+use App\Models\ActiveHonoraryMemberCount;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -14,17 +16,24 @@ class BillingController extends Controller
         $startDate = now()->startOfMonth();
         $endDate = now()->endOfMonth();
 
-        $activeMemberCounts = ActiveMemberCount::where('user_id', $userId)
+        $activeMemberCount = ActiveMemberCount::where('user_id', $userId)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get();
+
+        $activeHonoraryMemberCount = ActiveHonoraryMemberCount::where('user_id', $userId)
             ->whereBetween('date', [$startDate, $endDate])
             ->get();
 
         return response()->json([
             'status' => true,
-            'total_active_member' => $activeMemberCounts->sum('active_member'),
+            'total_active_member' => $activeMemberCount->sum('active_member'),
+            'total_active_honorary_member' => $activeHonoraryMemberCount->sum('active_honorary_member'), //per day 5 ta kore bad dite hobe
             'start_date' => $startDate->toDateString(),
             'end_date' => $endDate->toDateString(),
             'service_month' => $startDate->format('F'), // Service month name
             'billing_month' => $startDate->addMonth()->format('F'), // Billing month
+            'service_year' => $startDate->format('Y'), // Service year
+            'billing_year' => $startDate->addMonth()->format('Y'), // Billing year
         ]);
     }
 
@@ -35,18 +44,25 @@ class BillingController extends Controller
             ->leftJoin('user_countries', 'users.id', '=', 'user_countries.user_id')
             ->leftJoin('country_regions', 'user_countries.country_id', '=', 'country_regions.country_id')
             ->leftJoin('subscriptions', 'users.id', '=', 'subscriptions.user_id')
+            ->leftJoin('packages', 'subscriptions.package_id', '=', 'packages.id')
+            ->leftJoin('region_currencies', 'country_regions.region_id', '=', 'region_currencies.region_id')
+            ->leftJoin('currencies', 'region_currencies.currency_id', '=', 'currencies.id')
             ->leftJoin('regional_pricings', function ($join) {
                 $join->on('regional_pricings.region_id', '=', 'country_regions.region_id')
                     ->on('regional_pricings.package_id', '=', 'subscriptions.package_id');
             })
-            ->select('regional_pricings.price as regional_price_rate')
+            ->select('regional_pricings.price as regional_price_rate', 'packages.name as package_name', 'currencies.currency_code as user_currency_code')
             ->first();
 
         $price = $regionalPrice ? $regionalPrice->regional_price_rate : 0;
+        $packageName = $regionalPrice? $regionalPrice->package_name : '';
+        $userCurrencyCode = $regionalPrice? $regionalPrice->user_currency_code : '';
 
         return response()->json([
             'status' => true,
-            'regional_price_rate' => $price
+            'regional_price_rate' => $price,
+            'package_name' => $packageName,
+            'user_currency_code' => $userCurrencyCode
         ]);
     }
 
@@ -78,9 +94,14 @@ class BillingController extends Controller
                     'period_end' => $totalActiveMemberData['end_date'],
                     'service_month' => $totalActiveMemberData['service_month'],
                     'billing_month' => $totalActiveMemberData['billing_month'],
+                    'service_year' => $totalActiveMemberData['service_year'],
+                    'billing_year' => $totalActiveMemberData['billing_year'],
                     'total_active_member' => $totalActiveMemberData['total_active_member'],
+                    'total_active_honorary_member' => $totalActiveMemberData['total_active_honorary_member'],
                     'total_billable_active_member' => $totalActiveMemberData['total_active_member'],
                     'price_rate' => $priceRate['regional_price_rate'],
+                    'package_name' => $priceRate['package_name'],
+                    'currency_code' => $priceRate['user_currency_code'],
                     'bill_amount' => $billAmount,
                     'status' => 'issued',
                     'admin_notes' => 'non-refundable',
@@ -118,9 +139,12 @@ class BillingController extends Controller
                     'service_month' => $bill['service_month'],
                     'billing_month' => $bill['billing_month'],
                     'total_active_member' => $bill['total_active_member'],
+                    'total_active_honorary_member' => $bill['total_active_honorary_member'],
                     'total_billable_active_member' => $bill['total_active_member'],
+                    'subscribed_package_name' => $bill['package_name'],
                     'price_rate' => $bill['price_rate'],
                     'bill_amount' => $bill['bill_amount'],
+                    'currency_code' => $bill['currency_code'],
                     'status' => 'issued',
                     'admin_notes' => 'non-refundable',
                     'is_active' => 1,

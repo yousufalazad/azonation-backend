@@ -21,7 +21,7 @@ class Invoice extends Model
         'issued_at',
         'due_at',
         'total_active_member',
-        'total_honorary_member',
+        'total_active_honorary_member',
         'total_billable_active_member',
         'subscribed_package_name',
         'price_rate',

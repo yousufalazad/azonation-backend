@@ -56,7 +56,7 @@ class ActiveMemberCountController extends Controller
 
         // Combine the counts with the date range
         $fullCounts = [];
-        $totalActiveMembers = 0; // Initialize total active members count
+        $totalActiveMember = 0; // Initialize total active members count
         $priceRate = 0.03; // Define the price rate
         $approximateBill = 0; // Initialize approximate bill amount
 
@@ -66,7 +66,7 @@ class ActiveMemberCountController extends Controller
             $isBillable = $memberCount ? $memberCount->is_billable : false;
 
             // Add to total active members
-            $totalActiveMembers += $activeMemberCount;
+            $totalActiveMember += $activeMemberCount;
 
             $fullCounts[] = [
                 'date' => $date,
@@ -76,13 +76,13 @@ class ActiveMemberCountController extends Controller
         }
 
         // Calculate the approximate bill amount until today
-        $approximateBill = $totalActiveMembers * $priceRate;
+        $approximateBill = $totalActiveMember * $priceRate;
 
         // Return a JSON response with the total active members and approximate bill
         return response()->json([
             'status' => true,
             'data' => $fullCounts,
-            'total_active_members' => $totalActiveMembers, // Include the total in the response
+            'total_active_member' => $totalActiveMember, // Include the total in the response
             'approximate_bill' => $approximateBill, // Include the approximate bill
             'price_rate' => $priceRate, // Include the price rate
         ]);
@@ -98,7 +98,7 @@ class ActiveMemberCountController extends Controller
         $lastDayOfPreviousMonth = now()->subMonth()->endOfMonth();
 
         // Fetch total active members for the previous month
-        $previousTotalActiveMembers = ActiveMemberCount::where('user_id', $user_id)
+        $previousTotalActiveMember = ActiveMemberCount::where('user_id', $user_id)
             ->whereBetween('date', [$firstDayOfPreviousMonth, $lastDayOfPreviousMonth])
             ->sum('active_member'); // Sum the active members for the previous month
 
@@ -106,7 +106,7 @@ class ActiveMemberCountController extends Controller
         $priceRate = 0.03; // Your price rate per member
 
         // Calculate the total bill amount based on the active members and price rate
-        $previousTotalBillAmount = $previousTotalActiveMembers * $priceRate;
+        $previousTotalBillAmount = $previousTotalActiveMember * $priceRate;
 
         // Fetch daily active member counts for the previous month
         $previousMonthCounts = ActiveMemberCount::where('user_id', $user_id)
@@ -116,10 +116,10 @@ class ActiveMemberCountController extends Controller
 
         return response()->json([
             'status' => true,
-            'previous_total_active_members' => $previousTotalActiveMembers,
-            'previous_total_bill_amount' => $previousTotalBillAmount,
-            'previous_price_rate' => $priceRate,
-            'previous_member_counts' => $previousMonthCounts,
+            'previous_month_total_active_member' => $previousTotalActiveMember,
+            'previous_month_total_bill_amount' => $previousTotalBillAmount,
+            'previous_month_price_rate' => $priceRate,
+            'previous_month_member_count' => $previousMonthCounts,
         ]);
     }
 
@@ -130,7 +130,7 @@ class ActiveMemberCountController extends Controller
     //     $lastDayOfPreviousMonth = now()->subMonth()->endOfMonth();
 
     //     // Fetch total active members for the previous month
-    //     $previousTotalActiveMembers = ActiveMemberCount::whereBetween('created_at', [$firstDayOfPreviousMonth, $lastDayOfPreviousMonth])
+    //     $previousTotalActiveMember = ActiveMemberCount::whereBetween('created_at', [$firstDayOfPreviousMonth, $lastDayOfPreviousMonth])
     //         ->where('is_billable', true) // Assuming you have a status field to filter active members
     //         ->count();
 
@@ -138,7 +138,7 @@ class ActiveMemberCountController extends Controller
     //     $priceRate = 0.03; // Your price rate per member
 
     //     // Calculate the total bill amount based on the active members and price rate
-    //     $previousTotalBillAmount = $previousTotalActiveMembers * $priceRate;
+    //     $previousTotalBillAmount = $previousTotalActiveMember * $priceRate;
     // // Get the authenticated user
     // $user_id = $request->user()->id;
     //     // Fetch the daily active member counts for the previous month
@@ -152,7 +152,7 @@ class ActiveMemberCountController extends Controller
 
     //     return response()->json([
     //         'status' => true,
-    //         'previous_total_active_members' => $previousTotalActiveMembers,
+    //         'previous_total_active_members' => $previousTotalActiveMember,
     //         'previous_total_bill_amount' => $previousTotalBillAmount,
     //         'previous_price_rate' => $priceRate,
     //         'previous_member_counts' => $previousMonthCounts,
