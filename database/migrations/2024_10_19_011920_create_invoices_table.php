@@ -14,20 +14,29 @@ return new class extends Migration
             // Unique Invoice ID
             $table->string('invoice_code', 15)->unique()->nullable()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-INV.');
 
+            $table->foreignId('billing_id')
+                ->constrained('billings')
+                ->onDelete('cascade')
+                ->nullable()
+                ->comment('Reference to the associated billing entry');
+                
             $table->foreignId('billing_code')
                 ->constrained('billings')
                 ->onDelete('cascade')
                 ->nullable()
                 ->comment('Reference to the associated billing entry');
+            
+            
 
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')
                 ->nullable()
                 ->constrained()
-                ->onDelete('set null')
+                ->onDelete('cascade')
                 ->comment('Reference to the user who owns the invoice');
 
             $table->string('user_name', length: 100)->nullable()->comment('User name snapshot for billing reference');
+            $table->string('billing_address', length: 100)->nullable()->comment('User name snapshot for billing reference');
 
             // Item and description
             $table->string('item_name', 100)->nullable()->comment('Name of the invoiced item or service');
@@ -43,10 +52,10 @@ return new class extends Migration
             $table->integer('total_honorary_member')->nullable()->comment('Daily total active honorary members within billing period');
             $table->integer('total_billable_active_member')->nullable()->comment('Total billable active members within billing period');
 
-
             // Financial details
             $table->string('subscribed_package_name', length: 15)->nullable()->comment('Subscribed package name on service month');
             $table->decimal('price_rate', 10, 2)->nullable()->comment('Daily rate per active member');
+            $table->string('currency', length: 3)->nullable()->comment('Currency on service month');
             $table->decimal('subtotal', 10, 2)->nullable()->comment('Subtotal before discounts and taxes, data comes from billings table - bill_amount column');
             $table->string('discount_title', 50)->nullable()->comment('Title or description of the discount');
             $table->decimal('discount', 10, 2)->default(0)->comment('Discount amount applied to the invoice');

@@ -333,8 +333,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/active-member-counts', [ActiveMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
 
-    Route::get('/invoice', [InvoiceController::class, 'index']);
     Route::get('/invoices', [InvoiceController::class, 'indexForSuperAdmin']);
+    Route::get('invoices', [InvoiceController::class, 'index']);
+    Route::get('get-invoice/{id}', [InvoiceController::class, 'show']);
+    Route::post('create-invoice', [InvoiceController::class, 'store']);
+    Route::put('update-invoice/{id}', [InvoiceController::class, 'update']);
+    Route::delete('delete-invoice/{id}', [InvoiceController::class, 'destroy']);
 
     Route::get('billing-list', [BillingController::class, 'index']);
     Route::get('superadmin-billing-list', [BillingController::class, 'indexSuperAdmin']);
@@ -351,6 +355,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Finance
     //Billing
     Route::get('invoices-for-superadmin', [InvoiceController::class, 'indexForSuperAdmin']);
+
     Route::get('subscription-plans', [SubscriptionController::class, 'index']);
 
     // PriceRate

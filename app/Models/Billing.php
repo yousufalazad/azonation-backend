@@ -24,6 +24,7 @@ class Billing extends Model
         'total_billable_active_member',
         'subscribed_package_name',
         'price_rate',
+        'currency',
         'bill_amount',
         'status',
         'admin_notes',

@@ -53,8 +53,9 @@ return new class extends Migration
             // Billing rate and calculation
             $table->string('subscribed_package_name', length: 15)->nullable()->comment('Subscribed package name on service month');
             $table->decimal('price_rate', 10, 2)->nullable()->comment('Daily rate per active member');
+            $table->string('currency', length: 3)->nullable()->comment('Currency on service month');
             $table->decimal('bill_amount', 10, 2)->nullable()->comment('Total bill amount based on rate, members, and days');
-            //$table->string('currency')->nullable()->comment('Currency name from region, because region currency can change any time');
+            $table->string('currency', length: 3)->nullable()->comment('Currency on service month');
 
             // Billing status and administrative note
             $table->enum('status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
