@@ -20,14 +20,10 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Reference to the associated billing entry');
                 
-            $table->foreignId('billing_code')
-                ->constrained('billings')
-                ->onDelete('cascade')
-                ->nullable()
-                ->comment('Reference to the associated billing entry');
-            
-            
+                       
+            $table->string('billing_code', 15)->nullable()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-INV.');
 
+            
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')
                 ->nullable()
@@ -49,7 +45,7 @@ return new class extends Migration
 
             // Member count data from active_member_counts table
             $table->integer('total_active_member')->nullable()->comment('Daily total active members within billing period');
-            $table->integer('total_honorary_member')->nullable()->comment('Daily total active honorary members within billing period');
+            $table->integer('total_active_honorary_member')->nullable()->comment('Daily total active honorary members within billing period');
             $table->integer('total_billable_active_member')->nullable()->comment('Total billable active members within billing period');
 
             // Financial details
