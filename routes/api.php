@@ -340,12 +340,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/active-honorary-member-count', [ActiveHonoraryMemberCountController::class, 'show']);
     Route::get('/previous-month-bill-calculation-honorary-member', [ActiveHonoraryMemberCountController::class, 'getPreviousMonthBillCalculation']);
 
-    Route::get('/invoices', [InvoiceController::class, 'indexForSuperAdmin']);
-    Route::get('invoices', [InvoiceController::class, 'index']);
-    Route::get('get-invoice/{id}', [InvoiceController::class, 'show']);
-    Route::post('create-invoice', [InvoiceController::class, 'store']);
-    Route::put('update-invoice/{id}', [InvoiceController::class, 'update']);
-    Route::delete('delete-invoice/{id}', [InvoiceController::class, 'destroy']);
+    
 
     Route::get('billing-list', [BillingController::class, 'index']);
     Route::get('superadmin-billing-list', [BillingController::class, 'indexSuperAdmin']);
@@ -361,7 +356,23 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Finance
     //Billing
-    Route::get('invoices-for-superadmin', [InvoiceController::class, 'indexForSuperAdmin']);
+    
+
+    //Invoice
+
+    Route::get('invoices', [InvoiceController::class, 'index']);
+    Route::get('get-invoice/{id}', [InvoiceController::class, 'show']);
+    Route::post('create-invoice', [InvoiceController::class, 'store']);
+    Route::put('update-invoice/{id}', [InvoiceController::class, 'update']);
+    Route::delete('delete-invoice/{id}', [InvoiceController::class, 'destroy']);
+
+    //Route::get('invoices-for-superadmin', [InvoiceController::class, 'indexForSuperAdmin']);
+    // Route::get('/invoices', [InvoiceController::class, 'indexForSuperAdmin']);
+    // Route::get('invoices', [InvoiceController::class, 'index']);
+    // Route::get('get-invoice/{id}', [InvoiceController::class, 'show']);
+    // Route::post('create-invoice', [InvoiceController::class, 'store']);
+    // Route::put('update-invoice/{id}', [InvoiceController::class, 'update']);
+    // Route::delete('delete-invoice/{id}', [InvoiceController::class, 'destroy']);
 
     Route::get('subscription-plans', [SubscriptionController::class, 'index']);
 
