@@ -19,11 +19,9 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->nullable()
                 ->comment('Reference to the associated billing entry');
-                
-                       
+                   
             $table->string('billing_code', 15)->nullable()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-INV.');
 
-            
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')
                 ->nullable()
