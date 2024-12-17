@@ -47,7 +47,6 @@ return new class extends Migration
 
             $table->string('sku')->unique()->comment('Stock Keeping Unit: Unique inventory code');
 
-            $table->string('currency', 3)->default('USD')->comment('Currency code for the price, e.g., "USD"');
 
             // Core Product Information
             $table->string('name')->unique()->comment('Product name');
@@ -55,6 +54,8 @@ return new class extends Migration
             $table->text('short_description')->nullable()->comment('A short description of the product');
             $table->text('invoice_description')->nullable()->comment('A short description of the product for invoice, show after product name');
             $table->text('description')->nullable()->comment('Detailed description of the product');
+
+            $table->string('currency', 3)->default('USD')->comment('Currency code for the price, e.g., "USD"');
             $table->decimal('base_price', 10, 2)->comment('Price of the product');
             $table->decimal('original_base_price', 10, 2)->nullable()->comment('Original price before discounts');
             $table->boolean('on_sale')->default(false)->comment('Indicates if the product is on sale');
@@ -77,7 +78,7 @@ return new class extends Migration
             $table->boolean('is_sold_individually')->default(false)->comment('Indicates if the product can be sold individually');
             $table->boolean('is_downloadable_only')->default(false)->comment('Indicates if the product is downloadable only');
 
-
+ 
 
             // SEO and Marketing
             $table->string('meta_title')->nullable()->comment('SEO title for the product');

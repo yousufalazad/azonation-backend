@@ -20,7 +20,7 @@ return new class extends Migration
                 ->unique()
                 ->comment('Foreign key referencing the regions table');
 
-            $table->decimal('tax_rate', 3, 2)->comment('Tax rate for the region');
+            $table->decimal('tax_rate', 3, 2)->comment('Tax rate for the region in percentage');
             
             $table->timestamps();
         });
