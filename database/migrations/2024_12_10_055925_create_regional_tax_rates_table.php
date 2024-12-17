@@ -22,6 +22,8 @@ return new class extends Migration
 
             $table->decimal('tax_rate', 3, 2)->comment('Tax rate for the region in percentage');
             
+            $table->boolean('is_active')->default(true)->comment('Whether the regional tax rate is active or inactive');
+
             $table->timestamps();
         });
     }

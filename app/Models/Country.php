@@ -10,12 +10,14 @@ class Country extends Model
     use HasFactory;
 
     protected $fillable = [
-        'country_name', 
-        'iso_code',
+        'name',
+        'iso_code_alpha_3',
+        'iso_code_alpha_2',
+        'numeric_code',
         'is_active'
     ];
-    
-    protected $hidden=[
+
+    protected $hidden = [
         'created_at',
         'updated_at'
     ];

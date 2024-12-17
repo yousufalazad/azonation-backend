@@ -26,7 +26,8 @@ return new class extends Migration
                 ->constrained()
                 ->onDelete('cascade')
                 ->comment('Foreign key linking to the countries table');
-            $table->boolean('is_active')->default(true); // Indicates whether the user-country relationship is active or not
+            
+            $table->boolean('is_active')->default(true)->comment('Whether the user country is active or inactive');
 
             $table->timestamps();
         });

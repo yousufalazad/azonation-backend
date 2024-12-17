@@ -19,7 +19,7 @@ class UserCountryController extends Controller
     }
     public function index()
     {
-        $usersCountry = UserCountry::select('user_countries.*', 'users.name as user_name', 'countries.country_name as country_name')
+        $usersCountry = UserCountry::select('user_countries.*', 'users.name as user_name', 'countries.name as country_name')
             ->leftJoin('users', 'user_countries.user_id', '=', 'users.id')
             ->leftJoin('countries', 'user_countries.country_id', '=', 'countries.id')
             ->get();
@@ -133,3 +133,4 @@ class UserCountryController extends Controller
         return response()->json(['status' => true, 'message' => 'User Country deleted successfully.'], 200);
     }
 }
+

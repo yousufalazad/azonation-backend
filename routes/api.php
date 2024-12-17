@@ -76,7 +76,17 @@ use App\Http\Controllers\UserCountryController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\CountryRegionController;
 use App\Http\Controllers\RegionCurrencyController;
-use App\Models\ActiveHonoraryMemberCount;
+use App\Http\Controllers\ActiveHonoraryMemberCount;
+use App\Http\Controllers\PaymentLogController;
+use App\Http\Controllers\RegionalTaxRateController;
+
+use App\Http\Controllers\BusinessTypeController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SubCategoryController;
+use App\Http\Controllers\SubSubCategoryController;
+use App\Http\Controllers\BrandController;
+
+
 
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
@@ -399,6 +409,20 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::get('subscription-plans', [SubscriptionPlanController::class, 'index']);
     // Route::post('subscription-plans', [SubscriptionPlanController::class,'store']);
 
+    // RegionalTaxRateController
+Route::get('/get-region-tax-rates', [RegionalTaxRateController::class, 'index']);
+Route::get('/get-region-tax-rate/{id}', [RegionalTaxRateController::class, 'show']);
+Route::post('/create-region-tax-rate', [RegionalTaxRateController::class, 'store']);
+Route::put('/update-region-tax-rate/{id}', [RegionalTaxRateController::class, 'update']);
+Route::delete('/delete-region-tax-rate/{id}', [RegionalTaxRateController::class, 'destroy']);
+
+    // PaymentLogController
+    Route::get('payment-logs', [PaymentLogController::class, 'index']);
+    Route::get('get-payment-log/{id}', [PaymentLogController::class, 'show']);
+    Route::post('create-payment-log', [PaymentLogController::class, 'store']);
+    Route::put('update-payment-log/{id}', [PaymentLogController::class, 'update']);
+    Route::delete('delete-payment-log/{id}', [PaymentLogController::class, 'destroy']);
+
     // Country
     Route::get('/get-countries', [CountryController::class, 'index']);
     Route::post('/create-country', [CountryController::class, 'store']);
@@ -467,4 +491,36 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-region-currency', [RegionCurrencyController::class, 'store']);
     Route::put('/update-region-currency/{id}', [RegionCurrencyController::class, 'update']);
     Route::delete('/delete-region-currency/{id}', [RegionCurrencyController::class, 'destroy']);
+
+     //BusinessTypeController
+     Route::get('get-business-types', [BusinessTypeController::class, 'index']);
+     Route::post('get-business-type{id}', [BusinessTypeController::class, 'show']);
+     Route::post('create-business-type', [BusinessTypeController::class, 'store']);
+     Route::put('update-business-type/{id}', [BusinessTypeController::class, 'update']);
+     Route::delete('delete-business-type/{id}', [BusinessTypeController::class, 'destroy']);
+     
+     // CategoryController
+     Route::get('get-categories', [CategoryController::class, 'index']);
+     Route::get('get-category/{id}', [CategoryController::class, 'show']);
+     Route::post('create-category', [CategoryController::class, 'store']);
+     Route::put('update-category/{id}', [CategoryController::class, 'update']);
+     Route::delete('delete-category/{id}', [CategoryController::class, 'destroy']);
+     // SubCategoryController
+     Route::get('get-sub-categories', [SubCategoryController::class, 'index']);
+     Route::get('get-sub-category/{id}', [SubCategoryController::class, 'show']);
+     Route::post('create-sub-category', [SubCategoryController::class, 'store']);
+     Route::put('update-sub-category/{id}', [SubCategoryController::class, 'update']);
+     Route::delete('delete-sub-category/{id}', [SubCategoryController::class, 'destroy']);
+     // SubSubCategoryController
+     Route::get('get-sub-sub-categories', [SubSubCategoryController::class, 'index']);
+     Route::get('get-sub-sub-category/{id}', [SubSubCategoryController::class, 'show']);
+     Route::post('create-sub-sub-category', [SubSubCategoryController::class, 'store']);
+     Route::put('update-sub-sub-category/{id}', [SubSubCategoryController::class, 'update']);
+     Route::delete('delete-sub-sub-category/{id}', [SubSubCategoryController::class, 'destroy']);
+     // BrandController
+     Route::get('get-brands', [BrandController::class, 'index']);
+     Route::get('get-brand/{id}', [BrandController::class, 'show']);
+     Route::post('create-brand', [BrandController::class, 'store']);
+     Route::put('update-brand/{id}', [BrandController::class, 'update']);
+     Route::delete('delete-brand/{id}', [BrandController::class, 'destroy']);
 });

@@ -1,0 +1,40 @@
+//Note for invoice not for order
+            // $table->string('payment_gateway_transaction_id')->nullable()->comment('Transaction ID from the payment gateway');
+            // $table->decimal('payment_gateway_fee', 10, 2)->nullable()->comment('Payment gateway fee for the order');
+            // $table->decimal('payment_gateway_refund_amount', 10, 2)->nullable()->comment('Refund amount from the payment gateway for the order');
+            // $table->decimal('payment_gateway_fee_currency', 3)->nullable()->comment('Currency code for the payment gateway fee');
+            // $table->decimal('payment_gateway_refund_amount_currency', 3)->nullable()->comment('Currency code for the refund amount from the payment gateway');
+            // $table->string('payment_gateway_refund_reason')->nullable()->comment('Reason for the refund from the payment gateway');
+            // $table->string('payment_gateway_refund_transaction_id')->nullable()->comment('Refund transaction ID from the payment gateway');
+            // $table->string('payment_gateway_refund_currency', 3)->nullable()->comment('Currency code for the refund transaction ID from the payment gateway');
+            // $table->string('payment_gateway_refund_status')->nullable()->comment('Refund status from the payment gateway');
+            // $table->string('payment_gateway_refund_date')->nullable()->comment('Date and time when the refund was initiated');
+            // $table->string('payment_gateway_refund_admin_note')->nullable()->comment('Refund admin note for the order');
+            // $table->string('payment_gateway_refund_reason_code')->nullable()->comment('Refund reason code from the payment gateway');
+            // $table->string('payment_gateway_refund_reason_description')->nullable()->comment('Refund reason description from the payment gateway');
+            // $table->string('payment_gateway_refund_request_id')->nullable()->comment('Refund request ID from the payment gateway');
+            // $table->string('payment_gateway_refund_request_currency')->nullable()->comment('Currency code for the refund request ID from the payment gateway');
+            // $table->string('payment_gateway_refund_request_status')->nullable()->comment('Refund request status from the payment gateway');
+            // $table->string('payment_gateway_refund_request_date')->nullable()->comment('Date and time when the refund request was initiated');
+            // $table->string('payment_gateway_refund_request_admin_note')->nullable()->comment('Refund request admin note for the order');
+            // $table->string('payment_gateway_refund_request_reason_code')->nullable()->comment('Refund request reason code from the payment gateway');
+            // $table->string('payment_gateway_refund_request_reason_description')->nullable()->comment('Refund request reason description from the payment gateway');
+
+            //Note for tracking not for order
+            // $table->timestamp('order_date')->comment('Date and time when the order was placed');
+            // $table->timestamp('expected_delivery_date')->nullable()->comment('Expected delivery date for the order');
+            // $table->timestamp('paid_date')->nullable()->comment('Date and time when the order was paid');
+            // $table->timestamp('cancelled_date')->nullable()->comment('Date and time when the order was cancelled');
+            // $table->timestamp('refunded_date')->nullable()->comment('Date and time when the order was refunded');
+            // $table->timestamp('return_date')->nullable()->comment('Date and time when the order was returned');
+            // $table->timestamp('return_request_date')->nullable()->comment('Date and time when the order return request was submitted');
+            // $table->timestamp('return_accepted_date')->nullable()->comment('Date and time when the order return request was accepted by the customer');
+            // $table->timestamp('return_rejected_date')->nullable()->comment('Date and time when the order return request was rejected by the customer');
+            // $table->timestamp('return_sent_date')->nullable()->comment('Date and time when the order return request was sent to the customer');
+            // $table->timestamp('return_received_date')->nullable()->comment('Date and time when the order return was received by the customer');
+            // $table->timestamp('return_canceled_date')->nullable()->comment('Date and time when the order return was canceled by the customer');
+            // $table->timestamp('return_returned_date')->nullable()->comment('Date and time when the order return was returned by the customer');
+            // $table->timestamp('return_delayed_date')->nullable()->comment('Date and time when the order return was delayed');
+            // $table->timestamp('return_refund_date')->nullable()->comment('Date and time when the order return refund was processed');
+            // $table->timestamp('return_delayed_refund_date')->nullable()->comment('Date and time when the delayed order return refund was processed');
+            // $table->timestamp('return_delayed_refund_canceled_date')->nullable()->comment('Date and time when the delayed order return refund was canceled');

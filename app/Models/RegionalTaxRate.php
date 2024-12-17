@@ -8,4 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class RegionalTaxRate extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'tax_rate', 
+        'region_id',
+        'is_active'
+    ];
+    
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }

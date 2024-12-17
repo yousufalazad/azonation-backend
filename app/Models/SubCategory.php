@@ -8,4 +8,25 @@ use Illuminate\Database\Eloquent\Model;
 class SubCategory extends Model
 {
     use HasFactory;
+
+    protected $table = 'sub_categories';
+
+    /**
+     * The attributes that are mass assignable.
+     */
+    protected $fillable = [
+        'name',
+        'description',
+        'category_id',
+        'slug',
+        'meta_description',
+        'order',
+        'is_active',
+        'sub_category_image_path',
+    ];
+    
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 }
