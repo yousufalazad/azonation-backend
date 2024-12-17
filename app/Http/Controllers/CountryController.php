@@ -33,8 +33,10 @@ class CountryController extends Controller
     {
         // Validation
         $validator = Validator::make($request->all(), [
-            'country_name' => 'required|string|max:255',
-            'iso_code' => 'required|string|max:4',
+            'name' => 'required|string|max:255',
+            'iso_code_alpha_3' => 'required',
+            'iso_code_alpha_2' => 'required',
+            'numeric_code' => 'required',
             'is_active' => 'required',
         ]);
 
@@ -44,12 +46,14 @@ class CountryController extends Controller
 
         try {
             // Logging the inputs for debugging
-            Log::info('Country data: ', ['country_name' => $request->country_name, 'iso_code' => $request->iso_code]);
+            Log::info('Country data: ', ['name' => $request->name, 'iso_code_alpha_3' => $request->iso_code_alpha_3]);
 
             // Create the Country record
             $country = Country::create([
-                'country_name' => $request->country_name,
-                'iso_code' => $request->iso_code,
+                'name' => $request->name,
+                'iso_code_alpha_3' => $request->iso_code_alpha_3,
+                'iso_code_alpha_2' => $request->iso_code_alpha_2,
+                'numeric_code' => $request->numeric_code,
                 'is_active' => $request->is_active,
             ]);
 
@@ -87,8 +91,10 @@ class CountryController extends Controller
     {
         // Validation
         $validator = Validator::make($request->all(), [
-            'country_name' => 'required|string|max:255',
-            'iso_code' => 'required|string|max:4',
+            'name' => 'required|string|max:255',
+            'iso_code_alpha_3' => 'required',
+            'iso_code_alpha_2' => 'required',
+            'numeric_code' => 'required',
             'is_active' => 'required',
         ]);
 
@@ -103,8 +109,10 @@ class CountryController extends Controller
 
         // Update the country
         $country->update([
-            'country_name' => $request->country_name,
-            'iso_code' => $request->iso_code,
+            'name' => $request->name,
+            'iso_code_alpha_3' => $request->iso_code_alpha_3,
+            'iso_code_alpha_2' => $request->iso_code_alpha_2,
+            'numeric_code' => $request->numeric_code,
             'is_active' => $request->is_active,
         ]);
 

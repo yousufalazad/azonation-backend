@@ -17,6 +17,7 @@ return new class extends Migration
                 ->constrained('orders')
                 ->cascadeOnDelete()
                 ->comment('Foreign key: Links to the orders table');
+                
             $table->foreignId('product_id')
                 ->constrained('products')
                 ->cascadeOnDelete()
@@ -29,7 +30,8 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2)->comment('Total price for this product (unit price * quantity)');
             $table->decimal('discount_amount', 10, 2)->nullable()->comment('Discount applied to this item');
             $table->text('note')->nullable()->comment('Additional notes or comments regarding this item');
-            
+            $table->boolean('is_active')->default(true)->comment('Whether the order_items is active or inactive');
+
             $table->timestamps();
         });
     }
