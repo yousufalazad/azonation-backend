@@ -56,7 +56,15 @@ return new class extends Migration
             $table->text('description')->nullable()->comment('Detailed description of the product');
 
             $table->decimal('base_price', 10, 2)->comment('Price of the product');
-            
+            $table->boolean('on_sale')->default(false)->comment('Indicates if the product is on sale');
+            $table->decimal('discount_percentage', 5, 2)->nullable()->comment('Discount percentage applied to the product');
+            $table->decimal('sale_price', 10, 2)->nullable()->comment('Sale price after discount');
+            $table->dateTime('sale_start_date')->nullable()->comment('Start date for the product sale');
+            $table->dateTime('sale_end_date')->nullable()->comment('End date for the product sale');
+
+            // Product Attachments
+            $table->boolean('is_downloadable')->default(false)->comment('Indicates if the product is downloadable');
+            $table->string('download_link')->nullable()->comment('Download link for the product, if applicable');
             $table->boolean('is_backorderable')->default(false)->comment('Indicates if the product is backorderable');
 
             // SEO and Marketing
@@ -71,6 +79,13 @@ return new class extends Migration
 
             // Images and Media
             $table->string('feature_image_path')->nullable()->comment('Path to the main product image');
+
+            // Product Variations (Size, Color, Material, etc.)
+            $table->json('attributes')->nullable()->comment('Dynamic attributes like size, color, material, etc.');
+
+            $table->decimal('weight', 5, 2)->nullable()->comment('Weight of the product in kilograms');
+            $table->string('dimensions')->nullable()->comment('Dimensions of the product, e.g., "10x5x2 cm"');
+
 
             $table->json('additional_information')->nullable()->comment('Additional information about the product in JSON format');
             $table->boolean('is_in_stock')->default(true)->comment('Indicates if the product is in stock or out of stock');
