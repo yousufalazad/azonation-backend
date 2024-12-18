@@ -55,9 +55,21 @@ return new class extends Migration
             $table->text('invoice_description')->nullable()->comment('A short description of the product for invoice, show after product name');
             $table->text('description')->nullable()->comment('Detailed description of the product');
 
-            $table->decimal('base_price', 10, 2)->comment('Price of the product');
-            
+            $table->decimal('base_price', 10, 2)->nullable()->comment('Price of the product');
+            $table->boolean('on_sale')->default(false)->comment('Indicates if the product is on sale');
+            $table->decimal('discount_percentage', 5, 2)->nullable()->comment('Discount percentage applied to the product');
+            $table->decimal('sale_price', 10, 2)->nullable()->comment('Sale price after discount');
+            $table->dateTime('sale_start_date')->nullable()->comment('Start date for the product sale');
+            $table->dateTime('sale_end_date')->nullable()->comment('End date for the product sale');
+
+            // Product Attachments
+            $table->boolean('is_downloadable')->default(false)->comment('Indicates if the product is downloadable');
+            $table->string('download_link')->nullable()->comment('Download link for the product, if applicable');
+            $table->boolean('is_gift_card')->default(false)->comment('Indicates if the product is a gift card');
+            $table->boolean('is_refundable')->default(false)->comment('Indicates if the product is refundable');
+            $table->boolean('is_customizable')->default(false)->comment('Indicates if the product is customizable');
             $table->boolean('is_backorderable')->default(false)->comment('Indicates if the product is backorderable');
+            $table->boolean('is_sold_individually')->default(false)->comment('Indicates if the product can be sold individually');
 
             // SEO and Marketing
             $table->string('meta_title')->nullable()->comment('SEO title for the product');
@@ -70,17 +82,26 @@ return new class extends Migration
             $table->boolean('is_new')->default(false)->comment('Indicates if the product is new');
 
             // Images and Media
-            $table->string('feature_image_path')->nullable()->comment('Path to the main product image');
+            $table->string('feature_image')->nullable()->comment('Path to the main product image');
+
+            // Product Variations (Size, Color, Material, etc.)
+            $table->json('attributes')->nullable()->comment('Dynamic attributes like size, color, material, etc.');
+
+            $table->decimal('weight', 5, 2)->nullable()->comment('Weight of the product in kilograms');
+            $table->string('dimensions')->nullable()->comment('Dimensions of the product, e.g., "10x5x2 cm"');
+
 
             $table->json('additional_information')->nullable()->comment('Additional information about the product in JSON format');
             $table->boolean('is_in_stock')->default(true)->comment('Indicates if the product is in stock or out of stock');
             $table->integer('sold_quantity')->default(0)->comment('Quantity of the product sold');
             $table->json('additional_shipping_info')->nullable()->comment('Additional shipping information in JSON format');
+            $table->json('shipping_rules')->nullable()->comment('Shipping rules for the product in JSON format');
 
             // Product Categories and Tags
             $table->json('tags')->nullable()->comment('Product tags in JSON format');
 
             //Additional Information
+            $table->integer('warranty_period')->nullable()->comment('Warranty period in months');
             $table->boolean('is_active')->default(true)->comment('Indicates if the product is active and available');
 
             // Timestamps
