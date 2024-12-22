@@ -22,6 +22,7 @@ class ReceiptController extends Controller
                 'status' => true,
                 'data' => $receipts,
             ]);
+            
         } catch (\Exception $e) {
             // Log the exception for debugging
             Log::error('Error fetching packages: ' . $e->getMessage());
