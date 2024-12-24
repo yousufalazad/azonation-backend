@@ -6,7 +6,6 @@ use App\Models\Receipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-
 class ReceiptController extends Controller
 {
     /**
@@ -22,7 +21,6 @@ class ReceiptController extends Controller
                 'status' => true,
                 'data' => $receipts,
             ]);
-            
         } catch (\Exception $e) {
             // Log the exception for debugging
             Log::error('Error fetching packages: ' . $e->getMessage());
@@ -48,27 +46,78 @@ class ReceiptController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        // 'receipt_code',
-        // 'invoice_id',    
-        // 'user_id',    
-        // 'amount_received',    
-        // 'payment_method',
-        // 'transaction_reference',
-        // 'payment_date',
-        // 'note',
-        // 'status',
-        // 'admin_note',
-        // 'is_published'
+        // Validate incoming request
+        $validated = $request->validate([
+            'receipt_code' => 'required|string|max:255|unique:receipts,receipt_code',
+            'invoice_id' => 'required|exists:invoices,id',
+            'user_id' => 'required|exists:users,id',
+            'amount_received' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+            'transaction_reference' => 'required|string|max:255',
+            'payment_date' => 'required|date',
+            'note' => 'nullable|string',
+            'status' => 'nullable',
+            'admin_note' => 'nullable|string',
+            'is_published' => 'boolean',
+        ]);
+
+        try {
+            // Create receipt
+            $receipt = Receipt::create([
+                'receipt_code' => $validated['receipt_code'],
+                'invoice_id' => $validated['invoice_id'],
+                'user_id' => $validated['user_id'],
+                'amount_received' => $validated['amount_received'],
+                'payment_method' => $validated['payment_method'],
+                'transaction_reference' => $validated['transaction_reference'],
+                'payment_date' => $validated['payment_date'],
+                'note' => $validated['note'] ?? null,
+                'status' => $validated['status'],
+                'admin_note' => $validated['admin_note'] ?? null,
+                'is_published' => $validated['is_published'] ?? false,
+            ]);
+
+            // Return success response
+            return response()->json([
+                'status' => true,
+                'message' => 'Receipt created successfully.',
+                'data' => $receipt,
+            ], 201);
+        } catch (\Exception $e) {
+            // Log error and return error response
+            Log::error('Error creating receipt: ', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.',
+            ], 500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Receipt $receipt)
+    public function show($id)
     {
-        //
+        try {
+            // Find receipt by ID
+            $receipt = Receipt::findOrFail($id);
+
+            // Return success response with receipt data
+            return response()->json([
+                'status' => true,
+                'message' => 'Receipt retrieved successfully.',
+                'data' => $receipt,
+            ], 200);
+        } catch (\Exception $e) {
+            // Log error and return error response
+            Log::error('Error retrieving receipt: ', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.',
+            ], 500);
+        }
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -81,16 +130,83 @@ class ReceiptController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Receipt $receipt)
+    public function update(Request $request, $id)
     {
-        //
+        // Validate incoming request
+        $validated = $request->validate([
+            'receipt_code' => 'required|string|max:255|unique:receipts,receipt_code,' . $id,
+            'invoice_id' => 'required|exists:invoices,id',
+            'user_id' => 'required|exists:users,id',
+            'amount_received' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+            'transaction_reference' => 'required|string|max:255',
+            'payment_date' => 'required|date',
+            'note' => 'nullable|string',
+            'status' => 'nullable',
+            'admin_note' => 'nullable|string',
+            'is_published' => 'boolean',
+        ]);
+
+        try {
+            // Find receipt by ID
+            $receipt = Receipt::findOrFail($id);
+
+            // Update receipt details
+            $receipt->update([
+                'receipt_code' => $validated['receipt_code'],
+                'invoice_id' => $validated['invoice_id'],
+                'user_id' => $validated['user_id'],
+                'amount_received' => $validated['amount_received'],
+                'payment_method' => $validated['payment_method'],
+                'transaction_reference' => $validated['transaction_reference'],
+                'payment_date' => $validated['payment_date'],
+                'note' => $validated['note'] ?? null,
+                'status' => $validated['status'],
+                'admin_note' => $validated['admin_note'] ?? null,
+                'is_published' => $validated['is_published'] ?? false,
+            ]);
+
+            // Return success response
+            return response()->json([
+                'status' => true,
+                'message' => 'Receipt updated successfully.',
+                'data' => $receipt,
+            ], 200);
+        } catch (\Exception $e) {
+            // Log error and return error response
+            Log::error('Error updating receipt: ', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.',
+            ], 500);
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Receipt $receipt)
+    public function destroy($id)
     {
-        //
+        try {
+            // Find receipt by ID
+            $receipt = Receipt::findOrFail($id);
+
+            // Delete the receipt
+            $receipt->delete();
+
+            // Return success response
+            return response()->json([
+                'status' => true,
+                'message' => 'Receipt deleted successfully.',
+            ], 200);
+        } catch (\Exception $e) {
+            // Log error and return error response
+            Log::error('Error deleting receipt: ', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.',
+            ], 500);
+        }
     }
 }

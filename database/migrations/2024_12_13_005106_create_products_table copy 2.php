@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('backup_copy_products', function (Blueprint $table) {
             $table->id();  // Unique ID for the product
 
             // Foreign Keys for Relationships

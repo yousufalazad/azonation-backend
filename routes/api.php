@@ -87,6 +87,8 @@ use App\Http\Controllers\SubSubCategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReceiptController;
+
 
 
 
@@ -537,4 +539,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('create-order', [OrderController::class, 'store']);
     Route::put('update-order/{id}', [OrderController::class, 'update']);
     Route::delete('delete-order/{id}', [OrderController::class, 'destroy']);
+    // ReceiptController
+    Route::get('get-receipts', [ReceiptController::class, 'index']);
+    Route::get('get-receipt/{id}', [ReceiptController::class, 'show']);
+    Route::post('create-receipt', [ReceiptController::class, 'store']);
+    Route::put('update-receipt/{id}', [ReceiptController::class, 'update']);
+    Route::delete('delete-receipt/{id}', [ReceiptController::class, 'destroy']);
 });
