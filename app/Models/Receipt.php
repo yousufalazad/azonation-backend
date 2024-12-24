@@ -10,16 +10,16 @@ class Receipt extends Model
     use HasFactory;
     protected $fillable = [
         'receipt_code',
-        'invoice_id',    
-        'user_id',    
-        'amount_received',    
+        'invoice_id',
+        'user_id',
+        'amount_received',
         'payment_method',
         'transaction_reference',
         'payment_date',
         'note',
         'status',
         'admin_note',
-        'is_published'
+        'is_published',
     ];
     
     protected $hidden=[

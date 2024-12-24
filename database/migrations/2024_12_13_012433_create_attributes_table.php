@@ -12,13 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('attributes', function (Blueprint $table) {
-            $table->id();
-
-
-            $table->timestamps();
-        });
-
-        Schema::create('attributes', function (Blueprint $table) {
             $table->id();  // Unique ID for the attribute
         
             // The attribute name (e.g., "Size", "Color", "Material")

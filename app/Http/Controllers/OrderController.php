@@ -89,16 +89,6 @@ class OrderController extends Controller
     /**
      * Display the specified product.
      */
-    public function ___show($id)
-    {
-        try {
-            $order = Order::findOrFail($id);
-            return response()->json(['status' => true, 'data' => $order], 200);
-        } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => 'Order not found.'], 404);
-        }
-    }
-
     public function show($id)
     {
         try {
@@ -151,17 +141,17 @@ class OrderController extends Controller
             'is_active' => 'required|boolean',
 
             // OrderItem fields
-            // 'order_items' => 'required|array',
-            // 'order_items.*.id' => 'nullable|integer', // For existing items
-            // 'order_items.*.product_id' => 'required|integer',
-            // 'order_items.*.product_name' => 'nullable|string|max:255',
-            // 'order_items.*.product_attributes' => 'nullable|string',
-            // 'order_items.*.unit_price' => 'required|numeric',
-            // 'order_items.*.quantity' => 'required|integer',
-            // 'order_items.*.total_price' => 'required|numeric',
-            // 'order_items.*.discount_amount' => 'nullable|numeric',
-            // 'order_items.*.note' => 'nullable|string',
-            // 'order_items.*.is_active' => 'nullable|boolean',
+            'order_items' => 'required|array',
+            'order_items.*.id' => 'nullable|integer', // For existing items
+            'order_items.*.product_id' => 'required|integer',
+            'order_items.*.product_name' => 'nullable|string|max:255',
+            'order_items.*.product_attributes' => 'nullable|string',
+            'order_items.*.unit_price' => 'required|numeric',
+            'order_items.*.quantity' => 'required|integer',
+            'order_items.*.total_price' => 'required|numeric',
+            'order_items.*.discount_amount' => 'nullable|numeric',
+            'order_items.*.note' => 'nullable|string',
+            'order_items.*.is_active' => 'nullable|boolean',
         ]);
 
         try {
@@ -174,26 +164,26 @@ class OrderController extends Controller
             $order->update($orderData);
 
             // Process Order Items
-            // $existingItems = $order->orderItems()->pluck('id')->toArray();
-            // $submittedItems = collect($validated['order_items']);
+            $existingItems = $order->orderItems()->pluck('id')->toArray();
+            $submittedItems = collect($validated['order_items']);
 
             // // Update or create submitted items
-            // foreach ($submittedItems as $itemData) {
-            //     if (isset($itemData['id']) && in_array($itemData['id'], $existingItems)) {
-            //         // Update existing item
-            //         $orderItem = OrderItem::find($itemData['id']);
-            //         $orderItem->update($itemData);
-            //     } else {
-            //         // Create new item
-            //         $itemData['order_id'] = $order->id;
-            //         OrderItem::create($itemData);
-            //     }
-            // }
+            foreach ($submittedItems as $itemData) {
+                if (isset($itemData['id']) && in_array($itemData['id'], $existingItems)) {
+                    // Update existing item
+                    $orderItem = OrderItem::find($itemData['id']);
+                    $orderItem->update($itemData);
+                } else {
+                    // Create new item
+                    $itemData['order_id'] = $order->id;
+                    OrderItem::create($itemData);
+                }
+            }
 
             // Delete removed items
-            // $submittedItemIds = $submittedItems->pluck('id')->filter()->toArray();
-            // $itemsToDelete = array_diff($existingItems, $submittedItemIds);
-            // OrderItem::destroy($itemsToDelete);
+            $submittedItemIds = $submittedItems->pluck('id')->filter()->toArray();
+            $itemsToDelete = array_diff($existingItems, $submittedItemIds);
+            OrderItem::destroy($itemsToDelete);
 
             return response()->json(['status' => true, 'message' => 'Order updated successfully.', 'data' => $order], 200);
         } catch (\Exception $e) {
