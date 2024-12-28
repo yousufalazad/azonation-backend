@@ -26,8 +26,8 @@ class OrgProfileController extends Controller
 
     public function getLogo($userId)
     {
-        $logo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
-        $imageUrl = $logo ? Storage::url($logo->image_path) : null;
+        $logo = User::where('id', $userId)->orderBy('id', 'desc')->first();
+        $imageUrl = $logo ? Storage::url($logo->image) : null;
 
         return response()->json([
             'status' => true,
@@ -50,8 +50,6 @@ class OrgProfileController extends Controller
         $image = $request->file('image');
         $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
         $extension = $image->getClientOriginalExtension();
-        $mime_type = 'image' . '/' . $extension;
-        $fileSize = $image->getSize(); // Get file size in bytes
         $timestamp = Carbon::now()->format('YmdHis');
         $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
 
@@ -60,34 +58,22 @@ class OrgProfileController extends Controller
         // Update the logo path in users table or create a new record if not found
         //$orgLogo = User::where('id', $userId)->orderBy('id', 'desc')->first();
         $orgLogo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
-        
         if ($orgLogo) {
             //ekhane delete korte hobe save korar agee
             $orgLogo->user_id = $userId;
-            $orgLogo->image_path = $path;
-            $orgLogo->file_name = $originalName;
-            $orgLogo->mime_type = $mime_type;
-            $orgLogo->file_size = $fileSize;
-            // $orgLogo->is_public = $isPublic;
-            // $orgLogo->is_active = $isActive;.?
+            $orgLogo->image = $path;
             $orgLogo->save();
         } else {
             // Save the logo path to users table
             $orgLogo = new ProfileImage();
             $orgLogo->user_id = $userId;
-            $orgLogo->image_path = $path;
-            $orgLogo->file_name = $originalName;
-            $orgLogo->mime_type = $mime_type;
-            $orgLogo->file_size = $fileSize;
-            // $orgLogo->is_public = $isPublic;
-            // $orgLogo->is_active = $isActive;
+            $orgLogo->image = $path;
             $orgLogo->save();
         }
         $imageUrl = Storage::url($path);
         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
     }
 
-        
     /**
      * Display a listing of the resource.
      */

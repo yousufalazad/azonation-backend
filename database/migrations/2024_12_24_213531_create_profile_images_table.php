@@ -20,12 +20,11 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->comment('Foreign key: The user');
 
-            $table->string('image_path')->nullable()->comment('The storage path or URL of the profile image');
-            $table->string('image_type')->default('profile')->comment('The type of image: "profile" for personal profile photos, "logo" for organisation logos');
+            $table->string('image_path')->comment('The storage path or URL of the profile image');
             $table->string('file_name')->nullable()->comment('The original file name of the uploaded image');
             $table->string('mime_type')->nullable()->comment('The MIME type of the image file, e.g., image/jpeg or image/png');
             $table->integer('file_size')->nullable()->comment('The size of the image file in kilobytes (KB)');
-
+            $table->boolean('is_public')->default(true)->comment('Whether the profile image is publicly visible or not');
             $table->boolean('is_active')->default(true); // Status for active/inactive
             $table->timestamps();
         });
