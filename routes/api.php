@@ -3,10 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Individual\IndividualController;
+
+//Org members
 use App\Http\Controllers\Org\OrgMemberListController;
+use App\Http\Controllers\Org\OrgIndependentMemberController;
+
+//Committee
 use App\Http\Controllers\Org\CommitteeController;
 use App\Http\Controllers\Org\CommitteeMemberController;
 
+//Meeting
 use App\Http\Controllers\Org\MeetingController;
 use App\Http\Controllers\Org\MeetingMinutesController;
 use App\Http\Controllers\Org\MeetingAttendanceController;
@@ -194,6 +200,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/org-member-list/{userId}', [OrgMemberListController::class, 'getMemberList']);
     Route::get('/org-all-member-list', [OrgMemberListController::class, 'getOrgAllMemberList']);
     Route::get('/total-org-member-count/{userId}', [OrgMemberListController::class, 'totalOrgMemberCount']);
+
+     // OrgIndependentMemberController
+     Route::get('get-independent-members', [OrgIndependentMemberController::class, 'index']);
+     Route::get('get-independent-member/{id}', [OrgIndependentMemberController::class, 'show']);
+     Route::post('create-independent-member', [OrgIndependentMemberController::class, 'store']);
+     Route::put('update-independent-member/{id}', [OrgIndependentMemberController::class, 'update']);
+     Route::delete('delete-independent-member/{id}', [OrgIndependentMemberController::class, 'destroy']);
 
     //for Org Administrator
     Route::post('/search-individual', [OrgAdministratorController::class, 'search']);
