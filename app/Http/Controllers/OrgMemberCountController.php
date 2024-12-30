@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrgIndependentMember;
+use App\Models\OrgMemberCount;
 use Illuminate\Http\Request;
 
-class OrgIndependentMemberController extends Controller
+class OrgMemberCountController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class OrgIndependentMemberController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(OrgIndependentMember $orgIndependentMember)
+    public function show(OrgMemberCount $orgMemberCount)
     {
         //
     }
@@ -42,7 +42,7 @@ class OrgIndependentMemberController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OrgIndependentMember $orgIndependentMember)
+    public function edit(OrgMemberCount $orgMemberCount)
     {
         //
     }
@@ -50,7 +50,7 @@ class OrgIndependentMemberController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, OrgIndependentMember $orgIndependentMember)
+    public function update(Request $request, OrgMemberCount $orgMemberCount)
     {
         //
     }
@@ -58,7 +58,7 @@ class OrgIndependentMemberController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrgIndependentMember $orgIndependentMember)
+    public function destroy(OrgMemberCount $orgMemberCount)
     {
         //
     }

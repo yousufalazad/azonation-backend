@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('org_independent_members', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete()
+                ->comment('Foreign key: The user');
             $table->string('name'); // Member's full name
             $table->string('email')->nullable(); // Member's email address (optional)
             $table->string('mobile')->nullable(); // Member's mobile number (optional)
