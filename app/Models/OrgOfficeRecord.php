@@ -13,7 +13,7 @@ class OrgOfficeRecord extends Model
         'title',
         'description',
         'document',
-        'status'
+        'is_active'
     ];
 
     /**

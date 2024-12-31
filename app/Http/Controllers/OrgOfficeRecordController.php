@@ -56,7 +56,7 @@ class OrgOfficeRecordController extends Controller
             'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'string|max:20000',
-            'status' => 'required|integer',
+            //'is_active' => 'nullable|integer',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048', // Image validation for each file
             'document' => 'nullable|file|mimes:pdf,doc,docx|max:10024', // Document validation
         ]);
@@ -77,7 +77,7 @@ class OrgOfficeRecordController extends Controller
         $OrgOfficeRecord->user_id = $validatedData['user_id'];
         $OrgOfficeRecord->title = $validatedData['title'];
         $OrgOfficeRecord->description = $validatedData['description'];
-        $OrgOfficeRecord->status = $validatedData['status']; // Ensure you're saving the status as well
+        $OrgOfficeRecord->is_active = $validatedData['is_active']; // Ensure you're saving the status as well
         $OrgOfficeRecord->document = $documentPath; // Store the document path if available
         $OrgOfficeRecord->save(); // Save the office record
 
@@ -114,7 +114,7 @@ class OrgOfficeRecordController extends Controller
             'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'string|max:20000',
-            'status' => 'required|integer',
+            'is_active' => 'required|integer',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
             'document' => 'nullable|file|mimes:pdf,doc,docx|max:10024',
         ]);
@@ -141,7 +141,7 @@ class OrgOfficeRecordController extends Controller
         $OrgOfficeRecord->user_id = $validatedData['user_id'];
         $OrgOfficeRecord->title = $validatedData['title'];
         $OrgOfficeRecord->description = $validatedData['description'];
-        $OrgOfficeRecord->status = $validatedData['status'];
+        $OrgOfficeRecord->is_active = $validatedData['is_active'];
         $OrgOfficeRecord->save(); // Save the updated office record
 
         // Handle multiple image uploads

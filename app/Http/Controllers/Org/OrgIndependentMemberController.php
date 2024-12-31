@@ -12,6 +12,18 @@ class OrgIndependentMemberController extends Controller
     /**
      * Display a listing of the members.
      */
+    public function ___index()
+    {
+        $members = OrgIndependentMember::all();
+        // Map the members to include the image URL
+        $members = $members->map(function ($member) {
+            $member->image_url = $member->image_path ? Storage::url($member->image_path) : null;
+            return $member;
+        });
+
+        return response()->json(['status' => true, 'data' => $members]);
+    }
+
     public function index()
     {
         $members = OrgIndependentMember::all();
@@ -42,7 +54,6 @@ class OrgIndependentMemberController extends Controller
         ]);
 
         if ($request->hasFile('image_path')) {
-
             $image = $request->file('image_path');
             $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $image->getClientOriginalExtension();
@@ -90,6 +101,7 @@ class OrgIndependentMemberController extends Controller
             return response()->json(['status' => false, 'message' => 'Member not found.'], 404);
         }
 
+        // Validate the input data
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => "required|email|unique:org_independent_members,email,{$id}",
@@ -97,30 +109,33 @@ class OrgIndependentMemberController extends Controller
             'address' => 'nullable|string|max:500',
             'admin_note' => 'nullable|string',
             'is_active' => 'required|boolean',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        // Handle the image upload if a file is provided
         if ($request->hasFile('image_path')) {
-            // Delete the old image if exists
+            // Delete the old image if it exists
             if ($member->image_path) {
                 Storage::disk('public')->delete($member->image_path);
             }
 
+            // Process the new image
             $image = $request->file('image_path');
             $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $image->getClientOriginalExtension();
-            // $mime_type = 'image_path' . '/' . $extension;
-            // $fileSize = $image->getSize(); // Get file size in bytes
             $timestamp = Carbon::now()->format('YmdHis');
             $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
             $path = $image->storeAs('org/independent_member', $newFileName, 'public');
             $validatedData['image_path'] = $path;
         }
         $validatedData['user_id'] = $request->user()->id;
+
+        // Update the member record
         $member->update($validatedData);
 
         return response()->json(['status' => true, 'message' => 'Member updated successfully.', 'data' => $member]);
     }
+
 
     /**
      * Remove the specified member from storage.
