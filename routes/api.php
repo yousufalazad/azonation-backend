@@ -8,6 +8,10 @@ use App\Http\Controllers\Individual\IndividualController;
 use App\Http\Controllers\Org\OrgMemberListController;
 use App\Http\Controllers\Org\OrgIndependentMemberController;
 
+//Member counting
+use App\Http\Controllers\OrgMemberCountController;
+
+
 //Committee
 use App\Http\Controllers\Org\CommitteeController;
 use App\Http\Controllers\Org\CommitteeMemberController;
@@ -207,6 +211,10 @@ Route::middleware('auth:sanctum')->group(function () {
      Route::post('create-independent-member', [OrgIndependentMemberController::class, 'store']);
      Route::put('update-independent-member/{id}', [OrgIndependentMemberController::class, 'update']);
      Route::delete('delete-independent-member/{id}', [OrgIndependentMemberController::class, 'destroy']);
+
+    //Org member count
+    Route::post('/org-member-counts', [OrgMemberCountController::class, 'store']);
+
 
     //for Org Administrator
     Route::post('/search-individual', [OrgAdministratorController::class, 'search']);
