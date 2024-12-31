@@ -5,7 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Individual\IndividualController;
 
 //Org members
-use App\Http\Controllers\Org\OrgMemberListController;
+use App\Http\Controllers\Org\OrgMemberController;
 use App\Http\Controllers\Org\OrgIndependentMemberController;
 
 //Member counting
@@ -65,7 +65,7 @@ use App\Http\Controllers\OrgOfficeRecordController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ActiveMemberCountController;
-use App\Http\Controllers\ActiveHonoraryMemberCountController;
+use App\Http\Controllers\HonoraryMemberCountController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\CurrencyController;
@@ -199,11 +199,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/delete-office-record/{id}', [OrgOfficeRecordController::class, 'destroy']);
 
     //API for org membership
-    Route::post('/search_individual', [OrgMemberListController::class, 'search']);
-    Route::post('/add_member', [OrgMemberListController::class, 'addMember']);
-    Route::get('/org-member-list/{userId}', [OrgMemberListController::class, 'getMemberList']);
-    Route::get('/org-all-member-list', [OrgMemberListController::class, 'getOrgAllMemberList']);
-    Route::get('/total-org-member-count/{userId}', [OrgMemberListController::class, 'totalOrgMemberCount']);
+    Route::post('/search_individual', [OrgMemberController::class, 'search']);
+    Route::post('/add_member', [OrgMemberController::class, 'addMember']);
+    Route::get('/org-member-list/{userId}', [OrgMemberController::class, 'getMemberList']);
+    Route::get('/org-all-member-list', [OrgMemberController::class, 'getOrgAllMemberList']);
+    Route::get('/total-org-member-count/{userId}', [OrgMemberController::class, 'totalOrgMemberCount']);
 
      // OrgIndependentMemberController
      Route::get('get-independent-members', [OrgIndependentMemberController::class, 'index']);
@@ -372,8 +372,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
 
     //Active honorary member count
-    Route::get('/active-honorary-member-count', [ActiveHonoraryMemberCountController::class, 'show']);
-    Route::get('/previous-month-bill-calculation-honorary-member', [ActiveHonoraryMemberCountController::class, 'getPreviousMonthBillCalculation']);
+    Route::get('/active-honorary-member-count', [HonoraryMemberCountController::class, 'show']);
+    Route::get('/previous-month-bill-calculation-honorary-member', [HonoraryMemberCountController::class, 'getPreviousMonthBillCalculation']);
 
 
 
