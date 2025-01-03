@@ -10,8 +10,13 @@ class OfficeRecordImage extends Model
     use HasFactory;
 
     protected $fillable = [
-        'org_office_record_id',
-        'image',
+        'office_record_id',
+        'image_path',
+        'file_name',
+        'mime_type',
+        'file_size',
+        'is_public',  // Whether the profile image is publicly visible or not
+        'is_active'
     ];
 
     /**
@@ -19,6 +24,6 @@ class OfficeRecordImage extends Model
      */
     public function officeRecord()
     {
-        return $this->belongsTo(OrgOfficeRecord::class, 'org_office_record_id');
+        return $this->belongsTo(OfficeRecord::class, 'office_record_id');
     }
 }

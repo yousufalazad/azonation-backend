@@ -50,10 +50,12 @@ use App\Http\Controllers\Org\OrgProfileController;
 
 use App\Http\Controllers\SuccessStoryController;
 use App\Http\Controllers\StrategicPlanController;
-use App\Http\Controllers\OrgHistoryController;
+//use App\Http\Controllers\OrgHistoryController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\YearPlanController;
-use App\Http\Controllers\OrgRecognitionController;
-use App\Http\Controllers\OrgAccountController;
+// use App\Http\Controllers\OrgRecognitionController;
+use App\Http\Controllers\RecognitionController;
+//use App\Http\Controllers\OrgAccountController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AccountFundController;
 use App\Http\Controllers\OrgReportController;
@@ -141,11 +143,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-fund/{id}', [AccountFundController::class, 'update']);
     Route::delete('/delete-fund/{id}', [AccountFundController::class, 'destroy']);
 
-    // OrgHistoryController
-    Route::get('/get-org-histories', [OrgHistoryController::class, 'index']);
-    Route::post('/create-org-history', [OrgHistoryController::class, 'store']);
-    Route::put('/update-org-history/{id}', [OrgHistoryController::class, 'update']);
-    Route::delete('/delete-org-history/{id}', [OrgHistoryController::class, 'destroy']);
+    // HistoryController
+    Route::get('/get-org-histories', [HistoryController::class, 'index']);
+    Route::post('/create-org-history', [HistoryController::class, 'store']);
+    Route::put('/update-org-history/{id}', [HistoryController::class, 'update']);
+    Route::delete('/delete-org-history/{id}', [HistoryController::class, 'destroy']);
 
     //Year plan
     Route::get('/get-year-plans', [YearPlanController::class, 'index']);
@@ -154,11 +156,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-year-plan/{id}', [YearPlanController::class, 'update']);
     Route::delete('/delete-year-plan/{id}', [YearPlanController::class, 'destroy']);
 
-    // OrgRecognitionController
-    Route::get('/get-recognitions', [OrgRecognitionController::class, 'index']);
-    Route::post('/create-recognition', [OrgRecognitionController::class, 'store']);
-    Route::put('/update-recognition/{id}', [OrgRecognitionController::class, 'update']);
-    Route::delete('/delete-recognition/{id}', [OrgRecognitionController::class, 'destroy']);
+    // RecognitionController
+    Route::get('/get-recognitions', [RecognitionController::class, 'index']);
+    Route::post('/create-recognition', [RecognitionController::class, 'store']);
+    Route::put('/update-recognition/{id}', [RecognitionController::class, 'update']);
+    Route::delete('/delete-recognition/{id}', [RecognitionController::class, 'destroy']);
 
     // StrategicPlan
     Route::get('/get-strategic-plans', [StrategicPlanController::class, 'index']);

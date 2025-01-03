@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\OfficeRecord;
 use App\Models\OfficeRecordImage;
+use App\Models\OfficeRecordDocument;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -53,13 +54,14 @@ class OfficeRecordController extends Controller
     {
         // Validate the incoming request
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'string|max:20000',
-            'status' => 'required|integer',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048', // Image validation for each file
+            'privacy_setup_id' => 'nullable|integer',
+            'image_path.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048', // Image validation for each file
             'document' => 'nullable|file|mimes:pdf,doc,docx|max:10024', // Document validation
         ]);
+
+        $user_id = $request->user()->id;
 
         // Handle the document upload if present
         $documentPath = null;
@@ -73,13 +75,23 @@ class OfficeRecordController extends Controller
         }
 
         // Create the new organization office record
-        $OfficeRecord = new OfficeRecord();
-        $OfficeRecord->user_id = $validatedData['user_id'];
-        $OfficeRecord->title = $validatedData['title'];
-        $OfficeRecord->description = $validatedData['description'];
-        $OfficeRecord->status = $validatedData['status']; // Ensure you're saving the status as well
-        $OfficeRecord->document = $documentPath; // Store the document path if available
-        $OfficeRecord->save(); // Save the office record
+        $officeRecord = new OfficeRecord();
+        $officeRecord->title = $validatedData['title'];
+        $officeRecord->description = $validatedData['description'];
+        $officeRecord->privacy_setup_id = $validatedData['privacy_setup_id']; // Ensure you're saving the status as well
+        $officeRecord->document = $documentPath; // Store the document path if available
+        $officeRecord->user_id = $user_id; // Logged in user ID
+        $officeRecord->save(); // Save the office record
+
+        $officeRecordDocument = new OfficeRecordDocument();
+        $officeRecordDocument->office_record_id = $officeRecord->id;
+        $officeRecordDocument->file_path = $documentPath; // Store the document path in the office_record_documents table
+        $officeRecordDocument->file_name = $documentFile->getClientOriginalName(); // Store the document name
+        $officeRecordDocument->mime_type = $documentFile->getClientMimeType(); // Store the MIME type of the document
+        $officeRecordDocument->file_size = $documentFile->getSize(); // Store the size of the document
+        $officeRecordDocument->is_public = true; // Set the document as public
+        $officeRecordDocument->is_active = true; // Set the document as active
+        $officeRecordDocument->save(); // Save the document related to the office record
 
         // Handle multiple image uploads
         if ($request->hasFile('images')) {
@@ -93,8 +105,8 @@ class OfficeRecordController extends Controller
 
                 // Save each image path in the office_record_images table
                 OfficeRecordImage::create([
-                    'office_record_id' => $OfficeRecord->id,
-                    'image' => $imagePath, // Store the image path
+                    'office_record_id' => $officeRecord->id,
+                    'image_path' => $imagePath, // Store the image path
                 ]);
             }
         }
@@ -103,30 +115,28 @@ class OfficeRecordController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Organizational office record added successfully.',
-            'data' => $OfficeRecord
+            'data' => $officeRecord
         ], 201);
     }
 
     public function update(Request $request, $id)
     {
-        // Validate the incoming request
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'string|max:20000',
-            'status' => 'required|integer',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:10024',
+            'privacy_setup_id' => 'nullable|integer',
+            'image_path.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048', // Image validation for each file
+            'document' => 'nullable|file|mimes:pdf,doc,docx|max:10024', // Document validation
         ]);
 
         // Find the existing organization office record
-        $OfficeRecord = OfficeRecord::findOrFail($id);
+        $officeRecord = OfficeRecord::findOrFail($id);
 
         // Handle the document upload if present
         if ($request->hasFile('document')) {
             // Delete the old document if it exists
-            if ($OfficeRecord->document) {
-                Storage::delete('public/' . $OfficeRecord->document);
+            if ($officeRecord->document) {
+                Storage::delete('public/' . $officeRecord->document);
             }
             $documentFile = $request->file('document');
             $documentPath = $documentFile->storeAs(
@@ -134,15 +144,18 @@ class OfficeRecordController extends Controller
                 Carbon::now()->format('YmdHis') . '_' . $documentFile->getClientOriginalName(),
                 'public'
             );
-            $OfficeRecord->document = $documentPath; // Update the document path
+            $officeRecord->document = $documentPath; // Update the document path
         }
 
+        $user_id = $request->user()->id;
+
         // Update organization office record fields
-        $OfficeRecord->user_id = $validatedData['user_id'];
-        $OfficeRecord->title = $validatedData['title'];
-        $OfficeRecord->description = $validatedData['description'];
-        $OfficeRecord->status = $validatedData['status'];
-        $OfficeRecord->save(); // Save the updated office record
+        $officeRecord->title = $validatedData['title'];
+        $officeRecord->description = $validatedData['description'];
+        //$officeRecord->privacy_setup_id = $validatedData['privacy_setup_id']; // Ensure you're saving the status as well
+        $officeRecord->document = $documentPath; // Store the document path if available
+        $officeRecord->user_id = $user_id; // Logged in user ID
+        $officeRecord->save(); // Save the updated office record
 
         // Handle multiple image uploads
         if ($request->hasFile('images')) {
@@ -162,8 +175,8 @@ class OfficeRecordController extends Controller
                 );
                 // Save each image path in the office_record_images table
                 OfficeRecordImage::create([
-                    'office_record_id' => $OfficeRecord->id,
-                    'image' => $imagePath, // Store the image path
+                    'office_record_id' => $officeRecord->id,
+                    'image_path' => $imagePath, // Store the image path
                 ]);
             }
         }
@@ -172,7 +185,7 @@ class OfficeRecordController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Organizational office record updated successfully.',
-            'data' => $OfficeRecord
+            'data' => $officeRecord
         ], 200);
     }
 
@@ -180,11 +193,11 @@ class OfficeRecordController extends Controller
     public function destroy($id)
     {
         try {
-            $OfficeRecord = OfficeRecord::findOrFail($id);
+            $officeRecord = OfficeRecord::findOrFail($id);
 
             // Delete the image and document if they exist
-            if ($OfficeRecord->document) {
-                Storage::delete('public/' . $OfficeRecord->document);
+            if ($officeRecord->document) {
+                Storage::delete('public/' . $officeRecord->document);
             }
 
             // Delete old images
@@ -194,7 +207,7 @@ class OfficeRecordController extends Controller
                 $singleImage->delete();
             }
 
-            $OfficeRecord->delete();
+            $officeRecord->delete();
 
             return response()->json([
                 'status' => true,

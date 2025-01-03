@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('title', 255);
             $table->string('description', 255)->nullable();
             $table->string('document', 255)->nullable();
-            $table->tinyInteger(column: 'is_active')->default(0)->comment('1 = Active, 0 = Inactive');
+            $table->tinyInteger(column: 'is_active')->default(1)->comment('1 = Active, 0 = Inactive');
 
             //Foreign key referencing the privacy setups table (privacy settings)
             $table->foreignId('privacy_setup_id')

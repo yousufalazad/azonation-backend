@@ -5,19 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OfficeRecord extends Model
+class History extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'title',
-        'description',
-        'document',
-        'privacy_setup_id',
-        'is_active'
+        'history',
+        'status',
+        'image',
+        'document'
     ];
-    public function images()
+
+    // If you have a relationship to the user model
+    public function user()
     {
-        return $this->hasMany(OfficeRecordImage::class, 'office_record_id');
+        return $this->belongsTo(User::class);
     }
 }

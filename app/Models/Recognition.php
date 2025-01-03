@@ -5,19 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OfficeRecord extends Model
+class Recognition extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'title',
         'description',
-        'document',
+        'recognition_date',
         'privacy_setup_id',
-        'is_active'
+        'status',
     ];
-    public function images()
-    {
-        return $this->hasMany(OfficeRecordImage::class, 'office_record_id');
-    }
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
 }
