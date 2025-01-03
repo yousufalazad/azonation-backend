@@ -19,7 +19,12 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->comment('Image path relational table record.');
 
-            $table->string('image', 255);
+            $table->string('image_path')->comment('The storage path or URL of the profile image');
+            $table->string('file_name')->nullable()->comment('The original file name of the uploaded image');
+            $table->string('mime_type')->nullable()->comment('The MIME type of the image file, e.g., image/jpeg or image/png');
+            $table->integer('file_size')->nullable()->comment('The size of the image file in kilobytes (KB)');
+            $table->boolean('is_public')->default(true)->comment('Whether the profile image is publicly visible or not');
+            $table->boolean('is_active')->default(true); // Status for active/inactive
 
             $table->timestamps();
         });
