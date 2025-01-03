@@ -28,6 +28,7 @@ use App\Http\Controllers\PhoneNumberController;
 
 //Event Controller
 use App\Http\Controllers\Org\OrgEventController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventAttendanceController;
 use App\Http\Controllers\EventSummaryController;
 use App\Http\Controllers\EventGuestAttendanceController;
@@ -36,7 +37,8 @@ use App\Http\Controllers\EventGuestAttendanceController;
 //Project
 use App\Http\Controllers\ProjectAttendanceController;
 use App\Http\Controllers\ProjectSummaryController;
-use App\Http\Controllers\Org\OrgProjectController;
+//use App\Http\Controllers\Org\OrgProjectController;
+use App\Http\Controllers\Org\ProjectController;
 use App\Http\Controllers\ProjectGuestAttendanceController;
 
 
@@ -52,6 +54,7 @@ use App\Http\Controllers\OrgHistoryController;
 use App\Http\Controllers\YearPlanController;
 use App\Http\Controllers\OrgRecognitionController;
 use App\Http\Controllers\OrgAccountController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AccountFundController;
 use App\Http\Controllers\OrgReportController;
 use App\Http\Controllers\AssetController;
@@ -59,7 +62,9 @@ use App\Http\Controllers\PrivacySetupController;
 use App\Http\Controllers\AssetLifecycleStatusController;
 
 //Org office record
-use App\Http\Controllers\OrgOfficeRecordController;
+//use App\Http\Controllers\OrgOfficeRecordController;
+use App\Http\Controllers\OfficeRecordController;
+
 
 // Billing
 use App\Http\Controllers\PackageController;
@@ -125,10 +130,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ------------------- Organisation----------------------------------------------------------------
     // Accounts
-    Route::get('/get-transactions', [OrgAccountController::class, 'getTransactions']);
-    Route::post('/create-transaction', [OrgAccountController::class, 'createTransaction']);
-    Route::put('/update-transaction/{id}', [OrgAccountController::class, 'updateTransaction']);
-    Route::delete('/delete-transaction/{id}', [OrgAccountController::class, 'deleteTransaction']);
+    Route::get('/get-transactions', [AccountController::class, 'getTransactions']);
+    Route::post('/create-transaction', [AccountController::class, 'createTransaction']);
+    Route::put('/update-transaction/{id}', [AccountController::class, 'updateTransaction']);
+    Route::delete('/delete-transaction/{id}', [AccountController::class, 'deleteTransaction']);
 
     // Funds
     Route::get('/get-funds', [AccountFundController::class, 'index']);
@@ -192,11 +197,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
 
     //Office record
-    Route::get('/get-office-records', [OrgOfficeRecordController::class, 'index']);
-    Route::get('/get-office-record/{recordId}', [OrgOfficeRecordController::class, 'getOfficeRecord']);
-    Route::post('/create-office-record', [OrgOfficeRecordController::class, 'store']);
-    Route::put('/update-office-record/{id}', action: [OrgOfficeRecordController::class, 'update']);
-    Route::delete('/delete-office-record/{id}', [OrgOfficeRecordController::class, 'destroy']);
+    Route::get('/get-office-records', [OfficeRecordController::class, 'index']);
+    Route::get('/get-office-record/{recordId}', [OfficeRecordController::class, 'getOfficeRecord']);
+    Route::post('/create-office-record', [OfficeRecordController::class, 'store']);
+    Route::put('/update-office-record/{id}', action: [OfficeRecordController::class, 'update']);
+    Route::delete('/delete-office-record/{id}', [OfficeRecordController::class, 'destroy']);
 
     //API for org membership
     Route::post('/search_individual', [OrgMemberController::class, 'search']);
@@ -276,11 +281,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/delete-meeting-guest-attendance/{id}', [MeetingGuestAttendanceController::class, 'destroy']);
 
     //Event  
-    Route::get('/get-events/{userId}', [OrgEventController::class, 'index']);
-    Route::get('/get-event/{eventId}', [OrgEventController::class, 'getEvent']);
-    Route::post('/create-event', [OrgEventController::class, 'createEvent']);
-    Route::put('/update-event/{eventId}', [OrgEventController::class, 'updateEvent']);
-    Route::delete('/delete-event/{eventId}', [OrgEventController::class, 'deleteEvent']);
+    Route::get('/get-events/{userId}', [EventController::class, 'index']);
+    Route::get('/get-event/{eventId}', [EventController::class, 'getEvent']);
+    Route::post('/create-event', [EventController::class, 'createEvent']);
+    Route::put('/update-event/{eventId}', [EventController::class, 'updateEvent']);
+    Route::delete('/delete-event/{eventId}', [EventController::class, 'deleteEvent']);
 
     // Event Attendance
     Route::get('/get-org-user-list', [EventAttendanceController::class, 'getOrgUse']);
@@ -306,11 +311,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     //Project
-    Route::get('org-project-list/{userId}', [OrgProjectController::class, 'index']);
-    Route::get('/get-project/{projectId}', [OrgProjectController::class, 'show']);
-    Route::post('create-project', [OrgProjectController::class, 'store']);
-    Route::put('update-project/{userId}', [OrgProjectController::class, 'update']);
-    Route::delete('/delete-project/{id}', [OrgProjectController::class, 'destroy']);
+    Route::get('org-project-list/{userId}', [ProjectController::class, 'index']);
+    Route::get('/get-project/{projectId}', [ProjectController::class, 'show']);
+    Route::post('create-project', [ProjectController::class, 'store']);
+    Route::put('update-project/{userId}', [ProjectController::class, 'update']);
+    Route::delete('/delete-project/{id}', [ProjectController::class, 'destroy']);
 
     //ProjectAttendance
     Route::get('/get-org-user-list', [ProjectAttendanceController::class, 'getOrgUse']);
