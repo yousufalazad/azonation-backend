@@ -9,6 +9,7 @@ use App\Models\OfficeRecordDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class OfficeRecordController extends Controller
@@ -19,7 +20,7 @@ class OfficeRecordController extends Controller
     {
         try {
             // Fetch all office records with associated images
-            $officeRecords = OfficeRecord::with('images')->get();
+            $officeRecords = OfficeRecord::with(['images', 'documents'])->get();
 
             return response()->json([
                 'status' => true,
@@ -35,19 +36,36 @@ class OfficeRecordController extends Controller
         }
     }
 
-    public function getOfficeRecord($recordId)
+    public function show($recordId)
     {
-        // Find the meeting by ID
-        $record = OfficeRecord::find($recordId);
+        // Find the record by ID with related images and documents
+        $record = OfficeRecord::with(['images', 'documents'])->find($recordId);
 
-        // Check if meeting exists
+        // Check if the record exists
         if (!$record) {
-            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+            return response()->json(['status' => false, 'message' => 'Record not found'], 404);
         }
 
-        // Return the meeting data
+        // Map over the images to include their full URLs
+        $record->images = $record->images->map(function ($image) {
+            $image->image_url = $image->image_path
+                ? url(Storage::url($image->image_path))
+                : null;
+            return $image;
+        });
+
+        // Map over the documents to include their full URLs
+        $record->documents = $record->documents->map(function ($document) {
+            $document->document_url = $document->file_path
+                ? url(Storage::url($document->file_path))
+                : null;
+            return $document;
+        });
+
+        // Return the record data with transformed images and documents
         return response()->json(['status' => true, 'data' => $record], 200);
     }
+
 
     // Store a new organizational history record
     public function store(Request $request)
@@ -57,137 +75,183 @@ class OfficeRecordController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'string|max:20000',
             'privacy_setup_id' => 'nullable|integer',
-            'image_path.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048', // Image validation for each file
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:10024', // Document validation
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation for each file
+            'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Document validation
         ]);
 
         $user_id = $request->user()->id;
 
-        // Handle the document upload if present
-        $documentPath = null;
-        if ($request->hasFile('document')) {
-            $documentFile = $request->file(key: 'document');
-            $documentPath = $documentFile->storeAs(
-                'org/doc/office-record',
-                Carbon::now()->format(format: 'YmdHis') . '_' . $documentFile->getClientOriginalName(),
-                'public'
-            );
-        }
+        // Start transaction
+        DB::beginTransaction();
 
-        // Create the new organization office record
-        $officeRecord = new OfficeRecord();
-        $officeRecord->title = $validatedData['title'];
-        $officeRecord->description = $validatedData['description'];
-        $officeRecord->privacy_setup_id = $validatedData['privacy_setup_id']; // Ensure you're saving the status as well
-        $officeRecord->document = $documentPath; // Store the document path if available
-        $officeRecord->user_id = $user_id; // Logged in user ID
-        $officeRecord->save(); // Save the office record
+        try {
+            // Create the new organization office record
+            $officeRecord = new OfficeRecord();
+            $officeRecord->title = $validatedData['title'];
+            $officeRecord->description = $validatedData['description'];
+            $officeRecord->privacy_setup_id = $validatedData['privacy_setup_id']; // Ensure you're saving the privacy setup
+            $officeRecord->user_id = $user_id; // Logged in user ID
+            $officeRecord->save();
 
-        $officeRecordDocument = new OfficeRecordDocument();
-        $officeRecordDocument->office_record_id = $officeRecord->id;
-        $officeRecordDocument->file_path = $documentPath; // Store the document path in the office_record_documents table
-        $officeRecordDocument->file_name = $documentFile->getClientOriginalName(); // Store the document name
-        $officeRecordDocument->mime_type = $documentFile->getClientMimeType(); // Store the MIME type of the document
-        $officeRecordDocument->file_size = $documentFile->getSize(); // Store the size of the document
-        $officeRecordDocument->is_public = true; // Set the document as public
-        $officeRecordDocument->is_active = true; // Set the document as active
-        $officeRecordDocument->save(); // Save the document related to the office record
+            // Handle document uploads
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $document) {
+                    $documentPath = $document->storeAs(
+                        'org/doc/office-record',
+                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+                        'public'
+                    );
 
-        // Handle multiple image uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                // Store the image and get its path
-                $imagePath = $image->storeAs(
-                    'org/image/office-record',
-                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                    'public'
-                );
-
-                // Save each image path in the office_record_images table
-                OfficeRecordImage::create([
-                    'office_record_id' => $officeRecord->id,
-                    'image_path' => $imagePath, // Store the image path
-                ]);
+                    OfficeRecordDocument::create([
+                        'office_record_id' => $officeRecord->id,
+                        'file_path' => $documentPath, // Store the document path
+                        'file_name' => $document->getClientOriginalName(), // Store the document name
+                        'mime_type' => $document->getClientMimeType(), // Store the MIME type
+                        'file_size' => $document->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
             }
-        }
 
-        // Return a JSON response indicating success
-        return response()->json([
-            'status' => true,
-            'message' => 'Organizational office record added successfully.',
-            'data' => $officeRecord
-        ], 201);
+            // Handle multiple image uploads
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->storeAs(
+                        'org/image/office-record',
+                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                        'public'
+                    );
+
+                    OfficeRecordImage::create([
+                        'office_record_id' => $officeRecord->id,
+                        'image_path' => $imagePath, // Store the document path
+                        'file_name' => $image->getClientOriginalName(), // Store the document name
+                        'mime_type' => $image->getClientMimeType(), // Store the MIME type
+                        'file_size' => $image->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
+            }
+
+            // Commit transaction
+            DB::commit();
+
+            // Return a JSON response indicating success
+            return response()->json([
+                'status' => true,
+                'message' => 'Organizational office record added successfully.',
+                'data' => $officeRecord
+            ], 201);
+        } catch (\Exception $e) {
+            // Rollback transaction in case of error
+            DB::rollBack();
+
+            // Return an error response
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.'
+            ], 500);
+        }
     }
+
 
     public function update(Request $request, $id)
     {
+
+        // dd($request->all());exit;
+        // Validate the incoming request
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'string|max:20000',
             'privacy_setup_id' => 'nullable|integer',
-            'image_path.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048', // Image validation for each file
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:10024', // Document validation
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation for each file
+            'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Document validation
         ]);
-
-        // Find the existing organization office record
-        $officeRecord = OfficeRecord::findOrFail($id);
-
-        // Handle the document upload if present
-        if ($request->hasFile('document')) {
-            // Delete the old document if it exists
-            if ($officeRecord->document) {
-                Storage::delete('public/' . $officeRecord->document);
-            }
-            $documentFile = $request->file('document');
-            $documentPath = $documentFile->storeAs(
-                'org/doc/office-record',
-                Carbon::now()->format('YmdHis') . '_' . $documentFile->getClientOriginalName(),
-                'public'
-            );
-            $officeRecord->document = $documentPath; // Update the document path
-        }
 
         $user_id = $request->user()->id;
 
-        // Update organization office record fields
-        $officeRecord->title = $validatedData['title'];
-        $officeRecord->description = $validatedData['description'];
-        //$officeRecord->privacy_setup_id = $validatedData['privacy_setup_id']; // Ensure you're saving the status as well
-        $officeRecord->document = $documentPath; // Store the document path if available
-        $officeRecord->user_id = $user_id; // Logged in user ID
-        $officeRecord->save(); // Save the updated office record
+        // Start transaction
+        DB::beginTransaction();
 
-        // Handle multiple image uploads
-        if ($request->hasFile('images')) {
-            // Delete old images
-            $oldImages = OfficeRecordImage::where('office_record_id', $id)->get();
-            foreach ($oldImages as $oldImage) {
-                Storage::delete('public/' . $oldImage->image);
-                $oldImage->delete();
+        try {
+            // Find the organization office record to update
+            $officeRecord = OfficeRecord::findOrFail($id);
+            $officeRecord->title = $validatedData['title'];
+            $officeRecord->description = $validatedData['description'];
+            $officeRecord->privacy_setup_id = $validatedData['privacy_setup_id']; // Ensure you're saving the privacy setup
+            $officeRecord->user_id = $user_id; // Logged in user ID
+            $officeRecord->save();
+
+            // Delete existing documents and images before adding new ones
+            // OfficeRecordDocument::where('office_record_id', $officeRecord->id)->delete();
+            // OfficeRecordImage::where('office_record_id', $officeRecord->id)->delete();
+
+            // Handle document uploads
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $document) {
+                    $documentPath = $document->storeAs(
+                        'org/doc/office-record',
+                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+                        'public'
+                    );
+
+                    OfficeRecordDocument::create([
+                        'office_record_id' => $officeRecord->id,
+                        'file_path' => $documentPath, // Store the document path
+                        'file_name' => $document->getClientOriginalName(), // Store the document name
+                        'mime_type' => $document->getClientMimeType(), // Store the MIME type
+                        'file_size' => $document->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
             }
-            // Upload and save new images
-            foreach ($request->file('images') as $image) {
-                // Store the image and get its path
-                $imagePath = $image->storeAs(
-                    'org/image/office-record',
-                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                    options: 'public'
-                );
-                // Save each image path in the office_record_images table
-                OfficeRecordImage::create([
-                    'office_record_id' => $officeRecord->id,
-                    'image_path' => $imagePath, // Store the image path
-                ]);
+
+            // Handle multiple image uploads
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->storeAs(
+                        'org/image/office-record',
+                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                        'public'
+                    );
+
+                    OfficeRecordImage::create([
+                        'office_record_id' => $officeRecord->id,
+                        'image_path' => $imagePath, // Store the document path
+                        'file_name' => $image->getClientOriginalName(), // Store the document name
+                        'mime_type' => $image->getClientMimeType(), // Store the MIME type
+                        'file_size' => $image->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
             }
+
+            // Commit transaction
+            DB::commit();
+
+            // Return a JSON response indicating success
+            return response()->json([
+                'status' => true,
+                'message' => 'Organizational office record updated successfully.',
+                'data' => $officeRecord
+            ], 200);
+        } catch (\Exception $e) {
+            // Rollback transaction in case of error
+            DB::rollBack();
+
+            // Return an error response
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.'
+            ], 500);
         }
-
-        // Return a JSON response indicating success
-        return response()->json([
-            'status' => true,
-            'message' => 'Organizational office record updated successfully.',
-            'data' => $officeRecord
-        ], 200);
     }
+
+
 
     // Delete an organizational history record
     public function destroy($id)
@@ -199,11 +263,17 @@ class OfficeRecordController extends Controller
             if ($officeRecord->document) {
                 Storage::delete('public/' . $officeRecord->document);
             }
+            // Delete old images
+            $allDocuments = OfficeRecordDocument::where('office_record_id', $id)->get();
+            foreach ($allDocuments as $singleDocument) {
+                Storage::delete('public/' . $singleDocument->file_path);
+                $singleDocument->delete();
+            }
 
             // Delete old images
             $allImages = OfficeRecordImage::where('office_record_id', $id)->get();
             foreach ($allImages as $singleImage) {
-                Storage::delete('public/' . $singleImage->image);
+                Storage::delete('public/' . $singleImage->image_path);
                 $singleImage->delete();
             }
 

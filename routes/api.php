@@ -198,12 +198,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
     Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
 
-    //Office record
-    Route::get('/get-office-records', [OfficeRecordController::class, 'index']);
-    Route::get('/get-office-record/{recordId}', [OfficeRecordController::class, 'getOfficeRecord']);
-    Route::post('/create-office-record', [OfficeRecordController::class, 'store']);
-    Route::put('/update-office-record/{id}', action: [OfficeRecordController::class, 'update']);
-    Route::delete('/delete-office-record/{id}', [OfficeRecordController::class, 'destroy']);
+     //Office record
+     Route::get('/get-office-records', [OfficeRecordController::class, 'index']);
+     Route::get('/get-office-record/{recordId}', [OfficeRecordController::class, 'show']);
+     Route::post('/create-office-record', [OfficeRecordController::class, 'store']);
+     Route::put('/update-office-record/{id}', action: [OfficeRecordController::class, 'update']);
+     Route::delete('/delete-office-record/{id}', [OfficeRecordController::class, 'destroy']);
 
     //API for org membership
     Route::post('/search_individual', [OrgMemberController::class, 'search']);

@@ -9,13 +9,15 @@ class OfficeRecord extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id',
         'title',
         'description',
-        'document',
-        'privacy_setup_id',
-        'is_active'
+        // 'document',
+        'privacy_setup_id'
     ];
+    public function documents()
+    {
+        return $this->hasMany(OfficeRecordDocument::class, 'office_record_id');
+    }
     public function images()
     {
         return $this->hasMany(OfficeRecordImage::class, 'office_record_id');

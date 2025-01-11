@@ -19,11 +19,13 @@ class OfficeRecordImage extends Model
         'is_active'
     ];
 
-    /**
-     * Get the office record that owns the image.
-     */
-    public function officeRecord()
-    {
-        return $this->belongsTo(OfficeRecord::class, 'office_record_id');
-    }
+    protected $hidden=[
+        'created_at',
+        'updated_at'
+    ];
+
+    // public function officeRecordImages()
+    // {
+    //     return $this->belongsTo(OfficeRecord::class, 'office_record_id');
+    // }
 }

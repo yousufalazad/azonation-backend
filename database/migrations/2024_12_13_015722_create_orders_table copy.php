@@ -18,28 +18,17 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->comment('Foreign key: The user who placed the order');
             
-            $table->string('order_number')->unique()->comment('Unique order identifier');
             $table->string('user_name')->nullable()->comment('Name of the customer placing the order');
-
-            // Amount of the order
-            $table->decimal('sub_total', 10, 2)->comment('Total amount for the order');
+            $table->string('order_number')->unique()->comment('Unique order identifier');
+            $table->decimal('total_amount', 10, 2)->comment('Total amount for the order');
             $table->decimal('discount_amount', 10, 2)->nullable()->comment('Discount applied to the order, if any');
             $table->decimal('shipping_cost', 10, 2)->nullable()->comment('Cost of shipping');
             $table->decimal('total_tax', 10, 2)->nullable()->comment('Total tax applied to the order');
-            
-            $table->string('discount_title', 50)->nullable()->comment('Title or description of the discount');
-            $table->string('shipping_address')->comment('Shipping address for the order');
-            $table->enum('shipping_status', ['pending', 'shipped', 'delivered'])->default('pending')->comment('Status of shipping');
-
-            $table->decimal('tax_rate', 10, 2)->nullable()->comment('Total tax applied to the order');
             $table->string('currency', 3)->default('USD')->comment('Currency code for the order amount');
-            
+            $table->enum('shipping_status', ['pending', 'shipped', 'delivered'])->default('pending')->comment('Status of shipping');
+            $table->string('shipping_address')->comment('Shipping address for the order');
             $table->string('billing_address')->comment('Billing address for the order');
             $table->string('coupon_code')->nullable()->comment('Coupon code used for the order, if applicable');
-            $table->string('payment_method', length: 20)->comment('Payment method for the invoice, e.g., PayPal, Cash on Delivery');
-
-            $table->decimal('credit_applied', 10, 2)->default(0)->comment('Credit amount applied from the user’s balance');
-            $table->decimal('balance', 10, 2)->default(0)->comment('Final amount due after discounts, credit and taxes');
             
             $table->enum('shipping_method', ['Standard Shipping', 'Express Shipping', 'Free Shipping'])->default('Standard Shipping')->nullable()->comment('Shipping method used for the order, e.g., Standard Shipping, Express Shipping');
             $table->text('shipping_note')->nullable()->comment('Additional details for the shipping');
