@@ -15,18 +15,21 @@ return new class extends Migration
         Schema::create('founders', function (Blueprint $table) {
             $table->id(); // Primary key
 
-            // Foreign key referencing the users table (organization founder)
+            // Foreign key referencing the users table (for organization)
             $table->foreignId('user_id')
                 ->constrained('users')
-                ->onDelete('cascade'); // Cascade on delete to remove associated founders
+                ->onDelete('cascade') // Cascade on delete to remove associated founders
+                ->comment('Organisation ID'); 
 
-                $table->foreignId('founder_user_id')
+            $table->foreignId('founder_user_id')
                 ->constrained('users')
-                ->onDelete('cascade'); 
+                ->onDelete('cascade') // Cascade on delete to remove associated founders 
+                ->nullable() // Allow null values
+                ->comment('Individual ID'); 
 
             // Founder details
-            $table->string('name')->nullable(); // Optional name of the founder
-            $table->string('designation')->nullable(); // Optional designation of the founder
+            $table->string('name'); // name of the founder
+            $table->string('designation')->nullable(); // designation of the founder
 
             $table->timestamps(); // Created at and updated at timestamps
         });
