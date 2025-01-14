@@ -22,7 +22,7 @@ return new class extends Migration
                 ->comment('Reference to the order for the invoice');
 
 
-            // Foreign key linking to the 'users' table
+            // Foreign key linking to the 'users' table 
             $table->foreignId('user_id')
                 ->nullable()
                 ->constrained('users')
@@ -43,7 +43,7 @@ return new class extends Migration
 
             $table->string('discount_title', 50)->nullable()->comment('Title or description of the discount');
             $table->decimal('tax_rate', 10, 2)->nullable()->comment('Total tax applied to the order');
-            $table->string('currency', 3)->default('USD')->comment('Currency code for the order amount');
+            $table->string('currency', 3)->comment('Currency code for the order amount');
             $table->string('coupon_code')->nullable()->comment('Coupon code used for the order, if applicable');
             $table->string('payment_method', length: 20)->comment('Payment method for the invoice, e.g., PayPal, Cash on Delivery');
 

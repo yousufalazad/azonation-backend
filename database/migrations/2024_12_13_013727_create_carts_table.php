@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete()
+                ->comment('Foreign key: The user who placed the order');
+            
+            $table->boolean('is_anonymous')->default(false)->comment('Whether the cart is anonymous or not');
+            $table->decimal('total_price', 10, 2)->comment('Total price for the order');
+            $table->boolean('is_active')->default(true)->comment('Whether the cart is active or inactive');
             $table->timestamps();
         });
     }

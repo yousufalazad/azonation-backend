@@ -27,6 +27,11 @@ return new class extends Migration
             // Static user details for reference
             $table->string('user_name', length: 255)->nullable()->comment('User name snapshot for billing reference');
 
+            $table->foreignId('product_id')
+                ->constrained('products')
+                ->cascadeOnDelete()
+                ->comment('Foreign key: relations to products table');
+
             // Service and billing month details
             $table->string('service_month', 20)->nullable()->comment('Month in which the service was consumed');
             $table->string('billing_month', 20)->nullable()->comment('Month in which the bill is generated');
@@ -34,32 +39,32 @@ return new class extends Migration
             $table->smallInteger('service_year')->nullable()->comment('Year for billing reference');
             $table->smallInteger('billing_year')->nullable()->comment('Year for billing reference');
 
-            // Billing item details
-            $table->string('item_name', 255)->nullable()->comment('Name or description of the billed item or service');
+            // // Billing item details
+            // $table->string('item_name', 255)->nullable()->comment('Name or description of the billed item or service');
 
             // Brief description and billing address
-            $table->string('description', 255)->nullable()->comment('Optional detailed description of the bill.');
-            $table->string('billing_address', 255)->nullable()->comment('User billing address snapshot for reference');
-            
+            //$table->string('description', 155)->nullable()->comment('Optional detailed description of the bill.');
+
             // Billing period
             $table->date('period_start')->nullable()->comment('Billing period start date');
             $table->date('period_end')->nullable()->comment('Billing period end date');
 
             // Member count data from active_member_counts table
-            $table->integer('total_active_member')->nullable()->comment('Daily total active members within billing period');
-            $table->integer('total_active_honorary_member')->nullable()->comment('Daily total active honorary members within billing period');
-            $table->integer('total_billable_active_member')->nullable()->comment('Total billable active members within billing period');
+            $table->integer('total_member')->nullable()->comment('Daily total active members within billing period');
+            $table->integer('total_honorary_member')->nullable()->comment('Daily total active honorary members within billing period');
+            $table->integer('total_billable_honorary_member')->nullable()->comment('Total billable active members within billing period');
 
             // Billing rate and calculation
             $table->string('subscribed_package_name', length: 15)->nullable()->comment('Subscribed package name on service month');
             $table->decimal('price_rate', 10, 2)->nullable()->comment('Daily rate per active member');
-            $table->string('currency_code', length: 3)->nullable()->comment('Currency on service month');
-            $table->decimal('bill_amount', 10, 2)->nullable()->comment('Total bill amount based on rate, members, and days');
+            $table->string('currency', length: 3)->nullable()->comment('Currency on service month');
+            $table->decimal('sub_total', 10, 2)->nullable()->comment('Total bill amount based on rate, members, and days');
+
 
             // Billing status and administrative note
-            $table->enum('status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
-            ->nullable()    
-            ->default('issued')
+            $table->enum('bill_status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
+                ->nullable()
+                ->default('issued')
                 ->comment('Billing status: issued, unissued, pending, cancelled, or draft');
 
             $table->string('admin_notes', 255)->nullable()->comment('Administrative notes for reference');
