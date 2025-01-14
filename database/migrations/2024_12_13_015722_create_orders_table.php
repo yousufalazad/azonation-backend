@@ -28,10 +28,10 @@ return new class extends Migration
             $table->decimal('total_tax', 10, 2)->nullable()->comment('Total tax applied to the order');
             $table->decimal('credit_applied', 10, 2)->default(0)->comment('Credit amount applied from the user’s balance');
             $table->decimal('total_amount', 10, 2)->comment('Final amount due after discounts, credit and taxes');            
-            
+             
             $table->string('discount_title', 50)->nullable()->comment('Title or description of the discount');
             $table->decimal('tax_rate', 10, 2)->nullable()->comment('Total tax applied to the order');
-            $table->string('currency', 3)->default('USD')->comment('Currency code for the order amount');
+            $table->string('currency', 3)->comment('Currency code for the order amount');
             $table->string('coupon_code')->nullable()->comment('Coupon code used for the order, if applicable');
             $table->string('payment_method', length: 20)->comment('Payment method for the invoice, e.g., PayPal, Cash on Delivery');
 
@@ -42,12 +42,12 @@ return new class extends Migration
             $table->text('shipping_note')->nullable()->comment('Additional details for the shipping');
             $table->text('customer_note')->nullable()->comment('Additional notes or instructions for the order');
             $table->string('admin_note')->nullable()->comment('Admin notes or instructions for the order from Azonation team');
-            
+             
             $table->string('tracking_number')->nullable()->comment('Tracking number for the order, if applicable');
             $table->timestamp('order_date')->nullable()->comment('Date and time when the order was placed');
             $table->timestamp('delivery_date_expected')->nullable()->comment('Date and time for expected delivery');
             $table->timestamp('delivery_date_actual')->nullable()->comment('Date and time for actual delivery');
-            $table->enum('status', ['pending', 'processing', 'completed', 'cancelled', 'refunded', 'confirmed'])->default('pending')->comment('Order status');
+            $table->enum('order_status', ['pending', 'processing', 'completed', 'cancelled', 'refunded', 'confirmed'])->default('pending')->comment('Order status');
             
             $table->timestamp('cancelled_at')->nullable()->comment('Date and time when the order was cancelled');
             $table->string('cancellation_reason')->nullable()->comment('Cancellation reason');
