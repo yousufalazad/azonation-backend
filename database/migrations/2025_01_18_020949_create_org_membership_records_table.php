@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('org_members', function (Blueprint $table) {
+        Schema::create('org_membership_records', function (Blueprint $table) {
             $table->id();
-            
             // Foreign key to the users table representing the organization
             $table->foreignId('org_type_user_id')
                   ->constrained('users')
@@ -26,18 +25,23 @@ return new class extends Migration
                   ->onDelete('cascade')
                   ->comment('Foreign key to the users table representing the individual');
 
-            $table->string('org_own_membership_id')->nullable()->comment('Existing organization membership identifier');
+            $table->string('existing_org_membership_id')->nullable()->comment('Existing organization membership identifier');
 
             // Foreign key to the membership_types table
             $table->foreignId('membership_type_id')
-                  ->nullable()
                   ->constrained('membership_types')
                   ->onDelete('set null')
                   ->comment('Foreign key to the membership_types table');
 
             $table->date('membership_start_date')->nullable()->comment('Date when the individual joined the organization');
-            //$table->date('membership_end_date')->nullable()->comment('Date when the individual left the organization');
+            $table->date('membership_end_date')->nullable()->comment('Date when the individual left the organization');
             
+            // Foreign key to the membership_impact_reasons table
+            $table->foreignId('membership_impact_reason_id')
+                  ->constrained('membership_impact_reasons')
+                  ->onDelete('set null')
+                  ->comment('Foreign key to the membership_impact_reasons table');
+
             // Foreign key to the users table representing the individual
             $table->foreignId('sponsored_user_id')
                   ->constrained('users')
@@ -55,6 +59,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('org_members');
+        Schema::dropIfExists('org_membership_records');
     }
 };
