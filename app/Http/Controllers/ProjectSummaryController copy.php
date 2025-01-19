@@ -3,9 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProjectSummary;
-use App\Models\ProjectSummaryFile;
-use App\Models\ProjectSummaryImage;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -37,7 +34,6 @@ class ProjectSummaryController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());exit;
         // Validation
         $validator = Validator::make($request->all(), [
             'org_project_id' => 'required|integer',
@@ -47,6 +43,7 @@ class ProjectSummaryController extends Controller
             'total_beneficial_person' => 'required|integer',
             'total_communities_impacted' => 'required|integer',
             'total_expense' => 'required',
+
             'summary' => 'nullable|string',
             'highlights' => 'nullable|string',
             'feedback' => 'nullable|string',
@@ -72,26 +69,26 @@ class ProjectSummaryController extends Controller
 
         try {
             // Handle image attachment upload
-            $imageAttachmentPath = null;
-            if ($request->hasFile('image_attachment')) {
-                $image = $request->file('image_attachment');
-                $imageAttachmentPath = $image->storeAs(
-                    'project/images',
-                    now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                    'public'
-                );
-            }
+            // $imageAttachmentPath = null;
+            // if ($request->hasFile('image_attachment')) {
+            //     $image = $request->file('image_attachment');
+            //     $imageAttachmentPath = $image->storeAs(
+            //         'project/images',
+            //         now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+            //         'public'
+            //     );
+            // }
 
-            // Handle file attachment upload
-            $fileAttachmentPath = null;
-            if ($request->hasFile('file_attachment')) {
-                $file = $request->file('file_attachment');
-                $fileAttachmentPath = $file->storeAs(
-                    'project/files',
-                    now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
-                    'public'
-                );
-            }
+            // // Handle file attachment upload
+            // $fileAttachmentPath = null;
+            // if ($request->hasFile('file_attachment')) {
+            //     $file = $request->file('file_attachment');
+            //     $fileAttachmentPath = $file->storeAs(
+            //         'project/files',
+            //         now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
+            //         'public'
+            //     );
+            // }
 
             // Create new ProjectSummary record
             $projectSummary = new ProjectSummary();
@@ -108,8 +105,8 @@ class ProjectSummaryController extends Controller
             $projectSummary->suggestions = $request->suggestions;
             $projectSummary->financial_overview = $request->financial_overview;
             $projectSummary->total_expense = $request->total_expense;
-            $projectSummary->image_attachment = $imageAttachmentPath;
-            $projectSummary->file_attachment = $fileAttachmentPath;
+            // $projectSummary->image_attachment = $imageAttachmentPath;
+            // $projectSummary->file_attachment = $fileAttachmentPath;
             $projectSummary->next_steps = $request->next_steps;
             $projectSummary->outcomes = $request->outcomes;
             $projectSummary->privacy_setup_id = $request->privacy_setup_id;
@@ -119,48 +116,6 @@ class ProjectSummaryController extends Controller
 
             // Save the record
             $projectSummary->save();
-
-             //Handle document uploads
-             if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/doc/project-summary',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-
-                    ProjectSummaryFile::create([
-                        'project_summary_id' => $projectSummary->id,
-                        'file_path' => $documentPath, // Store the document path
-                        'file_name' => $document->getClientOriginalName(), // Store the document name
-                        'mime_type' => $document->getClientMimeType(), // Store the MIME type
-                        'file_size' => $document->getSize(), // Store the size of the document
-                        'is_public' => true, // Set the document as public
-                        'is_active' => true, // Set the document as active
-                    ]);
-                }
-            }
-
-            // // Handle multiple image uploads
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/image/project-summary',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-
-                    ProjectSummaryImage::create([
-                        'project_summary_id' => $projectSummary->id,
-                        'file_path' => $imagePath, // Store the document path
-                        'file_name' => $image->getClientOriginalName(), // Store the document name
-                        'mime_type' => $image->getClientMimeType(), // Store the MIME type
-                        'file_size' => $image->getSize(), // Store the size of the document
-                        'is_public' => true, // Set the document as public
-                        'is_active' => true, // Set the document as active
-                    ]);
-                }
-            }
 
             // Return success response
             return response()->json([
@@ -305,47 +260,6 @@ class ProjectSummaryController extends Controller
             // Save the record
             $projectSummary->save();
 
-            // Handle document uploads
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/doc/project-summary',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-
-                    ProjectSummaryFile::create([
-                        'project_summary_id' => $projectSummary->id,
-                        'file_path' => $documentPath, // Store the document path
-                        'file_name' => $document->getClientOriginalName(), // Store the document name
-                        'mime_type' => $document->getClientMimeType(), // Store the MIME type
-                        'file_size' => $document->getSize(), // Store the size of the document
-                        'is_public' => true, // Set the document as public
-                        'is_active' => true, // Set the document as active
-                    ]);
-                }
-            }
-
-            // // Handle multiple image uploads
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/image/project-summary',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-
-                    ProjectSummaryImage::create([
-                        'project_summary_id' => $projectSummary->id,
-                        'file_path' => $imagePath, // Store the document path
-                        'file_name' => $image->getClientOriginalName(), // Store the document name
-                        'mime_type' => $image->getClientMimeType(), // Store the MIME type
-                        'file_size' => $image->getSize(), // Store the size of the document
-                        'is_public' => true, // Set the document as public
-                        'is_active' => true, // Set the document as active
-                    ]);
-                }
-            }
 
             // Return success response
             return response()->json([

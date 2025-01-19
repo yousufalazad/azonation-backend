@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class MeetingMinuteImage extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'meeting_minute_id',
+        'file_path',
+        'file_name',
+        'mime_type',
+        'file_size',
+        'is_public',
+        'is_active',
+    ];
 }
