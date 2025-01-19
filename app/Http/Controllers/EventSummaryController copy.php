@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\EventSummary;
-use App\Models\EventSummaryFile;
-use App\Models\EventSummaryImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -23,51 +21,14 @@ class EventSummaryController extends Controller
         return response()->json(['status' => true, 'data' => $eventSummaries], 200);
     }
 
-     /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        $eventSummary =  EventSummary::select('event_summaries.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
-            ->leftJoin('privacy_setups', 'event_summaries.privacy_setup_id', '=', 'privacy_setups.id')
-            ->with(['images', 'documents'])
-            ->where('event_summaries.id', $id)->first();
-
-        // Check if meeting exists
-        if (!$eventSummary) {
-            return response()->json(['status' => false, 'message' => 'Event Summary not found'], 404);
-        }
-
-        // Map over the images to include their full URLs
-        $eventSummary->images = $eventSummary->images->map(function ($image) {
-            $image->image_url = $image->file_path
-                ? url(Storage::url($image->file_path))
-                : null;
-            return $image;
-        });
-
-        // Map over the documents to include their full URLs
-        $eventSummary->documents = $eventSummary->documents->map(function ($document) {
-            $document->document_url = $document->file_path
-                ? url(Storage::url($document->file_path))
-                : null;
-            return $document;
-        });
-
-
-        // Return the meeting data
-        return response()->json(['status' => true, 'data' => $eventSummary], 200);
-    }
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        dd($request->all());exit;
         // Validation
         $validator = Validator::make($request->all(), [
-            'event_id' => 'required|integer',
+            'org_event_id' => 'required|integer',
             'total_member_attendance' => 'required|integer',
             'total_guest_attendance' => 'required|integer',
             'summary' => 'nullable|string',
@@ -118,7 +79,7 @@ class EventSummaryController extends Controller
 
             // Create new EventSummary record
             $eventSummary = new EventSummary();
-            $eventSummary->event_id = $request->event_id;
+            $eventSummary->org_event_id = $request->org_event_id;
             $eventSummary->total_member_attendance = $request->total_member_attendance;
             $eventSummary->total_guest_attendance = $request->total_guest_attendance;
             $eventSummary->summary = $request->summary;
@@ -139,47 +100,6 @@ class EventSummaryController extends Controller
             // Save the record
             $eventSummary->save();
 
-             // Handle document uploads
-             if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/doc/meeting-minute',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-
-                    EventSummaryFile::create([
-                        'event_summary_id' => $eventSummary->id,
-                        'file_path' => $documentPath, // Store the document path
-                        'file_name' => $document->getClientOriginalName(), // Store the document name
-                        'mime_type' => $document->getClientMimeType(), // Store the MIME type
-                        'file_size' => $document->getSize(), // Store the size of the document
-                        'is_public' => true, // Set the document as public
-                        'is_active' => true, // Set the document as active
-                    ]);
-                }
-            }
-
-            // // Handle multiple image uploads
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/image/meeting-minute',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-
-                    EventSummaryImage::create([
-                        'event_summary_id' => $eventSummary->id,
-                        'file_path' => $imagePath, // Store the document path
-                        'file_name' => $image->getClientOriginalName(), // Store the document name
-                        'mime_type' => $image->getClientMimeType(), // Store the MIME type
-                        'file_size' => $image->getSize(), // Store the size of the document
-                        'is_public' => true, // Set the document as public
-                        'is_active' => true, // Set the document as active
-                    ]);
-                }
-            }
             // Return success response
             return response()->json([
                 'status' => true,
@@ -199,13 +119,31 @@ class EventSummaryController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        $eventSummary =  EventSummary::select('event_summaries.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
+            ->leftJoin('privacy_setups', 'event_summaries.privacy_setup_id', '=', 'privacy_setups.id')
+            ->where('event_summaries.id', $id)->first();
+
+        // Check if meeting exists
+        if (!$eventSummary) {
+            return response()->json(['status' => false, 'message' => 'Event Summary not found'], 404);
+        }
+
+        // Return the meeting data
+        return response()->json(['status' => true, 'data' => $eventSummary], 200);
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
     {
         // Validation
         $validator = Validator::make($request->all(), [
-            'event_id' => 'required|integer',
+            'org_event_id' => 'required|integer',
             'total_member_attendance' => 'required|integer',
             'total_guest_attendance' => 'required|integer',
             'summary' => 'nullable|string',
@@ -215,8 +153,8 @@ class EventSummaryController extends Controller
             'suggestions' => 'nullable|string',
             'financial_overview' => 'nullable|string',
             'total_expense' => 'required|numeric',
-            // 'image_attachment' => 'nullable|file|mimes:jpg,jpeg,png',
-            // 'file_attachment' => 'nullable|file|mimes:pdf,doc,docx',
+            'image_attachment' => 'nullable|file|mimes:jpg,jpeg,png',
+            'file_attachment' => 'nullable|file|mimes:pdf,doc,docx',
             'next_steps' => 'nullable|string',
             'privacy_setup_id' => 'required|integer',
             'is_active' => 'boolean',
@@ -258,7 +196,7 @@ class EventSummaryController extends Controller
             }
 
             // Update the EventSummary record
-            $eventSummary->event_id = $request->event_id;
+            $eventSummary->org_event_id = $request->org_event_id;
             $eventSummary->total_member_attendance = $request->total_member_attendance;
             $eventSummary->total_guest_attendance = $request->total_guest_attendance;
             $eventSummary->summary = $request->summary;
@@ -278,48 +216,6 @@ class EventSummaryController extends Controller
 
             // Save the updated record
             $eventSummary->save();
-
-            // Handle document uploads
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/doc/meeting-minute',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-
-                    EventSummaryFile::create([
-                        'event_summary_id' => $eventSummary->id,
-                        'file_path' => $documentPath, // Store the document path
-                        'file_name' => $document->getClientOriginalName(), // Store the document name
-                        'mime_type' => $document->getClientMimeType(), // Store the MIME type
-                        'file_size' => $document->getSize(), // Store the size of the document
-                        'is_public' => true, // Set the document as public
-                        'is_active' => true, // Set the document as active
-                    ]);
-                }
-            }
-
-            // Handle multiple image uploads
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/image/meeting-minute',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-
-                    EventSummaryImage::create([
-                        'event_summary_id' => $eventSummary->id,
-                        'file_path' => $imagePath, // Store the document path
-                        'file_name' => $image->getClientOriginalName(), // Store the document name
-                        'mime_type' => $image->getClientMimeType(), // Store the MIME type
-                        'file_size' => $image->getSize(), // Store the size of the document
-                        'is_public' => true, // Set the document as public
-                        'is_active' => true, // Set the document as active
-                    ]);
-                }
-            }
 
             // Return success response
             return response()->json([
