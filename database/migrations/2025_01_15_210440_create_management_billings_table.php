@@ -44,12 +44,12 @@ return new class extends Migration
 
             // Member count data from everyday_member_count_and_billings table
             $table->integer('total_member')->nullable()->comment('Daily total member * total days from the period/month');
-            
-            // Billing rate and calculation
-             $table->string('currency', length: 3)->nullable()->comment('Currency on service month');
-            $table->decimal('total_amount', 10, 2)->nullable()->comment('Total bill amount based on rate * total_member');
 
- 
+            // Billing rate and calculation
+            $table->string('currency', length: 3)->comment('Currency on service month');
+            
+            $table->decimal('total_amount', 10, 2)->comment('Total bill amount based on rate * total_member');
+
             // Billing status and administrative note
             $table->enum('bill_status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
                 ->nullable()

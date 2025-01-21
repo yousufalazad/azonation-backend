@@ -32,7 +32,7 @@ return new class extends Migration
             $table->string('user_name', length: 100)->nullable()->comment('User name snapshot for billing reference');
 
             // Financial fields
-            $table->decimal('sub_total', 10, 2)->comment('Total amount for the order');
+            $table->decimal('sub_total', 10, 2)->comment('Total amount for the order or bill');
             $table->decimal('discount_amount', 10, 2)->default(0)->nullable()->comment('Discount applied to the order, if any');
             $table->decimal('shipping_cost', 10, 2)->nullable()->comment('Cost of shipping');
             $table->decimal('total_tax', 10, 2)->nullable()->comment('Total tax applied to the order');
