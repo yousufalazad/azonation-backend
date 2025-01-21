@@ -18,10 +18,10 @@ return new class extends Migration
                 ->onDelete('cascade'); // Cascade on delete to remove associated recognitions
 
             $table->date('date')->unique()->comment('Date of the record');
-            $table->integer('total_member')->default(0)->comment('Day total member count');
-            $table->string('currency')->comment('Currency associated with the total bill');
-            $table->integer('day_total_bill')->default(0)->comment('total_member * price_rate');
-            $table->decimal('price_rate', 10, 2)->nullable()->comment('Daily rate per active member');
+            $table->integer('day_total_member')->comment('Day total member count');
+            $table->decimal('price_rate', 10, 2)->nullable()->comment('Daily rate per member');
+            $table->integer('day_total_bill')->comment('day_total_member * price_rate');
+            $table->boolean('is_active')->default(true)->comment('Indicates if the day bill is active');
            
             $table->timestamps();
         });
