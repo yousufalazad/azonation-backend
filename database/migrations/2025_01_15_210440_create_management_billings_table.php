@@ -42,13 +42,9 @@ return new class extends Migration
             $table->date('period_start')->nullable()->comment('Billing period start date');
             $table->date('period_end')->nullable()->comment('Billing period end date');
 
-            // Member count data from everyday_member_count_and_billings table
-            $table->integer('total_member')->nullable()->comment('Daily total member * total days from the period/month');
-
-            // Billing rate and calculation
-            $table->string('currency', length: 3)->comment('Currency on service month');
-            
+            $table->integer('total_member')->comment('Daily total member * total days from the period/month');
             $table->decimal('total_amount', 10, 2)->comment('Total bill amount based on rate * total_member');
+            $table->string('currency', length: 3)->comment('Currency on service month');            
 
             // Billing status and administrative note
             $table->enum('bill_status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])
