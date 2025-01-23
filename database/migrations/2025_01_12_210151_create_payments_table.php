@@ -48,6 +48,10 @@ return new class extends Migration
             $table->string('payment_gateway', 30)->nullable()
                 ->comment('The payment gateway used for the transaction, e.g., Stripe, PayPal.');
 
+                $table->string('gateway_response', 30)->nullable()
+                ->comment('The payment gateway response, e.g., Stripe, PayPal.');
+
+
             $table->enum('payment_status', ['initiated', 'completed', 'failed', 'pending', 'refunded'])
                 ->default('initiated')
                 ->comment('The status of the payment: initiated, completed, failed, pending, or refunded');
@@ -56,6 +60,15 @@ return new class extends Migration
                 ->comment('The currency of the payment (ISO 4217 code, e.g., USD, GBP).');
 
             $table->decimal('payment_fee', 10, 2)->nullable()->comment('The fee charged by the payment gateway for processing the transaction.');
+            $table->decimal('amount_paid', 10, 2)->comment('The total amount received');
+            $table->decimal('total_due', 10, 2)->comment('Remaining amount due');
+            $table->string('currency', 3)->comment('Currency code for the order amount');
+            
+            $table->enum('transaction_status', ['successful', 'Failed', 'pending', 'processing'])
+                ->default('pending')
+                ->comment('Current payment status of the transaction');
+
+            $table->timestamps('paid_at')->comment('Date and time when the payment was made.');
 
             $table->string('payment_reference_id')->nullable()
                 ->comment('Reference ID provided by the payment gateway for this transaction (e.g., PayPal payment ID).');
