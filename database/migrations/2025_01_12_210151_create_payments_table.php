@@ -68,8 +68,6 @@ return new class extends Migration
                 ->default('pending')
                 ->comment('Current payment status of the transaction');
 
-            $table->timestamps('paid_at')->comment('Date and time when the payment was made.');
-
             $table->string('payment_reference_id')->nullable()
                 ->comment('Reference ID provided by the payment gateway for this transaction (e.g., PayPal payment ID).');
 
@@ -81,6 +79,8 @@ return new class extends Migration
 
             $table->boolean('is_active')->default(true)
                 ->comment('Indicates whether the payment record is active or inactive (e.g., deactivated due to errors or disputes).');
+
+            $table->timestamps('paid_at');
 
             $table->timestamps(); // Created at and Updated at
         });
