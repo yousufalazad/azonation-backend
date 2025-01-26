@@ -82,7 +82,7 @@ return new class extends Migration
 
             $table->timestamps('paid_at');
 
-            $table->timestamps(); // Created at and Updated at
+            $table->timestamps();
         });
     }
 
