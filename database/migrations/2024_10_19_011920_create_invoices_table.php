@@ -38,7 +38,6 @@ return new class extends Migration
             $table->decimal('balance_due', 10, 2)->comment('The remaining amount still owed.');
 
             $table->string('currency', 3)->comment('Currency code for the order amount');
-            //$table->string('payment_method', length: 20)->comment('Payment method for the invoice, e.g., PayPal, Cash on Delivery');
 
             // Date columns
             $table->date('generate_date')->nullable()->comment('Date when the invoice was generated');
@@ -60,8 +59,6 @@ return new class extends Migration
                 ->default('unpaid')
                 ->comment('Current payment status of the invoice');
 
-            // Action reason and hidden note
-            //$table->string('payment_status_reason')->nullable()->comment('Reason for the current payment status');
             $table->string('admin_note')->nullable()->comment('Internal admin note for reference');
 
             // Timestamps
