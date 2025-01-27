@@ -31,6 +31,8 @@ return new class extends Migration
             $table->boolean('report')->default(true)->comment('Basic reporting enabled for all packages');
             $table->boolean('advanced_report')->default(false)->comment('Advanced reporting tools');
             $table->boolean('custom_report')->default(false)->comment('Custom reporting options');
+            $table->boolean('is_storage_grace_period_allow')->default(false)->comment('Enable grace period for storage limit');
+            $table->boolean('is_billing_grace_period_allow')->default(false)->comment('Enable over use of storage limit');
             
             // Support levels
             $table->boolean('support')->default(true)->comment('Basic email support');

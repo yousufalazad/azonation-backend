@@ -19,7 +19,6 @@ return new class extends Migration
 
             $table->date('date')->unique()->comment('Date of the record');
             $table->integer('day_total_member')->comment('Day total member count');
-            //$table->decimal('price_rate', 10, 2)->nullable()->comment('Daily rate per member');
             $table->integer('day_total_bill')->comment('day_total_member * price_rate');
             $table->boolean('is_active')->default(true)->comment('Indicates if the day bill is active');
            
