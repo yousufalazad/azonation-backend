@@ -30,7 +30,7 @@ return new class extends Migration
 
             $table->string('user_name', length: 100)->nullable()->comment('User name snapshot for billing reference');
 
-            //$table->string('description', length: 100)->nullable()->comment('Description for invoice reference');
+            $table->string('description', length: 100)->nullable()->comment('Description for invoice reference');
 
             // Financial fields
             $table->decimal('total_amount', 10, 2)->comment('Final amount due after discounts, credit and taxes and etc.');
@@ -43,6 +43,8 @@ return new class extends Migration
             $table->date('generate_date')->nullable()->comment('Date when the invoice was generated');
             $table->date('issue_date')->nullable()->comment('Date when the invoice was issued');
             $table->date('due_date')->nullable()->comment('Payment due date');
+
+            $table->string('terms', 100)->nullable()->comment('Payment terms for the invoice');
 
             // Additional fields
             $table->string('invoice_note', 255)->nullable()->comment('Notes for the invoice, like Non-refundable');

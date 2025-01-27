@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('storage_packages', function (Blueprint $table) {
             $table->id();
+            $table->string('name', 30)->comment('Name of the package (e.g., Starter, Essentials, Professional, Enterprise)');
+            $table->string('slug', 100)->unique()->comment('Unique slug for URL and identification purposes');
+            $table->string('description', 255)->nullable()->comment('Optional description of the package');
+            $table->integer('storage_max_limit')->default(1024)->comment('Storage limit in MB (default 1024MB)');
+            
+            // is_active column to indicate if the package is currently active or not
+            $table->boolean('is_active')->default(false)->comment('Indicates if the package is active or not');
+
             $table->timestamps();
         });
     }

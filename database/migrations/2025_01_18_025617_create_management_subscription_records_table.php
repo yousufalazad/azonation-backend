@@ -33,6 +33,8 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Stores the old management package name for future reference even if the package is deleted');
 
+            $table->decimal('old_management_price_rate', 10, 2)->nullable()->comment('Previous daily rate per active member');
+
             // Start and end dates of the old package
             $table->timestamp('old_management_package_start_date')
                 ->nullable()
@@ -54,9 +56,7 @@ return new class extends Migration
             ->nullable()
             ->comment('Stores the new management package name for future reference even if the package is deleted');
 
-            $table->decimal('old_price_rate', 10, 2)->nullable()->comment('Previous daily rate per active member');
-
-            $table->decimal('new_price_rate', 10, 2)->nullable()->comment('New daily rate per active member');
+            $table->decimal('new_management_price_rate', 10, 2)->nullable()->comment('New daily rate per active member');
             
             $table->string('currency')->comment('Currency associated with the packages');
 
