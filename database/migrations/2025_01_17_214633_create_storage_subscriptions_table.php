@@ -13,6 +13,32 @@ return new class extends Migration
     {
         Schema::create('storage_subscriptions', function (Blueprint $table) {
             $table->id();
+            // Foreign key to the 'users' table
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade')
+                ->unique() // Ensure that each user can only have one subscription
+                ->comment('Foreign key linking to the users table. Each user can only have one active subscription, cascades on delete');
+
+            // Foreign key to the 'storage_packages' table
+            $table->foreignId('storage_package_id')
+                ->constrained('storage_packages')
+                ->onDelete('restrict') // Prevent package deletion if referenced
+                ->comment('Foreign key linking to the storage_packages table, restrict on delete');
+
+            $table->timestamp('start_date')->comment('The date when the subscription started');
+            
+
+            $table->enum('subscription_status', ['active', 'hold', 'pending', 'cancelled', 'suspended', 'terminated'])
+                ->default('active')
+                ->comment('Subscription status: active, hold, pending, cancelled, suspended, terminated');
+
+            // Reason for the current subscription status
+            $table->string('reason_for_action')->nullable()->comment('Reason for the current subscription status (e.g., overdue payment, user request, etc.)');
+            
+            // Subscription status (active/inactive)
+            $table->boolean('is_active')->default(true)->comment('Indicates if the subscription is active (true) or inactive (false)');
+            
             $table->timestamps();
         });
     }

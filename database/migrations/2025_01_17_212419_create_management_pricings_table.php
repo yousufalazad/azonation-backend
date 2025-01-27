@@ -36,7 +36,7 @@ return new class extends Migration
                 ->comment('Optional note or description for this pricing record.');
 
             // Unique constraint to prevent duplicate region-package combinations
-            $table->unique(['region_id', 'package_id'], 'unique_region_package');
+            $table->unique(['region_id', 'management_package_id'], 'unique_region_management_package');
             $table->timestamps();
         });
     }
