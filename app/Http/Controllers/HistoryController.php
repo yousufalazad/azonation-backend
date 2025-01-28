@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\History;
+use App\Models\HistoryFile;
+use App\Models\HistoryImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class HistoryController extends Controller
@@ -28,42 +32,98 @@ class HistoryController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        $history = History::where('id', $id)
+            ->with(['images', 'documents'])
+            ->first();
+
+        // Check if meeting exists
+        if (!$history) {
+            return response()->json(['status' => false, 'message' => 'History not found'], 404);
+        }
+
+        // Map over the images to include their full URLs
+        $history->images = $history->images->map(function ($image) {
+            $image->image_url = $image->file_path
+                ? url(Storage::url($image->file_path))
+                : null;
+            return $image;
+        });
+
+        // Map over the documents to include their full URLs
+        $history->documents = $history->documents->map(function ($document) {
+            $document->document_url = $document->file_path
+                ? url(Storage::url($document->file_path))
+                : null;
+            return $document;
+        });
+
+        // Return the meeting data
+        return response()->json(['status' => true, 'data' => $history], 200);
+    }
+
+
     // Store a new organizational history record
     public function store(Request $request)
     {
         // Validate the incoming request
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'history' => 'required|string|max:20000',
             'status' => 'required|integer',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512', // Validating image file
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:1024', // Validating document file
         ]);
-
-        // Handle the image upload if present
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imageFile = $request->file('image');
-            $imagePath = $imageFile->storeAs('org/logos', Carbon::now()->format('YmdHis') . '_' . $imageFile->getClientOriginalName(), 'public');
-        }
-
-        // Handle the document upload if present
-        $documentPath = null;
-        if ($request->hasFile('document')) {
-            $documentFile = $request->file('document');
-            $documentPath = $documentFile->storeAs('org/docs', Carbon::now()->format('YmdHis') . '_' . $documentFile->getClientOriginalName(), 'public');
-        }
-
+        
         // Create the new organization history record
         $history = new History();
-        $history->user_id = $validatedData['user_id'];
+        $history->user_id = $request->user()->id;
         $history->title = $validatedData['title'];
         $history->history = $validatedData['history'];
         $history->status = $validatedData['status'];
-        $history->image = $imagePath; // Store the image path if available
-        $history->document = $documentPath; // Store the document path if available
         $history->save(); // Save the record in the database
+
+
+        // Handle document uploads
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $document) {
+                $documentPath = $document->storeAs(
+                    'org/doc/history',
+                    Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+                    'public'
+                );
+
+                HistoryFile::create([
+                    'history_id' => $history->id,
+                    'file_path' => $documentPath, // Store the document path
+                    'file_name' => $document->getClientOriginalName(), // Store the document name
+                    'mime_type' => $document->getClientMimeType(), // Store the MIME type
+                    'file_size' => $document->getSize(), // Store the size of the document
+                    'is_public' => true, // Set the document as public
+                    'is_active' => true, // Set the document as active
+                ]);
+            }
+        }
+
+        // Handle multiple image uploads
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath = $image->storeAs(
+                    'org/image/history',
+                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                    'public'
+                );
+
+                HistoryImage::create([
+                    'history_id' => $history->id,
+                    'file_path' => $imagePath, // Store the document path
+                    'file_name' => $image->getClientOriginalName(), // Store the document name
+                    'mime_type' => $image->getClientMimeType(), // Store the MIME type
+                    'file_size' => $image->getSize(), // Store the size of the document
+                    'is_public' => true, // Set the document as public
+                    'is_active' => true, // Set the document as active
+                ]);
+            }
+        }
 
         // Return a response, typically a JSON response for API-based applications
         return response()->json([
@@ -77,44 +137,63 @@ class HistoryController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'history' => 'required|string|max:20000',
             'status' => 'required|integer',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512', // Validating image file
-            'document' => 'nullable|file|mimes:pdf,doc,docx|max:1024', // Validating document file
         ]);
 
         try {
             $history = History::findOrFail($id);
 
-            // Handle the image upload if present
-            if ($request->hasFile('image')) {
-                // Delete the old image if present
-                if ($history->image) {
-                    Storage::delete('public/' . $history->image);
-                }
-                $imageFile = $request->file('image');
-                $history->image = $imageFile->storeAs('org/logos', Carbon::now()->format('YmdHis') . '_' . $imageFile->getClientOriginalName(), 'public');
-            }
-
-            // Handle the document upload if present
-            if ($request->hasFile('document')) {
-                // Delete the old document if present
-                if ($history->document) {
-                    Storage::delete('public/' . $history->document);
-                }
-                $documentFile = $request->file('document');
-                $history->document = $documentFile->storeAs('org/docs', Carbon::now()->format('YmdHis') . '_' . $documentFile->getClientOriginalName(), 'public');
-            }
 
             // Update other fields
             $history->update([
-                'user_id' => $validatedData['user_id'],
                 'title' => $validatedData['title'],
                 'history' => $validatedData['history'],
                 'status' => $validatedData['status'],
             ]);
+
+            // Handle document uploads
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $document) {
+                    $documentPath = $document->storeAs(
+                        'org/doc/history',
+                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+                        'public'
+                    );
+
+                    HistoryFile::create([
+                        'history_id' => $history->id,
+                        'file_path' => $documentPath, // Store the document path
+                        'file_name' => $document->getClientOriginalName(), // Store the document name
+                        'mime_type' => $document->getClientMimeType(), // Store the MIME type
+                        'file_size' => $document->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
+            }
+
+            // Handle multiple image uploads
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->storeAs(
+                        'org/image/history',
+                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                        'public'
+                    );
+
+                    HistoryImage::create([
+                        'history_id' => $history->id,
+                        'file_path' => $imagePath, // Store the document path
+                        'file_name' => $image->getClientOriginalName(), // Store the document name
+                        'mime_type' => $image->getClientMimeType(), // Store the MIME type
+                        'file_size' => $image->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
+            }
 
             return response()->json([
                 'status' => true,

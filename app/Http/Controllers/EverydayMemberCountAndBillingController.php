@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use Carbon\Carbon;
+use App\Models\ManagementPricing;
 
 
 class EverydayMemberCountAndBillingController extends Controller
@@ -28,17 +29,53 @@ class EverydayMemberCountAndBillingController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function getUserManagementDailyPriceRate($userId)
+    {
+        try {
+            // Fetch the user
+            $user = User::with(['userCountry.country.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
+
+            // Extract the region from the user's country
+            $region = $user->userCountry->country->region->region;
+
+            // Extract the user's subscribed package
+            $managementPackage = $user->managementSubscription->managementPackage;
+
+            // Fetch the price rate for the region and package
+            $managementPriceRate = ManagementPricing::where('region_id', $region->id)
+                ->where('management_package_id', $managementPackage->id)
+                ->value('price_rate');
+
+            if ($managementPriceRate) {
+                return response()->json([
+                    'daily_price_rate' => $managementPriceRate,
+                ]);
+            } else {
+                return response()->json([
+                    'error' => 'Price rate not found for the user\'s region and package',
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'An error occurred while fetching the daily price rate',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         try {
             $users = User::where('type', 'organisation')->get();
 
+            
+
             $singleUserData = $users->map(function ($user) {
                 $userId = $user->id;
                 $date = today();
+
+                $getUserManagementDailyPriceRateResponse = $this->getUserManagementDailyPriceRate($userId);
+                $getUserManagementDailyPriceRateData = $getUserManagementDailyPriceRateResponse->getData(true);
 
                 // Calculate active members from org_member_lists
                 $orgMembers = DB::table('org_members')
@@ -56,7 +93,8 @@ class EverydayMemberCountAndBillingController extends Controller
                 $totalMembers = $orgMembers + $independentMembers;
 
                 // Calculate the price rate per member
-                $managementDailyPriceRate = 0.03; // Your price rate per member
+                //$managementDailyPriceRate = 0.03; // Your price rate per member
+                $managementDailyPriceRate = $getUserManagementDailyPriceRateData; // Your price rate per member
 
                 // Calculate the total bill amount based on the members and price rate
                 $dayTotalBill = $totalMembers * $managementDailyPriceRate;
@@ -82,8 +120,6 @@ class EverydayMemberCountAndBillingController extends Controller
                 'status' => true,
                 'data' => $singleUserData,
             ]);
-
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,

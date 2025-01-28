@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use App\Models\StoragePricing;
 use Carbon\Carbon;
-
+ 
 
 class EverydayStorageBillingController extends Controller
 {
@@ -60,6 +61,44 @@ class EverydayStorageBillingController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
+     public function getUserStorageDailyPriceRate($userId)
+     {
+         // Get the user
+         $user = User::with(['country.region', 'storageSubscription.package'])->findOrFail($userId);
+     
+         // Check if the user has a valid subscription
+         $subscription = $user->subscription;
+         if (!$subscription) {
+             throw new \Exception("User does not have an active storage subscription.");
+         }
+     
+         // Get the region ID from the user's country
+         $region = $user->country->region;
+         if (!$region) {
+             throw new \Exception("Region not found for the user's country.");
+         }
+     
+         // Find the price rate for the user's subscription package in their region
+         $storagePriceRate = StoragePricing::where('region_id', $region->region_id)
+             ->where('storage_package_id', $subscription->storage_package_id)
+             ->value('price_rate');
+     
+        //  if (is_null($storagePriceRate)) {
+        //      throw new \Exception("Price rate not found for the user's package in their region.");
+        //  }
+
+         if ($storagePriceRate === null) {
+            throw new \Exception("Price rate not found for the user's package in their region.");
+        }
+     
+         return $storagePriceRate;
+
+        //  return response()->json([
+        //     'daily_price_rate' => $storagePriceRate,
+        // ]);
+     }
+
     public function store(Request $request)
     {
         try {
@@ -70,7 +109,8 @@ class EverydayStorageBillingController extends Controller
                 $date = today();
 
                 // Calculate the price rate per member
-                $storageDailyPriceRate = 0.03; // Your price rate per member
+                //$storageDailyPriceRate = 0.03; // Your price rate per member
+                $storageDailyPriceRate = $this->getUserStorageDailyPriceRate($userId);; // Your price rate per member
 
                 // Calculate the total bill amount based on the members and price rate
                 $dayTotalBill = 1 * $storageDailyPriceRate; // 1 for one day
@@ -95,7 +135,7 @@ class EverydayStorageBillingController extends Controller
                 'status' => true,
                 'data' => $singleUserData,
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,

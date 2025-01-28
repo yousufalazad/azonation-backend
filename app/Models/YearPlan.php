@@ -23,6 +23,11 @@ class YearPlan extends Model
         'status'
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     // Relationship to User
     public function user()
     {

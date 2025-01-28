@@ -131,11 +131,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // ------------------- Organisation----------------------------------------------------------------
-    // Accounts
-    Route::get('/get-transactions', [AccountController::class, 'getTransactions']);
-    Route::post('/create-transaction', [AccountController::class, 'createTransaction']);
-    Route::put('/update-transaction/{id}', [AccountController::class, 'updateTransaction']);
-    Route::delete('/delete-transaction/{id}', [AccountController::class, 'deleteTransaction']);
+     // Accounts
+     Route::get('/get-transactions', [AccountController::class, 'getTransactions']);
+     Route::post('/create-transaction', [AccountController::class, 'createTransaction']);
+     Route::put('/update-transaction/{id}', [AccountController::class, 'updateTransaction']);
+     Route::delete('/delete-transaction/{id}', [AccountController::class, 'deleteTransaction']);
 
     // Funds
     Route::get('/get-funds', [AccountFundController::class, 'index']);
@@ -145,7 +145,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // HistoryController
     Route::get('/get-org-histories', [HistoryController::class, 'index']);
-    Route::get('/get-org-history/{id}', [HistoryController::class, 'show']);
     Route::post('/create-org-history', [HistoryController::class, 'store']);
     Route::put('/update-org-history/{id}', [HistoryController::class, 'update']);
     Route::delete('/delete-org-history/{id}', [HistoryController::class, 'destroy']);
@@ -157,23 +156,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-year-plan/{id}', [YearPlanController::class, 'update']);
     Route::delete('/delete-year-plan/{id}', [YearPlanController::class, 'destroy']);
 
-    // Recognition
+    // RecognitionController
     Route::get('/get-recognitions', [RecognitionController::class, 'index']);
-    Route::get('/get-recognition/{id}', [RecognitionController::class, 'show']);
     Route::post('/create-recognition', [RecognitionController::class, 'store']);
     Route::put('/update-recognition/{id}', [RecognitionController::class, 'update']);
     Route::delete('/delete-recognition/{id}', [RecognitionController::class, 'destroy']);
 
     // StrategicPlan
     Route::get('/get-strategic-plans', [StrategicPlanController::class, 'index']);
-    Route::get('/get-strategic-plan/{id}', [StrategicPlanController::class, 'show']);
     Route::post('/create-strategic-plan', [StrategicPlanController::class, 'store']);
     Route::put('/update-strategic-plan/{id}', [StrategicPlanController::class, 'update']);
     Route::delete('/delete-strategic-plan/{id}', [StrategicPlanController::class, 'destroy']);
 
     // SuccessStoryController
     Route::get('/get-records', [SuccessStoryController::class, 'index']);
-    Route::get('/get-record/{id}', [SuccessStoryController::class, 'show']);
     Route::post('/create-record', [SuccessStoryController::class, 'store']);
     Route::put('/update-record/{id}', [SuccessStoryController::class, 'update']);
     Route::delete('/delete-record/{id}', [SuccessStoryController::class, 'destroy']);
@@ -202,12 +198,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
     Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
 
-    //Office record
-    Route::get('/get-office-records', [OfficeRecordController::class, 'index']);
-    Route::get('/get-office-record/{recordId}', [OfficeRecordController::class, 'show']);
-    Route::post('/create-office-record', [OfficeRecordController::class, 'store']);
-    Route::put('/update-office-record/{id}', action: [OfficeRecordController::class, 'update']);
-    Route::delete('/delete-office-record/{id}', [OfficeRecordController::class, 'destroy']);
+     //Office record
+     Route::get('/get-office-records', [OfficeRecordController::class, 'index']);
+     Route::get('/get-office-record/{recordId}', [OfficeRecordController::class, 'show']);
+     Route::post('/create-office-record', [OfficeRecordController::class, 'store']);
+     Route::put('/update-office-record/{id}', action: [OfficeRecordController::class, 'update']);
+     Route::delete('/delete-office-record/{id}', [OfficeRecordController::class, 'destroy']);
 
     //API for org membership
     Route::post('/search_individual', [OrgMemberController::class, 'search']);
@@ -216,12 +212,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/org-all-member-list', [OrgMemberController::class, 'getOrgAllMemberList']);
     Route::get('/total-org-member-count/{userId}', [OrgMemberController::class, 'totalOrgMemberCount']);
 
-    // OrgIndependentMemberController
-    Route::get('get-independent-members', [OrgIndependentMemberController::class, 'index']);
-    Route::get('get-independent-member/{id}', [OrgIndependentMemberController::class, 'show']);
-    Route::post('create-independent-member', [OrgIndependentMemberController::class, 'store']);
-    Route::put('update-independent-member/{id}', [OrgIndependentMemberController::class, 'update']);
-    Route::delete('delete-independent-member/{id}', [OrgIndependentMemberController::class, 'destroy']);
+     // OrgIndependentMemberController
+     Route::get('get-independent-members', [OrgIndependentMemberController::class, 'index']);
+     Route::get('get-independent-member/{id}', [OrgIndependentMemberController::class, 'show']);
+     Route::post('create-independent-member', [OrgIndependentMemberController::class, 'store']);
+     Route::put('update-independent-member/{id}', [OrgIndependentMemberController::class, 'update']);
+     Route::delete('delete-independent-member/{id}', [OrgIndependentMemberController::class, 'destroy']);
 
     //Org member count
     Route::post('/org-member-counts', [OrgMemberCountController::class, 'store']);

@@ -30,7 +30,8 @@ return new class extends Migration
             // Foreign key to the membership_types table
             $table->foreignId('membership_type_id')
                   ->constrained('membership_types')
-                  ->onDelete('set null')
+                  ->nullable()
+                  ->onDelete('cascade')
                   ->comment('Foreign key to the membership_types table');
 
             $table->date('membership_start_date')->nullable()->comment('Date when the individual joined the organization');
@@ -39,7 +40,8 @@ return new class extends Migration
             // Foreign key to the membership_impact_reasons table
             $table->foreignId('membership_impact_reason_id')
                   ->constrained('membership_impact_reasons')
-                  ->onDelete('set null')
+                  ->nullable()
+                  ->onDelete('cascade')
                   ->comment('Foreign key to the membership_impact_reasons table');
 
             // Foreign key to the users table representing the individual

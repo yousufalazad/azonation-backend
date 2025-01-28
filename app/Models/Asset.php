@@ -21,6 +21,10 @@ class Asset extends Model
         'privacy_setup_id',
         'is_active'
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 
     /**
      * Get the assignment logs associated with the asset.

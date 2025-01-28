@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class UserRegion extends Model
 {
     use HasFactory;
+
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 }

@@ -63,6 +63,7 @@ class FounderController extends Controller
             'founder_user_id' => 'nullable',
             'name' => 'string|max:50',
             'designation' => 'string|max:50',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:7168',
             ]);
 
         $founder = Founder::create([

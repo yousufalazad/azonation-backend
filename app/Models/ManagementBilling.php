@@ -12,22 +12,19 @@ class ManagementBilling extends Model
         //'management_billing_code',
         'user_id',
         'user_name',
-        'item_name',
-        
         'service_month',
-        'billing_month',
         'service_year',
+        'billing_month',
         'billing_year',
         'period_start',
         'period_end',
-
         'total_member',
         'total_management_bill_amount',
         'total_storage_bill_amount',
-        'currency',
+        'currency_code',
         'bill_status',
         'admin_note',
-        'is_active'
+        'is_active',
     ];
 
     protected $hidden = [

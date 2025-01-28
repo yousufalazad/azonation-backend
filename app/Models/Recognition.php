@@ -21,4 +21,13 @@ class Recognition extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function documents()
+    {
+        return $this->hasMany(RecognitionFile::class, 'recognition_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(RecognitionImage::class, 'recognition_id');
+    }
 }

@@ -18,6 +18,10 @@ class AssetAssignmentLog extends Model
         'note',
         'is_active'
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 
     /**
      * Get the asset associated with this assignment log.

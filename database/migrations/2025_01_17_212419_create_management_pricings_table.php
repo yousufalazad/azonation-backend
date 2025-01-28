@@ -34,6 +34,8 @@ return new class extends Migration
             $table->string('note', 100)
                 ->nullable()
                 ->comment('Optional note or description for this pricing record.');
+            
+            $table->boolean('is_active')->default(true)->comment('Indicates whether the management package is active or not');
 
             // Unique constraint to prevent duplicate region-package combinations
             $table->unique(['region_id', 'management_package_id'], 'unique_region_management_package');
