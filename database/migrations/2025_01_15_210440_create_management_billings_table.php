@@ -49,7 +49,7 @@ return new class extends Migration
             // Storage bill details
             $table->decimal('total_storage_bill_amount', 10, 2)->comment('Daily bill amount * total service days from the period/month');
 
-            $table->string('currency', length: 3)->comment('Currency on service month');            
+            $table->string('currency_code', length: 3)->comment('Currency on service month');            
 
             // Billing status and administrative note
             $table->enum('bill_status', ['issued', 'unissued', 'pending', 'cancelled', 'draft'])

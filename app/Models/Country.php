@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CountryRegion;
 
 class Country extends Model
 {
@@ -21,4 +22,9 @@ class Country extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function region()
+    {
+        return $this->hasOne(CountryRegion::class);
+    }
 }

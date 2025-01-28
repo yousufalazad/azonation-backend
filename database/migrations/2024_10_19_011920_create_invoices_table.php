@@ -37,7 +37,7 @@ return new class extends Migration
             $table->decimal('amount_paid', 10, 2)->default(0)->nullable()->comment('The total amount paid towards the invoice so far.');
             $table->decimal('balance_due', 10, 2)->comment('The remaining amount still owed.');
 
-            $table->string('currency', 3)->comment('Currency code for the order amount');
+            $table->string('currency_code', 3)->comment('Currency code for the order amount');
 
             // Date columns
             $table->date('generate_date')->nullable()->comment('Date when the invoice was generated');

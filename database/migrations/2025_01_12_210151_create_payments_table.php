@@ -62,7 +62,7 @@ return new class extends Migration
             $table->decimal('payment_fee', 10, 2)->nullable()->comment('The fee charged by the payment gateway for processing the transaction.');
             $table->decimal('amount_paid', 10, 2)->comment('The total amount received');
             $table->decimal('total_due', 10, 2)->comment('Remaining amount due');
-            $table->string('currency', 3)->comment('Currency code for the order amount');
+            $table->string('currency_code', 3)->comment('Currency code for the payment transaction');
             
             $table->enum('transaction_status', ['successful', 'Failed', 'pending', 'processing'])
                 ->default('pending')

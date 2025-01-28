@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use Carbon\Carbon;
+
 
 class EverydayMemberCountAndBillingController extends Controller
 {
@@ -72,10 +74,15 @@ class EverydayMemberCountAndBillingController extends Controller
                     ]
                 );
             });
+
             Log::info('Day total member count and day bill calculation successfully recorded.');
+
             return response()->json([
                 'message' => 'Day total member count and day bill calculation successfully recorded.',
+                'status' => true,
+                'data' => $singleUserData,
             ]);
+
 
         } catch (\Exception $e) {
             return response()->json([

@@ -31,7 +31,7 @@ return new class extends Migration
             
             $table->string('discount_title', 50)->nullable()->comment('Title or description of the discount');
             $table->decimal('tax_rate', 10, 2)->nullable()->comment('Total tax applied to the order');
-            $table->string('currency', 3)->comment('Currency code for the order amount');
+            $table->string('currency_code', 3)->comment('Currency code for the order amount');
             $table->string('coupon_code')->nullable()->comment('Coupon code used for the order, if applicable');
 
             //Billing information
