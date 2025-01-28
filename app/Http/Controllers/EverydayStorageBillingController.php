@@ -69,11 +69,10 @@ class EverydayStorageBillingController extends Controller
         ]);
 
         // Calculate the price rate per member
-        $storagePriceRate = 0.03; // Your price rate per member
-
+        $storageDailyPriceRate = 0.03; // Your price rate per member
 
         // Calculate the total bill amount based on the members and price rate
-        $dayTotalBill = 1 * $storagePriceRate; // 1 for one day
+        $dayTotalBill = 1 * $storageDailyPriceRate; // 1 for one day
 
         // Insert the count into org_member_counts
         DB::table('everyday_storage_billings')->updateOrInsert(

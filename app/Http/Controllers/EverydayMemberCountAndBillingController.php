@@ -6,6 +6,7 @@ use App\Models\EverydayMemberCountAndBilling;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class EverydayMemberCountAndBillingController extends Controller
 {
@@ -30,64 +31,58 @@ class EverydayMemberCountAndBillingController extends Controller
      */
     public function store(Request $request)
     {
-        $userId = $request->user()->id;
-        $date = today();
+        try {
+            $users = User::where('type', 'organisation')->get();
 
-        // Validate the request
-        $request->validate([
-            'user_id' => 'required|exists:users,id', // Ensure user_id exists in the users table
-            'date' => 'required|date', // Ensure date is valid
-        ]);
-    
-    
-        // Calculate active members from org_member_lists
-        $orgMembers = DB::table('org_members')
-            ->where('org_type_user_id', $userId)
-            ->where('is_active', true) // Only count active members
-            ->count();
+            $singleUserData = $users->map(function ($user) {
+                $userId = $user->id;
+                $date = today();
 
-            // ->where(function ($query) use ($date) {
-            //     $query->whereNull('membership_start_date')
-            //         ->orWhere('membership_start_date', '>=', $date); // Consider end_date only if it exists and is after or equal to the given date
-            // })
-    
-        // Calculate active members from org_independent_members
-        $independentMembers = DB::table('org_independent_members')
-            ->where('user_id', $userId)
-            ->where('is_active', true) // Only count active members
-            ->count();
-    
-        // Total active members
-        $totalMembers = $orgMembers + $independentMembers;
+                // Calculate active members from org_member_lists
+                $orgMembers = DB::table('org_members')
+                    ->where('org_type_user_id', $userId)
+                    ->where('is_active', true) // Only count active members
+                    ->count();
 
-        // Calculate the price rate per member
-        $managementPriceRate = 0.03; // Your price rate per member
+                // Calculate active members from org_independent_members
+                $independentMembers = DB::table('org_independent_members')
+                    ->where('user_id', $userId)
+                    ->where('is_active', true) // Only count active members
+                    ->count();
 
-        // Calculate the total bill amount based on the members and price rate
-        $dayTotalBill = $totalMembers * $managementPriceRate;
-    
-        // Insert the count into org_member_counts
-        DB::table('everyday_member_count_and_billings')->updateOrInsert(
-            [
-                'user_id' => $userId,
-                'date' => $date,
-            ],
-            [
-                'day_total_member' => $totalMembers,
-                'day_total_bill' => $dayTotalBill,
-                'is_active' => true,
-            ]
-        );
-    
-        return response()->json([
-            'message' => 'Day total member count and day bill calculation successfully recorded.',
-            'data' => [
-                'user_id' => $userId,
-                'date' => $date,
-                'day_total_member' => $totalMembers,
-                'day_total_bill' => $dayTotalBill,
-            ],
-        ]);
+                // Total active members
+                $totalMembers = $orgMembers + $independentMembers;
+
+                // Calculate the price rate per member
+                $managementDailyPriceRate = 0.03; // Your price rate per member
+
+                // Calculate the total bill amount based on the members and price rate
+                $dayTotalBill = $totalMembers * $managementDailyPriceRate;
+
+                // Insert the count into org_member_counts
+                DB::table('everyday_member_count_and_billings')->updateOrInsert(
+                    [
+                        'user_id' => $userId,
+                        'date' => $date,
+                    ],
+                    [
+                        'day_total_member' => $totalMembers,
+                        'day_total_bill' => $dayTotalBill,
+                        'is_active' => true,
+                    ]
+                );
+            });
+            Log::info('Day total member count and day bill calculation successfully recorded.');
+            return response()->json([
+                'message' => 'Day total member count and day bill calculation successfully recorded.',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
