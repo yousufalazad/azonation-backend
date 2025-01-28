@@ -26,16 +26,16 @@ return new class extends Migration
             // Static user details for reference
             $table->string('user_name', length: 255)->nullable()->comment('User name snapshot for billing reference');
 
-            $table->foreignId('product_id')
-                ->constrained('products')
-                ->cascadeOnDelete()
-                ->comment('Foreign key: relations to products table');
+            // $table->foreignId('product_id')
+            //     ->constrained('products')
+            //     ->cascadeOnDelete()
+            //     ->comment('Foreign key: relations to products table');
 
             // Service and billing month details
             $table->string('service_month', 20)->nullable()->comment('Month in which the service was consumed');
-            $table->string('billing_month', 20)->nullable()->comment('Month in which the bill is generated');
-
             $table->smallInteger('service_year')->nullable()->comment('Year for billing reference');
+
+            $table->string('billing_month', 20)->nullable()->comment('Month in which the bill is generated');
             $table->smallInteger('billing_year')->nullable()->comment('Year for billing reference');
 
             // Billing period
@@ -57,7 +57,7 @@ return new class extends Migration
                 ->default('issued')
                 ->comment('Billing status: issued, unissued, pending, cancelled, or draft');
 
-            $table->string('admin_notes', 255)->nullable()->comment('Administrative notes for reference');
+            $table->string('admin_note', 255)->nullable()->comment('Administrative notes for reference');
 
             // Active or inactive status flag
             $table->boolean('is_active')->nullable()->default(true)->comment('Indicates if the billing record is active');

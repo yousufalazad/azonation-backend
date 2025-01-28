@@ -9,28 +9,25 @@ class ManagementBilling extends Model
 {
     use HasFactory;
     protected $fillable = [
-        //'billing_code',
+        //'management_billing_code',
         'user_id',
         'user_name',
-        'description',
-        'billing_address',
         'item_name',
-        'period_start',
-        'period_end',
+        
         'service_month',
         'billing_month',
         'service_year',
         'billing_year',
-        'total_active_member',
-        'total_active_honorary_member',
-        'total_billable_active_member',
-        'subscribed_package_name',
-        'price_rate',
+        'period_start',
+        'period_end',
+
+        'total_member',
+        'total_management_bill_amount',
+        'total_storage_bill_amount',
         'currency',
-        'bill_amount',
-        'status',
-        'admin_notes',
-        'is_active',
+        'bill_status',
+        'admin_note',
+        'is_active'
     ];
 
     protected $hidden = [
