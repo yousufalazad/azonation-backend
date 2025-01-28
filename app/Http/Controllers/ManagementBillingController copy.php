@@ -121,28 +121,29 @@ class ManagementBillingController extends Controller
                 $endOfPreviousMonth = Carbon::now()->subMonth()->endOfMonth()->toDateString();
 
                 // Create a new management billing record
-                try {
-                    ManagementBilling::create([
-                        'user_id' => $userId,
-                        'user_name' => $userName,
-                        'service_month' => Carbon::now()->subMonth()->format('F'),
-                        'service_year' => Carbon::now()->subMonth()->format('Y'),
-                        'billing_month' => Carbon::now()->format('F'),
-                        'billing_year' => Carbon::now()->format('Y'),
-                        'period_start' => $startOfPreviousMonth,
-                        'period_end' => $endOfPreviousMonth,
-                        'total_member' => $billCalculationData['total_member'],
-                        'total_management_bill_amount' => $billCalculationData['total_management_bill_amount'],
-                        'total_storage_bill_amount' => $billCalculationData['total_storage_bill_amount'],
-                        'currency_code' => $userCurrencyData['currency_code'],
-                        'bill_status' => 'issued',
-                        'admin_note' => 'non-refundable',
-                        'is_active' => 1,
-                    ]);
-                    Log::info("Management billing created for user $userId");
-                } catch (\Exception $e) {
-                    Log::error("Error creating management billing for user $userId: " . $e->getMessage());
-                }
+                ManagementBilling::create([
+                    'user_id' =>  $userId,
+                    'user_name' => $userName,
+
+                    'service_month' => Carbon::now()->subMonth()->format('F'), // Previous month full name
+                    'service_year' => Carbon::now()->subMonth()->format('Y'), // Previous month's year
+
+                    'billing_month' => Carbon::now()->format('F'), // Current month full name
+                    'billing_year' => Carbon::now()->format('Y'), // Current month's year
+
+                    'period_start' => $startOfPreviousMonth,
+                    'period_end' => $endOfPreviousMonth,
+
+                    //foreign data
+                    'total_member' => $billCalculationData['total_member'],
+                    'total_management_bill_amount' => $billCalculationData['total_management_bill_amount'],
+                    'total_storage_bill_amount' => $billCalculationData['total_storage_bill_amount'],
+                    'currency_code' => $userCurrencyData['currency_code'],
+
+                    'bill_status' => 'issued',
+                    'admin_note' => 'non-refundable',
+                    'is_active' => 1,
+                ]);
             });
             return response()->json([
                 'status' => true,

@@ -23,6 +23,15 @@ class Account extends Model
         'updated_at'
     ];
 
+    public function documents()
+    {
+        return $this->hasMany(AccountTransactionFile::class, 'account_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(AccountTransactionImage::class, 'account_id');
+    }
+
     // Relationship to User
     public function user()
     {

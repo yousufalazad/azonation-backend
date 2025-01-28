@@ -18,14 +18,14 @@ return new class extends Migration
             $table->foreignId('user_id')
                 ->nullable()
                 ->constrained()
-                ->onDelete('set null')
+                ->onDelete('cascade')
                 ->comment('Foreign key linking to the users table, cascades on delete');
 
             // Foreign key to the 'packages' table for the old package
             $table->foreignId('old_storage_package_id')
                 ->nullable()
                 ->constrained('storage_packages')
-                ->onDelete('set null')
+                ->onDelete('cascade')
                 ->comment('The previous package before the change. Nullable if this is the first subscription');
 
             // Store the old package name as static data for future reference
@@ -48,7 +48,7 @@ return new class extends Migration
             $table->foreignId('new_storage_package_id')
                 ->nullable()
                 ->constrained('storage_packages')
-                ->onDelete('set null')
+                ->onDelete('cascade')
                 ->comment('The new package after the change, cascades on delete');
 
             // Store the new package name as static data for future reference

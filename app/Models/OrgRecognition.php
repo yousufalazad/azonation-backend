@@ -16,4 +16,9 @@ class OrgRecognition extends Model
         'privacy_setup_id',
         'status',
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 }

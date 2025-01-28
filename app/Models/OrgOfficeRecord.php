@@ -16,6 +16,11 @@ class OrgOfficeRecord extends Model
         'is_active'
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     /**
      * Get the images associated with this office record.
      */

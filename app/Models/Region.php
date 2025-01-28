@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ManagementPricing;
 
 class Region extends Model
 {
@@ -19,4 +20,10 @@ class Region extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function managementPricings()
+{
+    return $this->hasMany(ManagementPricing::class);
+}
+
 }

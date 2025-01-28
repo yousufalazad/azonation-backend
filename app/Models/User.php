@@ -8,10 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\UserCountry;
+use App\Models\ManagementSubscription;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;    
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'azon_id',
@@ -52,8 +53,23 @@ class User extends Authenticatable
     }
 
     public function userCountry()
-{
-    return $this->hasOne(UserCountry::class);
-}
+    {
+        return $this->hasOne(UserCountry::class);
+    }
 
+
+    public function managementSubscription()
+    {
+        return $this->hasOne(ManagementSubscription::class, 'user_id', 'id')->where('is_active', true);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(UserCountry::class, 'id', 'user_id')->where('is_active', true);
+    }
+
+    public function storageSubscription()
+    {
+        return $this->hasOne(StorageSubscription::class, 'user_id', 'id')->where('is_active', true);
+    }
 }

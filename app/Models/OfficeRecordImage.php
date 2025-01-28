@@ -19,6 +19,11 @@ class OfficeRecordImage extends Model
         'is_active'
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     /**
      * Get the office record that owns the image.
      */

@@ -17,10 +17,23 @@ class History extends Model
         'image',
         'document'
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 
     // If you have a relationship to the user model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(HistoryFile::class, 'history_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(HistoryImage::class, 'history_id');
     }
 }

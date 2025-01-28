@@ -23,8 +23,14 @@ class Country extends Model
         'updated_at'
     ];
 
+    // public function region()
+    // {
+    //     return $this->hasOne(CountryRegion::class);
+    // }
+
     public function region()
-    {
-        return $this->hasOne(CountryRegion::class);
-    }
+{
+    return $this->hasOne(CountryRegion::class, 'country_id', 'id')->with('region');
+}
+
 }

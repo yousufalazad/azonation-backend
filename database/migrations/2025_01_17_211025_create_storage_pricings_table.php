@@ -34,6 +34,8 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Optional note or description for this pricing record.');
 
+            $table->boolean('is_active')->default(true)->comment('Indicates whether the storage package is active or not');
+
             // Unique constraint to prevent duplicate region-package combinations
             $table->unique(['region_id', 'storage_package_id'], 'unique_region_storage_package');
             $table->timestamps();

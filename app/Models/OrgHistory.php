@@ -18,6 +18,11 @@ class OrgHistory extends Model
         'document'
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
     // If you have a relationship to the user model
     public function user()
     {
