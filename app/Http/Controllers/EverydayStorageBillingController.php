@@ -6,6 +6,9 @@ use App\Models\EverydayStorageBilling;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use Carbon\Carbon;
+
 
 class EverydayStorageBillingController extends Controller
 {
@@ -59,41 +62,46 @@ class EverydayStorageBillingController extends Controller
      */
     public function store(Request $request)
     {
-        $userId = $request->user()->id;
-        $date = today();
+        try {
+            $users = User::where('type', 'organisation')->get();
 
-        // Validate the request
-        $request->validate([
-            'user_id' => 'required|exists:users,id', // Ensure user_id exists in the users table
-            'date' => 'required|date', // Ensure date is valid
-        ]);
+            $singleUserData = $users->map(function ($user) {
+                $userId = $user->id;
+                $date = today();
 
-        // Calculate the price rate per member
-        $storageDailyPriceRate = 0.03; // Your price rate per member
+                // Calculate the price rate per member
+                $storageDailyPriceRate = 0.03; // Your price rate per member
 
-        // Calculate the total bill amount based on the members and price rate
-        $dayTotalBill = 1 * $storageDailyPriceRate; // 1 for one day
+                // Calculate the total bill amount based on the members and price rate
+                $dayTotalBill = 1 * $storageDailyPriceRate; // 1 for one day
 
-        // Insert the count into org_member_counts
-        DB::table('everyday_storage_billings')->updateOrInsert(
-            [
-                'user_id' => $userId,
-                'date' => $date,
-            ],
-            [
-                'day_bill_amount' => $dayTotalBill,
-                'is_active' => true,
-            ]
-        );
+                // Insert the count into org_member_counts
+                DB::table('everyday_storage_billings')->updateOrInsert(
+                    [
+                        'user_id' => $userId,
+                        'date' => $date,
+                    ],
+                    [
+                        'day_bill_amount' => $dayTotalBill,
+                        'is_active' => true,
+                    ]
+                );
+            });
 
-        return response()->json([
-            'message' => 'Day total storage bill calculation successfully recorded.',
-            'data' => [
-                'user_id' => $userId,
-                'date' => $date,
-                'day_bill_amount' => $dayTotalBill,
-            ],
-        ]);
+            Log::info('Day storage bill calculation successfully recorded.');
+
+            return response()->json([
+                'message' => 'Day storage bill calculation successfully recorded.',
+                'status' => true,
+                'data' => $singleUserData,
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

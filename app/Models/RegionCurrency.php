@@ -4,19 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Currency;
 
 class RegionCurrency extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'currency_id', 
+        'currency_id',
         'region_id',
         'is_active'
     ];
-    
-    protected $hidden=[
+
+    protected $hidden = [
         'created_at',
         'updated_at'
     ];
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
+    }
 }

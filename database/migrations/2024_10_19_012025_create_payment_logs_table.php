@@ -51,7 +51,7 @@ return new class extends Migration
                 ->comment('Payment method used for the transaction: card, bank transfer, cash, mobile payment, or cryptocurrency');
 
             // Currency used for the transaction
-            $table->string('currency', 3)->comment('Currency code for the transaction (e.g., USD, GBP).');
+            $table->string('currency_code', 3)->comment('Currency code for the transaction (e.g., USD, GBP).');
 
             // Total amount paid in the transaction
             $table->decimal('amount_paid', 15, 2)->comment('Total amount paid in the transaction currency.');

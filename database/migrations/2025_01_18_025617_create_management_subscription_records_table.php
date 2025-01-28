@@ -58,7 +58,7 @@ return new class extends Migration
 
             $table->decimal('new_management_price_rate', 10, 2)->nullable()->comment('New daily rate per active member');
             
-            $table->string('currency')->comment('Currency associated with the packages');
+            $table->string('currency_code')->comment('Currency associated with the packages');
 
             // Date when the package was changed
             $table->timestamp('change_date')->useCurrent()->comment('The date and time when the package was changed');
