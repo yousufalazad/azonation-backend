@@ -80,7 +80,12 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)
                 ->comment('Indicates whether the payment record is active or inactive (e.g., deactivated due to errors or disputes).');
 
-            $table->timestamps('paid_at');
+            $table->dateTimeTz('paid_at')->nullable()
+                ->comment('The date and time the payment was completed.');
+                
+                // Use Carbon's timestamp for paid_at column instead of date for better compatibility with different DBMS
+                
+            //$table->timestamps('paid_at');
 
             $table->timestamps();
         });

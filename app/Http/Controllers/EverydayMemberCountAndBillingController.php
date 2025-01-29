@@ -65,10 +65,11 @@ class EverydayMemberCountAndBillingController extends Controller
 
     public function store(Request $request)
     {
+        Log::info('Everyday Management bill generation started.');
         try {
             $users = User::where('type', 'organisation')->get();
 
-            
+            Log::info('Everyday Management bill generation started for ' . $users->count() . ' users.');
 
             $singleUserData = $users->map(function ($user) {
                 $userId = $user->id;
@@ -76,6 +77,7 @@ class EverydayMemberCountAndBillingController extends Controller
 
                 $getUserManagementDailyPriceRateResponse = $this->getUserManagementDailyPriceRate($userId);
                 $getUserManagementDailyPriceRateData = $getUserManagementDailyPriceRateResponse->getData(true);
+                Log::info('User management daily price rate fetched successfully.');
 
                 // Calculate active members from org_member_lists
                 $orgMembers = DB::table('org_members')
@@ -94,10 +96,12 @@ class EverydayMemberCountAndBillingController extends Controller
 
                 // Calculate the price rate per member
                 //$managementDailyPriceRate = 0.03; // Your price rate per member
-                $managementDailyPriceRate = $getUserManagementDailyPriceRateData; // Your price rate per member
+                $managementDailyPriceRate = $getUserManagementDailyPriceRateData['daily_price_rate']; // Your price rate per member
 
                 // Calculate the total bill amount based on the members and price rate
                 $dayTotalBill = $totalMembers * $managementDailyPriceRate;
+                
+                Log::info('Day total member count and day bill calculation successfully completed.');
 
                 // Insert the count into org_member_counts
                 DB::table('everyday_member_count_and_billings')->updateOrInsert(

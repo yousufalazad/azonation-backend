@@ -6,23 +6,19 @@ use Illuminate\Console\Command;
 use App\Http\Controllers\InvoiceController;
 use Illuminate\Console\Scheduling\Schedule;
 
-class GenerateInvoice extends Command
+class GenerateManagementAndStorageInvoice extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'generate:invoice';
-    protected $description = 'Generate invoice for all organizations';
+    
+    protected $signature = 'generate:management-and-storage-invoice';
+    protected $description = 'Generate management and Storage invoice for all organizations';
 
     
     public function handle()
     {
         $controller = new InvoiceController();
-        $controller->storeBySystem(request()); // Pass an empty request if no parameters needed
+        $controller->managementAndStorageInvoice(request()); // Pass an empty request if no parameters needed
 
-        $this->info('Invoice generated successfully by System.');
+        $this->info('Management and Storage invoice generated successfully by System.');
         return 0;
     }
 
