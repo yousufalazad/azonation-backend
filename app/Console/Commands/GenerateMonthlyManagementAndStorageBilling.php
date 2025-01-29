@@ -8,15 +8,15 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
 
 
-class GenerateManagementBilling extends Command
+class GenerateMonthlyManagementAndStorageBilling extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'generate:management-billing';
-    protected $description = 'Generated management bill for all organizations';
+    protected $signature = 'generate:management-and-storage-billing';
+    protected $description = 'Generated management and storage bill for all organizations';
 
     
     public function handle()

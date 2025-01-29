@@ -21,7 +21,7 @@ return new class extends Migration
 
             // Foreign key referencing the packages table
             $table->foreignId('storage_package_id')
-                ->constrained('storage_package')
+                ->constrained('storage_packages')
                 ->cascadeOnDelete()
                 ->comment('References the packages table; deletes related prices when the package is deleted.');
 
