@@ -3,38 +3,34 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\ManagementBillingController;
+use App\Http\Controllers\EverydayStorageBillingController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
 
 
-class GenerateMonthlyManagementAndStorageBilling extends Command
+class GenerateEverydayStorageBill extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'generate:management-and-storage-billing';
-    protected $description = 'Generated management and storage bill for all organizations';
+    
+    protected $signature = 'generate:everyday-storage-bill';
+    protected $description = 'Generated Everyday storage bill for all organizations';
 
     
     public function handle()
     {
-        $controller = new ManagementBillingController();
+        $controller = new EverydayStorageBillingController();
         $controller->store(request()); // Pass an empty request if no parameters needed
 
         // Log the command execution and the call to the store function
-        Log::info('Command executed and store function called');
+        Log::info('Command executed and store function called, Everyday storage bill');
 
-        $this->info('Management bill generated successfully by System.');
+        $this->info('Everyday storage bill generated successfully by System.');
         return 0;
     }
 
     public function schedule(Schedule $schedule): void
     {
         // $schedule->command(static::class)->daily();
-        $schedule->command('generate:management-billing')->daily()->runInBackground();
+        $schedule->command('generate:everyday-storage-billing')->daily()->runInBackground();
 
     }
     // You can adjust the frequency depending on your needs:

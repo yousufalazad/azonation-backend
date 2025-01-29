@@ -8,14 +8,10 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
 
 
-class GenerateEverydayManagementBilling extends Command
+class GenerateEverydayManagementBill extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'generate:everyday-management-billing';
+    
+    protected $signature = 'generate:everyday-management-bill';
     protected $description = 'Generated Everyday Management bill for all organizations';
 
     
