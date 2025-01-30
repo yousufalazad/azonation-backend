@@ -14,7 +14,7 @@ class GenerateManagementAndStorageBillingOrder extends Command
     public function handle()
     {
         $controller = new OrderController();
-        $controller->managementAndStorageBillingOrder(request()); // Pass an empty request if no parameters needed
+        $controller->generateOrdersFromBillings(request()); // Pass an empty request if no parameters needed
 
         $this->info('Management and storage billing order records generated successfully by System.');
         return 0;

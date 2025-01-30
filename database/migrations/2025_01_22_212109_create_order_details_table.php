@@ -27,7 +27,6 @@ return new class extends Migration
             $table->string('admin_note')->nullable()->comment('Admin notes or instructions for the order from Azonation team');
              
             $table->string('tracking_number')->nullable()->comment('Tracking number for the order, if applicable');
-            $table->timestamp('order_date')->nullable()->comment('Date and time when the order was placed');
             $table->timestamp('delivery_date_expected')->nullable()->comment('Date and time for expected delivery');
             $table->timestamp('delivery_date_actual')->nullable()->comment('Date and time for actual delivery');
             $table->enum('order_status', ['pending', 'processing', 'completed', 'cancelled', 'refunded', 'confirmed'])->default('pending')->comment('Order status');

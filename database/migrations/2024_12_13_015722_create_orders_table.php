@@ -18,7 +18,10 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->comment('Foreign key: The user who placed the order');
             
-            $table->string('order_number')->unique()->comment('Unique order identifier');
+            $table->string('order_code')->unique()->comment('Unique order identifier');
+            $table->timestamp('order_date')->nullable()->comment('Date and time when the order was placed');
+
+            // Customer information
             $table->string('user_name')->nullable()->comment('Name of the customer placing the order');
 
             // Amount of the order

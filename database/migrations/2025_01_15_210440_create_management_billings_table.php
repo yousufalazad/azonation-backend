@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('management_billings', function (Blueprint $table) {
             $table->id();
             // Unique billing identifier
-            $table->string('management_billing_code', 15)->nullable()->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-BILL.');
+            $table->string('management_billing_code', 15)->nullable()->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix B.');
 
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')

@@ -109,6 +109,8 @@ return new class extends Migration
         });
     }
 
+   
+
     //$table->json('image_gallery')->nullable()->comment('Gallery of additional product images in JSON format');
     //$table->json('video_links')->nullable()->comment('Product video links in JSON format');
     //$table->string('shipping_weight')->nullable()->comment('Shipping weight of the product');

@@ -6,6 +6,13 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Storage;
+use App\Models\ManagementBilling;
+use App\Models\OrderDetail;
+use App\Models\Product;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -22,24 +29,109 @@ class OrderController extends Controller
         }
     }
 
-    public function managementAndStorageBillingOrder()
+
+    public function generateOrdersFromBillings()
     {
+        try {
+            DB::transaction(function () {
 
-        
+                // Fetch all management billings
+                $billings = ManagementBilling::where('bill_status', 'issued')->get();
 
-        // Get all users with active storage subscriptions
-        // $users = User::with('storageSubscription')->whereHas('storageSubscription', function ($query) {
-        //     $query->where('is_active', true);
-        // })->get();
+                foreach ($billings as $billing) {
+                    $user = $billing->user_id;
+                    if (!$user) {
+                        continue; // Skip if user is not found
+                    }
 
-        // Process billing for each user
-        // foreach ($users as $user) {
-        //     $billingData = $this->getUserStorageDailyPriceRate($user->id);
-        //     $this->storeBillingRecord($billingData);
-        // }
+                    // Create an order
+                    $order = Order::create([
+                        'user_id'        => $billing->user_id,
+                        'order_date'     => now(),
+                        'user_name'      => $billing->user_name,
+                        'sub_total'      => $billing->total_management_bill_amount + $billing->total_storage_bill_amount,
+                        'discount_amount' => 0, // Default to no discount
+                        'shipping_cost'  => 0, // No shipping cost for service-based billing
+                        'total_tax'      => 0, // No tax applied initially
+                        'credit_applied' => 0, // No credit applied initially
+                        'total_amount'   => $billing->total_management_bill_amount + $billing->total_storage_bill_amount,
+                        'discount_title' => null,
+                        'tax_rate'       => null,
+                        'currency_code'  => $billing->currency_code,
+                        'coupon_code'    => null,
+                        'payment_method' => 'Bank Transfer',
+                        'billing_address' => 'User registered billing address',
+                        'user_country'   => $user->country ?? 'Unknown',
+                        'user_region'    => $user->region ?? 'Unknown',
+                        'is_active'      => true
+                    ]);
 
-        // return response()->json(['status' => true, 'message' => 'Billing records generated successfully.'], 200);
+                    if (!$order) {
+                        Log::error('Order creation failed for user: ' . $billing->user_id);
+                        continue;
+                    }
+
+                    // Retrieve related products for the billing
+                    $managementPortalSubscriptionProduct = Product::where('id', 1)->first();
+                    if ($managementPortalSubscriptionProduct && $managementPortalSubscriptionProduct->id == 1) {
+                        OrderItem::create([
+                            'order_id'          => $order->id,
+                            'product_id'        => $managementPortalSubscriptionProduct->id,
+                            'product_name'      => $managementPortalSubscriptionProduct->name,
+                            'product_attributes' => null,
+                            'unit_price'        => $billing->total_management_bill_amount,
+                            'quantity'          => 1,
+                            'total_price'       => $billing->total_management_bill_amount * 1,
+                            'discount_amount'   => 0,
+                            'note'              => 'Auto generated from management billing data for this order',
+                            'is_active'         => true
+                        ]);
+                    } else {
+                        return response()->json(['status' => false, 'message' => 'Product not found.'], 404);
+                    }
+
+                    // Retrieve related products for the storage
+                    $storageSubscriptionProduct = Product::where('id', 3)->first();
+                    if ($storageSubscriptionProduct && $storageSubscriptionProduct->id == 3) {
+                        OrderItem::create([
+                            'order_id'          => $order->id,
+                            'product_id'        => $storageSubscriptionProduct->id,
+                            'product_name'      => $storageSubscriptionProduct->name,
+                            'product_attributes' => null,
+                            'unit_price'        => $billing->total_storage_bill_amount,
+                            'quantity'          => 1,
+                            'total_price'       => $billing->total_storage_bill_amount * 1,
+                            'discount_amount'   => 0,
+                            'note'              => 'Auto generated from management billing data for this order',
+                            'is_active'         => true
+                        ]);
+                    } else {
+                        return response()->json(['status' => false, 'message' => 'Product not found.'], 404);
+                    }
+
+                    // Create order details
+                    $orderDetail = OrderDetail::create([
+                        'order_id'          => $order->id,
+                        'shipping_address'  => 'Not applicable',
+                        'shipping_status'   => 'pending',
+                        'shipping_method'   => 'Standard Shipping',
+                        'shipping_note'     => 'Auto-generated order from management billing data for this order',
+                        'customer_note'     => null,
+                        'admin_note'        => 'Admin generated',
+                        'tracking_number'   => null,
+                        'delivery_date_expected' => now()->addDays(1),
+                        'delivery_date_actual'   => null,
+                        'order_status'      => 'pending',
+                        'cancelled_at'      => null,
+                        'cancellation_reason' => null
+                    ]);
+                }
+            });
+        } catch (\Exception $e) {
+            Log::error('Error: ' . $e->getMessage());
+        }
     }
+
 
     public function store(Request $request)
     {
