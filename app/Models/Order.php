@@ -11,6 +11,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'billing_code',
         'order_date',
         'user_name',
 
@@ -46,6 +47,12 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function invoice()
+{
+    return $this->hasOne(Invoice::class);
+}
+
 
     protected static function boot()
     {

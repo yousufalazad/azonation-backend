@@ -405,8 +405,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     //Invoice
-
     Route::get('invoices', [InvoiceController::class, 'index']);
+    Route::get('all-invoices', [InvoiceController::class, 'indexForSuperadmin']);
     Route::get('get-invoice/{id}', [InvoiceController::class, 'show']);
     Route::post('create-invoice', [InvoiceController::class, 'store']);
     Route::put('update-invoice/{id}', [InvoiceController::class, 'update']);

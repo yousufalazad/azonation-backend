@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\OrderDetails;
+use Carbon\Carbon;
+
 
 class InvoiceController extends Controller
 {
@@ -34,20 +39,16 @@ class InvoiceController extends Controller
         }
     }
 
-    // public function indexForSuperAdmin(Request $request)
-    // {
-    //      // Get the authenticated user
-    //      $user_id = $request->user()->id;
+    public function indexForSuperadmin(Request $request)
+    {
+        $invoices = Invoice::get();
 
-    //     // Fetch invoices related to the authenticated user
-    //     $invoices = Invoice::where('user_id', $user_id)->get();
-
-    //     // Return the invoices data as a JSON response
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => $invoices,
-    //     ]);
-    // }
+        // Return the invoices data as a JSON response
+        return response()->json([
+            'status' => true,
+            'data' => $invoices,
+        ]);
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -57,11 +58,45 @@ class InvoiceController extends Controller
         //
     }
 
-    public function managementAndStorageInvoice() : void
-    {
-        // start creating
-        
+    public function managementAndStorageInvoice(): void
+{
+    Log::info('invoice function started');
+    // Fetch all orders that haven't been invoiced yet
+    $orders = Order::whereNotIn('id', function ($query) {
+        $query->select('order_id')->from('invoices');
+    })->get();
+    Log::info('Found '. $orders->count().' orders to invoice');
+
+    foreach ($orders as $order) {    
+        // Create invoice
+        Invoice::create([
+            'order_id'       => $order->id,
+            'billing_code'  => $order->billing_code,
+            'order_code'     => $order->order_code,
+            'user_id'        => $order->user_id,
+            'user_name'      => $order->user_name,
+            
+            'description'    => 'Invoice for order: ' . $order->order_code,
+
+            'total_amount'   => $order->total_amount,
+            'amount_paid'    => 0,
+            'balance_due'    => $order->total_amount - 0,
+
+            'currency_code'  => $order->currency_code,
+            'generate_date'  => Carbon::now(),
+            'issue_date'     => Carbon::now(),
+            // 'due_date'       => Carbon::now()->addDays(25),
+            'due_date'       => Carbon::now()->endOfMonth(),
+            'terms'          => 'Payment due in 30 days',
+            'invoice_note'   => 'Non-refundable',
+            'is_published'   => true,
+            'invoice_status' => 'issued',
+            'payment_status' => 'unpaid',
+            'admin_note'     => null,
+            'is_active'      => true,
+        ]);
     }
+}
 
     public function store(Request $request)
     {

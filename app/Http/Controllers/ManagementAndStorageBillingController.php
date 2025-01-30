@@ -2,19 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ManagementBilling;
+use App\Models\ManagementAndStorageBilling;
+use Illuminate\Http\Request;
 use App\Models\EverydayMemberCountAndBilling;
 use App\Models\EverydayStorageBilling;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
-
-
-
-class ManagementBillingController extends Controller
+class ManagementAndStorageBillingController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -121,29 +118,28 @@ class ManagementBillingController extends Controller
                 $endOfPreviousMonth = Carbon::now()->subMonth()->endOfMonth()->toDateString();
 
                 // Create a new management billing record
-                ManagementBilling::create([
-                    'user_id' =>  $userId,
-                    'user_name' => $userName,
-
-                    'service_month' => Carbon::now()->subMonth()->format('F'), // Previous month full name
-                    'service_year' => Carbon::now()->subMonth()->format('Y'), // Previous month's year
-
-                    'billing_month' => Carbon::now()->format('F'), // Current month full name
-                    'billing_year' => Carbon::now()->format('Y'), // Current month's year
-
-                    'period_start' => $startOfPreviousMonth,
-                    'period_end' => $endOfPreviousMonth,
-
-                    //foreign data
-                    'total_member' => $billCalculationData['total_member'],
-                    'total_management_bill_amount' => $billCalculationData['total_management_bill_amount'],
-                    'total_storage_bill_amount' => $billCalculationData['total_storage_bill_amount'],
-                    'currency_code' => $userCurrencyData['currency_code'],
-
-                    'bill_status' => 'issued',
-                    'admin_note' => 'non-refundable',
-                    'is_active' => 1,
-                ]);
+                try {
+                    ManagementAndStorageBilling::create([
+                        'user_id' => $userId,
+                        'user_name' => $userName,
+                        'service_month' => Carbon::now()->subMonth()->format('F'),
+                        'service_year' => Carbon::now()->subMonth()->format('Y'),
+                        'billing_month' => Carbon::now()->format('F'),
+                        'billing_year' => Carbon::now()->format('Y'),
+                        'period_start' => $startOfPreviousMonth,
+                        'period_end' => $endOfPreviousMonth,
+                        'total_member' => $billCalculationData['total_member'],
+                        'total_management_bill_amount' => $billCalculationData['total_management_bill_amount'],
+                        'total_storage_bill_amount' => $billCalculationData['total_storage_bill_amount'],
+                        'currency_code' => $userCurrencyData['currency_code'],
+                        'bill_status' => 'issued',
+                        'admin_note' => 'non-refundable',
+                        'is_active' => 1,
+                    ]);
+                    Log::info("Management billing created for user $userId");
+                } catch (\Exception $e) {
+                    Log::error("Error creating management billing for user $userId: " . $e->getMessage());
+                }
             });
             return response()->json([
                 'status' => true,
@@ -157,10 +153,9 @@ class ManagementBillingController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(ManagementBilling $managementBilling)
+   
+
+    public function show(ManagementAndStorageBilling $managementAndStorageBilling)
     {
         //
     }
@@ -168,7 +163,7 @@ class ManagementBillingController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ManagementBilling $managementBilling)
+    public function edit(ManagementAndStorageBilling $managementAndStorageBilling)
     {
         //
     }
@@ -176,7 +171,7 @@ class ManagementBillingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ManagementBilling $managementBilling)
+    public function update(Request $request, ManagementAndStorageBilling $managementAndStorageBilling)
     {
         //
     }
@@ -184,7 +179,7 @@ class ManagementBillingController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ManagementBilling $managementBilling)
+    public function destroy(ManagementAndStorageBilling $managementAndStorageBilling)
     {
         //
     }

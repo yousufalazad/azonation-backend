@@ -23,14 +23,18 @@ class YearPlan extends Model
         'status'
     ];
 
-    protected $hidden = [
-        'created_at',
-        'updated_at'
-    ];
-
     // Relationship to User
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(YearPlanFile::class, 'year_plan_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(YearPlanImage::class, 'year_plan_id');
     }
 }
