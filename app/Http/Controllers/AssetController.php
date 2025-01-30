@@ -3,10 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Models\AssetFile;
+use App\Models\AssetImage;
 use App\Models\AssetAssignmentLog;
 use App\Models\AssetLifecycleStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class AssetController extends Controller
 {
@@ -53,11 +60,10 @@ class AssetController extends Controller
 
         return response()->json(['status' => true, 'data' => $assets], 200);
     }
-    
+
     public function getAssetDetails($assetId)
     {
-        // Find the meeting by ID
-        // $asset = Asset::find($assetId);
+        // Query the asset with detailed joins
         $asset = DB::table('assets as a')
             ->select(
                 'a.id as id',
@@ -87,14 +93,40 @@ class AssetController extends Controller
             ->where('a.id', '=', $assetId)
             ->first();
 
-        // Check if meeting exists
+        // Check if asset exists
         if (!$asset) {
-            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+            return response()->json(['status' => false, 'message' => 'Asset not found'], 404);
         }
 
-        // Return the meeting data
-        return response()->json(['status' => true, 'data' => $asset], 200);
+        // Retrieve related documents and images
+        $documents = AssetFile::where('asset_id', $assetId)->get();
+        $images = AssetImage::where('asset_id', $assetId)->get();
+
+        // Append full URLs to images
+        $images = $images->map(function ($image) {
+            $image->image_url = $image->file_path
+                ? url(Storage::url($image->file_path))
+                : null;
+            return $image;
+        });
+
+        // Append full URLs to documents
+        $documents = $documents->map(function ($document) {
+            $document->document_url = $document->file_path
+                ? url(Storage::url($document->file_path))
+                : null;
+            return $document;
+        });
+
+        // Combine all data
+        $assetDetails = (array) $asset; // Convert the asset object to an array
+        $assetDetails['documents'] = $documents;
+        $assetDetails['images'] = $images;
+
+        // Return the full asset data with relationships
+        return response()->json(['status' => true, 'data' => $assetDetails], 200);
     }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -132,6 +164,47 @@ class AssetController extends Controller
                 'is_active' => $validated['is_active']
             ]);
 
+            // Handle document uploads
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $document) {
+                    $documentPath = $document->storeAs(
+                        'org/doc/asset',
+                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+                        'public'
+                    );
+
+                    AssetFile::create([
+                        'asset_id' => $asset->id,
+                        'file_path' => $documentPath, // Store the document path
+                        'file_name' => $document->getClientOriginalName(), // Store the document name
+                        'mime_type' => $document->getClientMimeType(), // Store the MIME type
+                        'file_size' => $document->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
+            }
+
+            // // Handle multiple image uploads
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->storeAs(
+                        'org/image/asset',
+                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                        'public'
+                    );
+
+                    AssetImage::create([
+                        'asset_id' => $asset->id,
+                        'file_path' => $imagePath, // Store the document path
+                        'file_name' => $image->getClientOriginalName(), // Store the document name
+                        'mime_type' => $image->getClientMimeType(), // Store the MIME type
+                        'file_size' => $image->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
+            }
             DB::commit();
             return response()->json([
                 'status' => true,
@@ -149,14 +222,34 @@ class AssetController extends Controller
      */
     public function show($id)
     {
-        $asset = Asset::with('assignmentLogs')->find($id);
+        // Fetch the asset with its relationships
+        $asset = Asset::with(['assignmentLogs', 'documents', 'images'])->find($id);
 
+        // Check if the asset exists
         if (!$asset) {
             return response()->json(['message' => 'Asset not found.'], 404);
         }
 
+        // Append full URLs to images
+        $asset->images = $asset->images->map(function ($image) {
+            $image->image_url = $image->file_path
+                ? url(Storage::url($image->file_path))
+                : null;
+            return $image;
+        });
+
+        // Append full URLs to documents
+        $asset->documents = $asset->documents->map(function ($document) {
+            $document->document_url = $document->file_path
+                ? url(Storage::url($document->file_path))
+                : null;
+            return $document;
+        });
+
+        // Return the asset as JSON
         return response()->json($asset);
     }
+
 
     /**
      * Update an asset and its assignment log.
@@ -210,6 +303,48 @@ class AssetController extends Controller
                     'note' => $validated['note'],
                     'is_active' => $validated['is_active']
                 ]);
+            }
+
+            // Handle document uploads
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $document) {
+                    $documentPath = $document->storeAs(
+                        'org/doc/asset',
+                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+                        'public'
+                    );
+
+                    AssetFile::create([
+                        'asset_id' => $asset->id,
+                        'file_path' => $documentPath, // Store the document path
+                        'file_name' => $document->getClientOriginalName(), // Store the document name
+                        'mime_type' => $document->getClientMimeType(), // Store the MIME type
+                        'file_size' => $document->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
+            }
+
+            // // Handle multiple image uploads
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->storeAs(
+                        'org/image/asset',
+                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                        'public'
+                    );
+
+                    AssetImage::create([
+                        'asset_id' => $asset->id,
+                        'file_path' => $imagePath, // Store the document path
+                        'file_name' => $image->getClientOriginalName(), // Store the document name
+                        'mime_type' => $image->getClientMimeType(), // Store the MIME type
+                        'file_size' => $image->getSize(), // Store the size of the document
+                        'is_public' => true, // Set the document as public
+                        'is_active' => true, // Set the document as active
+                    ]);
+                }
             }
 
             DB::commit();

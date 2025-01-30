@@ -21,10 +21,6 @@ class Asset extends Model
         'privacy_setup_id',
         'is_active'
     ];
-    protected $hidden = [
-        'created_at',
-        'updated_at'
-    ];
 
     /**
      * Get the assignment logs associated with the asset.
@@ -32,5 +28,14 @@ class Asset extends Model
     public function assignmentLogs()
     {
         return $this->hasMany(AssetAssignmentLog::class, 'asset_id');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(AssetFile::class, 'asset_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(AssetImage::class, 'asset_id');
     }
 }
