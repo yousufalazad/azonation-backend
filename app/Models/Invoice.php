@@ -45,7 +45,6 @@ class Invoice extends Model
         'updated_at'
     ];
 
-
     protected static function boot()
     {
         parent::boot();
@@ -64,4 +63,5 @@ class Invoice extends Model
             $model->invoice_code = 'I' . $randomString;
         });
     }
+    
 }

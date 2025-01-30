@@ -59,18 +59,7 @@ class InvoiceController extends Controller
 
     public function managementAndStorageInvoice() : void
     {
-        // Get all users with active storage subscriptions
-        // $users = User::with('storageSubscription')->whereHas('storageSubscription', function ($query) {
-        //     $query->where('is_active', true);
-        // })->get();
-
-        // Process billing for each user
-        // foreach ($users as $user) {
-        //     $billingData = $this->getUserStorageDailyPriceRate($user->id);
-        //     $this->storeBillingRecord($billingData);
-        // }
-
-        // return response()->json(['status' => true, 'message' => 'Billing records generated successfully.'], 200);
+        // start creating
         
     }
 

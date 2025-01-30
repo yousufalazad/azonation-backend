@@ -11,27 +11,26 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'order_date',
         'user_name',
-        'order_number',
-        'total_amount',
+
+        'sub_total',
         'discount_amount',
         'shipping_cost',
         'total_tax',
-        'currency',
-        'shipping_status',
-        'shipping_address',
-        'billing_address',
+        'credit_applied',
+        'total_amount',
+
+        'discount_title',
+        'tax_rate',
+        'currency_code',
         'coupon_code',
-        'shipping_method',
-        'shipping_note',
-        'customer_note',
-        'admin_note',
-        'tracking_number',
-        'order_date',
-        'delivery_date_expected',
-        'delivery_date_actual',
-        'status',
-        'cancelled_at',
+
+        'payment_method',
+        'billing_address',
+
+        'user_country',
+        'user_region',
         'is_active'
     ];
     protected $hidden = [
@@ -42,5 +41,28 @@ class Order extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class, 'order_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            // Define the allowed characters: uppercase letters A-Z and digits 0-9
+            $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+            // Generate a 15-character random string from the allowed characters
+            $randomString = '';
+            for ($i = 0; $i < 14; $i++) {
+                $randomString .= $characters[random_int(0, strlen($characters) - 1)];
+            }
+
+            // Prefix the random string with 'I' for the Invoice code
+            $model->order_code = 'O' . $randomString;
+        });
     }
 }

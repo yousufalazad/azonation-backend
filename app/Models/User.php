@@ -72,4 +72,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(StorageSubscription::class, 'user_id', 'id')->where('is_active', true);
     }
+    public function managementBilling()
+    {
+        return $this->hasMany(ManagementBilling::class, 'user_id', 'id')->where('is_active', true);
+    }
 }
