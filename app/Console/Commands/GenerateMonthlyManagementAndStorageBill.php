@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\ManagementBillingController;
+use App\Http\Controllers\ManagementAndStorageBillingController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
 
@@ -21,7 +21,7 @@ class GenerateMonthlyManagementAndStorageBill extends Command
     
     public function handle()
     {
-        $controller = new ManagementBillingController();
+        $controller = new ManagementAndStorageBillingController();
         $controller->store(request()); // Pass an empty request if no parameters needed
 
         // Log the command execution and the call to the store function

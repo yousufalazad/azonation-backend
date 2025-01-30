@@ -12,8 +12,10 @@ return new class extends Migration
             $table->id();
 
             // Unique Invoice ID
-            $table->string('invoice_code', 15)->unique()->nullable()->comment('Unique 15-character alphanumeric transaction ID with prefix AZON-INV.');
-
+            $table->string('invoice_code', 15)->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix I.');
+            $table->string('billing_code', 15)->unique()->comment('Unique 15-character alphanumeric billing transaction ID with prefix B.');
+            $table->string('order_code', 15)->unique()->comment('Unique 15-character alphanumeric order transaction ID with prefix O.');
+            
             // Foreign key linking to the 'orders' table
             $table->foreignId('order_id')
                 ->nullable()
@@ -34,7 +36,7 @@ return new class extends Migration
 
             // Financial fields
             $table->decimal('total_amount', 10, 2)->comment('Final amount due after discounts, credit and taxes and etc.');
-            $table->decimal('amount_paid', 10, 2)->default(0)->nullable()->comment('The total amount paid towards the invoice so far.');
+            $table->decimal('amount_paid', 10, 2)->nullable()->comment('The total amount paid towards the invoice so far.');
             $table->decimal('balance_due', 10, 2)->comment('The remaining amount still owed.');
 
             $table->string('currency_code', 3)->comment('Currency code for the order amount');
@@ -62,6 +64,8 @@ return new class extends Migration
                 ->comment('Current payment status of the invoice');
 
             $table->string('admin_note')->nullable()->comment('Internal admin note for reference');
+
+            $table->boolean('is_active')->default(true)->comment('Whether the invoice is active or inactive');
 
             // Timestamps
             $table->timestamps();

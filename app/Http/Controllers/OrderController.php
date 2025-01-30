@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ManagementAndStorageBilling;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
-use Illuminate\Support\Facades\Storage;
-use App\Models\ManagementBilling;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class OrderController extends Controller
@@ -35,8 +33,8 @@ class OrderController extends Controller
         try {
             DB::transaction(function () {
 
-                // Fetch all management billings
-                $billings = ManagementBilling::where('bill_status', 'issued')->get();
+                // Fetch all ManagementAndStorageBilling 
+                $billings = ManagementAndStorageBilling::where('bill_status', 'issued')->get();
 
                 foreach ($billings as $billing) {
                     $user = $billing->user_id;
@@ -47,7 +45,8 @@ class OrderController extends Controller
                     // Create an order
                     $order = Order::create([
                         'user_id'        => $billing->user_id,
-                        'order_date'     => now(),
+                        'billing_code'   => $billing->billing_code,
+                        'order_date'     => Carbon::now(),
                         'user_name'      => $billing->user_name,
                         'sub_total'      => $billing->total_management_bill_amount + $billing->total_storage_bill_amount,
                         'discount_amount' => 0, // Default to no discount

@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ManagementBilling extends Model
+class ManagementAndStorageBilling extends Model
 {
     use HasFactory;
     protected $fillable = [
-        //'management_billing_code',
+        //'billing_code',
         'user_id',
         'user_name',
         'service_month',
@@ -52,7 +52,7 @@ class ManagementBilling extends Model
             }
 
             // Prefix the random string with 'T' for the final transaction ID
-            $model->management_billing_code = 'B' . $randomString;
+            $model->billing_code = 'B' . $randomString;
         });
     }
 }

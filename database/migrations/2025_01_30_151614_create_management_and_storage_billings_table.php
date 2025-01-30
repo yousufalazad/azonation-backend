@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('management_billings', function (Blueprint $table) {
+        Schema::create('management_and_storage_billings', function (Blueprint $table) {
             $table->id();
             // Unique billing identifier
-            $table->string('management_billing_code', 15)->nullable()->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix B.');
+            $table->string('billing_code', 15)->nullable()->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix B.');
 
             // Foreign key linking to the 'users' table
             $table->foreignId('user_id')
@@ -71,6 +71,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('management_billings');
+        Schema::dropIfExists('management_and_storage_billings');
     }
 };
