@@ -212,6 +212,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //API for org membership
     Route::post('/search_individual', [OrgMemberController::class, 'search']);
     Route::post('/add_member', [OrgMemberController::class, 'addMember']);
+    Route::get('/org-members/{userId}', [OrgMemberController::class, 'getOrgMembers']);
     Route::get('/org-member-list/{userId}', [OrgMemberController::class, 'getMemberList']);
     Route::get('/org-all-member-list', [OrgMemberController::class, 'getOrgAllMemberList']);
     Route::get('/total-org-member-count/{userId}', [OrgMemberController::class, 'totalOrgMemberCount']);
