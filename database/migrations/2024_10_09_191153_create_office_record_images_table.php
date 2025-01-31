@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('office_record_images', function (Blueprint $table) {
             $table->id();
-            // Foreign key referencing the users table (creator or recipient of the plan)
+         
             $table->foreignId('office_record_id')
                 ->constrained('office_records')
                 ->onDelete('cascade')
