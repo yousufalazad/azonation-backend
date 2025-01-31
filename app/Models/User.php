@@ -18,10 +18,10 @@ class User extends Authenticatable
         'azon_id',
         'name',
         'type',
+        'shortname',
         'username',
         'email',
         'password',
-        'image',
         'verification_token',
         'email_verified_at',
         'remember_token'
