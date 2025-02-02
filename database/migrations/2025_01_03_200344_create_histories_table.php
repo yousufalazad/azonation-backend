@@ -22,12 +22,10 @@ return new class extends Migration
 
             // Organization history details
             $table->string('title', 255)->nullable(); // Limit title to 255 characters
-            $table->string('image')->nullable(); // Optional image for the history
             $table->longText('history')->nullable(); // Detailed history of the organization, limit handled in app layer
-            $table->string('document')->nullable(); // File path for the document, 1 MB limit handled in app layer
 
             // Status of the history record
-            $table->boolean('status')->default(1)->comment('0 = inactive, 1 = active');
+            $table->boolean('is_active')->default(true)->comment('0 = inactive, 1 = active');
 
             $table->timestamps(); // Created at and updated at timestamps
         });

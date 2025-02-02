@@ -80,7 +80,6 @@ class MeetingMinutesController extends Controller
             // 'reviewed_by' => 'required|integer|exists:users,id',
             'privacy_setup_id' => 'required|integer|exists:privacy_setups,id',
             'is_active' => 'required|boolean',
-            'file_attachments' => 'nullable|file|mimes:pdf,doc,docx|max:1024', // Validate document file
             // 'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation for each file
             // 'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Document validation
         ]);
@@ -95,17 +94,7 @@ class MeetingMinutesController extends Controller
         // Start transaction
         // DB::beginTransaction();
         // try {
-            // Handle the file upload
-            $fileAttachmentPath = null;
-            if ($request->hasFile('file_attachments')) {
-                $file = $request->file('file_attachments');
-                $fileAttachmentPath = $file->storeAs(
-                    'org/docs',
-                    now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
-                    'public'
-                );
-            }
-
+        
             // Create a new MeetingMinutes meetingMinute
             $meetingMinutes = new MeetingMinutes();
             $meetingMinutes->meeting_id = $request->meeting_id;
@@ -114,7 +103,6 @@ class MeetingMinutesController extends Controller
             $meetingMinutes->minutes = $request->minutes;
             $meetingMinutes->decisions = $request->decisions;
             $meetingMinutes->note = $request->note;
-            $meetingMinutes->file_attachments = $fileAttachmentPath; // Save file path
             $meetingMinutes->start_time = $request->start_time;
             $meetingMinutes->end_time = $request->end_time;
             $meetingMinutes->follow_up_tasks = $request->follow_up_tasks;

@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Org;
 
 use App\Http\Controllers\Controller;
+use App\Models\IndependentMemberImage;
 use App\Models\OrgIndependentMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon; // Import Carbon for timestamp
+use Illuminate\Support\Facades\Log;
+
+
 class OrgIndependentMemberController extends Controller
 {
     /**
@@ -43,31 +47,52 @@ class OrgIndependentMemberController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request);
+        $validatedData['user_id'] = $request->user()->id;
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:org_independent_members,email',
-            'mobile' => 'required|string|max:15',
+            'email' => 'nullable|email|unique:org_independent_members,email',
+            'mobile' => 'nullable|string|max:15',
             'address' => 'nullable|string|max:500',
-            'admin_note' => 'nullable|string',
+            'note' => 'nullable|string',
             'is_active' => 'required|boolean',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            //'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation for each file
         ]);
 
+        $member = new OrgIndependentMember();
+        $member->user_id = $request->user()->id;
+        $member->name = $validatedData['name'];
+        $member->email = $validatedData['email'];
+        $member->mobile = $validatedData['mobile'];
+        $member->address = $validatedData['address'];
+        $member->note = $validatedData['note'];
+        $member->is_active = $validatedData['is_active'];
+        $member->save(); // Save the record in the database
+
+        Log::info("Member updated");
+        // Handle single image uploads
         if ($request->hasFile('image_path')) {
-            $image = $request->file('image_path');
-            $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-            $extension = $image->getClientOriginalExtension();
-            // $mime_type = 'image_path' . '/' . $extension;
-            // $fileSize = $image->getSize(); // Get file size in bytes
-            $timestamp = Carbon::now()->format('YmdHis');
-            $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
-            $path = $image->storeAs('org/independent_member', $newFileName, 'public');
+            Log::info("inside image upload");
 
-            $validatedData['image_path'] = $path;
+            foreach ($request->file('image_path') as $image) {
+                $imagePath = $image->storeAs(
+                    'org/image/independent-member',
+                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                    'public'
+                );
+                Log::info('Image is now available');
+                IndependentMemberImage::create([
+                    'org_independent_member_id' => $member->id,
+                    'file_path' => $imagePath, // Store the document path
+                    'file_name' => $image->getClientOriginalName(), // Store the document name
+                    'mime_type' => $image->getClientMimeType(), // Store the MIME type
+                    'file_size' => $image->getSize(), // Store the size of the document
+                    'is_public' => true, // Set the document as public
+                    'is_active' => true, // Set the document as active
+                ]);
+            }
+            Log::info('Done');
         }
-        $validatedData['user_id'] = $request->user()->id;
-
-        $member = OrgIndependentMember::create($validatedData);
 
         return response()->json(['status' => true, 'message' => 'Member created successfully.', 'data' => $member], 201);
     }
@@ -104,12 +129,12 @@ class OrgIndependentMemberController extends Controller
         // Validate the input data
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => "required|email|unique:org_independent_members,email,{$id}",
-            'mobile' => 'required|string|max:15',
+            'email' => 'email|unique:org_independent_members,email',
+            'mobile' => 'string|max:15',
             'address' => 'nullable|string|max:500',
-            'admin_note' => 'nullable|string',
+            'note' => 'nullable|string',
             'is_active' => 'required|boolean',
-            // 'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         // Handle the image upload if a file is provided

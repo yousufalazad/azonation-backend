@@ -22,7 +22,7 @@ class OrgIndependentMember extends Model
         'email',
         'mobile',
         'address',
-        'admin_note',
+        'note',
         'is_active',
         'image_path',
     ];

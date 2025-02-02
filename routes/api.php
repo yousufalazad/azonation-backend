@@ -73,7 +73,7 @@ use App\Http\Controllers\PackageController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ActiveMemberCountController;
 use App\Http\Controllers\HonoraryMemberCountController;
-use App\Http\Controllers\BillingController;
+use App\Http\Controllers\ManagementAndStorageBillingController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\CurrencyController;
 
@@ -389,13 +389,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-    Route::get('billing-list', [BillingController::class, 'index']);
-    Route::get('superadmin-billing-list', [BillingController::class, 'indexSuperAdmin']);
-    Route::get('get-billing/{id}', [BillingController::class, 'show']);
-    Route::post('create-billing', [BillingController::class, 'store']);
-    Route::get('system-create-billing', [BillingController::class, 'storeBySystem']);
-    Route::put('update-billing/{id}', [BillingController::class, 'update']);
-    Route::delete('delete-billing/{id}', [BillingController::class, 'destroy']);
+    Route::get('billing-list', [ManagementAndStorageBillingController::class, 'index']);
+    Route::get('superadmin-billing-list', [ManagementAndStorageBillingController::class, 'indexSuperAdmin']);
+    Route::get('get-billing/{id}', [ManagementAndStorageBillingController::class, 'show']);
+    Route::post('create-billing', [ManagementAndStorageBillingController::class, 'store']);
+    Route::get('system-create-billing', [ManagementAndStorageBillingController::class, 'storeBySystem']);
+    Route::put('update-billing/{id}', [ManagementAndStorageBillingController::class, 'update']);
+    Route::delete('delete-billing/{id}', [ManagementAndStorageBillingController::class, 'destroy']);
 
     // ------------------- SuperAdmin----------------------------------------------------------------
     //API for SuperAdmin
