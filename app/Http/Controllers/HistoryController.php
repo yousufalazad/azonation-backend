@@ -72,6 +72,8 @@ class HistoryController extends Controller
             'title' => 'required|string|max:255',
             'history' => 'required|string|max:20000',
             'status' => 'required|integer',
+            'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Document validation
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation for each file
         ]);
         
         // Create the new organization history record

@@ -13,11 +13,11 @@ class OrgMember extends Model
     protected $fillable = [
         'org_type_user_id',
         'individual_type_user_id',
-        'existing_org_membership_id',
+        'existing_membership_id',
         'membership_type_id',
         'joining_date',
         'end_date',
-        'status'
+        'is_active'
     ];
     protected $hidden=[
         'created_at',

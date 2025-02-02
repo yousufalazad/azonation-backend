@@ -30,7 +30,7 @@ class GenerateEverydayManagementBill extends Command
     public function schedule(Schedule $schedule): void
     {
         // $schedule->command(static::class)->daily();
-        $schedule->command('generate:everyday-management-billing')->daily()->runInBackground();
+        $schedule->command('generate:everyday-management-bill')->daily()->runInBackground();
 
     }
     // You can adjust the frequency depending on your needs:

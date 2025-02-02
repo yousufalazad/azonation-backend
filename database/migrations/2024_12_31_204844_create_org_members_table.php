@@ -26,7 +26,7 @@ return new class extends Migration
                   ->onDelete('cascade')
                   ->comment('Foreign key to the users table representing the individual');
 
-            $table->string('org_own_membership_id')->nullable()->comment('Existing organization membership identifier');
+            $table->string('existing_membership_id')->nullable()->comment('Existing organization membership identifier');
 
             // Foreign key to the membership_types table
             $table->foreignId('membership_type_id')
@@ -42,9 +42,10 @@ return new class extends Migration
             $table->foreignId('sponsored_user_id')
                   ->constrained('users')
                   ->onDelete('cascade')
+                  ->nullable()
                   ->comment('Foreign key to the users table representing the individual');
             
-            $table->boolean('is_active')->default(true); // Status of the member (active or inactive)
+            $table->boolean('is_active')->default(true)->comment('Status of the member active or inactive');
             
             $table->timestamps();
         });
