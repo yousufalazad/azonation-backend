@@ -13,7 +13,7 @@ class History extends Model
         'user_id',
         'title',
         'history',
-        'status',
+        'is_active',
         'image',
         'document'
     ];

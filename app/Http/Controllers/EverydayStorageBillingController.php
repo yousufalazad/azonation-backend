@@ -37,13 +37,13 @@ class EverydayStorageBillingController extends Controller
         // Get the user
          $user = User::with(['country.region', 'storageSubscription.package'])->findOrFail($userId);
      
-         Log::info('getUserStorageDailyPriceRate user data found 8'. $user->id);
+         Log::info('getUserStorageDailyPriceRate user data found 8 ->'. $user->id);
 
          // Check if the user has a valid subscription
-         $subscription = $user->storageSubscription;
-         if (!$subscription) {
-             throw new \Exception("User does not have an active storage subscription.");
-         }
+        //  $subscription = $user->storageSubscription;
+        //  if (!$subscription) {
+        //      throw new \Exception("User does not have an active storage subscription.");
+        //  }
          
          Log::info('getUserStorageDailyPriceRate subscription found 9'. $subscription->id);
 
