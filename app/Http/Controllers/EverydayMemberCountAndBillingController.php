@@ -32,19 +32,27 @@ class EverydayMemberCountAndBillingController extends Controller
     public function getUserManagementDailyPriceRate($userId)
     {
         try {
+            Log::info("price 1---" . $userId);
             // Fetch the user
             $user = User::with(['userCountry.country.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
 
+            Log::info("price 2---" . $userId);
             // Extract the region from the user's country
             $region = $user->userCountry->country->region->region;
 
+            Log::info("price 3---" . $region);
             // Extract the user's subscribed package
             $managementPackage = $user->managementSubscription->managementPackage;
+
+            Log::info("price 4---" . $managementPackage);
 
             // Fetch the price rate for the region and package
             $managementPriceRate = ManagementPricing::where('region_id', $region->id)
                 ->where('management_package_id', $managementPackage->id)
-                ->value('price_rate');
+                ->value('price_rate')
+                ->get();
+
+                Log::info('Price 5, rate fetched.'. $managementPriceRate);
 
             if ($managementPriceRate) {
                 return response()->json([
@@ -55,6 +63,7 @@ class EverydayMemberCountAndBillingController extends Controller
                     'error' => 'Price rate not found for the user\'s region and package',
                 ], 404);
             }
+            
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
@@ -65,7 +74,7 @@ class EverydayMemberCountAndBillingController extends Controller
 
     public function store(Request $request)
     {
-        Log::info('Everyday Management bill generation started.');
+        Log::info('started.');
         try {
             $users = User::where('type', 'organisation')->get();
 
@@ -77,7 +86,9 @@ class EverydayMemberCountAndBillingController extends Controller
 
                 $getUserManagementDailyPriceRateResponse = $this->getUserManagementDailyPriceRate($userId);
                 $getUserManagementDailyPriceRateData = $getUserManagementDailyPriceRateResponse->getData(true);
-                Log::info('User management daily price rate fetched successfully.');
+                Log::info('User management daily price rate fetched.');
+                $managementDailyPriceRate = $getUserManagementDailyPriceRateData['price_rate'];
+                Log::info('Daily price rate for '. $userId.'is '. $managementDailyPriceRate);
 
                 // Calculate active members from org_member_lists
                 $orgMembers = DB::table('org_members')
@@ -85,7 +96,7 @@ class EverydayMemberCountAndBillingController extends Controller
                     ->where('is_active', true) // Only count active members
                     ->count();
 
-                Log::info('org_members count reached');
+                Log::info('org_members count ');
 
                 // Calculate active members from org_independent_members
                 $independentMembers = DB::table('org_independent_members')
@@ -93,17 +104,18 @@ class EverydayMemberCountAndBillingController extends Controller
                     ->where('is_active', true) // Only count active members
                     ->count();
 
-                Log::info('org_independent_members count reached');
+                Log::info('org_independent_members count');
 
                 // Total active members
                 $totalMembers = $orgMembers + $independentMembers;
 
-                Log::info('Total active members calculation successfully completed.');
-                // Calculate the price rate per member
-                $managementDailyPriceRate = 3; // Your price rate per member
-                //$managementDailyPriceRate = $getUserManagementDailyPriceRateData['daily_price_rate']; // Your price rate per member
+                Log::info('Total members');
 
-                Log::info('Daily price rate for '. $userId. ' is 4'. $managementDailyPriceRate);
+                // Calculate the price rate per member
+                //$managementDailyPriceRate = 3; // Your price rate per member
+                 // Your price rate per member
+
+                Log::info('Daily price rate for '. $userId. ' is 4 -'. $managementDailyPriceRate);
 
                 // Calculate the total bill amount based on the members and price rate
                 $dayTotalBill = $totalMembers * $managementDailyPriceRate;

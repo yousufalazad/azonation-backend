@@ -42,4 +42,10 @@ class ManagementPackage extends Model
         'created_at',
         'updated_at'
     ];
+
+    
+    public function managementPricing()
+    {
+        return $this->hasOne(ManagementPricing::class, 'management_package_id', 'id')->where('is_active', true);
+    }
 }
