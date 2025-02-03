@@ -18,15 +18,14 @@ class ManagementSubscription extends Model
         'is_active'
     ];
 
-    
+
     protected $hidden = [
         'created_at',
         'updated_at'
     ];
 
     public function managementPackage()
-{
-    return $this->belongsTo(ManagementPackage::class);
-}
-
+    {
+        return $this->belongsTo(ManagementPackage::class, 'management_package_id', 'id')->where('is_active', true);
+    }
 }

@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\UserCountry;
 use App\Models\ManagementSubscription;
+use App\Models\ManagementAndStorageBilling;
 
 class User extends Authenticatable
 {
@@ -72,8 +73,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(StorageSubscription::class, 'user_id', 'id')->where('is_active', true);
     }
-    public function managementBilling()
+    public function managementAndStorageBilling()
     {
-        return $this->hasMany(ManagementBilling::class, 'user_id', 'id')->where('is_active', true);
+        return $this->hasMany(ManagementAndStorageBilling::class, 'user_id', 'id')->where('is_active', true);
     }
 }
