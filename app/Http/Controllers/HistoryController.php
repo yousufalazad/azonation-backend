@@ -71,9 +71,9 @@ class HistoryController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'history' => 'required|string|max:20000',
-            'status' => 'required|integer',
-            'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Document validation
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation for each file
+            'is_active' => 'required|integer',
+            'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:100240', // Document validation
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048', // Image validation for each file
         ]);
         
         // Create the new organization history record
@@ -81,7 +81,7 @@ class HistoryController extends Controller
         $history->user_id = $request->user()->id;
         $history->title = $validatedData['title'];
         $history->history = $validatedData['history'];
-        $history->status = $validatedData['status'];
+        $history->is_active = $validatedData['is_active'];
         $history->save(); // Save the record in the database
 
 
@@ -141,7 +141,7 @@ class HistoryController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'history' => 'required|string|max:20000',
-            'status' => 'required|integer',
+            'is_active' => 'required|integer',
         ]);
 
         try {
@@ -152,7 +152,7 @@ class HistoryController extends Controller
             $history->update([
                 'title' => $validatedData['title'],
                 'history' => $validatedData['history'],
-                'status' => $validatedData['status'],
+                'is_active' => $validatedData['is_active'],
             ]);
 
             // Handle document uploads
