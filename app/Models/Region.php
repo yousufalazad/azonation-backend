@@ -23,7 +23,7 @@ class Region extends Model
 
     public function managementPricings()
 {
-    return $this->hasMany(ManagementPricing::class);
+    return $this->hasOne(ManagementPricing::class, 'region-id', 'id')->where('is_active', true);
 }
 
 }

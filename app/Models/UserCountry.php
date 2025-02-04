@@ -22,11 +22,11 @@ class UserCountry extends Model
 
     public function country()
     {
-        return $this->belongsTo(Country::class);
+        return $this->hasOne(Country::class, 'id', 'country_id');
     }
 
-    public function region()
-    {
-        return $this->hasOne(CountryRegion::class, 'country_id', 'country_id')->where('is_active', true);
-    }
+    // public function region()
+    // {
+    //     return $this->hasOne(CountryRegion::class, 'country_id', 'country_id')->where('is_active', true);
+    // }
 }

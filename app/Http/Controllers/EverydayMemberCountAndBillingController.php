@@ -34,23 +34,25 @@ class EverydayMemberCountAndBillingController extends Controller
         try {
             Log::info("price 1---" . $userId);
             // Fetch the user
-            $user = User::with(['userCountry.country.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
+            $user = User::with(['userCountry.country.countryRegion.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
 
-            Log::info("price 2---" . $userId);
-            // Extract the region from the user's country
-            $region = $user->userCountry->country->region->region;
+            Log::info("price 2---" . $user);
 
-            Log::info("price 3---" . $region);
-            // Extract the user's subscribed package
-            $managementPackage = $user->managementSubscription->managementPackage;
+            $managementPackageData = $user->managementSubscription->managementPackage;
+            Log::info("price 3---, Management package ID: " . $managementPackageData->id);
+            
+    
+            $regionData = $user->userCountry->country->countryRegion->region;
+            Log::info("price 4--- Region data: ". $regionData->id);
 
-            Log::info("price 4---" . $managementPackage);
+
+            Log::info("before pricing");
 
             // Fetch the price rate for the region and package
-            $managementPriceRate = ManagementPricing::where('region_id', $region->id)
-                ->where('management_package_id', $managementPackage->id)
-                ->value('price_rate')
-                ->get();
+            $managementPriceRate = ManagementPricing::where('region_id', $regionData->id)
+                ->where('management_package_id', $managementPackageData->id)
+                ->value('price_rate');
+                //->get();
 
                 Log::info('Price 5, rate fetched.'. $managementPriceRate);
 
@@ -87,6 +89,7 @@ class EverydayMemberCountAndBillingController extends Controller
                 $getUserManagementDailyPriceRateResponse = $this->getUserManagementDailyPriceRate($userId);
                 $getUserManagementDailyPriceRateData = $getUserManagementDailyPriceRateResponse->getData(true);
                 Log::info('User management daily price rate fetched.');
+
                 $managementDailyPriceRate = $getUserManagementDailyPriceRateData['price_rate'];
                 Log::info('Daily price rate for '. $userId.'is '. $managementDailyPriceRate);
 
