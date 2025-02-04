@@ -32,6 +32,8 @@ class CountryRegion extends Model
     // }
     public function region()
     {
-        return $this->belongsTo(Region::class, 'region_id', 'id');
+        // return $this->belongsTo(Region::class, 'region_id', 'id');
+        return $this->hasOne(Region::class, 'id', 'region_id');
+
     }
 }

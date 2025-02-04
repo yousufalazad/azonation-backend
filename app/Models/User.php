@@ -55,7 +55,7 @@ class User extends Authenticatable
 
     public function userCountry()
     {
-        return $this->hasOne(UserCountry::class);
+        return $this->hasOne(UserCountry::class, 'user_id', 'id');
     }
 
 
@@ -64,10 +64,10 @@ class User extends Authenticatable
         return $this->hasOne(ManagementSubscription::class, 'user_id', 'id')->where('is_active', true);
     }
 
-    public function country()
-    {
-        return $this->belongsTo(UserCountry::class, 'id', 'user_id')->where('is_active', true);
-    }
+    // public function country()
+    // {
+    //     return $this->belongsTo(UserCountry::class, 'id', 'user_id')->where('is_active', true);
+    // }
 
     public function storageSubscription()
     {

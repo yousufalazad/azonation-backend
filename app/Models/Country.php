@@ -28,9 +28,11 @@ class Country extends Model
     //     return $this->hasOne(CountryRegion::class);
     // }
 
-    public function region()
+    public function countryRegion()
 {
-    return $this->hasOne(CountryRegion::class, 'country_id', 'id')->with('region');
+    // return $this->hasOne(CountryRegion::class, 'country_id', 'id')->with('region');
+    return $this->hasOne(CountryRegion::class, 'country_id', 'id');
+
 }
 
 }
