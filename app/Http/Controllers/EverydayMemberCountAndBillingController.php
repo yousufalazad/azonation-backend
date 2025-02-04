@@ -51,8 +51,8 @@ class EverydayMemberCountAndBillingController extends Controller
             // Fetch the price rate for the region and package
             $managementPriceRate = ManagementPricing::where('region_id', $regionData->id)
                 ->where('management_package_id', $managementPackageData->id)
-                ->value('price_rate');
-                //->get();
+                ->value('price_rate')
+                ->get();
 
                 Log::info('Price 5, rate fetched.'. $managementPriceRate);
 
