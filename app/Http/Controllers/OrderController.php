@@ -90,8 +90,8 @@ class OrderController extends Controller
                     }
 
                     // Retrieve related products for the storage
-                    $storageSubscriptionProduct = Product::where('id', 3)->first();
-                    if ($storageSubscriptionProduct && $storageSubscriptionProduct->id == 3) {
+                    $storageSubscriptionProduct = Product::where('id', 2)->first();
+                    if ($storageSubscriptionProduct && $storageSubscriptionProduct->id == 2) {
                         OrderItem::create([
                             'order_id'          => $order->id,
                             'product_id'        => $storageSubscriptionProduct->id,
