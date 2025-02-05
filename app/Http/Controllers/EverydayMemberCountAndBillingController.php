@@ -51,10 +51,9 @@ class EverydayMemberCountAndBillingController extends Controller
             // Fetch the price rate for the region and package
             $managementPriceRate = ManagementPricing::where('region_id', $regionData->id)
                 ->where('management_package_id', $managementPackageData->id)
-                ->value('price_rate')
-                ->get();
+                ->value('price_rate');
 
-                Log::info('Price 5, rate fetched.'. $managementPriceRate);
+                Log::info('Price 5, rate fetched;  '. $managementPriceRate);
 
             if ($managementPriceRate) {
                 return response()->json([
@@ -90,7 +89,8 @@ class EverydayMemberCountAndBillingController extends Controller
                 $getUserManagementDailyPriceRateData = $getUserManagementDailyPriceRateResponse->getData(true);
                 Log::info('User management daily price rate fetched.');
 
-                $managementDailyPriceRate = $getUserManagementDailyPriceRateData['price_rate'];
+                $managementDailyPriceRate = $getUserManagementDailyPriceRateData['daily_price_rate'];
+
                 Log::info('Daily price rate for '. $userId.'is '. $managementDailyPriceRate);
 
                 // Calculate active members from org_member_lists
@@ -99,7 +99,7 @@ class EverydayMemberCountAndBillingController extends Controller
                     ->where('is_active', true) // Only count active members
                     ->count();
 
-                Log::info('org_members count ');
+                Log::info('Total member connected member: ' . $orgMembers);
 
                 // Calculate active members from org_independent_members
                 $independentMembers = DB::table('org_independent_members')
@@ -107,25 +107,19 @@ class EverydayMemberCountAndBillingController extends Controller
                     ->where('is_active', true) // Only count active members
                     ->count();
 
-                Log::info('org_independent_members count');
+                Log::info('org_independent_members count' . $independentMembers);
 
                 // Total active members
                 $totalMembers = $orgMembers + $independentMembers;
 
-                Log::info('Total members');
+                Log::info('Total members is: ' . $totalMembers);
 
-                // Calculate the price rate per member
-                //$managementDailyPriceRate = 3; // Your price rate per member
-                 // Your price rate per member
+                Log::info('Daily price rate for '. $userId. ' is: '. $managementDailyPriceRate);
 
-                Log::info('Daily price rate for '. $userId. ' is 4 -'. $managementDailyPriceRate);
-
-                // Calculate the total bill amount based on the members and price rate
                 $dayTotalBill = $totalMembers * $managementDailyPriceRate;
                 
-                Log::info('Day total member count and day bill calculation successfully completed.');
+                Log::info('Day total bill: ' . $dayTotalBill);
 
-                // Insert the count into org_member_counts
                 DB::table('everyday_member_count_and_billings')->updateOrInsert(
                     [
                         'user_id' => $userId,

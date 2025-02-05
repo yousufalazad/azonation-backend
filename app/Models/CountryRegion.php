@@ -21,19 +21,9 @@ class CountryRegion extends Model
         'updated_at'
     ];
 
-    public function regionCurrency()
-    {
-        return $this->belongsTo(RegionCurrency::class, 'region_id', 'region_id');
-    }
-
-    //     public function region()
-    // {
-    //     return $this->belongsTo(Region::class);
-    // }
+   //for management and storage everyday bill calculation
     public function region()
     {
-        // return $this->belongsTo(Region::class, 'region_id', 'id');
         return $this->hasOne(Region::class, 'id', 'region_id');
-
     }
 }

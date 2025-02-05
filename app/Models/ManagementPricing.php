@@ -22,10 +22,6 @@ class ManagementPricing extends Model
         'updated_at'
     ];
 
-    public function region()
-    {
-        return $this->belongsTo(Region::class);
-    }
 
     public function managementPackage()
     {

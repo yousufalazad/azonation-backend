@@ -58,21 +58,16 @@ class User extends Authenticatable
         return $this->hasOne(UserCountry::class, 'user_id', 'id');
     }
 
-
     public function managementSubscription()
     {
         return $this->hasOne(ManagementSubscription::class, 'user_id', 'id')->where('is_active', true);
     }
 
-    // public function country()
-    // {
-    //     return $this->belongsTo(UserCountry::class, 'id', 'user_id')->where('is_active', true);
-    // }
-
     public function storageSubscription()
     {
         return $this->hasOne(StorageSubscription::class, 'user_id', 'id')->where('is_active', true);
     }
+    
     public function managementAndStorageBilling()
     {
         return $this->hasMany(ManagementAndStorageBilling::class, 'user_id', 'id')->where('is_active', true);

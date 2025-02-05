@@ -20,4 +20,9 @@ class Currency extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function regionCurrency()
+    {
+        return $this->belongsTo(RegionCurrency::class, 'currency_id', 'id')->where('is_active', true);
+    }
 }

@@ -22,4 +22,9 @@ class StoragePackage extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function storagePricing()
+    {
+        return $this->hasOne(storagePricing::class, 'storage_package_id', 'id')->where('is_active', true);
+    }
 }
