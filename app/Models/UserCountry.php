@@ -24,9 +24,4 @@ class UserCountry extends Model
     {
         return $this->hasOne(Country::class, 'id', 'country_id');
     }
-
-    // public function region()
-    // {
-    //     return $this->hasOne(CountryRegion::class, 'country_id', 'country_id')->where('is_active', true);
-    // }
 }

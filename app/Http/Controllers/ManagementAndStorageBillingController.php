@@ -53,6 +53,7 @@ class ManagementAndStorageBillingController extends Controller
             // Traverse relationships to find the currency
             $userCurrency = $user->userCountry // Fetch user's country
                 ->country // Access the associated country
+                ->countryRegion
                 ->region // Access the associated region
                 ->regionCurrency // Fetch region's currency
                 ->currency; // Get the actual currency

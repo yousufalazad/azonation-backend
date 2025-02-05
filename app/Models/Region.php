@@ -26,4 +26,9 @@ class Region extends Model
     return $this->hasOne(ManagementPricing::class, 'region-id', 'id')->where('is_active', true);
 }
 
+public function regionCurrency()
+{
+    return $this->hasOne(RegionCurrency::class, 'region_id', 'id')->where('is_active', true);
+}
+
 }

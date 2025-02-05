@@ -23,6 +23,6 @@ class RegionCurrency extends Model
 
     public function currency()
     {
-        return $this->belongsTo(Currency::class);
+        return $this->hasOne(Currency::class, 'id', 'currency_id')->where('is_active', true);
     }
 }
