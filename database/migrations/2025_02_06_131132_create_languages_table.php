@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('language_lists', function (Blueprint $table) {
+        Schema::create('languages', function (Blueprint $table) {
             $table->id();
 
             // Full name of the language (e.g., 'English', 'French')
@@ -29,7 +29,6 @@ return new class extends Migration
 
             $table->boolean('is_active')->default(true); // Indicates whether the language_lists is active or not
 
-            // Timestamps for created_at and updated_at
             $table->timestamps();
         });
     }
@@ -39,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('language_lists');
+        Schema::dropIfExists('languages');
     }
 };
