@@ -32,8 +32,12 @@ class EverydayStorageBillingController extends Controller
 
      public function getUserStorageDailyPriceRate($userId)
      {        
+        Log::info('User rate for: '. $userId);
+
          $user = User::with(['userCountry.country.countryRegion.region', 'storageSubscription.storagePackage'])->findOrFail($userId);
-         
+
+         Log::info('User getUserStorageDailyPriceRate: '. $user->id);
+
          $storageSubscriptionPackageData = $user->storageSubscription->storagePackage;
          $regionData = $user->userCountry->country->countryRegion->region;
          
@@ -48,15 +52,17 @@ class EverydayStorageBillingController extends Controller
     {
         try {
             $users = User::where('type', 'organisation')->get();
-
+            Log::info('User store ' . $users);
             $userData = $users->map(function ($user) {
                 $userId = $user->id;
                 $date = today();
+                Log::info('User store ' . $userId);
 
                 //Get storage daily price rate from other function
                 $storageDailyPriceRate = $this->getUserStorageDailyPriceRate($userId);
 
                 $dayTotalBill = 1 * $storageDailyPriceRate; // 1 for one day
+                Log::info('User store ' . $dayTotalBill . ' fro user: ' . $userId);                
 
                 DB::table('everyday_storage_billings')->updateOrInsert(
                     [
