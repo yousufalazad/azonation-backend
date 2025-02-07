@@ -33,14 +33,29 @@ class OrderController extends Controller
         try {
             DB::transaction(function () {
 
+                Log::info('Generating orders from management and storage billings...');
                 // Fetch all ManagementAndStorageBilling 
-                $billings = ManagementAndStorageBilling::where('bill_status', 'issued')->get();
+                $billings = ManagementAndStorageBilling::where('bill_status', 'issued')
+                    ->where('billing_month', Carbon::now()->format('F')) // Fetch orders created within current month
+                    ->where('billing_year', Carbon::now()->format('Y')) // Fetch orders created within current year
+                    ->get();
+
+                Log::info('Total billings found: ' . $billings->count());
 
                 foreach ($billings as $billing) {
+                    // Check if order already exists with the same billing_code
+                    $existingOrder = Order::where('billing_code', $billing->billing_code)->first();
+                    if ($existingOrder) {
+                        Log::info('Order already exists for billing code: ' . $billing->billing_code);
+                        continue; // Skip this billing and move to the next
+                    }
+
+
                     $user = $billing->user_id;
                     if (!$user) {
                         continue; // Skip if user is not found
                     }
+
 
                     // Create an order
                     $order = Order::create([
@@ -86,7 +101,8 @@ class OrderController extends Controller
                             'is_active'         => true
                         ]);
                     } else {
-                        return response()->json(['status' => false, 'message' => 'Product not found.'], 404);
+                        Log::error('Management product not found for billing code: ' . $billing->billing_code);
+                        continue;  // Skip to the next billing if product is not found
                     }
 
                     // Retrieve related products for the storage
@@ -105,7 +121,8 @@ class OrderController extends Controller
                             'is_active'         => true
                         ]);
                     } else {
-                        return response()->json(['status' => false, 'message' => 'Product not found.'], 404);
+                        Log::error('Storage product not found for billing code: ' . $billing->billing_code);
+                        continue;  // Skip to the next billing if product is not found
                     }
 
                     // Create order details
