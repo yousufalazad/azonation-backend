@@ -32,39 +32,15 @@ class EverydayMemberCountAndBillingController extends Controller
     public function getUserManagementDailyPriceRate($userId)
     {
         try {
-            Log::info("price 1---" . $userId);
-            // Fetch the user
             $user = User::with(['userCountry.country.countryRegion.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
-
-            Log::info("price 2---" . $user);
-
-            $managementPackageData = $user->managementSubscription->managementPackage;
-            Log::info("price 3---, Management package ID: " . $managementPackageData->id);
-            
-    
+            $managementPackageData = $user->managementSubscription->managementPackage;            
             $regionData = $user->userCountry->country->countryRegion->region;
-            Log::info("price 4--- Region data: ". $regionData->id);
 
-
-            Log::info("before pricing");
-
-            // Fetch the price rate for the region and package
             $managementPriceRate = ManagementPricing::where('region_id', $regionData->id)
                 ->where('management_package_id', $managementPackageData->id)
                 ->value('price_rate');
+            return $managementPriceRate;
 
-                Log::info('Price 5, rate fetched;  '. $managementPriceRate);
-
-            if ($managementPriceRate) {
-                return response()->json([
-                    'daily_price_rate' => $managementPriceRate,
-                ]);
-            } else {
-                return response()->json([
-                    'error' => 'Price rate not found for the user\'s region and package',
-                ], 404);
-            }
-            
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
@@ -75,25 +51,14 @@ class EverydayMemberCountAndBillingController extends Controller
 
     public function store(Request $request)
     {
-        Log::info('started.');
         try {
             $users = User::where('type', 'organisation')->get();
-
-            Log::info('Everyday Management bill generation started for ' . $users->count() . ' users.');
 
             $singleUserData = $users->map(function ($user) {
                 $userId = $user->id;
                 $date = today();
 
-                $getUserManagementDailyPriceRateResponse = $this->getUserManagementDailyPriceRate($userId);
-                $getUserManagementDailyPriceRateData = $getUserManagementDailyPriceRateResponse->getData(true);
-                Log::info('User management daily price rate fetched.');
-
-                $managementDailyPriceRate = $getUserManagementDailyPriceRateData['daily_price_rate'];
-
-                Log::info('Daily price rate for '. $userId.'is '. $managementDailyPriceRate);
-
-                // Calculate active members from org_member_lists
+                // Calculate active members from org_members
                 $orgMembers = DB::table('org_members')
                     ->where('org_type_user_id', $userId)
                     ->where('is_active', true) // Only count active members
@@ -107,18 +72,13 @@ class EverydayMemberCountAndBillingController extends Controller
                     ->where('is_active', true) // Only count active members
                     ->count();
 
-                Log::info('org_independent_members count' . $independentMembers);
-
-                // Total active members
+                // Total members
                 $totalMembers = $orgMembers + $independentMembers;
 
-                Log::info('Total members is: ' . $totalMembers);
-
-                Log::info('Daily price rate for '. $userId. ' is: '. $managementDailyPriceRate);
+                //Get management daily price rate from other function
+                $managementDailyPriceRate = $this->getUserManagementDailyPriceRate($userId);
 
                 $dayTotalBill = $totalMembers * $managementDailyPriceRate;
-                
-                Log::info('Day total bill: ' . $dayTotalBill);
 
                 DB::table('everyday_member_count_and_billings')->updateOrInsert(
                     [
@@ -131,10 +91,7 @@ class EverydayMemberCountAndBillingController extends Controller
                         'is_active' => true,
                     ]
                 );
-
             });
-            Log::info('Day total member count and day bill calculation successfully recorded.');
-
             return response()->json([
                 'message' => 'Day total member count and day bill calculation successfully recorded.',
                 'status' => true,

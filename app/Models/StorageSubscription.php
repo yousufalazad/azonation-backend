@@ -28,7 +28,7 @@ class StorageSubscription extends Model
         'updated_at'
     ];
 
-    public function package()
+    public function storagePackage()
     {
         return $this->belongsTo(StoragePackage::class, 'storage_package_id', 'id');
     }

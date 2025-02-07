@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class EverydayStorageBilling extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'date',
+        'day_bill_amount',
+        'is_active'
+    ];
 
     protected $hidden = [
         'created_at',

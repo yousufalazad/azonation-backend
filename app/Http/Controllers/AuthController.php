@@ -19,44 +19,6 @@ use Illuminate\Support\Carbon;
 
 class AuthController extends Controller
 {
-    // Method to handle successful responses
-    protected function success($message, $data = [], $status = 200)
-    {
-        return response()->json(data: [
-            'status' => 'success',
-            'message' => $message,
-            'data' => $data
-        ], status: $status);
-    }
-
-    // Method to handle error responses
-    protected function error($message, $errors = [], $status = 422)
-    {
-        return response()->json([
-            'status' => 'error',
-            'message' => $message,
-            'errors' => $errors
-        ], $status);
-    }
-
-    public function verify($uuid)
-    {
-        // Find the user by UUID in the database
-        $user = User::where('verification_token', $uuid)->first();
-
-        if (!$user) {
-            return redirect('/')->with('error', 'Invalid verification link.');
-        }
-
-        // Update the email_verified_at column
-        $user->email_verified_at = Carbon::now();
-        $user->verification_token = null; // Optionally remove the token
-        $user->save();
-
-        return redirect('/')->with('success', 'Your email has been verified!');
-    }
-
-    // Method to handle individual registration creation
     public function register(Request $request)
     {
         $request->validate([
@@ -73,7 +35,6 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'type' => $request->type,
-            'image' => $request->image,
             'password' => Hash::make($request->password),
             // 'azon_id' => $request->azon_id,
         ]);
@@ -134,6 +95,46 @@ class AuthController extends Controller
         }
     }
 
+    // Method to handle successful responses
+    protected function success($message, $data = [], $status = 200)
+    {
+        return response()->json(data: [
+            'status' => 'success',
+            'message' => $message,
+            'data' => $data
+        ], status: $status);
+    }
+
+    // Method to handle error responses
+    protected function error($message, $errors = [], $status = 422)
+    {
+        return response()->json([
+            'status' => 'error',
+            'message' => $message,
+            'errors' => $errors
+        ], $status);
+    }
+
+    public function verify($uuid)
+    {
+        // Find the user by UUID in the database
+        $user = User::where('verification_token', $uuid)->first();
+
+        if (!$user) {
+            return redirect('/')->with('error', 'Invalid verification link.');
+        }
+
+        // Update the email_verified_at column
+        $user->email_verified_at = Carbon::now();
+        $user->verification_token = null; // Optionally remove the token
+        $user->save();
+
+        return redirect('/')->with('success', 'Your email has been verified!');
+    }
+
+    // Method to handle register user
+    
+
     //WHY THIS FUNCTION??????????
     // public function user(Request $request)
     // {
@@ -169,7 +170,6 @@ class AuthController extends Controller
     //         'data' => $user
     //     ]);
     // }
-
 
 
 
@@ -363,6 +363,7 @@ class AuthController extends Controller
 
     //----------------------------------------------------------------
     //not checking $userId vs auth()
+
     public function updatePassword(Request $request, $userId)
     {
         // Validate the request
