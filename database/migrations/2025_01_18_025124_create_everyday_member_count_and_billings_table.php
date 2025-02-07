@@ -17,7 +17,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->onDelete('cascade'); // Cascade on delete to remove associated recognitions
 
-            $table->date('date')->unique()->comment('Date of the record');
+            $table->date('date')->comment('Date of the record');
             $table->integer('day_total_member')->comment('Day total member count');
             $table->integer('day_total_bill')->comment('day_total_member * price_rate');
             $table->boolean('is_active')->default(true)->comment('Indicates if the day bill is active');

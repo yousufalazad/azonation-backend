@@ -30,7 +30,6 @@ class AuthController extends Controller
         ]);
 
         // Create a new user record
-        // User profile photo/logo path will store in ther user table
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -38,6 +37,27 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             // 'azon_id' => $request->azon_id,
         ]);
+
+        // Add default management and storage subscription for organisation users
+        if ($request->type == 'organisation') {
+            $user->managementSubscription()->create([
+                'user_id' => $user->user_id,
+                'management_package_id' => 1, // Default management package ID
+                'start_date' => now(),
+                'subscription_status' => 'active',
+                'is_active' => 1,
+                'created_at' => now(),
+            ]);
+
+            $user->storageSubscription()->create([
+                'user_id' => $user->user_id,
+                'storage_package_id' => 1, // Default storage package ID
+                'start_date' => now(),
+                'subscription_status' => 'active',
+                'is_active' => 1,
+                'created_at' => now(),
+            ]);
+        }
 
         // Send email function call
         $this->sendEmail($user);
