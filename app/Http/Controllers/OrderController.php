@@ -86,12 +86,12 @@ class OrderController extends Controller
                     }
 
                     // Retrieve related products for the billing
-                    $managementPortalSubscriptionProduct = Product::where('id', 1)->first();
-                    if ($managementPortalSubscriptionProduct && $managementPortalSubscriptionProduct->id == 1) {
+                    $managementSubscriptionProduct = Product::where('id', 1)->first();
+                    if ($managementSubscriptionProduct && $managementSubscriptionProduct->id == 1) {
                         OrderItem::create([
                             'order_id'          => $order->id,
-                            'product_id'        => $managementPortalSubscriptionProduct->id,
-                            'product_name'      => $managementPortalSubscriptionProduct->name,
+                            'product_id'        => $managementSubscriptionProduct->id,
+                            'product_name'      => $managementSubscriptionProduct->name,
                             'product_attributes' => null,
                             'unit_price'        => $billing->total_management_bill_amount,
                             'quantity'          => 1,
