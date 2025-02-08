@@ -18,7 +18,8 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    // 'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => env('SESSION_DRIVER', 'cookie'),  // Ensure it’s set to 'cookie' or 'file'
 
     /*
     |--------------------------------------------------------------------------
@@ -129,7 +130,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'laravel'), '_').'_session'
+        Str::slug(env('APP_NAME', 'laravel'), '_') . '_session'
     ),
 
     /*
@@ -159,6 +160,12 @@ return [
     //'domain' => env('SESSION_DOMAIN'),
     'domain' => env('SESSION_DOMAIN', null),
 
+
+    //copy from chatGPT, need to remove after testing
+    //'domain' => env('SESSION_DOMAIN', '.yourdomain.com'), // Ensure it matches your frontend domain
+    'secure' => env('SESSION_SECURE_COOKIE', false), // false for local development without HTTPS
+
+
     /*
     |--------------------------------------------------------------------------
     | HTTPS Only Cookies
@@ -170,7 +177,7 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    //'secure' => env('SESSION_SECURE_COOKIE'),
 
     /*
     |--------------------------------------------------------------------------
