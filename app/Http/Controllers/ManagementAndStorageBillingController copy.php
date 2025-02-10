@@ -53,6 +53,7 @@ class ManagementAndStorageBillingController extends Controller
             // Traverse relationships to find the currency
             $userCurrency = $user->userCountry // Fetch user's country
                 ->country // Access the associated country
+                ->countryRegion
                 ->region // Access the associated region
                 ->regionCurrency // Fetch region's currency
                 ->currency; // Get the actual currency
@@ -168,7 +169,7 @@ class ManagementAndStorageBillingController extends Controller
         }
     }
 
-    public function storeBySystem(Request $request)
+    public function storeManually(Request $request)
     {
         $request->validate([
             //'billing_code' => 'required',
@@ -181,9 +182,9 @@ class ManagementAndStorageBillingController extends Controller
             // 'period_end' => 'date|nullable',
             // 'service_month' => 'string|max:9|nullable',
             // 'billing_month' => 'string|max:9|nullable',
-            // 'total_member' => 'numeric|min:0|nullable',
-            // 'total_management_bill_amount' => 'numeric|min:0|nullable',
-            // 'total_storage_bill_amount' => 'numeric|min:0|nullable',
+            // 'total_active_member' => 'numeric|min:0|nullable',
+            // 'total_billable_active_member' => 'numeric|min:0|nullable',
+            // 'price_rate' => 'numeric|min:0|nullable',
             // 'bill_amount' => 'numeric|min:0|nullable',
             // 'status' => 'string|max:15|nullable',
             // 'admin_notes' => 'string|max:255|nullable',
@@ -194,17 +195,18 @@ class ManagementAndStorageBillingController extends Controller
             // 'billing_code' => $request->billing_code,
             'user_id' => $request->user()->id,
             'user_name' => $request->user()->name,
+            'description' => $request->description,
+            'billing_address' => $request->billing_address,
+            'item_name' => $request->item_name,
             'period_start' => $request->period_start,
             'period_end' => $request->period_end,
             'service_month' => $request->service_month,
-            'service_year' => $request->service_year,
             'billing_month' => $request->billing_month,
-            'billing_year' => $request->billing_year,
-            'total_member' => $request->total_member,
-            'total_management_bill_amount' => $request->total_management_bill_amount,
-            'total_storage_bill_amount' => $request->total_storage_bill_amount,
-            'currency_code' => $request->currency_code,
-            'bill_status' => $request->bill_status,
+            'total_active_member' => $request->total_active_member,
+            'total_billable_active_member' => $request->total_billable_active_member,
+            'price_rate' => $request->price_rate,
+            'bill_amount' => $request->bill_amount,
+            'status' => $request->status,
             'admin_notes' => $request->admin_notes,
             'is_active' => $request->is_active,
         ]);
@@ -255,36 +257,40 @@ class ManagementAndStorageBillingController extends Controller
         // Validate the incoming request data
         $request->validate([
             //'billing_code' => 'required',
-            // 'period_start' => 'date|nullable',
-            // 'period_end' => 'date|nullable',
-            // 'service_month' => 'string|max:9|nullable',
-            // 'service_year' => 'string|max:9|nullable',
-            // 'billing_month' => 'string|max:9|nullable',
-            // 'billing_year' => 'string|max:9|nullable',
-            // 'total_member' => 'numeric|min:0|nullable',
-            // 'total_management_bill_amount' => 'numeric|min:0|nullable',
-            // 'total_storage_bill_amount' => 'numeric|min:0|nullable',
-            // 'bill_amount' => 'numeric|min:0|nullable',
-            // 'bill_status' => 'string|max:15|nullable',
-            // 'admin_notes' => 'string|max:255|nullable',
-            // 'is_active' => 'nullable',
+            'user_id' => 'number|nullable',
+            'user_name' => 'string|max:100|nullable',
+            'description' => 'string|max:255|nullable',
+            'billing_address' => 'string|max:255|nullable',
+            'item_name' => 'string|max:255|nullable',
+            'period_start' => 'date|nullable',
+            'period_end' => 'date|nullable',
+            'service_month' => 'string|max:9|nullable',
+            'billing_month' => 'string|max:9|nullable',
+            'total_active_member' => 'numeric|min:0|nullable',
+            'total_billable_active_member' => 'numeric|min:0|nullable',
+            'price_rate' => 'numeric|min:0|nullable',
+            'bill_amount' => 'numeric|min:0|nullable',
+            'status' => 'string|max:15|nullable',
+            'admin_notes' => 'string|max:255|nullable',
+            'is_active' => 'nullable',
         ]);
         // Find the existing billing record by ID
         $billing = ManagementAndStorageBilling::findOrFail($id);
         // Update the billing record with the new data
         $billing->update([
             //'billing_code' => $request->billing_code,
+            'description' => $request->description,
+            'billing_address' => $request->billing_address,
+            'item_name' => $request->item_name,
             'period_start' => $request->period_start,
             'period_end' => $request->period_end,
             'service_month' => $request->service_month,
-            'service_year' => $request->service_year,
             'billing_month' => $request->billing_month,
-            'billing_year' => $request->billing_year,
-            'total_member' => $request->total_member,
-            'total_management_bill_amount' => $request->total_management_bill_amount,
-            'total_storage_bill_amount' => $request->total_storage_bill_amount,
+            'total_active_member' => $request->total_active_member,
+            'total_billable_active_member' => $request->total_billable_active_member,
+            'price_rate' => $request->price_rate,
             'bill_amount' => $request->bill_amount,
-            'bill_status' => $request->bill_status,
+            'status' => $request->status,
             'admin_notes' => $request->admin_notes,
             'is_active' => $request->is_active,
         ]);

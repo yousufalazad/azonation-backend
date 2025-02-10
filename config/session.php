@@ -4,6 +4,12 @@ use Illuminate\Support\Str;
 
 return [
 
+    'driver' => env('SESSION_DRIVER', 'database'),
+    'cookie' => env('SESSION_COOKIE', Str::slug(env('APP_NAME', 'laravel'), '_') . '_session'),
+    'domain' => env('SESSION_DOMAIN', null),
+    'secure' => env('SESSION_SECURE_COOKIE', true),  // Set to true if using HTTPS
+    'same_site' => 'lax',
+
     /*
     |--------------------------------------------------------------------------
     | Default Session Driver
@@ -19,7 +25,7 @@ return [
     */
 
     // 'driver' => env('SESSION_DRIVER', 'database'),
-    'driver' => env('SESSION_DRIVER', 'cookie'),  // Ensure it’s set to 'cookie' or 'file'
+    //'driver' => env('SESSION_DRIVER', 'cookie'),  // Ensure it’s set to 'cookie' or 'file'
 
     /*
     |--------------------------------------------------------------------------
@@ -33,7 +39,7 @@ return [
     |
     */
 
-    'lifetime' => env('SESSION_LIFETIME', 120),
+    'lifetime' => env('SESSION_LIFETIME', 240),
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
@@ -128,10 +134,13 @@ return [
     |
     */
 
-    'cookie' => env(
-        'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'laravel'), '_') . '_session'
-    ),
+    // 'cookie' => env(
+    //     'SESSION_COOKIE',
+    //     Str::slug(env('APP_NAME', 'laravel'), '_') . '_session'
+    // ),
+
+    //'cookie' => env('SESSION_COOKIE', 'laravel_session'),
+
 
     /*
     |--------------------------------------------------------------------------
@@ -158,12 +167,12 @@ return [
     */
 
     //'domain' => env('SESSION_DOMAIN'),
-    'domain' => env('SESSION_DOMAIN', null),
+    //'domain' => env('SESSION_DOMAIN', null),
 
 
     //copy from chatGPT, need to remove after testing
     //'domain' => env('SESSION_DOMAIN', '.yourdomain.com'), // Ensure it matches your frontend domain
-    'secure' => env('SESSION_SECURE_COOKIE', false), // false for local development without HTTPS
+    //'secure' => env('SESSION_SECURE_COOKIE', false), // false for local development without HTTPS
 
 
     /*
@@ -207,8 +216,8 @@ return [
     |
     */
 
-    'same_site' => env('SESSION_SAME_SITE', 'lax'),
-    'same_site' => 'lax',
+    //'same_site' => env('SESSION_SAME_SITE', 'lax'),
+    //'same_site' => 'lax',
 
     /*
     |--------------------------------------------------------------------------

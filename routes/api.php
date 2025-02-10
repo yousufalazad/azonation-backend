@@ -30,7 +30,6 @@ use App\Http\Controllers\Org\OrgAdministratorController;
 use App\Http\Controllers\PhoneNumberController;
 
 //Event Controller
-use App\Http\Controllers\Org\OrgEventController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventAttendanceController;
 use App\Http\Controllers\EventSummaryController;
@@ -40,7 +39,6 @@ use App\Http\Controllers\EventGuestAttendanceController;
 //Project
 use App\Http\Controllers\ProjectAttendanceController;
 use App\Http\Controllers\ProjectSummaryController;
-//use App\Http\Controllers\Org\OrgProjectController;
 use App\Http\Controllers\Org\ProjectController;
 use App\Http\Controllers\ProjectGuestAttendanceController;
 
@@ -53,12 +51,9 @@ use App\Http\Controllers\Org\OrgProfileController;
 
 use App\Http\Controllers\SuccessStoryController;
 use App\Http\Controllers\StrategicPlanController;
-//use App\Http\Controllers\OrgHistoryController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\YearPlanController;
-// use App\Http\Controllers\OrgRecognitionController;
 use App\Http\Controllers\RecognitionController;
-//use App\Http\Controllers\OrgAccountController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AccountFundController;
 use App\Http\Controllers\OrgReportController;
@@ -67,7 +62,6 @@ use App\Http\Controllers\PrivacySetupController;
 use App\Http\Controllers\AssetLifecycleStatusController;
 
 //Org office record
-//use App\Http\Controllers\OrgOfficeRecordController;
 use App\Http\Controllers\OfficeRecordController;
 
 
@@ -77,6 +71,8 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ActiveMemberCountController;
 use App\Http\Controllers\HonoraryMemberCountController;
 use App\Http\Controllers\ManagementAndStorageBillingController;
+use App\Http\Controllers\EverydayMemberCountAndBillingController;
+use App\Http\Controllers\EverydayStorageBillingController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\CurrencyController;
 
@@ -96,7 +92,6 @@ use App\Http\Controllers\UserCountryController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\CountryRegionController;
 use App\Http\Controllers\RegionCurrencyController;
-use App\Http\Controllers\ActiveHonoraryMemberCount;
 use App\Http\Controllers\PaymentLogController;
 use App\Http\Controllers\RegionalTaxRateController;
 
@@ -108,10 +103,6 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReceiptController;
-
-
-
-
 
 
 //API for auth
@@ -142,6 +133,11 @@ Route::middleware([
 
 
     // ------------------- Organisation----------------------------------------------------------------
+
+    //Billing
+    Route::get('billing-list', [ManagementAndStorageBillingController::class, 'index']);
+
+
     // Accounts
     Route::get('/get-transactions', [AccountController::class, 'getTransactions']);
     Route::post('/create-transaction', [AccountController::class, 'createTransaction']);
@@ -413,7 +409,26 @@ Route::middleware([
     Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show']);
 
     //Finance
-    //Billing
+
+
+    Route::get('superadmin-billing-list', [ManagementAndStorageBillingController::class, 'indexSuperAdmin']);
+    Route::get('get-billing/{id}', [ManagementAndStorageBillingController::class, 'show']);
+    Route::post('create-billing', [ManagementAndStorageBillingController::class, 'store']);
+    Route::post('system-create-billing', [ManagementAndStorageBillingController::class, 'storeBySystem']);
+    Route::put('update-billing/{id}', [ManagementAndStorageBillingController::class, 'update']);
+    Route::delete('delete-billing/{id}', [ManagementAndStorageBillingController::class, 'destroy']);
+
+    Route::get('every-day-member-count-list', [EverydayMemberCountAndBillingController::class, 'index']);
+    Route::get('get-every-day-member-count/{id}', [EverydayMemberCountAndBillingController::class, 'show']);
+    Route::post('create-every-day-member-count', [EverydayMemberCountAndBillingController::class, 'superAdminStore']);
+    Route::put('update-every-day-member-count/{id}', [EverydayMemberCountAndBillingController::class, 'update']);
+    Route::delete('delete-every-day-member-count/{id}', [EverydayMemberCountAndBillingController::class, 'destroy']);
+
+    Route::get('everyday-storage-billing-list', [EverydayStorageBillingController::class, 'index']);
+    Route::get('get-everyday-storage-billing/{id}', [EverydayStorageBillingController::class, 'show']);
+    Route::post('create-everyday-storage-billing', [EverydayStorageBillingController::class, 'superAdminStore']);
+    Route::put('update-everyday-storage-billing/{id}', [EverydayStorageBillingController::class, 'update']);
+    Route::delete('delete-everyday-storage-billing/{id}', [EverydayStorageBillingController::class, 'destroy']);
 
 
     //Invoice
