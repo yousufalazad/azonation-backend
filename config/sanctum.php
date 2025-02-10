@@ -83,4 +83,11 @@ return [
         'validate_csrf_token' => Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
     ],
 
+    //from ChatGPT, need to remove
+    'web' => [
+        Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        Illuminate\Session\Middleware\StartSession::class,
+        // Other middleware like CSRF, etc.
+    ],
+
 ];

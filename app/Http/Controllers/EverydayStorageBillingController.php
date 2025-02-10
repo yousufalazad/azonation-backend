@@ -18,7 +18,19 @@ class EverydayStorageBillingController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            $records = EverydayStorageBilling::all();
+            return response()->json([
+                'status' => true,
+                'data' => $records,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to retrieve records.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -31,39 +43,76 @@ class EverydayStorageBillingController extends Controller
 
 
      public function getUserStorageDailyPriceRate($userId)
-     {        
-        Log::info('User rate for: '. $userId);
+     {
+        Log::info('getUserStorageDailyPriceRate started for 7'. $userId); 
+        
+        // Get the user
+         $user = User::with(['country.region', 'storageSubscription.package'])->findOrFail($userId);
+     
+         Log::info('getUserStorageDailyPriceRate user data found 8'. $user->id);
 
-         $user = User::with(['userCountry.country.countryRegion.region', 'storageSubscription.storagePackage'])->findOrFail($userId);
-
-         Log::info('User getUserStorageDailyPriceRate: '. $user->id);
-
-         $storageSubscriptionPackageData = $user->storageSubscription->storagePackage;
-         $regionData = $user->userCountry->country->countryRegion->region;
+         // Check if the user has a valid subscription
+         $subscription = $user->storageSubscription;
+         if (!$subscription) {
+             throw new \Exception("User does not have an active storage subscription.");
+         }
          
-         $storagePriceRate = StoragePricing::where('region_id', $regionData->id)
-             ->where('storage_package_id', $storageSubscriptionPackageData->id)
-             ->value('price_rate');
+         Log::info('getUserStorageDailyPriceRate subscription found 9'. $subscription->id);
 
+         // Get the region ID from the user's country
+         $region = $user->country->region;
+         if (!$region) {
+             throw new \Exception("Region not found for the user's country.");
+         }
+         
+         Log::info('getUserStorageDailyPriceRate region found 10'. $region->region_id);
+
+         // Find the price rate for the user's subscription package in their region
+         $storagePriceRate = StoragePricing::where('region_id', $region->region_id)
+             ->where('storage_package_id', $subscription->storage_package_id)
+             ->value('price_rate');
+     
+             Log::info('Daily price rate for '. $userId. ' is '. $storagePriceRate);
+
+        //  if (is_null($storagePriceRate)) {
+        //      throw new \Exception("Price rate not found for the user's package in their region.");
+        //  }
+
+         if ($storagePriceRate === null) {
+            throw new \Exception("Price rate not found for the user's package in their region.");
+        }
+     
          return $storagePriceRate;
+
+        //  return response()->json([
+        //     'daily_price_rate' => $storagePriceRate,
+        // ]);
      }
 
     public function store(Request $request)
     {
+        Log::info('Everyday storage bill generation started. 1');
         try {
             $users = User::where('type', 'organisation')->get();
-            Log::info('User store ' . $users);
+            Log::info('Everyday storage bill generation started for '. $users->count().'users. 2');
+
             $userData = $users->map(function ($user) {
+                Log::info('Everyday storage bill generation started for 3 '. $user->id);
                 $userId = $user->id;
                 $date = today();
-                Log::info('User store ' . $userId);
 
-                //Get storage daily price rate from other function
-                $storageDailyPriceRate = $this->getUserStorageDailyPriceRate($userId);
+                // Calculate the price rate per member
+                //$storageDailyPriceRate = 0.03; // Your price rate per member
+                $storageDailyPriceRate = $this->getUserStorageDailyPriceRate($userId);; // Your price rate per member
 
+                Log::info('Daily price rate for '. $userId. ' is 4'. $storageDailyPriceRate);
+
+                // Calculate the total bill amount based on the members and price rate
                 $dayTotalBill = 1 * $storageDailyPriceRate; // 1 for one day
-                Log::info('User store ' . $dayTotalBill . ' fro user: ' . $userId);                
 
+                Log::info('hmm. 5');
+
+                // Insert the count into org_member_counts
                 DB::table('everyday_storage_billings')->updateOrInsert(
                     [
                         'user_id' => $userId,
@@ -74,7 +123,10 @@ class EverydayStorageBillingController extends Controller
                         'is_active' => true,
                     ]
                 );
+                Log::info('hmm 6');
             });
+
+            
 
             return response()->json([
                 'message' => 'Day storage bill calculation successfully recorded.',
@@ -90,12 +142,34 @@ class EverydayStorageBillingController extends Controller
         }
     }
 
+
+    public function superAdminStore(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            // 'is_active' => 'required|boolean',
+        ]);
+        $request['user_id'] = $request->user()->id;
+
+        $record = EverydayStorageBilling::create($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Record created successfully',
+            'data' => $record
+        ], 201);
+    }
+
     /**
      * Display the specified resource.
      */
-    public function show(EverydayStorageBilling $everydayStorageBilling)
+    public function show($id)
     {
-        //
+        $record = EverydayStorageBilling::find($id);
+        if (!$record) {
+            return response()->json(['message' => 'Record not found'], 404);
+        }
+        return response()->json(['status' => true, 'data' => $record], 200);
     }
 
     /**
@@ -109,16 +183,42 @@ class EverydayStorageBillingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, EverydayStorageBilling $everydayStorageBilling)
+    public function update(Request $request,  $id)
     {
-        //
+        $request->validate([
+            'date' => 'sometimes|required|date',
+            // 'is_active' => 'sometimes|required|boolean',
+        ]);
+
+        $record = EverydayStorageBilling::find($id);
+        if (!$record) {
+            return response()->json(['message' => 'Record not found'], 404);
+        }
+
+        $record->update($request->all());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Record updated successfully',
+            'data' => $record
+        ], 201);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(EverydayStorageBilling $everydayStorageBilling)
+    public function destroy( $id)
     {
-        //
+        $record = EverydayStorageBilling::find($id);
+        if (!$record) {
+            return response()->json(['message' => 'Record not found'], 404);
+        }
+
+        $record->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Deleted successfully.',
+        ], 200);
     }
 }
