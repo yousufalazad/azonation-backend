@@ -27,35 +27,19 @@ class OrderController extends Controller
         }
     }
 
-
     public function generateOrdersFromBillings()
     {
         try {
             DB::transaction(function () {
 
-                Log::info('Generating orders from management and storage billings...');
                 // Fetch all ManagementAndStorageBilling 
-                $billings = ManagementAndStorageBilling::where('bill_status', 'issued')
-                    ->where('billing_month', Carbon::now()->format('F')) // Fetch orders created within current month
-                    ->where('billing_year', Carbon::now()->format('Y')) // Fetch orders created within current year
-                    ->get();
-
-                Log::info('Total billings found: ' . $billings->count());
+                $billings = ManagementAndStorageBilling::where('bill_status', 'issued')->get();
 
                 foreach ($billings as $billing) {
-                    // Check if order already exists with the same billing_code
-                    $existingOrder = Order::where('billing_code', $billing->billing_code)->first();
-                    if ($existingOrder) {
-                        Log::info('Order already exists for billing code: ' . $billing->billing_code);
-                        continue; // Skip this billing and move to the next
-                    }
-
-
                     $user = $billing->user_id;
                     if (!$user) {
                         continue; // Skip if user is not found
                     }
-
 
                     // Create an order
                     $order = Order::create([
@@ -86,12 +70,12 @@ class OrderController extends Controller
                     }
 
                     // Retrieve related products for the billing
-                    $managementSubscriptionProduct = Product::where('id', 1)->first();
-                    if ($managementSubscriptionProduct && $managementSubscriptionProduct->id == 1) {
+                    $managementPortalSubscriptionProduct = Product::where('id', 1)->first();
+                    if ($managementPortalSubscriptionProduct && $managementPortalSubscriptionProduct->id == 1) {
                         OrderItem::create([
                             'order_id'          => $order->id,
-                            'product_id'        => $managementSubscriptionProduct->id,
-                            'product_name'      => $managementSubscriptionProduct->name,
+                            'product_id'        => $managementPortalSubscriptionProduct->id,
+                            'product_name'      => $managementPortalSubscriptionProduct->name,
                             'product_attributes' => null,
                             'unit_price'        => $billing->total_management_bill_amount,
                             'quantity'          => 1,
@@ -101,13 +85,12 @@ class OrderController extends Controller
                             'is_active'         => true
                         ]);
                     } else {
-                        Log::error('Management product not found for billing code: ' . $billing->billing_code);
-                        continue;  // Skip to the next billing if product is not found
+                        return response()->json(['status' => false, 'message' => 'Product not found.'], 404);
                     }
 
                     // Retrieve related products for the storage
-                    $storageSubscriptionProduct = Product::where('id', 2)->first();
-                    if ($storageSubscriptionProduct && $storageSubscriptionProduct->id == 2) {
+                    $storageSubscriptionProduct = Product::where('id', 3)->first();
+                    if ($storageSubscriptionProduct && $storageSubscriptionProduct->id == 3) {
                         OrderItem::create([
                             'order_id'          => $order->id,
                             'product_id'        => $storageSubscriptionProduct->id,
@@ -121,8 +104,7 @@ class OrderController extends Controller
                             'is_active'         => true
                         ]);
                     } else {
-                        Log::error('Storage product not found for billing code: ' . $billing->billing_code);
-                        continue;  // Skip to the next billing if product is not found
+                        return response()->json(['status' => false, 'message' => 'Product not found.'], 404);
                     }
 
                     // Create order details
@@ -148,36 +130,18 @@ class OrderController extends Controller
         }
     }
 
-
     public function store(Request $request)
     {
+        // dd( $request-all()); exit;
         $validated = $request->validate([
             // Order fields
             'user_id' => 'required|integer',
             'user_name' => 'required|string|max:255',
-            'order_number' => 'required|string|max:255',
+            'order_code' => 'required|string|max:255',
             'total_amount' => 'required|numeric',
-            'discount_amount' => 'nullable|numeric',
-            'shipping_cost' => 'nullable|numeric',
-            'total_tax' => 'nullable|numeric',
-            'currency' => 'nullable|string|max:10',
-            'shipping_status' => 'nullable|string|max:255',
-            'shipping_address' => 'required|string',
-            'billing_address' => 'required|string',
-            'coupon_code' => 'nullable|string|max:255',
-            'shipping_method' => 'nullable|string|max:255',
-            'shipping_note' => 'nullable|string',
-            'customer_note' => 'nullable|string',
-            'admin_note' => 'nullable|string',
-            'tracking_number' => 'nullable|string|max:255',
-            'order_date' => 'required|date',
-            'delivery_date_expected' => 'nullable|date',
-            'delivery_date_actual' => 'nullable|date',
-            'status' => 'required|string|max:50',
-            'cancelled_at' => 'nullable|date',
             'is_active' => 'required|boolean',
 
-            //OrderItem fields
+            // OrderItem fields
             'order_items' => 'required|array',
             'order_items.*.product_id' => 'required|integer',
             'order_items.*.product_name' => 'required|string|max:255',
@@ -191,23 +155,73 @@ class OrderController extends Controller
         ]);
 
         try {
-            // Create a new Order instance
-            $orderData = $validated;
-            unset($orderData['order_items']); // Remove order items for main Order model
-            $order = Order::create($orderData);
+            DB::beginTransaction();
 
-            // Process and save Order Items
+            // Create Order
+            $order = Order::create([
+                'user_id'         => $request->user_id ?? '', //$validated['user_id'],
+                'billing_code'    => $request->billing_code ?? '',
+                'order_code'      => $request->order_code ?? '',
+                'order_date'      => $request->order_date ?? Carbon::now(),
+                'user_name'       => $request->user_name ?? '', //$validated['user_name'],
+                'sub_total'       => $request->sub_total ?? 0,
+                'discount_amount' => $request->discount_amount ?? 0,
+                'shipping_cost'   => $request->shipping_cost ?? 0,
+                'total_tax'       => $request->total_tax ?? 0,
+                'credit_applied'  => $request->credit_applied ?? '',
+                'total_amount'    => $request->total_amount ?? '', //$validated['total_amount'],
+                'discount_title'  => $request->discount_title ?? '',
+                'tax_rate'        => $request->tax_rate ?? 0,
+                'currency_code'   => $request->currency_code ?? '',
+                'coupon_code'     => $request->coupon_code ?? '',
+                'payment_method'  => $request->payment_method ?? '',
+                'billing_address' => $request->billing_address ?? '',
+                'user_country'    => $request->user_country ?? '',
+                'user_region'     => $request->user_region ?? '',
+                'is_active'       => $request->is_active ?? 1, //$validated['is_active'],
+            ]);
+
+            // Create Order Details
+            OrderDetail::create([
+                'order_id'              => $order->id,
+                'shipping_address'      => $request->shipping_address ?? '',
+                'shipping_status'       => $request->shipping_status ?? '',
+                'shipping_method'       => $request->shipping_method ?? '',
+                'shipping_note'         => $request->shipping_note ?? '',
+                'customer_note'         => $request->customer_note ?? '',
+                'admin_note'            => $request->admin_note ?? '',
+                'tracking_number'       => $request->tracking_number ?? '',
+                'delivery_date_expected' => $request->delivery_date_expected ?? now()->addDays(1),
+                'delivery_date_actual'  => $request->delivery_date_actual ?? now()->addDays(1),
+                'order_status'          => $request->order_status ?? '',
+                'cancelled_at'          => $request->cancelled_at ?? null,
+                'cancellation_reason'   => $request->cancellation_reason ?? '',
+            ]);
+
+            // Create Order Items
             foreach ($validated['order_items'] as $itemData) {
-                $itemData['order_id'] = $order->id; // Associate the order ID
+                $itemData['order_id'] = $order->id; // Associate order ID
                 OrderItem::create($itemData);
             }
 
-            return response()->json(['status' => true, 'message' => 'Order created successfully.', 'data' => $order], 201);
+            DB::commit();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Order created successfully.',
+                'order'   => $order
+            ], 201);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => 'Error creating order.', 'error' => $e->getMessage()], 500);
+            DB::rollBack();
+            Log::error('Order creation failed: ' . $e->getMessage());
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Error creating order.',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
-
 
     /**
      * Display the specified product.
@@ -216,7 +230,9 @@ class OrderController extends Controller
     {
         try {
             // Retrieve the Order with its associated OrderItems
-            $order = Order::with('orderItems')->findOrFail($id);
+            $order = Order::with(['orderDetail', 'orderItems'])->find($id);
+
+            // $order = Order::with('orderItems')->findOrFail($id);
 
             return response()->json([
                 'status' => true,
@@ -231,43 +247,23 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    
 
-    /**
-     * Update the specified product in storage.
-     */
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
             // Order fields
             'user_id' => 'required|integer',
             'user_name' => 'required|string|max:255',
-            'order_number' => 'required|string|max:255',
+            'order_code' => 'required|string|max:255',
             'total_amount' => 'required|numeric',
-            'discount_amount' => 'nullable|numeric',
-            'shipping_cost' => 'nullable|numeric',
-            'total_tax' => 'nullable|numeric',
-            'currency' => 'nullable|string|max:10',
-            'shipping_status' => 'nullable|string|max:255',
-            'shipping_address' => 'required|string',
-            'billing_address' => 'required|string',
-            'coupon_code' => 'nullable|string|max:255',
-            'shipping_method' => 'nullable|string|max:255',
-            'shipping_note' => 'nullable|string',
-            'customer_note' => 'nullable|string',
-            'admin_note' => 'nullable|string',
-            'tracking_number' => 'nullable|string|max:255',
-            'order_date' => 'required|date',
-            'delivery_date_expected' => 'nullable|date',
-            'delivery_date_actual' => 'nullable|date',
-            'status' => 'required|string|max:50',
-            'cancelled_at' => 'nullable|date',
             'is_active' => 'required|boolean',
 
             // OrderItem fields
             'order_items' => 'required|array',
-            'order_items.*.id' => 'nullable|integer', // For existing items
+            'order_items.*.id' => 'nullable|integer',
             'order_items.*.product_id' => 'required|integer',
-            'order_items.*.product_name' => 'nullable|string|max:255',
+            'order_items.*.product_name' => 'required|string|max:255',
             'order_items.*.product_attributes' => 'nullable|string',
             'order_items.*.unit_price' => 'required|numeric',
             'order_items.*.quantity' => 'required|integer',
@@ -275,46 +271,139 @@ class OrderController extends Controller
             'order_items.*.discount_amount' => 'nullable|numeric',
             'order_items.*.note' => 'nullable|string',
             'order_items.*.is_active' => 'nullable|boolean',
+
+            // Order Details fields
+            'shipping_address' => 'nullable|string',
+            'shipping_status' => 'nullable|string',
+            'shipping_method' => 'nullable|string',
+            'shipping_note' => 'nullable|string',
+            'customer_note' => 'nullable|string',
+            'admin_note' => 'nullable|string',
+            'tracking_number' => 'nullable|string',
+            'delivery_date_expected' => 'nullable|date',
+            'delivery_date_actual' => 'nullable|date',
+            'order_status' => 'nullable|string',
+            'cancelled_at' => 'nullable|date',
+            'cancellation_reason' => 'nullable|string',
         ]);
 
         try {
-            // Find the Order
+            DB::beginTransaction();
+
+            // Find the order
             $order = Order::findOrFail($id);
 
-            // Update Order fields
-            $orderData = $validated;
-            unset($orderData['order_items']); // Remove order items for main Order model
-            $order->update($orderData);
+            // Update order
+            $order->update([
+                'user_id'         => $request->user_id,
+                'billing_code'    => $request->billing_code ?? $order->billing_code,
+                'order_code'      => $request->order_code,
+                'order_date'      => $request->order_date ?? $order->order_date,
+                'user_name'       => $request->user_name,
+                'sub_total'       => $request->sub_total ?? $order->sub_total,
+                'discount_amount' => $request->discount_amount ?? $order->discount_amount,
+                'shipping_cost'   => $request->shipping_cost ?? $order->shipping_cost,
+                'total_tax'       => $request->total_tax ?? $order->total_tax,
+                'credit_applied'  => $request->credit_applied ?? $order->credit_applied,
+                'total_amount'    => $request->total_amount,
+                'discount_title'  => $request->discount_title ?? $order->discount_title,
+                'tax_rate'        => $request->tax_rate ?? $order->tax_rate,
+                'currency_code'   => $request->currency_code ?? $order->currency_code,
+                'coupon_code'     => $request->coupon_code ?? $order->coupon_code,
+                'payment_method'  => $request->payment_method ?? $order->payment_method,
+                'billing_address' => $request->billing_address ?? $order->billing_address,
+                'user_country'    => $request->user_country ?? $order->user_country,
+                'user_region'     => $request->user_region ?? $order->user_region,
+                'is_active'       => $request->is_active,
+            ]);
 
-            // Process Order Items
-            $existingItems = $order->orderItems()->pluck('id')->toArray();
-            $submittedItems = collect($validated['order_items']);
+            // Update or create OrderDetail
+            if ($order->orderDetail) {
+                $order->orderDetail->update([
+                    'shipping_address' => $request->shipping_address ?? $order->orderDetail->shipping_address,
+                    'shipping_status'  => $request->shipping_status ?? $order->orderDetail->shipping_status,
+                    'shipping_method'  => $request->shipping_method ?? $order->orderDetail->shipping_method,
+                    'shipping_note'    => $request->shipping_note ?? $order->orderDetail->shipping_note,
+                    'customer_note'    => $request->customer_note ?? $order->orderDetail->customer_note,
+                    'admin_note'       => $request->admin_note ?? $order->orderDetail->admin_note,
+                    'tracking_number'  => $request->tracking_number ?? $order->orderDetail->tracking_number,
+                    'delivery_date_expected' => $request->delivery_date_expected ?? $order->orderDetail->delivery_date_expected,
+                    'delivery_date_actual' => $request->delivery_date_actual ?? $order->orderDetail->delivery_date_actual,
+                    'order_status'     => $request->order_status ?? $order->orderDetail->order_status,
+                    'cancelled_at'     => $request->cancelled_at ?? $order->orderDetail->cancelled_at,
+                    'cancellation_reason' => $request->cancellation_reason ?? $order->orderDetail->cancellation_reason,
+                ]);
+            } else {
+                OrderDetail::create([
+                    'order_id'        => $order->id,
+                    'shipping_address' => $request->shipping_address,
+                    'shipping_status'  => $request->shipping_status,
+                    'shipping_method'  => $request->shipping_method,
+                    'shipping_note'    => $request->shipping_note,
+                    'customer_note'    => $request->customer_note,
+                    'admin_note'       => $request->admin_note,
+                    'tracking_number'  => $request->tracking_number,
+                    'delivery_date_expected' => $request->delivery_date_expected ?? now()->addDays(1),
+                    'delivery_date_actual' => $request->delivery_date_actual ?? now()->addDays(1),
+                    'order_status'     => $request->order_status,
+                    'cancelled_at'     => $request->cancelled_at,
+                    'cancellation_reason' => $request->cancellation_reason,
+                ]);
+            }
 
-            // // Update or create submitted items
-            foreach ($submittedItems as $itemData) {
-                if (isset($itemData['id']) && in_array($itemData['id'], $existingItems)) {
+            // Update Order Items
+            foreach ($validated['order_items'] as $itemData) {
+                if (isset($itemData['id']) && $itemData['id']) {
                     // Update existing item
                     $orderItem = OrderItem::find($itemData['id']);
-                    $orderItem->update($itemData);
+                    if ($orderItem) {
+                        $orderItem->update([
+                            'product_id' => $itemData['product_id'],
+                            'product_name' => $itemData['product_name'],
+                            'product_attributes' => $itemData['product_attributes'] ?? null,
+                            'unit_price' => $itemData['unit_price'],
+                            'quantity' => $itemData['quantity'],
+                            'total_price' => $itemData['total_price'],
+                            'discount_amount' => $itemData['discount_amount'] ?? 0,
+                            'note' => $itemData['note'] ?? null,
+                            'is_active' => $itemData['is_active'] ?? 1,
+                        ]);
+                    }
                 } else {
                     // Create new item
-                    $itemData['order_id'] = $order->id;
-                    OrderItem::create($itemData);
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $itemData['product_id'],
+                        'product_name' => $itemData['product_name'],
+                        'product_attributes' => $itemData['product_attributes'] ?? null,
+                        'unit_price' => $itemData['unit_price'],
+                        'quantity' => $itemData['quantity'],
+                        'total_price' => $itemData['total_price'],
+                        'discount_amount' => $itemData['discount_amount'] ?? 0,
+                        'note' => $itemData['note'] ?? null,
+                        'is_active' => $itemData['is_active'] ?? 1,
+                    ]);
                 }
             }
 
-            // Delete removed items
-            $submittedItemIds = $submittedItems->pluck('id')->filter()->toArray();
-            $itemsToDelete = array_diff($existingItems, $submittedItemIds);
-            OrderItem::destroy($itemsToDelete);
+            DB::commit();
 
-            return response()->json(['status' => true, 'message' => 'Order updated successfully.', 'data' => $order], 200);
+            return response()->json([
+                'status'  => true,
+                'message' => 'Order updated successfully.',
+                'order'   => $order
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => 'Error updating order.', 'error' => $e->getMessage()], 500);
+            DB::rollBack();
+            Log::error('Order update failed: ' . $e->getMessage());
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Error updating order.',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
-
-
 
     /**
      * Remove the specified product from storage.

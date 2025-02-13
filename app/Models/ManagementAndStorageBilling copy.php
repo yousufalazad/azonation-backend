@@ -5,37 +5,37 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Invoice extends Model
+class ManagementAndStorageBilling extends Model
 {
     use HasFactory;
     protected $fillable = [
-        // 'invoice_code',
-        'billing_code',
-        'order_code',
-        'order_id',
+        //'billing_code',
         'user_id',
         'user_name',
-        'description',
-        'total_amount',
-        'amount_paid',
-        'balance_due',
+        'service_month',
+        'service_year',
+        'billing_month',
+        'billing_year',
+        'period_start',
+        'period_end',
+        'total_member',
+        'total_management_bill_amount',
+        'total_storage_bill_amount',
         'currency_code',
-        'generate_date',
-        'issue_date',
-        'due_date',
-        'terms',
-        'invoice_note',
-        'is_published',
-        'invoice_status',
-        'payment_status',
+        'bill_status',
         'admin_note',
         'is_active',
     ];
-    
+
     protected $hidden = [
         'created_at',
         'updated_at'
     ];
+
+    // public function user()
+    // {
+    //     return $this->belongsTo(User::class);
+    // }
 
     protected static function boot()
     {
@@ -51,9 +51,8 @@ class Invoice extends Model
                 $randomString .= $characters[random_int(0, strlen($characters) - 1)];
             }
 
-            // Prefix the random string with 'I' for the Invoice code
-            $model->invoice_code = 'I' . $randomString;
+            // Prefix the random string with 'T' for the final transaction ID
+            $model->billing_code = 'B' . $randomString;
         });
     }
-    
 }

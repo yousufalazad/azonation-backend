@@ -12,7 +12,6 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'billing_code',
-        'order_code',
         'order_date',
         'user_name',
 
@@ -40,17 +39,6 @@ class Order extends Model
         'updated_at'
     ];
 
-    // public function orderDetail()
-    // {
-    //     return $this->hasOne(OrderDetail::class, 'order_id', 'id');
-    // }
-
-    // Define relationship for order details
-    public function orderDetail()
-    {
-        return $this->hasOne(OrderDetail::class, 'order_id');
-    }
-
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class, 'order_id');
@@ -61,9 +49,9 @@ class Order extends Model
     }
 
     public function invoice()
-    {
-        return $this->hasOne(Invoice::class);
-    }
+{
+    return $this->hasOne(Invoice::class);
+}
 
 
     protected static function boot()

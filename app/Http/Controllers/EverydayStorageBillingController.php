@@ -19,7 +19,8 @@ class EverydayStorageBillingController extends Controller
     public function index()
     {
         try {
-            $records = EverydayStorageBilling::all();
+            $records = EverydayStorageBilling::with('user')->get();
+
             return response()->json([
                 'status' => true,
                 'data' => $records,
@@ -149,8 +150,6 @@ class EverydayStorageBillingController extends Controller
             'date' => 'required|date',
             // 'is_active' => 'required|boolean',
         ]);
-        $request['user_id'] = $request->user()->id;
-
         $record = EverydayStorageBilling::create($request->all());
 
         return response()->json([
@@ -163,13 +162,30 @@ class EverydayStorageBillingController extends Controller
     /**
      * Display the specified resource.
      */
+    
     public function show($id)
     {
-        $record = EverydayStorageBilling::find($id);
-        if (!$record) {
-            return response()->json(['message' => 'Record not found'], 404);
+        try {
+            $record = EverydayStorageBilling::with('user')->find($id);
+
+            if (!$record) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Record not found',
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $record,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to retrieve record.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-        return response()->json(['status' => true, 'data' => $record], 200);
     }
 
     /**
