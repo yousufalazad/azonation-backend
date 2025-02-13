@@ -395,12 +395,22 @@ Route::middleware([
     Route::get('/previous-month-bill-calculation-honorary-member', [HonoraryMemberCountController::class, 'getPreviousMonthBillCalculation']);
 
 
+
+    Route::get('billing-list', [ManagementAndStorageBillingController::class, 'index']);
+    Route::get('superadmin-billing-list', [ManagementAndStorageBillingController::class, 'indexSuperAdmin']);
+    Route::get('get-billing/{id}', [ManagementAndStorageBillingController::class, 'show']);
+    Route::post('create-billing', [ManagementAndStorageBillingController::class, 'store']);
+    Route::get('system-create-billing', [ManagementAndStorageBillingController::class, 'storeBySystem']);
+    Route::put('update-billing/{id}', [ManagementAndStorageBillingController::class, 'update']);
+    Route::delete('delete-billing/{id}', [ManagementAndStorageBillingController::class, 'destroy']);
+
     // ------------------- SuperAdmin----------------------------------------------------------------
     //API for SuperAdmin
     Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show']);
 
     //Finance
-    Route::get('billing-list', [ManagementAndStorageBillingController::class, 'index']);
+
+
     Route::get('superadmin-billing-list', [ManagementAndStorageBillingController::class, 'indexSuperAdmin']);
     Route::get('get-billing/{id}', [ManagementAndStorageBillingController::class, 'show']);
     Route::post('create-billing', [ManagementAndStorageBillingController::class, 'store']);
@@ -408,14 +418,11 @@ Route::middleware([
     Route::put('update-billing/{id}', [ManagementAndStorageBillingController::class, 'update']);
     Route::delete('delete-billing/{id}', [ManagementAndStorageBillingController::class, 'destroy']);
 
-
-
-    // Everyday billing
-    Route::get('every-day-member-count-and-bill-list', [EverydayMemberCountAndBillingController::class, 'index']);
-    Route::get('get-every-day-member-count-and-bill/{id}', [EverydayMemberCountAndBillingController::class, 'show']);
-    Route::post('create-every-day-member-count-and-bill', [EverydayMemberCountAndBillingController::class, 'superAdminStore']);
-    Route::put('update-every-day-member-count-and-bill/{id}', [EverydayMemberCountAndBillingController::class, 'update']);
-    Route::delete('delete-every-day-member-count-and-bill/{id}', [EverydayMemberCountAndBillingController::class, 'destroy']);
+    Route::get('every-day-member-count-list', [EverydayMemberCountAndBillingController::class, 'index']);
+    Route::get('get-every-day-member-count/{id}', [EverydayMemberCountAndBillingController::class, 'show']);
+    Route::post('create-every-day-member-count', [EverydayMemberCountAndBillingController::class, 'superAdminStore']);
+    Route::put('update-every-day-member-count/{id}', [EverydayMemberCountAndBillingController::class, 'update']);
+    Route::delete('delete-every-day-member-count/{id}', [EverydayMemberCountAndBillingController::class, 'destroy']);
 
     Route::get('everyday-storage-billing-list', [EverydayStorageBillingController::class, 'index']);
     Route::get('get-everyday-storage-billing/{id}', [EverydayStorageBillingController::class, 'show']);
@@ -423,12 +430,22 @@ Route::middleware([
     Route::put('update-everyday-storage-billing/{id}', [EverydayStorageBillingController::class, 'update']);
     Route::delete('delete-everyday-storage-billing/{id}', [EverydayStorageBillingController::class, 'destroy']);
 
+
+    //Invoice
     Route::get('invoices', [InvoiceController::class, 'index']);
     Route::get('all-invoices', [InvoiceController::class, 'indexForSuperadmin']);
     Route::get('get-invoice/{id}', [InvoiceController::class, 'show']);
     Route::post('create-invoice', [InvoiceController::class, 'store']);
     Route::put('update-invoice/{id}', [InvoiceController::class, 'update']);
     Route::delete('delete-invoice/{id}', [InvoiceController::class, 'destroy']);
+
+    //Route::get('invoices-for-superadmin', [InvoiceController::class, 'indexForSuperAdmin']);
+    // Route::get('/invoices', [InvoiceController::class, 'indexForSuperAdmin']);
+    // Route::get('invoices', [InvoiceController::class, 'index']);
+    // Route::get('get-invoice/{id}', [InvoiceController::class, 'show']);
+    // Route::post('create-invoice', [InvoiceController::class, 'store']);
+    // Route::put('update-invoice/{id}', [InvoiceController::class, 'update']);
+    // Route::delete('delete-invoice/{id}', [InvoiceController::class, 'destroy']);
 
     Route::get('subscription-plans', [SubscriptionController::class, 'index']);
 
@@ -575,14 +592,12 @@ Route::middleware([
     Route::post('create-product', [ProductController::class, 'store']);
     Route::put('update-product/{id}', [ProductController::class, 'update']);
     Route::delete('delete-product/{id}', [ProductController::class, 'destroy']);
-    
     // OrderController
     Route::get('get-orders', [OrderController::class, 'index']);
     Route::get('get-order/{id}', [OrderController::class, 'show']);
     Route::post('create-order', [OrderController::class, 'store']);
     Route::put('update-order/{id}', [OrderController::class, 'update']);
     Route::delete('delete-order/{id}', [OrderController::class, 'destroy']);
-
     // ReceiptController
     Route::get('get-receipts', [ReceiptController::class, 'index']);
     Route::get('get-receipt/{id}', [ReceiptController::class, 'show']);

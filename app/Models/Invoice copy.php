@@ -9,10 +9,10 @@ class Invoice extends Model
 {
     use HasFactory;
     protected $fillable = [
-        // 'invoice_code',
-        'billing_code',
-        'order_code',
+        //'invoice_code',
         'order_id',
+        'order_code',
+        'billing_code',
         'user_id',
         'user_name',
         'description',
@@ -29,9 +29,9 @@ class Invoice extends Model
         'invoice_status',
         'payment_status',
         'admin_note',
-        'is_active',
+        'is_active'
     ];
-    
+
     protected $hidden = [
         'created_at',
         'updated_at'

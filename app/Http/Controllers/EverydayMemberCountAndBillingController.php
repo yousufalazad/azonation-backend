@@ -19,7 +19,8 @@ class EverydayMemberCountAndBillingController extends Controller
     public function index()
     {
         try {
-            $records = EverydayMemberCountAndBilling::all();
+            $records = EverydayMemberCountAndBilling::with('user')->get();
+
             return response()->json([
                 'status' => true,
                 'data' => $records,
@@ -33,17 +34,17 @@ class EverydayMemberCountAndBillingController extends Controller
         }
     }
 
-
     // Store a newly created resource
     public function superAdminStore(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'date' => 'required|date',
             // 'day_total_member' => 'required|integer',
             // 'day_total_bill' => 'required|numeric',
             // 'is_active' => 'required|boolean',
         ]);
-        $request['user_id'] = $request->user()->id;
+        // $request['user_id'] = $request->user()->id;
 
         $record = EverydayMemberCountAndBilling::create($request->all());
 
@@ -57,13 +58,29 @@ class EverydayMemberCountAndBillingController extends Controller
     // Display the specified resource
     public function show($id)
     {
-        $record = EverydayMemberCountAndBilling::find($id);
-        if (!$record) {
-            return response()->json(['message' => 'Record not found'], 404);
-        }
-        return response()->json(['status' => true, 'data' => $record], 200);
+        try {
+            $record = EverydayMemberCountAndBilling::with('user')->find($id);
 
+            if (!$record) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Record not found',
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $record,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to retrieve record.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+
 
     // Update the specified resource
     public function update(Request $request, $id)
@@ -103,7 +120,6 @@ class EverydayMemberCountAndBillingController extends Controller
             'status' => true,
             'message' => 'Deleted successfully.',
         ], 200);
-
     }
     /**
      * Show the form for creating a new resource.
@@ -187,11 +203,11 @@ class EverydayMemberCountAndBillingController extends Controller
                 $managementDailyPriceRate = 3; // Your price rate per member
                 //$managementDailyPriceRate = $getUserManagementDailyPriceRateData['daily_price_rate']; // Your price rate per member
 
-                Log::info('Daily price rate for '. $userId. ' is 4'. $managementDailyPriceRate);
+                Log::info('Daily price rate for ' . $userId . ' is 4' . $managementDailyPriceRate);
 
                 // Calculate the total bill amount based on the members and price rate
                 $dayTotalBill = $totalMembers * $managementDailyPriceRate;
-                
+
                 Log::info('Day total member count and day bill calculation successfully completed.');
 
                 // Insert the count into org_member_counts
