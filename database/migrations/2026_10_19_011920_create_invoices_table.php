@@ -13,7 +13,7 @@ return new class extends Migration
 
             // Unique Invoice ID
             $table->string('invoice_code', 15)->unique()->comment('Unique 15-character alphanumeric transaction ID with prefix I.');
-            $table->string('billing_code', 15)->unique()->comment('Unique 15-character alphanumeric billing transaction ID with prefix B.');
+            $table->string('billing_code', 15)->unique()->nullable()->comment('Unique 15-character alphanumeric billing transaction ID with prefix B.');
             $table->string('order_code', 15)->unique()->comment('Unique 15-character alphanumeric order transaction ID with prefix O.');
             
             // Foreign key linking to the 'orders' table
