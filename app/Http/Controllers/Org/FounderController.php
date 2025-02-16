@@ -2,8 +2,11 @@
 namespace App\Http\Controllers\Org;
 use App\Http\Controllers\Controller;
 use App\Models\Founder;
+use App\Models\FounderProfileImage;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class FounderController extends Controller
 {
@@ -63,7 +66,8 @@ class FounderController extends Controller
             'founder_user_id' => 'nullable',
             'name' => 'string|max:50',
             'designation' => 'string|max:50',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:7168',
+            'is_active' => 'boolean',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:7168',
             ]);
 
         $founder = Founder::create([
@@ -71,8 +75,31 @@ class FounderController extends Controller
             'founder_user_id' => $request->founder_user_id,
             'name' => $request->name,
             'designation' => $request->designation,
-            //'status' => 1
+            'is_active' => $request->is_active,
         ]);
+
+
+        // // Handle multiple image uploads
+        if ($request->hasFile('profile_image')) {
+            foreach ($request->file('profile_image') as $image) {
+                $imagePath = $image->storeAs(
+                    'org/image/founder-profile-image',
+                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                    'public'
+                );
+                dd($imagePath);
+
+                FounderProfileImage::create([
+                    'founder_id' => $founder->id,
+                    'file_path' => $imagePath, // Store the document path
+                    'file_name' => $image->getClientOriginalName(), // Store the document name
+                    'mime_type' => $image->getClientMimeType(), // Store the MIME type
+                    'file_size' => $image->getSize(), // Store the size of the document
+                    'is_public' => true, // Set the document as public
+                    'is_active' => true, // Set the document as active
+                ]);
+            }
+        }
 
         // Retrieve the individual user and the organization name
         // $individualUser = User::find($validated['individual_type_user_id']);
@@ -139,6 +166,7 @@ class FounderController extends Controller
         $request->validate([
             'name' => 'string|max:50',
             'designation' => 'string|max:50',
+            'is_active' => 'boolean',
         ]);
 
         try {
@@ -148,6 +176,7 @@ class FounderController extends Controller
             // Update the founder's designation
             $founder->name = $request->input('name');
             $founder->designation = $request->input('designation');
+            $founder->is_active = $request->input('is_active');
             $founder->save();
 
             return response()->json([
