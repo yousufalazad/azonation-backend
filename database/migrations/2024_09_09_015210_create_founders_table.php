@@ -31,6 +31,8 @@ return new class extends Migration
             $table->string('name'); // name of the founder
             $table->string('designation')->nullable(); // designation of the founder
 
+            $table->boolean('is_active')->default(true); // Active status
+
             $table->timestamps(); // Created at and updated at timestamps
         });
     }

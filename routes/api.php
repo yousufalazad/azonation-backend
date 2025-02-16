@@ -111,15 +111,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
 
 
-// Route::middleware('auth:sanctum')->group(function () {
-
-Route::middleware([
-    EnsureFrontendRequestsAreStateful::class,
-    'auth:sanctum'
-])->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();  // Should return authenticated user if session is valid
-    });
+Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('logout', [AuthController::class, 'logout']);
 
