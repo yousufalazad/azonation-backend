@@ -137,7 +137,7 @@ class InvoiceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($invoiceId)
+    public function X_show($invoiceId)
     {
         // Find the Project by ID
         $invoice = Invoice::find($invoiceId);
@@ -148,6 +148,24 @@ class InvoiceController extends Controller
         }
 
         // Return the Project data
+        return response()->json(['status' => true, 'data' => $invoice], 200);
+    }
+
+    public function show($invoiceId)
+    {
+        // Fetch invoice with related order, order items, and order details
+        $invoice = Invoice::with([
+            'order',
+            'order.orderDetail',
+            'order.orderItems',
+            'order.user',
+        ])->find($invoiceId);
+
+        // Check if invoice exists
+        if (!$invoice) {
+            return response()->json(['status' => false, 'message' => 'Invoice not found'], 404);
+        }
+
         return response()->json(['status' => true, 'data' => $invoice], 200);
     }
 

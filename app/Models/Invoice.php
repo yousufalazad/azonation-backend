@@ -31,7 +31,7 @@ class Invoice extends Model
         'admin_note',
         'is_active',
     ];
-    
+
     protected $hidden = [
         'created_at',
         'updated_at'
@@ -55,5 +55,12 @@ class Invoice extends Model
             $model->invoice_code = 'I' . $randomString;
         });
     }
-    
+
+    /**
+     * Relationship with the Order model
+     */
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
 }
