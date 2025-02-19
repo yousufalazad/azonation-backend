@@ -39,13 +39,25 @@ class Order extends Model
         'created_at',
         'updated_at'
     ];
+   
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
-    // public function orderDetail()
+    // public function invoice()
     // {
-    //     return $this->hasOne(OrderDetail::class, 'order_id', 'id');
+    //     return $this->hasOne(Invoice::class);
+    // }
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class, 'order_id');
+    }
+    // public function orderDetails()
+    // {
+    //     return $this->hasMany(OrderDetail::class, 'order_id');
     // }
 
-    // Define relationship for order details
     public function orderDetail()
     {
         return $this->hasOne(OrderDetail::class, 'order_id');
@@ -55,17 +67,8 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class, 'order_id');
     }
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
 
-    public function invoice()
-    {
-        return $this->hasOne(Invoice::class);
-    }
-
-
+   
     protected static function boot()
     {
         parent::boot();
