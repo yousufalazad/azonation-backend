@@ -16,21 +16,22 @@ class OrgIndependentMemberController extends Controller
     /**
      * Display a listing of the members.
      */
-    public function ___index()
+    // public function ___index()
+    // {
+    //     $members = OrgIndependentMember::all();
+    //     // Map the members to include the image URL
+    //     $members = $members->map(function ($member) {
+    //         $member->image_url = $member->image_path ? Storage::url($member->image_path) : null;
+    //         return $member;
+    //     });
+
+    //     return response()->json(['status' => true, 'data' => $members]);
+    // }
+
+    public function index(Request $request)
     {
         $members = OrgIndependentMember::all();
-        // Map the members to include the image URL
-        $members = $members->map(function ($member) {
-            $member->image_url = $member->image_path ? Storage::url($member->image_path) : null;
-            return $member;
-        });
-
-        return response()->json(['status' => true, 'data' => $members]);
-    }
-
-    public function index()
-    {
-        $members = OrgIndependentMember::all();
+        //dd($members);
 
         // Map the members to include the full image URL with the running server path
         $members = $members->map(function ($member) {
