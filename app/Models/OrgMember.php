@@ -30,6 +30,17 @@ class OrgMember extends Model
         return $this->belongsTo(User::class, 'individual_type_user_id', 'id');
     }
 
+    public function membershipType(): BelongsTo
+{
+    return $this->belongsTo(MembershipType::class, 'membership_type_id', 'id');
+}
+
+    public function memberProfileImage(): BelongsTo
+    {
+        return $this->belongsTo(ProfileImage::class, 'individual_type_user_id', 'id');
+    }
+
+
     public function connectedorg(): BelongsTo
     {
         return $this->belongsTo(User::class, 'org_type_user_id', 'id');
