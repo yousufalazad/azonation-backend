@@ -149,7 +149,6 @@ class YearPlanController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'start_year' => 'required|string|max:4',
             'end_year' => 'required|string|max:4',
             'goals' => 'nullable|string',

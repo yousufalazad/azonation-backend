@@ -19,6 +19,20 @@ class OrgMemberController extends Controller
 {
     use Notifiable;
 
+    public function getOrgAllMemberName(Request $request)
+    {
+        //$userId = $request->user()->id;
+        $userId = Auth::id();
+        $getOrgAllMemberName = OrgMember::with(['individual:id,name']) // Load only necessary fields
+        ->where('org_type_user_id', $userId)
+        ->where('is_active', '1')
+        ->get();
+        return response()->json([
+            'status' => true,
+            'data' => $getOrgAllMemberName
+        ]);
+    }
+
     public function getOrgAllMembers(Request $request)
     {
         $userId = $request->user()->id;
