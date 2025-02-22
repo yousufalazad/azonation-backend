@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('email')->nullable(); // Member's email address (optional)
             $table->string('mobile')->nullable(); // Member's mobile number (optional)
             $table->text('address')->nullable(); // Member's address (optional)
-            $table->string('image_path')->nullable()->comment('Non-user member profile image URL');
             $table->string('note')->nullable(); // Notes added by admin about the member
             $table->boolean('is_active')->default(true); // Status of the member (active or inactive)
             $table->timestamps(); // Created and updated timestamps

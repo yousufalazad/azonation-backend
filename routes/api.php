@@ -156,7 +156,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-year-plans', [YearPlanController::class, 'index']);
     Route::get('/year-plan/{id}', [YearPlanController::class, 'show']);
     Route::post('/create-year-plan', [YearPlanController::class, 'store']);
-    Route::put('/update-year-plan/{id}', [YearPlanController::class, 'update']);
+    Route::post('/update-year-plan/{id}', [YearPlanController::class, 'update']);
     Route::delete('/delete-year-plan/{id}', [YearPlanController::class, 'destroy']);
 
     // Recognition
@@ -217,6 +217,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/org-members/{userId}', [OrgMemberController::class, 'getOrgMembers']);
     Route::get('/org-member-list/{userId}', [OrgMemberController::class, 'getMemberList']);
     Route::get('/org-all-members', [OrgMemberController::class, 'getOrgAllMembers']);
+    Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
     Route::get('/total-org-member-count/{userId}', [OrgMemberController::class, 'totalOrgMemberCount']);
 
     // OrgIndependentMemberController
@@ -357,7 +358,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-assets/{userId}', [AssetController::class, 'getAsset']);
     Route::get('/get-asset/{assetId}', [AssetController::class, 'getAssetDetails']);
     Route::post('/create-asset', [AssetController::class, 'store']);
-    Route::put('/update-asset/{id}', [AssetController::class, 'update']);
+    Route::post('/update-asset/{id}', [AssetController::class, 'update']);
     Route::delete('/delete-asset/{id}', [AssetController::class, 'destroy']);
 
     // privacy_setups
