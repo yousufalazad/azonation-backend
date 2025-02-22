@@ -22,14 +22,10 @@ class OrgMemberController extends Controller
     public function getOrgAllMembers(Request $request)
     {
         $userId = $request->user()->id;
-        $getOrgAllMembers = OrgMember::leftJoin('users', 'org_members.individual_type_user_id', 'users.id')
-            ->where('org_type_user_id', $userId)
-            ->where('status', '1')
-            ->select(
-                'users.id as user_id',
-                'users.name as user_name'
-            )
-            ->get();
+        $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
+        ->where('org_type_user_id', $userId)
+        ->where('is_active', '1')
+        ->get();
         return response()->json([
             'status' => true,
             'data' => $getOrgAllMembers

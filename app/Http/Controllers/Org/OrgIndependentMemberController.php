@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon; // Import Carbon for timestamp
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 
 class OrgIndependentMemberController extends Controller
@@ -30,7 +31,8 @@ class OrgIndependentMemberController extends Controller
 
     public function index(Request $request)
     {
-        $members = OrgIndependentMember::all();
+        $userId = Auth::id();
+        $members = OrgIndependentMember::where('user_id', $userId)->get();
         //dd($members);
 
         // Map the members to include the full image URL with the running server path

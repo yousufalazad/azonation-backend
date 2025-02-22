@@ -40,9 +40,11 @@ class AccountController extends Controller
     public function getTransactions()
     {
         try {
+            $userId = Auth::id();
             // Fetch transactions with related images and documents
             $transactions = Account::orderBy('date', 'desc')
                 ->with(['images', 'documents'])
+                ->where('user_id', $userId)
                 ->get();
 
             // Map each transaction to include full URLs for images and documents
