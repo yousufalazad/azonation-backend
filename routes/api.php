@@ -110,7 +110,7 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
 
-Route::get('get-independent-members', [OrgIndependentMemberController::class, 'index']);
+//Route::get('get-independent-members', [OrgIndependentMemberController::class, 'index']);
 
 
 
@@ -220,7 +220,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/total-org-member-count/{userId}', [OrgMemberController::class, 'totalOrgMemberCount']);
 
     // OrgIndependentMemberController
-    // Route::get('get-independent-members', [OrgIndependentMemberController::class, 'index']);
+    Route::get('get-independent-members', [OrgIndependentMemberController::class, 'index']);
     Route::get('get-independent-member/{id}', [OrgIndependentMemberController::class, 'show']);
     Route::post('create-independent-member', [OrgIndependentMemberController::class, 'store']);
     Route::put('update-independent-member/{id}', [OrgIndependentMemberController::class, 'update']);
@@ -380,10 +380,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('subscription/{id}', [SubscriptionController::class, 'update']);
     Route::delete('subscription{id}', [SubscriptionController::class, 'destroy']);
     Route::get('/user-price-rate', [RegionalPricingController::class, 'getUserPriceRate']);
-
-    //Active member count
-    Route::get('/active-member-count', [ActiveMemberCountController::class, 'show']);
-    Route::get('/previous-month-bill-calculation', [ActiveMemberCountController::class, 'getPreviousMonthBillCalculation']);
 
 
     // ------------------- SuperAdmin----------------------------------------------------------------
