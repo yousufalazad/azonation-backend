@@ -10,16 +10,38 @@ use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ManagementAndStorageBillingController extends Controller
 {
+    public function orgAllBill(Request $request)
+    {
+        try {
+            $userId = Auth::id();
+            $orgAllBill = ManagementAndStorageBilling::where('user_id', $userId)->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $orgAllBill,
+            ]);
+            
+        } catch (\Exception $e) {
+            // Log the exception for debugging
+            Log::error('Error fetching packages: ' . $e->getMessage());
+            // Return JSON response with error status
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching packages.',
+            ], 500);
+        }
+    }
     public function index(Request $request)
     {
         try {
             // Get the authenticated user
-            $user_id = $request->user()->id;
+            //$user_id = $request->user()->id;
             // Fetch billing related to the authenticated user
-            $billingList = ManagementAndStorageBilling::where('user_id', $user_id)->get();
+            $billingList = ManagementAndStorageBilling::all();
             // Return the billing data as a JSON response
             return response()->json([
                 'status' => true,

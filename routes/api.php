@@ -130,7 +130,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ------------------- Organisation----------------------------------------------------------------
 
     //Billing
-    Route::get('billing-list', [ManagementAndStorageBillingController::class, 'index']);
+    Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
 
 
     // Accounts
@@ -387,6 +387,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //API for SuperAdmin
     Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show']);
 
+    
     //Finance
     Route::get('billing-list', [ManagementAndStorageBillingController::class, 'index']);
     Route::get('superadmin-billing-list', [ManagementAndStorageBillingController::class, 'indexSuperAdmin']);
