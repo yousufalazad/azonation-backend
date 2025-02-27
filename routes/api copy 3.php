@@ -4,101 +4,105 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
-// Auth
-use App\Http\Controllers\Auth\AuthController;
-// Common
-use App\Http\Controllers\Common\UserCountryController;
-use App\Http\Controllers\Common\AddressController;
-use App\Http\Controllers\Common\PhoneNumberController;
-use App\Http\Controllers\Common\NotificationController;
-// Ecommerce\Category
-use App\Http\Controllers\Ecommerce\Category\BusinessTypeController;
-use App\Http\Controllers\Ecommerce\Category\CategoryController;
-use App\Http\Controllers\Ecommerce\Category\SubCategoryController;
-use App\Http\Controllers\Ecommerce\Category\SubSubCategoryController;
-// Ecommerce
-use App\Http\Controllers\Ecommerce\BrandController;
-// Ecommerce\Product
-use App\Http\Controllers\Ecommerce\Product\ProductController;
-// Ecommerce\Order
-use App\Http\Controllers\Ecommerce\Order\OrderController;
-// Individual
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Individual\IndividualController;
-// Org\Account
-use App\Http\Controllers\Org\Account\AccountController;
-use App\Http\Controllers\Org\Account\AccountFundController;
-// Org\Asset
-use App\Http\Controllers\Org\Asset\AssetController;
-use App\Http\Controllers\Org\Asset\AssetLifecycleStatusController;
-// Org\Committee
-use App\Http\Controllers\Org\Committee\CommitteeController;
-use App\Http\Controllers\Org\Committee\CommitteeMemberController;
-// Org\Event
-use App\Http\Controllers\Org\Event\EventController;
-use App\Http\Controllers\Org\Event\EventAttendanceController;
-use App\Http\Controllers\Org\Event\EventSummaryController;
-use App\Http\Controllers\Org\Event\EventGuestAttendanceController;
-// Org\History
-use App\Http\Controllers\Org\History\HistoryController;
-// Org\Meeting
-use App\Http\Controllers\Org\Meeting\MeetingController;
-use App\Http\Controllers\Org\Meeting\MeetingMinutesController;
-use App\Http\Controllers\Org\Meeting\MeetingAttendanceController;
-use App\Http\Controllers\Org\Meeting\MeetingGuestAttendanceController;
-// Org\Membership
-use App\Http\Controllers\Org\Membership\OrgMemberController;
-use App\Http\Controllers\Org\Membership\OrgIndependentMemberController;
-// Org\OfficeDocument
-use App\Http\Controllers\Org\OfficeDocument\OfficeRecordController;
-// Org\Project
-use App\Http\Controllers\Org\Project\ProjectAttendanceController;
-use App\Http\Controllers\Org\Project\ProjectSummaryController;
-use App\Http\Controllers\Org\Project\ProjectController;
-use App\Http\Controllers\Org\Project\ProjectGuestAttendanceController;
-// Org\Recognition
-use App\Http\Controllers\Org\Recognition\RecognitionController;
-// Org\Report
-use App\Http\Controllers\Org\Report\OrgReportController;
-// Org\StrategicPlan
-use App\Http\Controllers\Org\StrategicPlan\StrategicPlanController;
-// Org\SuccessStory
-use App\Http\Controllers\Org\SuccessStory\SuccessStoryController;
-// Org\YearPlan
-use App\Http\Controllers\Org\YearPlan\YearPlanController;
-// Org
-use App\Http\Controllers\Org\FounderController;
-use App\Http\Controllers\Org\OrgAdministratorController;
-use App\Http\Controllers\Org\OrgProfileController;
-// SuperAdmin
-use App\Http\Controllers\SuperAdmin\SuperAdminController;
-// SuperAdmin\Settings
-use App\Http\Controllers\SuperAdmin\Settings\AttendanceTypeController;
-use App\Http\Controllers\SuperAdmin\Settings\ConductTypeController;
-use App\Http\Controllers\SuperAdmin\Settings\CountryController;
-use App\Http\Controllers\SuperAdmin\Settings\CountryRegionController;
-use App\Http\Controllers\SuperAdmin\Settings\CurrencyController;
-use App\Http\Controllers\SuperAdmin\Settings\DesignationController;
-use App\Http\Controllers\SuperAdmin\Settings\DialingCodeController;
-use App\Http\Controllers\SuperAdmin\Settings\LanguageListController;
-use App\Http\Controllers\SuperAdmin\Settings\MembershipTypeController;
-use App\Http\Controllers\SuperAdmin\Settings\PrivacySetupController;
-use App\Http\Controllers\SuperAdmin\Settings\RegionController;
-use App\Http\Controllers\SuperAdmin\Settings\RegionCurrencyController;
-use App\Http\Controllers\SuperAdmin\Settings\TimeZoneSetupController;
-// SuperAdmin\Financial
-use App\Http\Controllers\SuperAdmin\Financial\InvoiceController;
-use App\Http\Controllers\SuperAdmin\Financial\PaymentLogController;
-use App\Http\Controllers\SuperAdmin\Financial\ReceiptController;
-use App\Http\Controllers\SuperAdmin\Financial\RegionalPricingController;
-use App\Http\Controllers\SuperAdmin\Financial\RegionalTaxRateController;
-use App\Http\Controllers\SuperAdmin\Financial\SubscriptionController;
-// SuperAdmin\Financial\Management
-use App\Http\Controllers\SuperAdmin\Financial\Management\EverydayMemberCountAndBillingController;
-use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementAndStorageBillingController;
-// SuperAdmin\Financial\Storage
-use App\Http\Controllers\SuperAdmin\Financial\Storage\EverydayStorageBillingController;
 
-// -------------------------------------------------------------------------------------------
+//Org members
+use App\Http\Controllers\Org\OrgMemberController;
+use App\Http\Controllers\Org\OrgIndependentMemberController;
+
+//Member counting
+use App\Http\Controllers\OrgMemberCountController;
+
+
+//Committee
+use App\Http\Controllers\Org\CommitteeController;
+use App\Http\Controllers\Org\CommitteeMemberController;
+
+//Meeting
+use App\Http\Controllers\Org\MeetingController;
+use App\Http\Controllers\Org\MeetingMinutesController;
+use App\Http\Controllers\Org\MeetingAttendanceController;
+use App\Http\Controllers\MeetingGuestAttendanceController;
+
+use App\Http\Controllers\Org\AddressController;
+use App\Http\Controllers\Org\OrgAdministratorController;
+use App\Http\Controllers\PhoneNumberController;
+
+//Event Controller
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventAttendanceController;
+use App\Http\Controllers\EventSummaryController;
+use App\Http\Controllers\EventGuestAttendanceController;
+
+
+//Project
+use App\Http\Controllers\ProjectAttendanceController;
+use App\Http\Controllers\ProjectSummaryController;
+use App\Http\Controllers\Org\ProjectController;
+use App\Http\Controllers\ProjectGuestAttendanceController;
+
+
+use App\Http\Controllers\SuperAdmin\SuperAdminController;
+
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Org\FounderController;
+use App\Http\Controllers\Org\OrgProfileController;
+
+use App\Http\Controllers\SuccessStoryController;
+use App\Http\Controllers\StrategicPlanController;
+use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\YearPlanController;
+use App\Http\Controllers\RecognitionController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AccountFundController;
+use App\Http\Controllers\OrgReportController;
+use App\Http\Controllers\AssetController;
+use App\Http\Controllers\PrivacySetupController;
+use App\Http\Controllers\AssetLifecycleStatusController;
+
+//Org office record
+use App\Http\Controllers\OfficeRecordController;
+
+
+// Billing
+use App\Http\Controllers\PackageController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\ActiveMemberCountController;
+use App\Http\Controllers\HonoraryMemberCountController;
+use App\Http\Controllers\ManagementAndStorageBillingController;
+use App\Http\Controllers\EverydayMemberCountAndBillingController;
+use App\Http\Controllers\EverydayStorageBillingController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\CurrencyController;
+
+
+// Master Setting
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\DialingCodeController;
+use App\Http\Controllers\AttendanceTypeController;
+use App\Http\Controllers\ConductTypeController;
+use App\Http\Controllers\Org\MembershipTypeController;
+use App\Http\Controllers\Org\DesignationController;
+use App\Http\Controllers\LanguageListController;
+use App\Http\Controllers\RegionalPricingController;
+use App\Http\Controllers\TimeZoneSetupController;
+use App\Http\Controllers\UserCountryController;
+
+use App\Http\Controllers\RegionController;
+use App\Http\Controllers\CountryRegionController;
+use App\Http\Controllers\RegionCurrencyController;
+use App\Http\Controllers\PaymentLogController;
+use App\Http\Controllers\RegionalTaxRateController;
+
+use App\Http\Controllers\BusinessTypeController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SubCategoryController;
+use App\Http\Controllers\SubSubCategoryController;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReceiptController;
 
 
 //API for auth
@@ -222,6 +226,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('create-independent-member', [OrgIndependentMemberController::class, 'store']);
     Route::put('update-independent-member/{id}', [OrgIndependentMemberController::class, 'update']);
     Route::delete('delete-independent-member/{id}', [OrgIndependentMemberController::class, 'destroy']);
+
+    //Org member count
+    Route::post('/org-member-counts', [OrgMemberCountController::class, 'store']);
+
 
     //for Org Administrator
     Route::post('/search-individual', [OrgAdministratorController::class, 'search']);
@@ -366,6 +374,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('asset-lifecycle-setups', [AssetLifecycleStatusController::class, 'index']);
 
     //Billing
+    Route::get('packages', [PackageController::class, 'index']);
+
     Route::get('subscription', [SubscriptionController::class, 'show']);
     Route::post('subscription', [SubscriptionController::class, 'store']);
     Route::put('subscription/{id}', [SubscriptionController::class, 'update']);
@@ -453,7 +463,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/create-country', [CountryController::class, 'store']);
     Route::put('/update-country/{id}', [CountryController::class, 'update']);
     Route::delete('/delete-country/{id}', [CountryController::class, 'destroy']);
-    
     // dialing-code
     Route::get('/get-dialing-codes', [DialingCodeController::class, 'index']);
     Route::post('/create-dialing-code', [DialingCodeController::class, 'store']);
