@@ -11,7 +11,7 @@ use App\Models\ProfileImage;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
+use Carbon\Carbon; // Import Carbon for timestamp
 
 class OrgProfileController extends Controller
 {
@@ -23,68 +23,123 @@ class OrgProfileController extends Controller
             'data' => $data
         ], $status);
     }
+
     public function getLogo($userId)
     {
         $logo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
         $imageUrl = $logo ? Storage::url($logo->image_path) : null;
+
         return response()->json([
             'status' => true,
             'data' => ['image' => $imageUrl]
         ]);
     }
+
     public function updateLogo(Request $request)
     {
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
         ]);
+
         $userId = $request->user()->id;
         $user = User::find($userId);
         if (!$user) {
             return response()->json(['status' => false, 'message' => 'Organization not found'], 404);
         }
+
         $image = $request->file('image');
         $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
         $extension = $image->getClientOriginalExtension();
         $mime_type = 'image' . '/' . $extension;
-        $fileSize = $image->getSize();
+        $fileSize = $image->getSize(); // Get file size in bytes
         $timestamp = Carbon::now()->format('YmdHis');
         $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
+
         $path = $image->storeAs('org/logos', $newFileName, 'public');
+
+        // Update the logo path in users table or create a new record if not found
+        //$orgLogo = User::where('id', $userId)->orderBy('id', 'desc')->first();
         $orgLogo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
+        
         if ($orgLogo) {
+            //ekhane delete korte hobe save korar agee
             $orgLogo->user_id = $userId;
             $orgLogo->image_path = $path;
             $orgLogo->file_name = $originalName;
             $orgLogo->mime_type = $mime_type;
             $orgLogo->file_size = $fileSize;
+            // $orgLogo->is_public = $isPublic;
+            // $orgLogo->is_active = $isActive;.?
             $orgLogo->save();
         } else {
+            // Save the logo path to users table
             $orgLogo = new ProfileImage();
             $orgLogo->user_id = $userId;
             $orgLogo->image_path = $path;
             $orgLogo->file_name = $originalName;
             $orgLogo->mime_type = $mime_type;
             $orgLogo->file_size = $fileSize;
+            // $orgLogo->is_public = $isPublic;
+            // $orgLogo->is_active = $isActive;
             $orgLogo->save();
         }
         $imageUrl = Storage::url($path);
         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
     }
+
+        
+    /**
+     * Display a listing of the resource.
+     */
     public function index($userId)
     {
         $orgProfileData = OrgProfile::where('user_id', $userId)->first();
+        
         if ($orgProfileData) {
             return response()->json(['status' => true, 'data' => $orgProfileData]);
         } else {
             return response()->json(['status' => false, 'message' => 'Organisation not found']);
         }
     }
-    public function create() {}
-    public function store(Request $request) {}
-    public function show(OrgProfile $orgProfile) {}
-    public function edit(OrgProfile $orgProfile) {}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(OrgProfile $orgProfile)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(OrgProfile $orgProfile)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, int $userId): JsonResponse
     {
+        // Validate the request data
         $validatedData = $request->validate([
             'short_description'  => 'nullable|string|max:255',
             'detail_description' => 'nullable|string',
@@ -102,26 +157,44 @@ class OrgProfileController extends Controller
             'organising_date' => 'nullable|date',
             'foundation_date' => 'nullable|date',
             'status' => 'nullable|boolean',
+
         ]);
+
         try {
+            // Find the organization profile by user ID
             $orgProfile = OrgProfile::firstOrNew(['user_id' => $userId]);
+
+            // Update or create new profile based on existence
             $orgProfile->fill($validatedData);
             $orgProfile->save();
+
             $message = $orgProfile->wasRecentlyCreated
                 ? 'Org profile created successfully.'
                 : 'Org profile updated successfully.';
+
+            // Return a JSON response
             return response()->json([
                 'status'  => true,
                 'data'    => $orgProfile,
                 'message' => $message,
             ], 200);
         } catch (\Exception $e) {
+            // Log the error for debugging
             Log::error("Failed to update or create OrgProfile for user ID {$userId}: " . $e->getMessage());
+
+            // Return a generic error response
             return response()->json([
                 'status'  => false,
                 'message' => 'An error occurred while processing your request. Please try again later.',
             ], 500);
         }
     }
-    public function destroy(OrgProfile $orgProfile) {}
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(OrgProfile $orgProfile)
+    {
+        //
+    }
 }
