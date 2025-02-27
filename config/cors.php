@@ -1,20 +1,12 @@
 <?php
 
 return [
-
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
-
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login'],
     'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['*'],
-
+    'allowed_origins' => ['*'],  // Change * to your frontend URL in production
     'allowed_origins_patterns' => [],
-
     'allowed_headers' => ['*'],
-
     'exposed_headers' => [],
-
     'max_age' => 0,
-
-    'supports_credentials' => true, // Important for cookies and sessions
+    'supports_credentials' => true, // Allow cookies (needed for authentication)
 ];

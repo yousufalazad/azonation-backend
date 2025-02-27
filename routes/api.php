@@ -430,10 +430,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::put('payment-gateways/{id}', [PaymentGatewayController::class, 'update']);
     // Route::delete('payment-gateways/{id}', [PaymentGatewayController::class, 'destroy']);
 
-    // //Subscription plan
-    // Route::get('subscription-plans', [SubscriptionPlanController::class, 'index']);
-    // Route::post('subscription-plans', [SubscriptionPlanController::class,'store']);
-
     // RegionalTaxRateController
     Route::get('/get-region-tax-rates', [RegionalTaxRateController::class, 'index']);
     Route::get('/get-region-tax-rate/{id}', [RegionalTaxRateController::class, 'show']);
