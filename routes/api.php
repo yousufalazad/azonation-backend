@@ -106,9 +106,6 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
 
-//Route::get('get-independent-members', [OrgIndependentMemberController::class, 'index']);
-
-
 
 Route::middleware('auth:sanctum')->group(function () {
 
