@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             
             // Foreign key to the meetings table using foreignId and constrained
-            $table->foreignId('org_event_id')
-                  ->constrained('org_events')
+            $table->foreignId('event_id')
+                  ->constrained('events')
                   ->cascadeOnUpdate()
                   ->cascadeOnDelete()
                   ->comment('Foreign key referencing the org_events table');

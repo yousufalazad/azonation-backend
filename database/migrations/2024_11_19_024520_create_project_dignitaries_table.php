@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
 
             // Foreign key referencing org_projects table
-            $table->foreignId('org_project_id')
-                ->constrained('org_projects')
+            $table->foreignId('project_id')
+                ->constrained('projects')
                 ->cascadeOnDelete()
                 ->comment('Foreign key referencing org_projects table');
 
