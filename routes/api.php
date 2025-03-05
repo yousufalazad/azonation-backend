@@ -11,7 +11,8 @@ use App\Http\Controllers\Common\UserCountryController;
 use App\Http\Controllers\Common\AddressController;
 use App\Http\Controllers\Common\PhoneNumberController;
 use App\Http\Controllers\Common\NotificationController;
-// Ecommerce\Category
+
+// E-commerce\Category
 use App\Http\Controllers\Ecommerce\Category\BusinessTypeController;
 use App\Http\Controllers\Ecommerce\Category\CategoryController;
 use App\Http\Controllers\Ecommerce\Category\SubCategoryController;
@@ -100,7 +101,6 @@ use App\Http\Controllers\SuperAdmin\Financial\Storage\EverydayStorageBillingCont
 
 // -------------------------------------------------------------------------------------------
 
-
 //API for auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -111,7 +111,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('logout', [AuthController::class, 'logout']);
 
+    //-------------------- Common--------------------------------------------------------------------
+    
+
     // ------------------- Individual----------------------------------------------------------------
+
+    //profile-image
     Route::get('/individual_profile_data/{userId}', [IndividualController::class, 'getProfileImage']);
     Route::get('/profileimage/{userId}', [IndividualController::class, 'getProfileImage']);
     Route::post('/profileimage/{userId}', [IndividualController::class, 'updateProfileImage']);
@@ -121,10 +126,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // ------------------- Organisation----------------------------------------------------------------
-
     //Billing
     Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
-
 
     // Accounts
     Route::get('/get-transactions', [AccountController::class, 'getTransactions']);
@@ -384,8 +387,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('update-billing/{id}', [ManagementAndStorageBillingController::class, 'update']);
     Route::delete('delete-billing/{id}', [ManagementAndStorageBillingController::class, 'destroy']);
 
-
-
     // Everyday billing
     Route::get('every-day-member-count-and-bill-list', [EverydayMemberCountAndBillingController::class, 'index']);
     Route::get('get-every-day-member-count-and-bill/{id}', [EverydayMemberCountAndBillingController::class, 'show']);
@@ -418,14 +419,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('currencies', [CurrencyController::class, 'store']);
     Route::put('currencies/{id}', [CurrencyController::class, 'update']);
     Route::delete('currencies/{id}', [CurrencyController::class, 'destroy']);
-
-    //Payment method
-
-    // //Payment gateway
-    // Route::get('payment-gateways', [PaymentGatewayController::class, 'index']);
-    // Route::post('payment-gateways', [PaymentGatewayController::class,'store']);
-    // Route::put('payment-gateways/{id}', [PaymentGatewayController::class, 'update']);
-    // Route::delete('payment-gateways/{id}', [PaymentGatewayController::class, 'destroy']);
 
     // RegionalTaxRateController
     Route::get('/get-region-tax-rates', [RegionalTaxRateController::class, 'index']);
