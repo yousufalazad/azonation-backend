@@ -15,9 +15,10 @@ class ProjectController extends Controller
         }
         return response()->json(['status' => true, 'data' => $project], 200);
     }
-    public function index($userId)
+    public function index(Request $request)
     {
-        $projectList = Project::where('user_id', $userId)
+        $user_id = $request->user()->id;
+        $projectList = Project::where('user_id', $user_id)
             ->orderBy('id', 'asc')
             ->get();
         return response()->json([

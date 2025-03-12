@@ -12,9 +12,10 @@ use Illuminate\Support\Facades\Mail;
 
 class FounderController extends Controller
 {
-    public function index($userId)
+    public function index(Request $request)
     {
-        $founders = Founder::where('user_id', $userId)
+        $user_id = $request->user()->id;
+        $founders = Founder::where('user_id', $user_id)
             ->with('founders')
             ->get();
         return response()->json([

@@ -31,7 +31,7 @@ class AccountController extends Controller
             ], 500);
         }
     }
-    public function getTransactions()
+    public function index()
     {
         try {
             $userId = Auth::id();
@@ -66,7 +66,7 @@ class AccountController extends Controller
             ], 500);
         }
     }
-    public function createTransaction(Request $request)
+    public function store(Request $request)
     {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -136,7 +136,7 @@ class AccountController extends Controller
             ], 500);
         }
     }
-    public function updateTransaction(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -204,7 +204,7 @@ class AccountController extends Controller
             ], 500);
         }
     }
-    public function deleteTransaction($id)
+    public function destroy($id)
     {
         try {
             $transaction = Account::where('id', $id)->first();

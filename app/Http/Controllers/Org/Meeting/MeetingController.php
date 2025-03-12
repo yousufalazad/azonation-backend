@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Validator;
 
 class MeetingController extends Controller
 {
-    public function getOrgMeeting(Request $request)
+    public function index(Request $request)
     {
         $user_id = $request->user()->id;
         $meetings = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')

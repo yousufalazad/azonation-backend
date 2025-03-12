@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
-    public function index($userId)
+    public function index(Request $request)
     {
-        $events = Event::where('user_id', $userId)->get();
+        $user_id = $request->user()->id;
+        $events = Event::where('user_id', $user_id)->get();
         return response()->json(['status' => true, 'data' => $events]);
     }
     public function getEvent($eventId)
@@ -21,7 +22,7 @@ class EventController extends Controller
         }
         return response()->json(['status' => true, 'data' => $event], 200);
     }
-    public function createEvent(Request $request)
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
@@ -33,7 +34,7 @@ class EventController extends Controller
         $event = Event::create($request->all());
         return response()->json(['status' => true, 'message' => 'Event created successfully.', 'data' => $event], 201);
     }
-    public function updateEvent(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $event = Event::find($id);
         if (!$event) {
@@ -49,7 +50,7 @@ class EventController extends Controller
         $event->update($request->all());
         return response()->json(['status' => true, 'message' => 'Event updated successfully.', 'data' => $event]);
     }
-    public function deleteEvent($id)
+    public function destroy($id)
     {
         $event = Event::find($id);
         if (!$event) {
