@@ -9,7 +9,7 @@ use App\Models\Individual;
 
 class OrgAdministratorController extends Controller
 {
-    public function search(Request $request)
+    public function index(Request $request)
     {
         $query = $request->input('query');
         $results = Individual::where('id', 'like', "%{$query}%")
@@ -22,7 +22,7 @@ class OrgAdministratorController extends Controller
             'data' => $results
         ]);
     }
-    public function index() {}
+    // public function index() {}
     public function create() {}
     public function store(Request $request)
     {

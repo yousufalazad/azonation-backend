@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 
 class CommitteeController extends Controller
 {
-    public function getCommitteeListByUserId($userId)
+    public function index(Request $request)
     {
+        $userId = $request->user()->id;
         $committeeList = Committee::where('user_id', $userId)
             ->orderBy('id', 'asc')
             ->get();
@@ -17,7 +18,6 @@ class CommitteeController extends Controller
             'data' => $committeeList
         ]);
     }
-    public function index() {}
     public function create() {}
     public function store(Request $request)
     {

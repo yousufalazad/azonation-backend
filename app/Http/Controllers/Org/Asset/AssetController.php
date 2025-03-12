@@ -17,7 +17,7 @@ use Carbon\Carbon;
 
 class AssetController extends Controller
 {
-    public function getAsset(Request $request)
+    public function index(Request $request)
     {
         $user_id = $request->user()->id;
         $assets = DB::table('assets as a')
@@ -99,6 +99,27 @@ class AssetController extends Controller
         $assetDetails['images'] = $images;
         return response()->json(['status' => true, 'data' => $assetDetails], 200);
     }
+    public function show($id)
+    {
+        $asset = Asset::with(['assignmentLogs', 'documents', 'images'])->find($id);
+        if (!$asset) {
+            return response()->json(['message' => 'Asset not found.'], 404);
+        }
+        $asset->images = $asset->images->map(function ($image) {
+            $image->image_url = $image->file_path
+                ? url(Storage::url($image->file_path))
+                : null;
+            return $image;
+        });
+        $asset->documents = $asset->documents->map(function ($document) {
+            $document->document_url = $document->file_path
+                ? url(Storage::url($document->file_path))
+                : null;
+            return $document;
+        });
+        return response()->json($asset);
+    }
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -176,26 +197,7 @@ class AssetController extends Controller
             return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
         }
     }
-    public function show($id)
-    {
-        $asset = Asset::with(['assignmentLogs', 'documents', 'images'])->find($id);
-        if (!$asset) {
-            return response()->json(['message' => 'Asset not found.'], 404);
-        }
-        $asset->images = $asset->images->map(function ($image) {
-            $image->image_url = $image->file_path
-                ? url(Storage::url($image->file_path))
-                : null;
-            return $image;
-        });
-        $asset->documents = $asset->documents->map(function ($document) {
-            $document->document_url = $document->file_path
-                ? url(Storage::url($document->file_path))
-                : null;
-            return $document;
-        });
-        return response()->json($asset);
-    }
+    
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
