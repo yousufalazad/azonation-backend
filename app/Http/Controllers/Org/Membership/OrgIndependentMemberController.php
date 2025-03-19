@@ -25,7 +25,6 @@ class OrgIndependentMemberController extends Controller
     }
     public function store(Request $request)
     {
-        dd($request);
         $validatedData['user_id'] = $request->user()->id;
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
@@ -44,12 +43,13 @@ class OrgIndependentMemberController extends Controller
         $member->note = $validatedData['note'];
         $member->is_active = $validatedData['is_active'];
         $member->save();
+
         Log::info("Member updated");
         if ($request->hasFile('image_path')) {
             Log::info("inside image upload");
             foreach ($request->file('image_path') as $image) {
                 $imagePath = $image->storeAs(
-                    'org/image/independent-member',
+                    'org/independent-member/image',
                     Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                     'public'
                 );
