@@ -90,7 +90,7 @@ class AccountController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/account',
+                        'org/account/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -108,7 +108,7 @@ class AccountController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/account',
+                        'org/account/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
@@ -159,7 +159,7 @@ class AccountController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/account',
+                        'org/account/doc',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -177,7 +177,7 @@ class AccountController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/account',
+                        'org/account/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );

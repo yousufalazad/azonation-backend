@@ -71,7 +71,7 @@ class RecognitionController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/recognition',
+                        'org/recognition/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -89,7 +89,7 @@ class RecognitionController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/recognition',
+                        'org/recognition/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
@@ -144,7 +144,7 @@ class RecognitionController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/recognition',
+                        'org/recognition/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -162,7 +162,7 @@ class RecognitionController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/recognition',
+                        'org/recognition/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );

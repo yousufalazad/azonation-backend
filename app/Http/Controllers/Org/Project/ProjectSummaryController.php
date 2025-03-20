@@ -94,7 +94,7 @@ class ProjectSummaryController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/project-summary',
+                        'org/project-summary/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -112,7 +112,7 @@ class ProjectSummaryController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/project-summary',
+                        'org/project-summary/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
@@ -211,7 +211,7 @@ class ProjectSummaryController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/project-summary',
+                        'org/project-summary/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -229,7 +229,7 @@ class ProjectSummaryController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/project-summary',
+                        'org/project-summary/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );

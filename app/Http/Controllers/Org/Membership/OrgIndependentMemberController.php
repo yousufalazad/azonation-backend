@@ -108,7 +108,7 @@ class OrgIndependentMemberController extends Controller
             $extension = $image->getClientOriginalExtension();
             $timestamp = Carbon::now()->format('YmdHis');
             $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
-            $path = $image->storeAs('org/independent_member', $newFileName, 'public');
+            $path = $image->storeAs('org/independent_member/image', $newFileName, 'public');
             $validatedData['image_path'] = $path;
         }
         $validatedData['user_id'] = $request->user()->id;

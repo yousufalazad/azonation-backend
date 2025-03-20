@@ -70,7 +70,7 @@ class OfficeRecordController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/office-record',
+                        'org/office-record/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -88,7 +88,7 @@ class OfficeRecordController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/office-record',
+                        'org/office-record/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
@@ -138,7 +138,7 @@ class OfficeRecordController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/office-record',
+                        'org/office-record/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -156,7 +156,7 @@ class OfficeRecordController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/office-record',
+                        'org/office-record/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
