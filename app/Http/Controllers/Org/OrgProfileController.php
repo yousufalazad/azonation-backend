@@ -49,7 +49,7 @@ class OrgProfileController extends Controller
         $fileSize = $image->getSize();
         $timestamp = Carbon::now()->format('YmdHis');
         $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
-        $path = $image->storeAs('org/logos', $newFileName, 'public');
+        $path = $image->storeAs('org/logo', $newFileName, 'public');
         $orgLogo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
         if ($orgLogo) {
             $orgLogo->user_id = $userId;

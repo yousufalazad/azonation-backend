@@ -23,8 +23,7 @@ class OrgIndependentMember extends Model
         'mobile',
         'address',
         'note',
-        'is_active',
-        'image_path',
+        'is_active'
     ];
 
     protected $hidden = [
