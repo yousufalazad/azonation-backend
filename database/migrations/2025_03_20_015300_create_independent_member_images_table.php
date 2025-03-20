@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('independent_member_images', function (Blueprint $table) {
             $table->id();
-            
             // Foreign key referencing the office_records table
             $table->foreignId('org_independent_member_id')
                 ->constrained('org_independent_members')
