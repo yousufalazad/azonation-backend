@@ -77,7 +77,7 @@ class MeetingMinutesController extends Controller
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $document) {
                 $documentPath = $document->storeAs(
-                    'org/doc/meeting-minute',
+                    'org/meeting-minute/file',
                     Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                     'public'
                 );
@@ -95,7 +95,7 @@ class MeetingMinutesController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $imagePath = $image->storeAs(
-                    'org/image/meeting-minute',
+                    'org/meeting-minute/image',
                     Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                     'public'
                 );
@@ -141,7 +141,7 @@ class MeetingMinutesController extends Controller
                 }
                 $file = $request->file('file_attachments');
                 $fileAttachmentPath = $file->storeAs(
-                    'org/docs',
+                    'org/meeting-minute/file',
                     now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
                     'public'
                 );
@@ -168,7 +168,7 @@ class MeetingMinutesController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/meeting-minute',
+                        'org/meeting-minute/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -186,7 +186,7 @@ class MeetingMinutesController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/meeting-minute',
+                        'org/meeting-minute/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );

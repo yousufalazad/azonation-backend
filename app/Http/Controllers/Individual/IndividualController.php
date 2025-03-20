@@ -53,7 +53,7 @@ class IndividualController extends Controller
         $extension = $image->getClientOriginalExtension();
         $timestamp = Carbon::now()->format('YmdHis');
         $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
-        $path = $image->storeAs('individual/profileimages', $newFileName, 'public');
+        $path = $image->storeAs('individual/profile/image', $newFileName, 'public');
         $profileImage = ProfileImage::where('individual_id', $individualId)->orderBy('id', 'desc')->first();
         if ($profileImage) {
             $profileImage->individual_id = $individualId;

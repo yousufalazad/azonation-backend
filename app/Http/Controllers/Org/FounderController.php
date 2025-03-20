@@ -71,11 +71,11 @@ class FounderController extends Controller
         if ($request->hasFile('profile_image')) {
             foreach ($request->file('profile_image') as $image) {
                 $imagePath = $image->storeAs(
-                    'org/image/founder-profile-image',
+                    'org/founder-profile/image/',
                     Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                     'public'
                 );
-                dd($imagePath);
+                // dd($imagePath);
                 FounderProfileImage::create([
                     'founder_id' => $founder->id,
                     'file_path' => $imagePath,

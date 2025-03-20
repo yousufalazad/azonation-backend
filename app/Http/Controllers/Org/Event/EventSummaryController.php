@@ -44,8 +44,8 @@ class EventSummaryController extends Controller
     }
     public function store(Request $request)
     {
-        dd($request->all());
-        exit;
+        // dd($request->all());
+        // exit;
         $validator = Validator::make($request->all(), [
             'event_id' => 'required|integer',
             'total_member_attendance' => 'required|integer',
@@ -75,7 +75,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('image_attachment')) {
                 $image = $request->file('image_attachment');
                 $imageAttachmentPath = $image->storeAs(
-                    'event/images',
+                    'org/event/image',
                     now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                     'public'
                 );
@@ -84,7 +84,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('file_attachment')) {
                 $file = $request->file('file_attachment');
                 $fileAttachmentPath = $file->storeAs(
-                    'event/files',
+                    'org/event/file',
                     now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
                     'public'
                 );
@@ -111,7 +111,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/meeting-minute',
+                        'org/event/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -129,7 +129,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/meeting-minute',
+                        'org/event/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
@@ -187,7 +187,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('image_attachment')) {
                 $image = $request->file('image_attachment');
                 $imageAttachmentPath = $image->storeAs(
-                    'event/images',
+                    'org/event/image',
                     now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                     'public'
                 );
@@ -196,7 +196,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('file_attachment')) {
                 $file = $request->file('file_attachment');
                 $fileAttachmentPath = $file->storeAs(
-                    'event/files',
+                    'org/event/file',
                     now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
                     'public'
                 );
@@ -222,7 +222,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/doc/meeting-minute',
+                        'org/event/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -240,7 +240,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/image/meeting-minute',
+                        'org/event/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
