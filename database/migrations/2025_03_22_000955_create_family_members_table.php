@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->comment('Organisation primary ID');
             $table->foreignId('member_id')->constrained('users')->onDelete('cascade')->comment('main member id associated with this organisation'); // Main member ID
             $table->string('name');
+            $table->string('mobile')->nullable();
+            $table->string('email')->nullable();
+            $table->string('address')->nullable();
             $table->date('day_month_of_birth')->nullable()->comment('Day and month of birth');
             $table->enum('gender', ['male', 'female', 'other']); // Relationship with main member
             $table->enum('relationship', ['child', 'spouse', 'sibling', 'dependent', 'other']); // Relationship with main member
