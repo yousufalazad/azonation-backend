@@ -1,5 +1,6 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\SuperAdmin\PaymentGateway;
+use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use Stripe\Stripe;
@@ -10,7 +11,7 @@ use Carbon\Carbon;
 
 class StripeController extends Controller
 {
-    public function createCheckoutSession(Request $request, $invoiceId)
+    public function stripeCreateCheckoutSession(Request $request, $invoiceId)
     {
         $invoice = Invoice::findOrFail($invoiceId);
         
@@ -39,7 +40,7 @@ class StripeController extends Controller
         return response()->json(['url' => $session->url]);
     }
 
-    public function success(Request $request, $invoiceId)
+    public function stripeSuccess(Request $request, $invoiceId)
     {
         $invoice = Invoice::findOrFail($invoiceId);
         
@@ -73,8 +74,48 @@ class StripeController extends Controller
         return redirect()->route('dashboard')->with('success', 'Payment successful');
     }
 
-    public function cancel($invoiceId)
+    public function stripeCancel($invoiceId)
     {
         return redirect()->route('dashboard')->with('error', 'Payment was cancelled');
     }
+
+    public function StripeHandleWebhook(Request $request)
+{
+    $payload = $request->all();
+
+    if ($payload['type'] === 'checkout.session.completed') {
+        $session = $payload['data']['object'];
+        $invoice = Invoice::where('billing_code', $session['metadata']['billing_code'])->first();
+
+        if ($invoice) {
+            $invoice->update([
+                'payment_status' => 'paid',
+                'amount_paid' => $invoice->total_amount,
+                'balance_due' => 0,
+                'invoice_status' => 'closed'
+            ]);
+
+            Payment::create([
+                'invoice_id' => $invoice->id,
+                'user_id' => $invoice->user_id,
+                'user_name' => $invoice->user_name,
+                'payment_amount' => $invoice->total_amount,
+                'payment_method' => 'card',
+                'payment_date' => Carbon::now(),
+                'payment_gateway' => 'Stripe',
+                'transaction_id' => $session['id'],
+                'payment_status' => 'completed',
+                'payment_currency' => $invoice->currency_code,
+                'amount_paid' => $invoice->total_amount,
+                'total_due' => 0,
+                'currency_code' => $invoice->currency_code,
+                'transaction_status' => 'successful',
+                'paid_at' => Carbon::now(),
+            ]);
+        }
+    }
+
+    return response()->json(['status' => 'success']);
+}
+
 }

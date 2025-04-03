@@ -69,6 +69,8 @@ use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementPricingContro
 use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementSubscriptionController;
 use App\Http\Controllers\SuperAdmin\Financial\Storage\EverydayStorageBillingController;
 
+use App\Http\Controllers\SuperAdmin\PaymentGateway\StripeController;
+
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
@@ -504,5 +506,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [OrderDetailController::class, 'store']);
         Route::put('/{id}', [OrderDetailController::class, 'update']);
         Route::delete('/{id}', [OrderDetailController::class, 'destroy']);
+    });
+    Route::group(['prefix' => 'payment-gateway-stripe'], function () {
+        Route::get('/checkout/{invoiceId}', [StripeController::class, 'stripeCreateCheckoutSession']);
+        Route::get('/success/{invoiceId}', [StripeController::class, 'stripeSuccess']);
+        Route::get('/cancel/{invoiceId}', [StripeController::class, 'stripeCancel']);
+        Route::post('/webhook', [StripeController::class, 'stripeHandleWebhook']);
     });
 });
