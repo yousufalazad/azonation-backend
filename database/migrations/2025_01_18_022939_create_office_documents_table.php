@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('office_documents', function (Blueprint $table) {
@@ -28,12 +25,11 @@ return new class extends Migration
             ->constrained('privacy_setups')
             ->onDelete('cascade')
             ->comment('Privacy level of the year plan (e.g., public, private, only members).');
+            
+            $table->timestamps();
+
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('office_documents');

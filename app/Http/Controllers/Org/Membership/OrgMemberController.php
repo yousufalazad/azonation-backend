@@ -69,13 +69,13 @@ class OrgMemberController extends Controller
                     ->orWhereRaw("CONCAT(dialing_codes.dialing_code, phone_numbers.phone_number) LIKE ?", ["%{$query}%"]);
             })
             ->leftJoin('addresses', 'addresses.user_id', '=', 'users.id')
-            ->leftJoin('countries', 'countries.id', '=', 'addresses.country_id')
+            // ->leftJoin('countries', 'countries.id', '=', 'addresses.country_id')
             ->leftJoin('phone_numbers', 'phone_numbers.user_id', '=', 'users.id')
             ->leftJoin('dialing_codes', 'dialing_codes.id', '=', 'phone_numbers.dialing_code_id')
             ->select(
                 'users.*',
                 'addresses.city',
-                'countries.country_name',
+                // 'countries.name as country_name',
                 'dialing_codes.dialing_code',
                 'phone_numbers.phone_number'
             )
@@ -94,7 +94,7 @@ class OrgMemberController extends Controller
         $orgMember = OrgMember::create([
             'org_type_user_id' => $validated['org_type_user_id'],
             'individual_type_user_id' => $validated['individual_type_user_id'],
-            'status' => 1
+            'is_active' => true,
         ]);
         $individualUser = User::find($validated['individual_type_user_id']);
         $orgUser = User::find($validated['org_type_user_id']);
