@@ -31,8 +31,9 @@ use App\Http\Controllers\Org\Meeting\MeetingMinutesController;
 use App\Http\Controllers\Org\Meeting\MeetingAttendanceController;
 use App\Http\Controllers\Org\Meeting\MeetingGuestAttendanceController;
 use App\Http\Controllers\Org\Membership\OrgMemberController;
+use App\Http\Controllers\Org\Membership\FamilyMemberController;
 use App\Http\Controllers\Org\Membership\OrgIndependentMemberController;
-use App\Http\Controllers\Org\OfficeDocument\OfficeRecordController;
+use App\Http\Controllers\Org\OfficeDocument\OfficeDocumentController;
 use App\Http\Controllers\Org\Project\ProjectAttendanceController;
 use App\Http\Controllers\Org\Project\ProjectSummaryController;
 use App\Http\Controllers\Org\Project\ProjectController;
@@ -151,12 +152,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update']);
     Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
     Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
+    
     Route::group(['prefix' => 'office-documents'], function () {
-        Route::get('/', [OfficeRecordController::class, 'index']);
-        Route::get('/{recordId}', [OfficeRecordController::class, 'show']);
-        Route::post('/', [OfficeRecordController::class, 'store']);
-        Route::put('/{id}', [OfficeRecordController::class, 'update']);
-        Route::delete('/{id}', [OfficeRecordController::class, 'destroy']);
+        Route::get('/', [OfficeDocumentController::class, 'index']);
+        Route::get('/{id}', [OfficeDocumentController::class, 'show']);
+        Route::post('/', [OfficeDocumentController::class, 'store']);
+        Route::put('/{id}', [OfficeDocumentController::class, 'update']);
+        Route::delete('/{id}', [OfficeDocumentController::class, 'destroy']);
     });
     Route::group(['prefix' => 'org-members'], function () {
         Route::get('/{userId}', [OrgMemberController::class, 'getOrgMembers']);
@@ -165,6 +167,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/search', [OrgMemberController::class, 'search']);
         Route::post('/create', [OrgMemberController::class, 'addMember']);
     });
+
+    Route::group(['prefix' => 'family-members'], function () {
+        Route::get('/', [FamilyMemberController::class, 'index']);
+        Route::post('/', [FamilyMemberController::class, 'store']);
+        Route::get('{id}', [FamilyMemberController::class, 'show']);
+        Route::put('{id}', [FamilyMemberController::class, 'update']);
+        Route::delete('{id}', [FamilyMemberController::class, 'destroy']);
+    });
+
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
     Route::get('/total-org-member-count/{userId}', [OrgMemberController::class, 'totalOrgMemberCount']);
     Route::group(['prefix' => 'independent-members'], function () {

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('gender', ['male', 'female', 'other']); // Relationship with main member
             $table->enum('relationship', ['child', 'spouse', 'sibling', 'dependent', 'other']); // Relationship with main member
             $table->enum('life_status', ['active', 'deceased', 'left']); // Status of the member
-            $table->boolean('is_active')->default('true')->comment('Is this member active?');
+            $table->boolean('is_active')->default(true)->comment('Is this member active?');
             $table->timestamps();
         });
     }
