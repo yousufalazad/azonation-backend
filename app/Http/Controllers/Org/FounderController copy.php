@@ -61,7 +61,6 @@ class FounderController extends Controller
             'is_active' => 'boolean',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:7168',
         ]);
-
         $founder = Founder::create([
             'user_id' => $request->user_id,
             'founder_user_id' => $request->founder_user_id,
@@ -70,30 +69,30 @@ class FounderController extends Controller
             'is_active' => $request->is_active,
         ]);
         if ($request->hasFile('profile_image')) {
-            $image = $request->file('profile_image');
-            $imagePath = $image->storeAs(
-                'org/founder-profile/image/',
-                Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                'public'
-            );
-            FounderProfileImage::create([
-                'founder_id' => $founder->id,
-                'file_path' => $imagePath,
-                'file_name' => $image->getClientOriginalName(),
-                'mime_type' => $image->getClientMimeType(),
-                'file_size' => $image->getSize(),
-                'is_public' => true,
-                'is_active' => true,
-            ]);
+            foreach ($request->file('profile_image') as $image) {
+                $imagePath = $image->storeAs(
+                    'org/founder-profile/image/',
+                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                    'public'
+                );
+                // dd($imagePath);
+                FounderProfileImage::create([
+                    'founder_id' => $founder->id,
+                    'file_path' => $imagePath,
+                    'file_name' => $image->getClientOriginalName(),
+                    'mime_type' => $image->getClientMimeType(),
+                    'file_size' => $image->getSize(),
+                    'is_public' => true,
+                    'is_active' => true,
+                ]);
+            }
         }
-
         return response()->json([
             'status' => true,
-            'message' => 'Founder added successfully',
+            'message' => 'founder added successfully',
             'data' => $founder,
         ]);
     }
-
     public function create() {}
     public function show(Founder $founder) {}
     public function edit(Founder $founder) {}

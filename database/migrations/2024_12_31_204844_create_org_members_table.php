@@ -13,40 +13,40 @@ return new class extends Migration
     {
         Schema::create('org_members', function (Blueprint $table) {
             $table->id();
-            
+
             // Foreign key to the users table representing the organization
             $table->foreignId('org_type_user_id')
-                  ->constrained('users')
-                  ->onDelete('cascade')
-                  ->comment('Foreign key to the users table representing the organization');
+                ->constrained('users')
+                ->onDelete('cascade')
+                ->comment('Foreign key to the users table representing the organization');
 
             // Foreign key to the users table representing the individual
             $table->foreignId('individual_type_user_id')
-                  ->constrained('users')
-                  ->onDelete('cascade')
-                  ->comment('Foreign key to the users table representing the individual');
+                ->constrained('users')
+                ->onDelete('cascade')
+                ->comment('Foreign key to the users table representing the individual');
 
             $table->string('existing_membership_id')->nullable()->comment('Existing organization membership identifier');
 
             // Foreign key to the membership_types table
             $table->foreignId('membership_type_id')
-                  ->nullable()
-                  ->constrained('membership_types')
-                  ->onDelete('set null')
-                  ->comment('Foreign key to the membership_types table');
+                ->nullable()
+                ->constrained('membership_types')
+                ->onDelete('set null')
+                ->comment('Foreign key to the membership_types table');
 
             $table->date('membership_start_date')->nullable()->comment('Date when the individual joined the organization');
             //$table->date('membership_end_date')->nullable()->comment('Date when the individual left the organization');
-            
+
             // Foreign key to the users table representing the individual
             $table->foreignId('sponsored_user_id')
-                  ->constrained('users')
-                  ->onDelete('cascade')
-                  ->nullable()
-                  ->comment('Foreign key to the users table representing the individual');
-            
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('cascade')
+                ->comment('Foreign key to the users table representing the individual');
+
             $table->boolean('is_active')->default(true)->comment('Status of the member active or inactive');
-            
+
             $table->timestamps();
         });
     }
