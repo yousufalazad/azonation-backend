@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class OrgMemberController extends Controller
-{
+{ 
     use Notifiable;
     public function getOrgAllMemberName(Request $request)
     {

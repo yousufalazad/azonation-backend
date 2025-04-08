@@ -19,16 +19,16 @@ return new class extends Migration
             $table->foreignId('user_id')
                 ->constrained('users')
                 ->onDelete('cascade') // Cascade on delete to remove associated founders
-                ->comment('Organisation ID'); 
+                ->comment('Organisation ID');
 
             $table->foreignId('founder_user_id')
+                ->nullable()
                 ->constrained('users')
                 ->onDelete('cascade') // Cascade on delete to remove associated founders 
-                ->nullable() // Allow null values
-                ->comment('Individual ID'); 
+                ->comment('Individual ID');
 
             // Founder details
-            $table->string('name'); // name of the founder
+            $table->string('name')->nullable(); // name of the founder
             $table->string('designation')->nullable(); // designation of the founder
 
             $table->boolean('is_active')->default(true); // Active status
