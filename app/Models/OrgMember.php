@@ -15,8 +15,8 @@ class OrgMember extends Model
         'individual_type_user_id',
         'existing_membership_id',
         'membership_type_id',
-        'joining_date',
-        'end_date',
+        'membership_start_date',
+        'sponsored_user_id ',
         'is_active'
     ];
     protected $hidden=[
@@ -24,11 +24,15 @@ class OrgMember extends Model
         'updated_at'
     ];
 
-    //Get the organization user related to this membership.
     public function individual(): BelongsTo
     {
         return $this->belongsTo(User::class, 'individual_type_user_id', 'id');
     }
+
+//     public function individual()
+// {
+//     return $this->belongsTo(Individual::class); // Adjust if it's a different relation
+// }
 
     public function membershipType(): BelongsTo
 {
