@@ -27,18 +27,49 @@ class OrgMemberController extends Controller
             'data' => $getOrgAllMemberName
         ]);
     }
+    // public function getOrgAllMembers(Request $request)
+    // {
+    //     $userId = Auth::id();
+    //     // $userId = $request->user()->id;
+
+    //     // $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
+    //     $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
+    //         ->where('org_type_user_id', $userId)
+    //         ->where('is_active', '1')
+    //         ->get();
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $getOrgAllMembers
+    //     ]);
+    // }
+
     public function getOrgAllMembers(Request $request)
     {
-        $userId = $request->user()->id;
-        $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
-            ->where('org_type_user_id', $userId)
-            ->where('is_active', '1')
-            ->get();
-        return response()->json([
-            'status' => true,
-            'data' => $getOrgAllMembers
-        ]);
+        $userId = Auth::id();
+            // $userId = $request->user()->id;
+    
+            // $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
+            $getOrgAllMembers = OrgMember::with(['individual:id,name', 'memberProfileImage'])
+                ->where('org_type_user_id', $userId)
+                ->where('is_active', '1')
+                ->get();
+            return response()->json([
+                'status' => true,
+                'data' => $getOrgAllMembers
+            ]);
     }
+
+    // public function getOrgMembers($userId)
+    // {
+    //     $members = OrgMember::where('org_type_user_id', $userId)
+    //         ->with('individual')
+    //         ->get();
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $members
+    //     ]);
+    // }
+    
     public function totalOrgMemberCount($userId)
     {
         $totalOrgMemberCount = OrgMember::where('org_type_user_id', $userId)->count();
@@ -47,16 +78,7 @@ class OrgMemberController extends Controller
             'totalOrgMemberCount' => $totalOrgMemberCount
         ]);
     }
-    public function getOrgMembers($userId)
-    {
-        $members = OrgMember::where('org_type_user_id', $userId)
-            ->with('individual')
-            ->get();
-        return response()->json([
-            'status' => true,
-            'data' => $members
-        ]);
-    }
+    
     public function search(Request $request)
     {
         $query = $request->input('query');
@@ -100,7 +122,7 @@ class OrgMemberController extends Controller
         $orgUser = User::find($validated['org_type_user_id']);
         $orgName = $orgUser ? $orgUser->name : 'The Organization';
         if ($individualUser) {
-            Mail::to($individualUser->email)->send(new AddMemberSuccessMail($individualUser->name, $orgName));
+            Mail::to($individualUser->email)->queue(new AddMemberSuccessMail($individualUser->name, $orgName));
         }
         User::find($individualUser->id)->notify(new AddMemberSuccess($orgName));
         return response()->json([

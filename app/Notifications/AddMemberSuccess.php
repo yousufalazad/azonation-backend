@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 
 
-class AddMemberSuccess extends Notification
+class AddMemberSuccess extends Notification implements ShouldQueue
 {
     use Queueable;
     protected $data;
