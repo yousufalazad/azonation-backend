@@ -169,6 +169,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/create', [OrgMemberController::class, 'addMember']);
     });
 
+    Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
+    Route::get('/total-org-member-count', [OrgMemberController::class, 'totalOrgMemberCount']);
+
     Route::group(['prefix' => 'family-members'], function () {
         Route::get('/', [FamilyMemberController::class, 'index']);
         Route::post('/', [FamilyMemberController::class, 'store']);
@@ -177,8 +180,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('{id}', [FamilyMemberController::class, 'destroy']);
     });
 
-    Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
-    Route::get('/total-org-member-count/{userId}', [OrgMemberController::class, 'totalOrgMemberCount']);
+    
     Route::group(['prefix' => 'independent-members'], function () {
         Route::get('/', [OrgIndependentMemberController::class, 'index']);
         Route::get('/{id}', [OrgIndependentMemberController::class, 'show']);
