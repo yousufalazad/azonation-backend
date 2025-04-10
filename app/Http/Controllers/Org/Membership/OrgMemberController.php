@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Org\Membership;
+
 use App\Http\Controllers\Controller;
 use App\Mail\AddMemberSuccessMail;
 use Illuminate\Support\Facades\Mail;
@@ -13,12 +15,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class OrgMemberController extends Controller
-{ 
+{
     use Notifiable;
     public function getOrgAllMemberName(Request $request)
     {
         $userId = Auth::id();
-        $getOrgAllMemberName = OrgMember::with(['individual:id,name'])
+        $getOrgAllMemberName = OrgMember::with(['individual:id,name', 'membershipType',])
             ->where('org_type_user_id', $userId)
             ->where('is_active', '1')
             ->get();
@@ -46,17 +48,14 @@ class OrgMemberController extends Controller
     public function getOrgAllMembers(Request $request)
     {
         $userId = Auth::id();
-            // $userId = $request->user()->id;
-    
-            // $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
-            $getOrgAllMembers = OrgMember::with(['individual:id,name', 'memberProfileImage'])
-                ->where('org_type_user_id', $userId)
-                ->where('is_active', '1')
-                ->get();
-            return response()->json([
-                'status' => true,
-                'data' => $getOrgAllMembers
-            ]);
+        $getOrgAllMembers = OrgMember::with(['individual:id,name', 'membershipType', 'memberProfileImage'])
+            ->where('org_type_user_id', $userId)
+            ->where('is_active', '1')
+            ->get();
+        return response()->json([
+            'status' => true,
+            'data' => $getOrgAllMembers
+        ]);
     }
 
     // public function getOrgMembers($userId)
@@ -69,16 +68,17 @@ class OrgMemberController extends Controller
     //         'data' => $members
     //     ]);
     // }
-    
-    public function totalOrgMemberCount($userId)
+
+    public function totalOrgMemberCount(Request $request)
     {
+        $userId = Auth::id();
         $totalOrgMemberCount = OrgMember::where('org_type_user_id', $userId)->count();
         return response()->json([
             'status' => true,
-            'totalOrgMemberCount' => $totalOrgMemberCount
+            'data' => $totalOrgMemberCount
         ]);
     }
-    
+
     public function search(Request $request)
     {
         $query = $request->input('query');
