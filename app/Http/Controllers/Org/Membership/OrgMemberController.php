@@ -155,6 +155,58 @@ class OrgMemberController extends Controller
     public function store(Request $request) {}
     public function show(OrgMember $orgMember) {}
     public function edit(OrgMember $orgMember) {}
-    public function update(Request $request, OrgMember $orgMember) {}
-    public function destroy(OrgMember $orgMember) {}
+    public function update(Request $request, $id)
+    {
+        try {
+            $member = OrgMember::findOrFail($id);
+    
+            // Validate the incoming request data
+            $request->validate([
+                'individual_name' => 'required|string|max:255',
+                'existing_membership_id' => 'required|string|max:255',
+                'membership_type' => 'required|string|max:255',
+                'membership_start_date' => 'required|date',
+                'sponsored_user_id' => 'nullable|exists:users,id', // Assuming it's a user ID
+                'is_active' => 'required|boolean',
+            ]);
+    
+            // Update the member data
+            // $member->individual->name = $request->individual_name;
+            $member->existing_membership_id = $request->existing_membership_id;
+            $member->membership_type->name = $request->membership_type;
+            $member->membership_start_date = $request->membership_start_date;
+            $member->sponsored_user_id = $request->sponsored_user_id;
+            $member->is_active = $request->is_active;
+            $member->save();
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Member updated successfully.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update member.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    
+    public function destroy($id) {
+        try {
+            $member = OrgMember::findOrFail($id);
+            $member->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Member deleted successfully.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to delete member.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
