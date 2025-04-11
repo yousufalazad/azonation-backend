@@ -48,6 +48,9 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->comment('Status of the member active or inactive');
 
             $table->timestamps();
+
+            // Add a unique constraint to prevent the same individual being added twice to the same organization
+            $table->unique(['org_type_user_id', 'individual_type_user_id']);
         });
     }
 
