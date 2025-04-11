@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Notifications\AddMemberSuccess;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 class OrgMemberController extends Controller
 {
@@ -130,6 +131,25 @@ class OrgMemberController extends Controller
             'message' => 'Member added successfully',
         ]);
     }
+
+    public function checkMember(Request $request)
+{
+    $validated = $request->validate([
+        'org_type_user_id' => 'required|exists:users,id',
+        'individual_type_user_id' => 'required|exists:users,id',
+    ]);
+
+    // Check if the individual is already in the org_members list
+    $exists = DB::table('org_members')
+        ->where('org_type_user_id', $request->org_type_user_id)
+        ->where('individual_type_user_id', $request->individual_type_user_id)
+        ->exists();
+
+    return response()->json([
+        'status' => true,
+        'data' => ['exists' => $exists]
+    ]);
+}
     public function index() {}
     public function create() {}
     public function store(Request $request) {}

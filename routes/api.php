@@ -167,6 +167,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/all', [OrgMemberController::class, 'getOrgAllMembers']);
         Route::post('/search', [OrgMemberController::class, 'search']);
         Route::post('/create', [OrgMemberController::class, 'addMember']);
+        Route::post('/check', [OrgMemberController::class, 'checkMember']);
     });
 
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
