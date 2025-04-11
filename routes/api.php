@@ -168,6 +168,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/search', [OrgMemberController::class, 'search']);
         Route::post('/create', [OrgMemberController::class, 'addMember']);
         Route::post('/check', [OrgMemberController::class, 'checkMember']);
+        Route::put('/{id}', [OrgMemberController::class, 'update']);
+        Route::delete('/{id}', [OrgMemberController::class, 'destroy']);        
     });
 
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
