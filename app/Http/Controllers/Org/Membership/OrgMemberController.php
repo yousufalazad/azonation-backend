@@ -162,21 +162,16 @@ class OrgMemberController extends Controller
     
             // Validate the incoming request data
             $request->validate([
-                'individual_name' => 'required|string|max:255',
                 'existing_membership_id' => 'required|string|max:255',
-                'membership_type' => 'required|string|max:255',
+                // 'membership_type' => 'required|string|max:255',
                 'membership_start_date' => 'required|date',
-                'sponsored_user_id' => 'nullable|exists:users,id', // Assuming it's a user ID
-                'is_active' => 'required|boolean',
+                // 'sponsored_user_id' => 'nullable|exists:users,id', // Assuming it's a user ID
             ]);
-    
-            // Update the member data
-            // $member->individual->name = $request->individual_name;
             $member->existing_membership_id = $request->existing_membership_id;
-            $member->membership_type->name = $request->membership_type;
+            // $member->membership_type->name = $request->membership_type;
             $member->membership_start_date = $request->membership_start_date;
-            $member->sponsored_user_id = $request->sponsored_user_id;
-            $member->is_active = $request->is_active;
+            // $member->sponsored_user_id = $request->sponsored_user_id;
+            // $member->is_active = $request->is_active;
             $member->save();
     
             return response()->json([
