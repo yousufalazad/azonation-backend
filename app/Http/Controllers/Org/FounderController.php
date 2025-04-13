@@ -9,19 +9,37 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class FounderController extends Controller
 {
     public function index(Request $request)
     {
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
         $founders = Founder::where('user_id', $user_id)
-            ->with('founders')
+            ->with('founders','image')
             ->get();
+
+        if ($founders->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Founders not found'
+            ], 404);
+        }
+
+        $founders = $founders->map(function ($founder) {
+            $founder->image_url = $founder->image && $founder->image->file_path
+                ? url(Storage::url($founder->image->file_path))
+                : null;
+            unset($founder->image);
+            return $founder;
+        });
+
         return response()->json([
             'status' => true,
             'data' => $founders
-        ]);
+        ], 200);
     }
     public function search(Request $request)
     {

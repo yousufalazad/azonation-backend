@@ -14,6 +14,7 @@ use App\Notifications\AddMemberSuccess;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class OrgMemberController extends Controller
 {
@@ -30,21 +31,6 @@ class OrgMemberController extends Controller
             'data' => $getOrgAllMemberName
         ]);
     }
-    // public function getOrgAllMembers(Request $request)
-    // {
-    //     $userId = Auth::id();
-    //     // $userId = $request->user()->id;
-
-    //     // $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
-    //     $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
-    //         ->where('org_type_user_id', $userId)
-    //         ->where('is_active', '1')
-    //         ->get();
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => $getOrgAllMembers
-    //     ]);
-    // }
 
     public function getOrgAllMembers(Request $request)
     {
@@ -53,6 +39,14 @@ class OrgMemberController extends Controller
             ->where('org_type_user_id', $userId)
             ->where('is_active', '1')
             ->get();
+
+            $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
+                $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
+                    ? url(Storage::url($member->memberProfileImage->image_path))
+                    : null;
+                unset($member->memberProfileImage);
+                return $member;
+            });
         return response()->json([
             'status' => true,
             'data' => $getOrgAllMembers
@@ -129,7 +123,9 @@ class OrgMemberController extends Controller
         ]);
     }
     public function index() {}
+
     public function create() {}
+
     public function store(Request $request) {
         $validated = $request->validate([
             'org_type_user_id' => 'required|exists:users,id',
@@ -153,7 +149,9 @@ class OrgMemberController extends Controller
         ]);
     }
     public function show(OrgMember $orgMember) {}
+
     public function edit(OrgMember $orgMember) {}
+
     public function update(Request $request, $id)
     {
         try {
