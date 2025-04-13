@@ -19,7 +19,7 @@ class OrgMember extends Model
         'sponsored_user_id ',
         'is_active'
     ];
-    protected $hidden=[
+    protected $hidden = [
         'created_at',
         'updated_at'
     ];
@@ -29,21 +29,15 @@ class OrgMember extends Model
         return $this->belongsTo(User::class, 'individual_type_user_id', 'id');
     }
 
-//     public function individual()
-// {
-//     return $this->belongsTo(Individual::class); // Adjust if it's a different relation
-// }
-
     public function membershipType(): BelongsTo
-{
-    return $this->belongsTo(MembershipType::class, 'membership_type_id', 'id');
-}
+    {
+        return $this->belongsTo(MembershipType::class, 'membership_type_id', 'id');
+    }
 
     public function memberProfileImage(): BelongsTo
     {
-        return $this->belongsTo(ProfileImage::class, 'individual_type_user_id', 'id');
+        return $this->belongsTo(ProfileImage::class, 'individual_type_user_id', 'user_id');
     }
-
 
     public function connectedorg(): BelongsTo
     {

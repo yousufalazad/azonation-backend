@@ -9,21 +9,26 @@ class Founder extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id', 
+        'user_id',
         'founder_user_id', //individual type user_id
         'name',
         'designation'
+
     ];
-    
-    protected $hidden=[
+
+    protected $hidden = [
         'created_at',
         'updated_at'
     ];
 
     public function founders()
-{
-    
-    return $this->belongsTo(User::class, 'founder_user_id');
-}
+    {
 
+        return $this->belongsTo(User::class, 'founder_user_id');
+    }
+
+    public function image()
+    {
+        return $this->hasOne(FounderProfileImage::class, 'founder_id');
+    }
 }

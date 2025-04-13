@@ -332,8 +332,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/individual-users', [IndividualController::class, 'getIndividualUser']);
 
     // ----------------------- Superadmin --------------------
+    Route::get('/super_admin_profile_image/{userId}', [SuperAdminController::class, 'getSuperAdminProfileImage']);
+    Route::post('/super_admin_profile_image/{userId}', [SuperAdminController::class, 'updateSuperAdminProfileImage']);
     Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show']);
     Route::get('/management-pricings', [ManagementPricingController::class, 'getUserPriceRate']);
+    
 
     Route::group(['prefix' => 'management-and-storage-billings'], function () {
         Route::get('/', [ManagementAndStorageBillingController::class, 'index']);

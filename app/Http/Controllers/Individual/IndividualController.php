@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Individual;
 
 use App\Http\Controllers\Controller;
 use App\Models\Individual;
-use App\Models\OrgMemberList;
+use App\Models\OrgMember;
 use App\Models\ProfileImage;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -22,55 +22,59 @@ class IndividualController extends Controller
             'data' => $data
         ], $status);
     }
-    public function getIndividualUser()
+
+
+    public function getProfileImage($userId)
     {
-        $individualUsers = User::where('type', 'individual')->get();
-        return response()->json([
-            'status' => true,
-            'data' => $individualUsers
-        ]);
-    }
-    public function getProfileImage($individualId)
-    {
-        $profileImage = ProfileImage::where('individual_id', $individualId)->orderBy('id', 'desc')->first();
-        $imageUrl = $profileImage ? Storage::url($profileImage->image) : null;
+        $logo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
+        $imageUrl = $logo ? Storage::url($logo->image_path) : null;
         return response()->json([
             'status' => true,
             'data' => ['image' => $imageUrl]
         ]);
     }
-    public function updateProfileImage(Request $request, $individualId)
+    public function updateProfileImage(Request $request)
     {
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
         ]);
-        $individual = Individual::find($individualId);
-        if (!$individual) {
-            return response()->json(['status' => false, 'message' => 'Individual account not found'], 404);
+        $userId = $request->user()->id;
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json(['status' => false, 'message' => 'Organization not found'], 404);
         }
         $image = $request->file('image');
         $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
         $extension = $image->getClientOriginalExtension();
+        $mime_type = 'image' . '/' . $extension;
+        $fileSize = $image->getSize();
         $timestamp = Carbon::now()->format('YmdHis');
         $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
         $path = $image->storeAs('individual/profile/image', $newFileName, 'public');
-        $profileImage = ProfileImage::where('individual_id', $individualId)->orderBy('id', 'desc')->first();
-        if ($profileImage) {
-            $profileImage->individual_id = $individualId;
-            $profileImage->image = $path;
-            $profileImage->save();
+        $orgLogo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
+        if ($orgLogo) {
+            $orgLogo->user_id = $userId;
+            $orgLogo->image_path = $path;
+            $orgLogo->file_name = $originalName;
+            $orgLogo->mime_type = $mime_type;
+            $orgLogo->file_size = $fileSize;
+            $orgLogo->save();
         } else {
-            $profileImage = new ProfileImage();
-            $profileImage->individual_id = $individualId;
-            $profileImage->image = $path;
-            $profileImage->save();
+            $orgLogo = new ProfileImage();
+            $orgLogo->user_id = $userId;
+            $orgLogo->image_path = $path;
+            $orgLogo->file_name = $originalName;
+            $orgLogo->mime_type = $mime_type;
+            $orgLogo->file_size = $fileSize;
+            $orgLogo->save();
         }
         $imageUrl = Storage::url($path);
         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
     }
+
     public function getOrganisationByIndividualId($individualId)
     {
-        $organisations = OrgMemberList::where('individual_id', $individualId)
+        $organisations = OrgMember::where('individual_id', $individualId)
             ->with('connectedorg')
             ->get();
         return response()->json([
