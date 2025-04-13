@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\SuperAdmin\Settings;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\MembershipType;
@@ -11,8 +13,8 @@ class MembershipTypeController extends Controller
 {
     public function index()
     {
-        $countries = MembershipType::all();
-        return response()->json(['status' => true, 'data' => $countries], 200);
+        $membershipType = MembershipType::all();
+        return response()->json(['status' => true, 'data' => $membershipType], 200);
     }
     public function create() {}
     public function store(Request $request)

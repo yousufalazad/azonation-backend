@@ -49,7 +49,7 @@ class OrgMemberController extends Controller
     public function getOrgAllMembers(Request $request)
     {
         $userId = Auth::id();
-        $getOrgAllMembers = OrgMember::with(['individual:id,name', 'membershipType', 'memberProfileImage'])
+        $getOrgAllMembers = OrgMember::with(['individual:id,name,azon_id', 'membershipType', 'memberProfileImage'])
             ->where('org_type_user_id', $userId)
             ->where('is_active', '1')
             ->get();
@@ -108,8 +108,29 @@ class OrgMemberController extends Controller
             'data' => $results
         ]);
     }
-    public function addMember(Request $request)
+
+    // Check if the individual is already a member of the organization, used in create function on member folder
+    public function checkMember(Request $request)
     {
+        $validated = $request->validate([
+            'org_type_user_id' => 'required|exists:users,id',
+            'individual_type_user_id' => 'required|exists:users,id',
+        ]);
+
+        // Check if the individual is already in the org_members list
+        $exists = DB::table('org_members')
+            ->where('org_type_user_id', $request->org_type_user_id)
+            ->where('individual_type_user_id', $request->individual_type_user_id)
+            ->exists();
+
+        return response()->json([
+            'status' => true,
+            'data' => ['exists' => $exists]
+        ]);
+    }
+    public function index() {}
+    public function create() {}
+    public function store(Request $request) {
         $validated = $request->validate([
             'org_type_user_id' => 'required|exists:users,id',
             'individual_type_user_id' => 'required|exists:users,id',
@@ -131,49 +152,27 @@ class OrgMemberController extends Controller
             'message' => 'Member added successfully',
         ]);
     }
-
-    public function checkMember(Request $request)
-{
-    $validated = $request->validate([
-        'org_type_user_id' => 'required|exists:users,id',
-        'individual_type_user_id' => 'required|exists:users,id',
-    ]);
-
-    // Check if the individual is already in the org_members list
-    $exists = DB::table('org_members')
-        ->where('org_type_user_id', $request->org_type_user_id)
-        ->where('individual_type_user_id', $request->individual_type_user_id)
-        ->exists();
-
-    return response()->json([
-        'status' => true,
-        'data' => ['exists' => $exists]
-    ]);
-}
-    public function index() {}
-    public function create() {}
-    public function store(Request $request) {}
     public function show(OrgMember $orgMember) {}
     public function edit(OrgMember $orgMember) {}
     public function update(Request $request, $id)
     {
         try {
             $member = OrgMember::findOrFail($id);
-    
+
             // Validate the incoming request data
             $request->validate([
                 'existing_membership_id' => 'required|string|max:255',
-                // 'membership_type' => 'required|string|max:255',
-                'membership_start_date' => 'required|date',
-                // 'sponsored_user_id' => 'nullable|exists:users,id', // Assuming it's a user ID
+                'membership_type_id' => 'nullable|numeric|exists:membership_types,id',
+                'membership_start_date' => 'nullable|date',
+                'sponsored_user_id' => 'nullable|exists:users,id', // Individual type user ID
             ]);
             $member->existing_membership_id = $request->existing_membership_id;
-            // $member->membership_type->name = $request->membership_type;
+            $member->membership_type_id = $request->membership_type_id;
             $member->membership_start_date = $request->membership_start_date;
-            // $member->sponsored_user_id = $request->sponsored_user_id;
+            $member->sponsored_user_id = $request->sponsored_user_id;
             // $member->is_active = $request->is_active;
             $member->save();
-    
+
             return response()->json([
                 'status' => true,
                 'message' => 'Member updated successfully.'
@@ -186,9 +185,9 @@ class OrgMemberController extends Controller
             ], 500);
         }
     }
-    
-    
-    public function destroy($id) {
+
+    public function destroy($id)
+    {
         try {
             $member = OrgMember::findOrFail($id);
             $member->delete();
