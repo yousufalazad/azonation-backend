@@ -12,14 +12,15 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
+
 class FounderController extends Controller
 {
-    public function index(Request $request)
+
+    public function X_index(Request $request)
     {
         $user_id = Auth::id();
         $founders = Founder::where('user_id', $user_id)
-            ->with('founders','image')
-            ->get();
+            ->with(['image'])->get();
 
         if ($founders->isEmpty()) {
             return response()->json([
@@ -36,11 +37,35 @@ class FounderController extends Controller
             return $founder;
         });
 
+        // dd($founders);
         return response()->json([
             'status' => true,
             'data' => $founders
         ], 200);
     }
+
+
+    public function index(Request $request)
+    {
+        $user_id = Auth::id();
+        $founders = Founder::where('user_id', $user_id)
+            ->with(['founders'])
+            ->get();
+
+        $founders = $founders->map(function ($founder) {
+            $founder->image_url = $founder->image ? url(Storage::url($founder->image->image_path??$founder->image->file_path)):null;
+            return $founder;
+        });
+
+        // dd($founders);
+        return response()->json([
+            'status' => true,
+            'data' => $founders
+        ], 200);
+    }
+
+
+
     public function search(Request $request)
     {
         $query = $request->input('query');
