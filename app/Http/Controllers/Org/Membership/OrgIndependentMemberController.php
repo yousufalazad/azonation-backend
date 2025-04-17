@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Org\Membership;
+
 use App\Http\Controllers\Controller;
 use App\Models\IndependentMemberImage;
 use App\Models\OrgIndependentMember;
@@ -29,9 +31,10 @@ class OrgIndependentMemberController extends Controller
         $validatedData['user_id'] = $request->user()->id;
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:org_independent_members,email',
+            // 'email' => 'nullable|email|unique:org_independent_members,email',
+            'email' => 'nullable|email', //multiple org can add same person with same email address
             'mobile' => 'nullable|string|max:15',
-            'address' => 'nullable|string|max:500',
+            'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
             'is_active' => 'required|boolean',
             'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -47,7 +50,7 @@ class OrgIndependentMemberController extends Controller
         $member->save();
 
         Log::info("Member updated");
-        
+
         if ($request->hasFile('image_path')) {
             Log::info("inside image upload");
             foreach ($request->file('image_path') as $image) {
@@ -92,7 +95,8 @@ class OrgIndependentMemberController extends Controller
         }
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'email|unique:org_independent_members,email',
+            // 'email' => 'nullable|email|unique:org_independent_members,email',
+            'email' => 'nullable|email', //multiple org can add same person with same email address
             'mobile' => 'string|max:15',
             'address' => 'nullable|string|max:500',
             'note' => 'nullable|string',

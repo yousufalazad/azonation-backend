@@ -32,7 +32,7 @@ class OrgMemberController extends Controller
         ]);
     }
 
-    public function getOrgAllMembers(Request $request)
+    public function index(Request $request)
     {
         $userId = Auth::id();
         $getOrgAllMembers = OrgMember::with(['individual:id,name,azon_id', 'membershipType', 'memberProfileImage'])
@@ -122,7 +122,6 @@ class OrgMemberController extends Controller
             'data' => ['exists' => $exists]
         ]);
     }
-    public function index() {}
 
     public function create() {}
 
