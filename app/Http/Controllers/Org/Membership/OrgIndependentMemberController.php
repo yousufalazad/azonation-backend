@@ -17,51 +17,43 @@ class OrgIndependentMemberController extends Controller
     {
         Log::info('Inside index');
         $userId = Auth::id();
-        $members = OrgIndependentMember::where('user_id', $userId)->get();
-        $members = $members->map(function ($member) {
-            $member->image_url = $member->image_path
-                ? url(Storage::url($member->image_path))
+        $independentMembers = OrgIndependentMember::where('user_id', $userId)->get();
+        $independentMembers = $independentMembers->map(function ($independentMember) {
+            $independentMember->image_url = $independentMember->image_path
+                ? url(Storage::url($independentMember->image_path))
                 : null;
-            return $member;
+            return $independentMember;
         });
-        return response()->json(['status' => true, 'data' => $members]);
+        return response()->json(['status' => true, 'data' => $independentMembers]);
     }
     public function store(Request $request)
     {
-        $validatedData['user_id'] = $request->user()->id;
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            // 'email' => 'nullable|email|unique:org_independent_members,email',
-            'email' => 'nullable|email', //multiple org can add same person with same email address
+            'email' => 'nullable|email',
             'mobile' => 'nullable|string|max:15',
             'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
-            'is_active' => 'required|boolean',
+            'is_active' => 'nullable|boolean',
             'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-        $member = new OrgIndependentMember();
-        $member->user_id = $request->user()->id;
-        $member->name = $validatedData['name'];
-        $member->email = $validatedData['email'];
-        $member->mobile = $validatedData['mobile'];
-        $member->address = $validatedData['address'];
-        $member->note = $validatedData['note'];
-        $member->is_active = $validatedData['is_active'];
-        $member->save();
 
-        Log::info("Member updated");
+        $validatedData['user_id'] = $request->user()->id;
+        $independentMember = OrgIndependentMember::create($validatedData);
+
+        Log::info("independentMember updated");
 
         if ($request->hasFile('image_path')) {
             Log::info("inside image upload");
             foreach ($request->file('image_path') as $image) {
                 $imagePath = $image->storeAs(
-                    'org/independent-member/image',
+                    'org/independent-independentMember/image',
                     Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                     'public'
                 );
                 Log::info('Image is now available');
                 IndependentMemberImage::create([
-                    'org_independent_member_id' => $member->id,
+                    'org_independent_member_id' => $independentMember->id,
                     'file_path' => $imagePath,
                     'file_name' => $image->getClientOriginalName(),
                     'mime_type' => $image->getClientMimeType(),
@@ -72,40 +64,40 @@ class OrgIndependentMemberController extends Controller
             }
             Log::info('Done');
         }
-        return response()->json(['status' => true, 'message' => 'Member created successfully.', 'data' => $member], 201);
+        return response()->json(['status' => true, 'message' => 'independentMember created successfully.', 'data' => $independentMember], 201);
     }
     public function show($id)
     {
-        $member = OrgIndependentMember::find($id);
-        if (!$member) {
-            return response()->json(['status' => false, 'message' => 'Member not found.'], 404);
+        $independentMember = OrgIndependentMember::find($id);
+        if (!$independentMember) {
+            return response()->json(['status' => false, 'message' => 'independentMember not found.'], 404);
         }
-        $imageUrl = $member ? Storage::url($member->image_path) : null;
+        $imageUrl = $independentMember ? Storage::url($independentMember->image_path) : null;
         return response()->json([
             'status' => true,
-            'data' => $member,
+            'data' => $independentMember,
             'imageUrl' => $imageUrl,
         ]);
     }
     public function update(Request $request, $id)
     {
-        $member = OrgIndependentMember::find($id);
-        if (!$member) {
-            return response()->json(['status' => false, 'message' => 'Member not found.'], 404);
+        $independentMember = OrgIndependentMember::find($id);
+        if (!$independentMember) {
+            return response()->json(['status' => false, 'message' => 'independentMember not found.'], 404);
         }
+
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            // 'email' => 'nullable|email|unique:org_independent_members,email',
-            'email' => 'nullable|email', //multiple org can add same person with same email address
-            'mobile' => 'string|max:15',
-            'address' => 'nullable|string|max:500',
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email',
+            'mobile' => 'nullable|string|max:15',
+            'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
-            'is_active' => 'required|boolean',
+            'is_active' => 'nullable|boolean',
             'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
         if ($request->hasFile('image_path')) {
-            if ($member->image_path) {
-                Storage::disk('public')->delete($member->image_path);
+            if ($independentMember->image_path) {
+                Storage::disk('public')->delete($independentMember->image_path);
             }
             $image = $request->file('image_path');
             $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
@@ -116,19 +108,19 @@ class OrgIndependentMemberController extends Controller
             $validatedData['image_path'] = $path;
         }
         $validatedData['user_id'] = $request->user()->id;
-        $member->update($validatedData);
-        return response()->json(['status' => true, 'message' => 'Member updated successfully.', 'data' => $member]);
+        $independentMember->update($validatedData);
+        return response()->json(['status' => true, 'message' => 'independentMember updated successfully.', 'data' => $independentMember]);
     }
     public function destroy($id)
     {
-        $member = OrgIndependentMember::find($id);
-        if (!$member) {
-            return response()->json(['status' => false, 'message' => 'Member not found.'], 404);
+        $independentMember = OrgIndependentMember::find($id);
+        if (!$independentMember) {
+            return response()->json(['status' => false, 'message' => 'independentMember not found.'], 404);
         }
-        if ($member->image_path) {
-            Storage::disk('public')->delete($member->image_path);
+        if ($independentMember->image_path) {
+            Storage::disk('public')->delete($independentMember->image_path);
         }
-        $member->delete();
-        return response()->json(['status' => true, 'message' => 'Member deleted successfully.']);
+        $independentMember->delete();
+        return response()->json(['status' => true, 'message' => 'Independent member deleted successfully.']);
     }
 }
