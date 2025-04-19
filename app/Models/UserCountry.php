@@ -24,4 +24,9 @@ class UserCountry extends Model
     {
         return $this->hasOne(Country::class, 'id', 'country_id');
     }
+    public function userCountryName()
+    {
+        return $this->hasOne(Country::class, 'id', 'country_id')
+            ->select('id', 'name');
+    }
 }
