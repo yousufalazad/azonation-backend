@@ -9,8 +9,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Models\ProfileImage;
 use App\Models\User;
+use App\Models\UserCountry;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class OrgProfileController extends Controller
@@ -23,6 +25,7 @@ class OrgProfileController extends Controller
             'data' => $data
         ], $status);
     }
+
     public function getLogo($userId)
     {
         $logo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
@@ -32,6 +35,7 @@ class OrgProfileController extends Controller
             'data' => ['image' => $imageUrl]
         ]);
     }
+
     public function updateLogo(Request $request)
     {
         $request->validate([
@@ -70,6 +74,7 @@ class OrgProfileController extends Controller
         $imageUrl = Storage::url($path);
         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
     }
+
     public function index($userId)
     {
         $orgProfileData = OrgProfile::where('user_id', $userId)->first();
@@ -79,10 +84,23 @@ class OrgProfileController extends Controller
             return response()->json(['status' => false, 'message' => 'Organisation not found']);
         }
     }
+
+    public function getOrgCountry(Request $request)
+    {
+        $userId = Auth::id();
+        $userCountry = UserCountry::where('user_id', $userId)->with('userCountryName')->first();
+        if ($userCountry) {
+            return response()->json(['status' => true, 'data' => $userCountry]);
+        } else {
+            return response()->json(['status' => false, 'message' => 'Organisation country name not found']);
+        }
+    }
+    
     public function create() {}
     public function store(Request $request) {}
     public function show(OrgProfile $orgProfile) {}
     public function edit(OrgProfile $orgProfile) {}
+    
     public function update(Request $request, int $userId): JsonResponse
     {
         $validatedData = $request->validate([
@@ -123,5 +141,6 @@ class OrgProfileController extends Controller
             ], 500);
         }
     }
+    
     public function destroy(OrgProfile $orgProfile) {}
 }

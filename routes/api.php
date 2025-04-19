@@ -434,7 +434,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [TimeZoneSetupController::class, 'destroy']);
     });
     Route::get('/get-user-list', [UserCountryController::class, 'getUser']);
+
     Route::group(['prefix' => 'user-countries'], function () {
+        Route::get('/country-name', [OrgProfileController::class, 'getOrgCountry']);
         Route::get('/', [UserCountryController::class, 'index']);
         Route::get('/{id}', [UserCountryController::class, 'show']);
         Route::post('/', [UserCountryController::class, 'store']);
