@@ -76,6 +76,13 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
 
+Route::group(['prefix' => 'countries'], function () {
+    Route::get('/', [CountryController::class, 'index']);
+    Route::post('/', [CountryController::class, 'store']);
+    Route::put('{id}', [CountryController::class, 'update']);
+    Route::delete('{id}', [CountryController::class, 'destroy']);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
@@ -385,12 +392,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('{id}', [RegionalTaxRateController::class, 'update']);
         Route::delete('{id}', [RegionalTaxRateController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'countries'], function () {
-        Route::get('/', [CountryController::class, 'index']);
-        Route::post('/', [CountryController::class, 'store']);
-        Route::put('{id}', [CountryController::class, 'update']);
-        Route::delete('{id}', [CountryController::class, 'destroy']);
-    });
+    
     Route::group(['prefix' => 'dialing-codes'], function () {
         Route::get('/', [DialingCodeController::class, 'index']);
         Route::post('/', [DialingCodeController::class, 'store']);

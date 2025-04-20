@@ -27,7 +27,7 @@ class CommitteeMemberController extends Controller
             'start_date' => 'nullable',
             'end_date' => 'nullable',
             'note' => 'nullable',
-            'status' => 'required',
+            'status' => 'nullable',
         ]);
         if ($validator->fails()) {
             return response()->json([

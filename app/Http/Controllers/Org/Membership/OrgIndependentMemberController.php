@@ -13,21 +13,44 @@ use Illuminate\Support\Facades\Auth;
 
 class OrgIndependentMemberController extends Controller
 {
+
     public function index(Request $request)
     {
         Log::info('Inside index');
+
         $userId = Auth::id();
-        $independentMembers = OrgIndependentMember::where('user_id', $userId)->get();
-        $independentMembers = $independentMembers->map(function ($independentMember) {
-            $independentMember->image_url = $independentMember->image_path
-                ? url(Storage::url($independentMember->image_path))
-                : null;
-            return $independentMember;
+
+        $independentMembers = OrgIndependentMember::where('user_id', $userId)
+            ->with('image') // assuming 'image' is a hasOne or belongsTo relationship
+            ->get();
+
+        if ($independentMembers->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'Independent Members not found'], 404);
+        }
+
+        $independentMembers = $independentMembers->map(function ($member) {
+            if ($member->image) {
+                $member->image_url = $member->image->file_path
+                    ? url(Storage::url($member->image->file_path))
+                    : null;
+            }
+            unset($member->image);
+
+            return $member;
         });
-        return response()->json(['status' => true, 'data' => $independentMembers]);
+
+        return response()->json([
+            'status' => true,
+            'data' => $independentMembers
+        ]);
     }
+
+
+
     public function store(Request $request)
     {
+        // dd(request()->all()); exit;
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email',
@@ -35,7 +58,7 @@ class OrgIndependentMemberController extends Controller
             'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
             'is_active' => 'nullable|boolean',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            // 'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
         ]);
 
         $validatedData['user_id'] = $request->user()->id;
@@ -45,40 +68,52 @@ class OrgIndependentMemberController extends Controller
 
         if ($request->hasFile('image_path')) {
             Log::info("inside image upload");
-            foreach ($request->file('image_path') as $image) {
-                $imagePath = $image->storeAs(
-                    'org/independent-independentMember/image',
-                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                    'public'
-                );
-                Log::info('Image is now available');
-                IndependentMemberImage::create([
-                    'org_independent_member_id' => $independentMember->id,
-                    'file_path' => $imagePath,
-                    'file_name' => $image->getClientOriginalName(),
-                    'mime_type' => $image->getClientMimeType(),
-                    'file_size' => $image->getSize(),
-                    'is_public' => true,
-                    'is_active' => true,
-                ]);
-            }
+
+            $image = $request->file('image_path'); // ⬅️ Single file only
+
+            $imagePath = $image->storeAs(
+                'org/independent-independentMember/image',
+                Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                'public'
+            );
+            Log::info('Image is now available');
+
+            IndependentMemberImage::create([
+                'org_independent_member_id' => $independentMember->id,
+                'file_path' => $imagePath,
+                'file_name' => $image->getClientOriginalName(),
+                'mime_type' => $image->getClientMimeType(),
+                'file_size' => $image->getSize(),
+                'is_public' => true,
+                'is_active' => true,
+            ]);
+
             Log::info('Done');
         }
         return response()->json(['status' => true, 'message' => 'independentMember created successfully.', 'data' => $independentMember], 201);
     }
     public function show($id)
     {
-        $independentMember = OrgIndependentMember::find($id);
+        $independentMember = OrgIndependentMember::with('image')->find($id);
+
         if (!$independentMember) {
-            return response()->json(['status' => false, 'message' => 'independentMember not found.'], 404);
+            return response()->json(['status' => false, 'message' => 'Independent Member not found.'], 404);
         }
-        $imageUrl = $independentMember ? Storage::url($independentMember->image_path) : null;
+
+        // Attach image_url if image exists
+        $independentMember->image_url = $independentMember->image && $independentMember->image->file_path
+            ? url(Storage::url($independentMember->image->file_path))
+            : null;
+
+        // Optionally hide the actual image relationship
+        unset($independentMember->image);
+
         return response()->json([
             'status' => true,
             'data' => $independentMember,
-            'imageUrl' => $imageUrl,
         ]);
     }
+
     public function update(Request $request, $id)
     {
         $independentMember = OrgIndependentMember::find($id);
