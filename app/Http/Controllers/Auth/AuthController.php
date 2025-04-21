@@ -21,8 +21,9 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|min:3',
+            'country_id' => 'required|numeric|max:3',
             'type' => 'required|string|max:12',
+            'password' => 'required|string|min:8',
         ]);
         $user = User::create([
             'name' => $request->name,
@@ -30,6 +31,15 @@ class AuthController extends Controller
             'type' => $request->type,
             'password' => Hash::make($request->password),
         ]);
+
+        if($request->country_id){
+            $user->userCountry()->create([
+                'user_id' => $user->id,
+                'country_id' => $request->country_id,
+                'is_active' => 1,
+            ]);
+        }
+
         if ($request->type == 'organisation') {
             $user->managementSubscription()->create([
                 'user_id' => $user->user_id,
