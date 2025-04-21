@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Log;
 
 class FounderController extends Controller
 {
@@ -166,5 +166,21 @@ class FounderController extends Controller
             ], 500);
         }
     }
-    public function destroy(Founder $founder) {}
+    public function destroy($id)
+    {
+        try {
+            $founder = Founder::findOrFail($id);
+            $founder->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Founder Member deleted successfully.'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error deleting Founder Member: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.'
+            ], 500);
+        }
+    }
 }
