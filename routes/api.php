@@ -88,9 +88,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ----------------------- Organisation --------------------
     Route::group(['prefix' => 'addresses'], function () {
-        Route::get('/', [AddressController::class, 'show']);
+        Route::get('/', [AddressController::class, 'index']);
         Route::post('/', [AddressController::class, 'store']);
-        Route::put('/', [AddressController::class, 'update']);
+        Route::put('/{id}', [AddressController::class, 'update']);
     });
     Route::group(['prefix' => 'phone-numbers'], function () {
         Route::get('/', [PhoneNumberController::class, 'show']);

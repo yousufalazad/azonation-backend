@@ -5,42 +5,17 @@ namespace App\Http\Controllers\Common;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Address;
 use Illuminate\Http\Request;
 
 class AddressController extends Controller
 {
-    public function index() {}
-    public function create() {}
-    public function store(Request $request)
+    public function index()
     {
-        $request->validate([
-            'user_id' => 'required',
-        ]);
-        Address::create([
-            'user_id' => $request->user_id,
-            'address_line_one' => $request->address_line_one,
-            'address_line_two' => $request->address_line_two,
-            'city' => $request->city,
-            'state_or_region' => $request->state_or_region,
-            'postal_code' => $request->postal_code,
-            'country_id' => $request->country_id,
-        ]);
-        $message = 'Address created successfully';
-        return response()->json([
-            'status'  => true,
-            'message' => $message,
-        ], 200);
-    }
-    public function show($userId)
-    {
-        $address = Address::where('addresses.user_id', $userId)
-            ->leftJoin('countries', 'addresses.country_id', '=', 'countries.id')
-            ->select(
-                'addresses.*',
-                'countries.country_name'
-            )
-            ->first();
+        // $userId = auth()->user()->id;
+        $userId = Auth::id();
+        $address = Address::where('user_id', $userId)->first();
         if ($address) {
             return response()->json([
                 'status' => true,
@@ -53,6 +28,56 @@ class AddressController extends Controller
             ], 404);
         }
     }
+    //     $address = Address::where('addresses.user_id', $userId)
+    //         ->leftJoin('countries', 'addresses.country_id', '=', 'countries.id')
+    //         ->select(
+    //             'addresses.*',
+    //             'countries.name'
+    //         )
+    //         ->first();
+    //     if ($address) {
+    //         return response()->json([
+    //             'status' => true,
+    //             'data' => $address
+    //         ]);
+    //     } else {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Address not found'
+    //         ], 404);
+    //     }
+    // }
+    public function create() {}
+    public function store(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'address_line_one' => 'required|string',
+                'address_line_two' => 'nullable|string',
+                'city' => 'required|string',
+                'state_or_region' => 'nullable|string',
+                'postal_code' => 'required|string',
+            ]);
+            // $userId = auth()->user()->id;
+            $userId = Auth::id();
+
+            $address = Address::firstOrNew(['user_id' => $userId]);
+            $address->fill($validatedData);
+            $address->save();
+            return response()->json([
+                'status'  => true,
+                'data'    => $address,
+                'message' => 'Address created/updated successfully.',
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error("Failed to create or update address for user ID {$userId}: " . $e->getMessage());
+            return response()->json([
+                'status'  => false,
+                'message' => 'An error occurred while processing your request. Please try again later.',
+            ], 500);
+        }
+    }
+    
     public function edit(Address $address) {}
     public function update(Request $request, int $userId): JsonResponse
     {
@@ -62,7 +87,6 @@ class AddressController extends Controller
             'city' => 'nullable|string',
             'state_or_region' => 'nullable|string',
             'postal_code' => 'nullable|string',
-            'country_id' => 'nullable',
         ]);
         try {
             $address = Address::firstOrNew(['user_id' => $userId]);
