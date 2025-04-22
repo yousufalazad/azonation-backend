@@ -14,8 +14,7 @@ class Address extends Model
         'address_line_two',
         'city',
         'state_or_region',
-        'postal_code',
-        'country_id'
+        'postal_code'
     ];
 
     protected $hidden=[

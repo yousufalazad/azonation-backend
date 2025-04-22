@@ -26,10 +26,6 @@ return new class extends Migration
             $table->string('state_or_region')->nullable(); 
             $table->string('postal_code')->nullable(); 
 
-            // Foreign key to 'country_names' table
-            $table->foreignId('country_id')
-                ->constrained('countries')
-                ->onDelete('cascade');
             $table->timestamps();
         });
     }
