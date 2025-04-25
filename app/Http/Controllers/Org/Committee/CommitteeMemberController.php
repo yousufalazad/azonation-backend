@@ -9,12 +9,16 @@ use Illuminate\Support\Facades\Log;
 
 class CommitteeMemberController extends Controller
 {
-    public function index()
+    public function index($id)
     {
-        $committeeMember = CommitteeMember::select('committee_members.*', 'users.name as user_name', 'designations.name as designation_name')
+        $committeeMember = CommitteeMember::where('committee_id', $id)
             ->leftJoin('users', 'committee_members.user_id', '=', 'users.id')
             ->leftJoin('designations', 'committee_members.designation_id', '=', 'designations.id')
+            ->select('committee_members.*', 'users.name as user_name', 'designations.name as designation_name')
             ->get();
+        if ($committeeMember->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'No committee members found'], 404);
+        }
         return response()->json(['status' => true, 'data' => $committeeMember], 200);
     }
     public function create() {}
