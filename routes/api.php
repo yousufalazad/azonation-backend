@@ -204,13 +204,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::group(['prefix' => 'committees'], function () {
         Route::get('/', [CommitteeController::class, 'index']);
+        Route::get('/{id}', [CommitteeController::class, 'show']);
         Route::post('/', [CommitteeController::class, 'store']);
         Route::put('/{id}', [CommitteeController::class, 'update']);
         Route::delete('/{id}', [CommitteeController::class, 'destroy']);
     });
     Route::group(['prefix' => 'committee-members'], function () {
-        Route::get('/', [CommitteeMemberController::class, 'index']);
-        Route::get('/{id}', [CommitteeMemberController::class, 'show']);
+        Route::get('/{id}', [CommitteeMemberController::class, 'index']);
+        // Route::get('/{id}', [CommitteeMemberController::class, 'show']);
         Route::post('/', [CommitteeMemberController::class, 'store']);
         Route::put('/{id}', [CommitteeMemberController::class, 'update']);
         Route::delete('/{id}', [CommitteeMemberController::class, 'destroy']);
