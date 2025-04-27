@@ -53,13 +53,13 @@ return new class extends Migration
             // Weather asset is tangible asset
             $table->boolean('is_tangible')
                 ->nullable()
-                ->default(null)
                 ->comment('Indicates if the asset is tangible (true) or intangible (false).');
             
             //Foreign key referencing the privacy setups table (privacy settings)
             $table->foreignId('privacy_setup_id')
                 ->constrained('privacy_setups')
                 ->onDelete('cascade')
+                ->nullable()
                 ->comment('Privacy level of the asset (e.g., public, private, only members. etc).');
 
             $table->boolean('is_active')
@@ -67,37 +67,6 @@ return new class extends Migration
                 ->comment('Indicates whether the asset is currently active.');
 
             $table->timestamps();
-
-
-            // // Status of the asset end of the assignment    
-            // $table->enum('asset_lifecycle_statuses_id', [
-            //     'draft',
-            //     'under_maintenance',
-            //     'disposed',
-            //     'lost',
-            //     'stolen',
-            //     'damaged',
-            //     'unknown',
-            //     'other',
-            //     'returned',
-            //     'reserved',
-            //     'in_use',
-            //     'pending_disposal',
-            //     'decommissioned',
-            //     'out_for_repair',
-            //     'in_storage',
-            //     'awaiting_inspection',
-            //     'transferred',
-            //     'leased',
-            //     'recalled',
-            //     'quarantined',
-            //     'expired',
-            //     'missing',
-            //     'being_audited',
-            //     'repaired',
-            // ])
-            //     ->default('in_use')
-            //     ->comment('Current status of the asset.');
         });
     }
 
