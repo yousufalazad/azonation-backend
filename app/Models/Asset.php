@@ -13,21 +13,33 @@ class Asset extends Model
         'user_id',
         'name',
         'description',
-        'is_long_term',
         'quantity',
         'value_amount',
         'inkind_value',
+        'is_long_term',
         'is_tangible',
         'privacy_setup_id',
         'is_active'
     ];
 
-    /**
-     * Get the assignment logs associated with the asset.
-     */
+    public function responsibleUser()
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
     public function assignmentLogs()
     {
         return $this->hasMany(AssetAssignmentLog::class, 'asset_id');
+    }
+
+    public function lifecycleStatus()
+    {
+        return $this->belongsTo(AssetLifecycleStatus::class, 'asset_lifecycle_statuses_id');
+    }
+
+    public function privacySetup()
+    {
+        return $this->belongsTo(PrivacySetup::class, 'privacy_setup_id');
     }
 
     public function documents()
