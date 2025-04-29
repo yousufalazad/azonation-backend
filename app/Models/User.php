@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class User extends Authenticatable
 {
@@ -102,5 +104,12 @@ class User extends Authenticatable
     public function currency()
     {
         return $this->hasOne(Currency::class, 'currency_id', 'id')->where('is_active', true);
+    }
+
+    public function down()
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn(['reset_code', 'reset_code_expires_at']);
+        });
     }
 }

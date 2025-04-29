@@ -93,32 +93,6 @@ class ManagementSubscriptionController extends Controller
         }
     }
     
-
-
-    public function currencyTest() {
-        try {
-            $userId = Auth::id();
-            $user = User::with(['userCountry.country.countryRegion.regionCurrency.currency'])->findOrFail($userId);
-            $currency = $user->userCountry->country->countryRegion->regionCurrency->currency;
-
-            if ($currency) {
-                return response()->json([
-                    'data' => $currency,
-                    'status' => true,
-                    'message' => 'Currency fetched successfully'
-                ], 200);
-            } else {
-                return response()->json([
-                    'error' => 'Currency not found for the user\'s region',
-                ], 404);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'An error occurred while fetching the currency',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
     public function store(Request $request) {}
     public function show(ManagementSubscription $managementSubscription) {}
     public function edit(ManagementSubscription $managementSubscription) {}
