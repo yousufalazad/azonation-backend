@@ -83,6 +83,11 @@ class ForgotPasswordController extends Controller
         $user->reset_code_expires_at = null;
         $user->save();
 
-        return response()->json(['message' => 'Password reset successfully.']);
+        return response()->json([
+            'status' => true,
+            'message' => 'Password reset successfully.',
+            'data' => $user
+        ]);
+        // return response()->json(['message' => 'Password reset successfully.']);
     }
 }
