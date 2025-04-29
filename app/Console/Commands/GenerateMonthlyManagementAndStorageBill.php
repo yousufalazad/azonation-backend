@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\ManagementAndStorageBillingController;
+use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementAndStorageBillingController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
 

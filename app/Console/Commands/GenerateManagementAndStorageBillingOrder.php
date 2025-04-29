@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Ecommerce\Order\OrderController;
 use Illuminate\Console\Scheduling\Schedule;
 
 class GenerateManagementAndStorageBillingOrder extends Command
