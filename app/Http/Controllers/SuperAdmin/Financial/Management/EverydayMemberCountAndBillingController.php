@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Http\Controllers\SuperAdmin\Financial\Management;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\EverydayMemberCountAndBilling;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\ManagementPricing;
@@ -91,9 +94,11 @@ class EverydayMemberCountAndBillingController extends Controller
         ], 200);
     }
     public function create() {}
+
     public function getUserManagementDailyPriceRate($userId)
     {
         try {
+            $userId = Auth::id();
             $user = User::with(['userCountry.country.countryRegion.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
             $region = $user->userCountry->country->countryRegion->region;
             $managementPackage = $user->managementSubscription->managementPackage;
@@ -104,7 +109,9 @@ class EverydayMemberCountAndBillingController extends Controller
             if ($managementPriceRate) {
                 return response()->json([
                     'daily_price_rate' => $managementPriceRate,
-                ]);
+                    'status' => true,
+                    'message' => 'Daily price rate fetched successfully'
+                ], 200);
             } else {
                 return response()->json([
                     'error' => 'Price rate not found for the user\'s region and package',
@@ -141,8 +148,9 @@ class EverydayMemberCountAndBillingController extends Controller
                 Log::info('org_independent_members count reached');
                 $totalMembers = $orgMembers + $independentMembers;
                 Log::info('Total active members calculation successfully completed.');
-                $managementDailyPriceRate = 3;
-                Log::info('Daily price rate for ' . $userId . ' is 4' . $managementDailyPriceRate);
+                // $managementDailyPriceRate = 3;
+                $managementDailyPriceRate = $getUserManagementDailyPriceRateData['daily_price_rate'];
+                // Log::info('Daily price rate for ' . $userId . ' is 4' . $managementDailyPriceRate);
                 $dayTotalBill = $totalMembers * $managementDailyPriceRate;
                 Log::info('Day total member count and day bill calculation successfully completed.');
                 DB::table('everyday_member_count_and_billings')->updateOrInsert(
@@ -170,6 +178,53 @@ class EverydayMemberCountAndBillingController extends Controller
             ], 500);
         }
     }
+
+    public function currentMonthBillCalculation()
+    {
+        try {
+            $userId = Auth::id();
+            $startOfSubMonth = Carbon::now()->startOfMonth()->toDateString();
+            $endOfSubMonth = Carbon::now()->endOfMonth()->toDateString();
+
+            $monthlyTotalMemberCount = EverydayMemberCountAndBilling::where('user_id', $userId)
+                ->whereBetween('date', [$startOfSubMonth, $endOfSubMonth])
+                ->get();
+            return response()->json([
+                'status' => true,
+                'data' => $monthlyTotalMemberCount,
+                'message' => 'Monthly total member count fetched successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function subMonthBillCalculation()
+    {
+        try {
+            $userId = Auth::id();
+            $startOfSubMonth = Carbon::now()->subMonth()->startOfMonth()->toDateString();
+            $endOfSubMonth = Carbon::now()->subMonth()->endOfMonth()->toDateString();
+
+            $monthlyTotalMemberCount = EverydayMemberCountAndBilling::where('user_id', $userId)
+                ->whereBetween('date', [$startOfSubMonth, $endOfSubMonth])
+                ->get();
+            return response()->json([
+                'status' => true,
+                'data' => $monthlyTotalMemberCount,
+                'message' => 'Monthly total member count fetched successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function X_show(EverydayMemberCountAndBilling $everydayMemberCountAndBilling) {}
     public function X_edit(EverydayMemberCountAndBilling $everydayMemberCountAndBilling) {}
     public function X_update(Request $request, EverydayMemberCountAndBilling $everydayMemberCountAndBilling) {}

@@ -71,10 +71,15 @@ use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementSubscriptionC
 use App\Http\Controllers\SuperAdmin\Financial\Storage\EverydayStorageBillingController;
 
 use App\Http\Controllers\SuperAdmin\PaymentGateway\StripeController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode']);
+Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 Route::group(['prefix' => 'countries'], function () {
     Route::get('/', [CountryController::class, 'index']);
@@ -103,6 +108,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('update-password/{userId}', [AuthController::class, 'updatePassword']);
     Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
     
+    //Org finance related api
+    Route::group(['prefix' => 'org-financial'], function () {
+        Route::get('/sub-month-bill-calculation', [EverydayMemberCountAndBillingController::class, 'subMonthBillCalculation']);
+        Route::get('/current-month-bill-calculation', [EverydayMemberCountAndBillingController::class, 'currentMonthBillCalculation']);
+    });
     Route::group(['prefix' => 'transactions'], function () {
         Route::get('/', [AccountController::class, 'index']);
         Route::post('/', [AccountController::class, 'store']);

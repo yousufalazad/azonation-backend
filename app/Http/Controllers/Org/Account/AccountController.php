@@ -36,9 +36,10 @@ class AccountController extends Controller
         try {
             $userId = Auth::id();
             $transactions = Account::orderBy('date', 'desc')
-                ->with(['images', 'documents'])
+                ->with(['funds','images', 'documents'])
                 ->where('user_id', $userId)
                 ->get();
+                
             $transactions = $transactions->map(function ($transaction) {
                 $transaction->images = $transaction->images->map(function ($image) {
                     $image->image_url = $image->file_path

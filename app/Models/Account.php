@@ -23,6 +23,11 @@ class Account extends Model
         'updated_at'
     ];
 
+    public function funds()
+    {
+        return $this->belongsTo(AccountFund::class, 'fund_id', 'id');
+    }
+
     public function documents()
     {
         return $this->hasMany(AccountTransactionFile::class, 'account_id');

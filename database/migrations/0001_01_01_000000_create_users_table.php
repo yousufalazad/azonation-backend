@@ -26,6 +26,10 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');
             $table->string('password')->comment('Password hash');
             $table->rememberToken()->comment('Token for "remember me" functionality');
+
+            $table->string('reset_code')->nullable();
+            $table->timestamp('reset_code_expires_at')->nullable();
+            
             $table->enum('activation_status', [
                 'active', 
                 'inactive', 
