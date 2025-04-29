@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\EverydayMemberCountAndBillingController;
+use App\Http\Controllers\SuperAdmin\Financial\Management\EverydayMemberCountAndBillingController;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
 
@@ -12,6 +12,7 @@ class GenerateEverydayManagementBill extends Command
 {
     
     protected $signature = 'generate:everyday-management-bill';
+    // Command name: php artisan generate:everyday-management-bill
     protected $description = 'Generated Everyday Management bill for all organizations';
 
     

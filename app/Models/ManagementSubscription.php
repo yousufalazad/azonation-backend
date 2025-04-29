@@ -28,4 +28,6 @@ class ManagementSubscription extends Model
     {
         return $this->belongsTo(ManagementPackage::class, 'management_package_id', 'id')->where('is_active', true);
     }
+    
+    
 }

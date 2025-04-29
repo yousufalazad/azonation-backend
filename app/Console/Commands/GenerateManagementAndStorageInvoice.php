@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\SuperAdmin\Financial\InvoiceController;
 use Illuminate\Console\Scheduling\Schedule;
 
 class GenerateManagementAndStorageInvoice extends Command

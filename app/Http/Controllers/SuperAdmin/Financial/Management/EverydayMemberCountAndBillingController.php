@@ -94,9 +94,10 @@ class EverydayMemberCountAndBillingController extends Controller
     public function getUserManagementDailyPriceRate($userId)
     {
         try {
-            $user = User::with(['userCountry.country.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
-            $region = $user->userCountry->country->region->region;
+            $user = User::with(['userCountry.country.countryRegion.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
+            $region = $user->userCountry->country->countryRegion->region;
             $managementPackage = $user->managementSubscription->managementPackage;
+
             $managementPriceRate = ManagementPricing::where('region_id', $region->id)
                 ->where('management_package_id', $managementPackage->id)
                 ->value('price_rate');

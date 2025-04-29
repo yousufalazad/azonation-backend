@@ -26,4 +26,10 @@ class CountryRegion extends Model
     {
         return $this->hasOne(Region::class, 'id', 'region_id');
     }
+
+    public function regionCurrency ()
+    {
+        return $this->hasOne(RegionCurrency::class, 'region_id', 'currency_id')->where('is_active', true);
+    }
+    
 }

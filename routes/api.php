@@ -324,12 +324,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/all', [PrivacySetupController::class, 'getAllPrivacySetupForSuperAdmin']);
     });
     Route::get('asset-lifecycle-setups', [AssetLifecycleStatusController::class, 'index']);
+
     Route::group(['prefix' => 'management-subscriptions'], function () {
-        Route::get('/', [ManagementSubscriptionController::class, 'show']);
+        Route::get('/', [ManagementSubscriptionController::class, 'index']);
         Route::post('/', [ManagementSubscriptionController::class, 'store']);
         Route::put('{id}', [ManagementSubscriptionController::class, 'update']);
         Route::delete('{id}', [ManagementSubscriptionController::class, 'destroy']);
+        Route::get('/daily-price-rate', [ManagementSubscriptionController::class, 'managementPriceRate']);
+        Route::get('/currencies', [ManagementSubscriptionController::class, 'currency']);
     });
+    
+
+
 
     // ----------------------- Individual --------------------
     Route::get('/individual_profile_data/{userId}', [IndividualController::class, 'getProfileImage']);
