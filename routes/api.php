@@ -47,6 +47,9 @@ use App\Http\Controllers\Org\FounderController;
 use App\Http\Controllers\Org\OrgAdministratorController;
 use App\Http\Controllers\Org\OrgProfileController;
 
+use App\Http\Controllers\SuperAdmin\Financial\ReceiptController;
+
+
 // Superadmin
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\Settings\AttendanceTypeController;
@@ -343,6 +346,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/daily-price-rate', [ManagementSubscriptionController::class, 'managementPriceRate']);
         Route::get('/currencies', [ManagementSubscriptionController::class, 'currency']);
     });
+
+    Route::group(['prefix' => 'invoices'], function () {
+        Route::get('/', [InvoiceController::class, 'index']);
+        Route::get('{id}', [InvoiceController::class, 'show']);
+        Route::post('/', [InvoiceController::class, 'store']);
+        Route::put('{id}', [InvoiceController::class, 'update']);
+        Route::delete('{id}', [InvoiceController::class, 'destroy']);
+        Route::get('/all', [InvoiceController::class, 'indexForSuperadmin']);
+    });
+
+    Route::group(['prefix' => 'receipts'], function () {
+        Route::get('/org-receipts', [ReceiptController::class, 'orgIndex']);
+    });
     
 
 
@@ -384,14 +400,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('{id}', [EverydayStorageBillingController::class, 'update']);
         Route::delete('{id}', [EverydayStorageBillingController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'invoices'], function () {
-        Route::get('/', [InvoiceController::class, 'index']);
-        Route::get('{id}', [InvoiceController::class, 'show']);
-        Route::post('/', [InvoiceController::class, 'store']);
-        Route::put('{id}', [InvoiceController::class, 'update']);
-        Route::delete('{id}', [InvoiceController::class, 'destroy']);
-        Route::get('/all', [InvoiceController::class, 'indexForSuperadmin']);
-    });
+    
     Route::group(['prefix' => 'management-pricings'], function () {
         Route::get('/', [ManagementPricingController::class, 'index']);
         Route::put('/update', [ManagementPricingController::class, 'update']);
