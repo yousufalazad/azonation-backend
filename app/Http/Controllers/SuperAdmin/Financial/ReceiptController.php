@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class ReceiptController extends Controller
 {
-    public function index()
+    public function orgIndex()
     {
         try {
             $receipts = Receipt::all();
