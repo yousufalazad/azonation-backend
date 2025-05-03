@@ -50,6 +50,8 @@ class HistoryController extends Controller
                 : null;
             return $document;
         });
+
+        // dd($history);exit;
         return response()->json(['status' => true, 'data' => $history], 200);
     }
     public function store(Request $request)

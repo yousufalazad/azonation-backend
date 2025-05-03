@@ -54,7 +54,8 @@ class SuccessStoryController extends Controller
     }
     public function store(Request $request)
     {
-        $validated = $request->validate([
+
+        $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'story' => 'required|string',
             'status' => 'required|boolean',
@@ -62,9 +63,10 @@ class SuccessStoryController extends Controller
         try {
             $story = new SuccessStory();
             $story->user_id = $request->user()->id;
-            $story->title = $validated['title'];
-            $story->story = $validated['story'];
-            $story->status = $validated['status'];
+            $story->title = $validatedData['title'];
+            $story->story = $validatedData['story'];
+            $story->status = $validatedData['status'];
+            // dd($story);exit;
             $story->save();
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
