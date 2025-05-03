@@ -9,7 +9,7 @@ class SuccessStory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'history', 'status', 'user_id', 'image'];
+    protected $fillable = ['title', 'story', 'status', 'user_id'];
 
     protected $hidden = [
         'created_at',
