@@ -22,22 +22,29 @@ jobs:
         run: |
           composer install --no-dev --optimize-autoloader
 
-      - name: Upload Laravel app (excluding public/)
+      - name: Generate .env file from secret
+        run: |
+          echo "${{ secrets.LARAVEL_ENV }}" > .env
+
+      - name: Upload Laravel App Files (excluding /public)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: .
-          server-dir: /home6/azonorg/api/
+          server-dir: /home6/azonorg/my.azonation.com/api/
           exclude: |
             .git*
             node_modules*
             public/
             tests/
-            .env
+            vendor/
+            storage/
+            .github/
+            README.md
 
-      - name: Upload public folder to my.azonation.com/
+      - name: Upload Laravel Public Folder
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -47,14 +54,25 @@ jobs:
           server-dir: /home6/azonorg/my.azonation.com/
 
       - name: Upload .env file
-        run: echo "${{ secrets.LARAVEL_ENV }}" > .env
-
-      - name: Deploy .env to backend
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: .
-          server-dir: /home6/azonorg/api/
+          server-dir: /home6/azonorg/my.azonation.com/api/
           include: .env
+
+      - name: Upload artisan runner script
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: .
+          server-dir: /home6/azonorg/my.azonation.com/api/
+          include: artisan-runner.php
+
+      - name: Run Artisan Commands via HTTP
+        run: |
+          curl https://my.azonation.com/api/artisan-runner.php?key=secure-token-here
