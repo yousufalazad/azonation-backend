@@ -29,6 +29,7 @@ class StrategicPlanController extends Controller
             ], 500);
         }
     }
+    
     public function show($id)
     {
         $strategicPlan =  StrategicPlan::where('id', $id)

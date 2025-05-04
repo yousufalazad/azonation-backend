@@ -43,6 +43,7 @@ jobs:
             storage/
             .github/
             README.md
+          dangerously-ignore-upload-path: true
 
       - name: Upload Laravel Public Folder
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -52,6 +53,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: public/
           server-dir: /home6/azonorg/my.azonation.com/
+          dangerously-ignore-upload-path: true
+
 
       - name: Upload .env file
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -62,6 +65,8 @@ jobs:
           local-dir: ./
           server-dir: /home6/azonorg/my.azonation.com/api/
           include: .env
+          dangerously-ignore-upload-path: true
+
 
       - name: Upload artisan runner script
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -72,6 +77,8 @@ jobs:
           local-dir: ./
           server-dir: /home6/azonorg/my.azonation.com/api/
           include: artisan-runner.php
+          dangerously-ignore-upload-path: true
+
 
       - name: Run Artisan Commands via HTTP
         run: |
