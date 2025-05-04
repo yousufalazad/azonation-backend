@@ -36,3 +36,12 @@ jobs:
             public/
             tests/
             .env
+
+      - name: FTP Deploy Laravel Public Folder
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: public
+          server-dir: /public_html/
