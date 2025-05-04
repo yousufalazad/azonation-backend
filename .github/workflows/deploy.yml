@@ -32,7 +32,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: .
+          local-dir: ./
           server-dir: /home6/azonorg/my.azonation.com/api/
           exclude: |
             .git*
@@ -50,7 +50,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: public
+          local-dir: public/
           server-dir: /home6/azonorg/my.azonation.com/
 
       - name: Upload .env file
@@ -59,7 +59,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: .
+          local-dir: ./
           server-dir: /home6/azonorg/my.azonation.com/api/
           include: .env
 
@@ -69,7 +69,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: .
+          local-dir: ./
           server-dir: /home6/azonorg/my.azonation.com/api/
           include: artisan-runner.php
 
