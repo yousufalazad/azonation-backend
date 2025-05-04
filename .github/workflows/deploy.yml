@@ -22,14 +22,14 @@ jobs:
         run: |
           composer install --no-dev --optimize-autoloader
 
-      - name: FTP Deploy Laravel App Files (excluding /public)
+      - name: Upload Laravel app (excluding public/)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: .
-          server-dir: /home/YOUR_CPANL_USER/backend/
+          server-dir: /home6/azonorg/api/
           exclude: |
             .git*
             node_modules*
@@ -37,11 +37,24 @@ jobs:
             tests/
             .env
 
-      - name: FTP Deploy Laravel Public Folder
+      - name: Upload public folder to my.azonation.com/
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: public
-          server-dir: /public_html/
+          server-dir: /home6/azonorg/my.azonation.com/
+
+      - name: Upload .env file
+        run: echo "${{ secrets.LARAVEL_ENV }}" > .env
+
+      - name: Deploy .env to backend
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: .
+          server-dir: /home6/azonorg/api/
+          include: .env
