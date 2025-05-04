@@ -1,0 +1,38 @@
+name: Deploy Laravel Backend to cPanel
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, bcmath, pdo, curl, fileinfo
+
+      - name: Install Laravel dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader
+
+      - name: FTP Deploy Laravel App Files (excluding /public)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: .
+          server-dir: /home/YOUR_CPANL_USER/backend/
+          exclude: |
+            .git*
+            node_modules*
+            public/
+            tests/
+            .env
