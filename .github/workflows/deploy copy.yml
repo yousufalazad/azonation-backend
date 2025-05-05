@@ -20,6 +20,10 @@ jobs:
       - name: Install Laravel Dependencies
         run: composer install --no-dev --optimize-autoloader
 
+      - name: Generate .env File
+        run: |
+          echo "${{ secrets.LARAVEL_ENV }}" > .env
+
       - name: Upload Laravel Core (excluding public/)
         uses: SamKirkland/FTP-Deploy-Action@v4.2.0
         with:
@@ -27,17 +31,36 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: ./api
+          server-dir: /home6/azonorg/api/
           exclude: |
-            **/.git*
-            **/node_modules/*
-            public/**
-            tests/**
-            vendor/**
-            storage/**
-            .github/**
+            .git*
+            node_modules*
+            public/
+            tests/
+            vendor/
+            storage/
+            .github/
             README.md
-      
+
+      - name: Upload Laravel Public Folder
+        uses: SamKirkland/FTP-Deploy-Action@v4.2.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./public/
+          server-dir: /home6/azonorg/public_html/api/
+
+      - name: Upload .env File
+        uses: SamKirkland/FTP-Deploy-Action@v4.2.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: /home6/azonorg/api/
+          include: .env
+
       - name: Upload Artisan Runner Script
         uses: SamKirkland/FTP-Deploy-Action@v4.2.0
         with:
@@ -45,7 +68,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: ./api
+          server-dir: /home6/azonorg/api/
           include: artisan-runner.php
 
       - name: Run Artisan Commands via HTTP
