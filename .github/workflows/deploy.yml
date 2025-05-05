@@ -27,7 +27,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: ./api
+          server-dir: ./api/
           exclude: |
             **/.git*
             **/node_modules/*
@@ -37,16 +37,6 @@ jobs:
             storage/**
             .github/**
             README.md
-      
-      - name: Upload Artisan Runner Script
-        uses: SamKirkland/FTP-Deploy-Action@v4.2.0
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: ./api
-          include: artisan-runner.php
 
       - name: Run Artisan Commands via HTTP
         run: |
