@@ -4,18 +4,59 @@ use App\Http\Controllers\Controller;
 use App\Models\Meeting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+
 
 class MeetingController extends Controller
 {
     public function index(Request $request)
     {
-        $user_id = $request->user()->id;
+        $user_id = Auth::id();
         $meetings = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')
             ->leftJoin('conduct_types', 'meetings.conduct_type_id', '=', 'conduct_types.id')
             ->where('meetings.user_id', $user_id)
             ->get();
         return response()->json(['status' => true, 'data' => $meetings]);
     }
+
+    public function orgNextMeeting(Request $request)
+    {
+        $user_id = Auth::id();
+        $meetings = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')
+            ->leftJoin('conduct_types', 'meetings.conduct_type_id', '=', 'conduct_types.id')
+            ->where('meetings.user_id', $user_id)
+            ->get();
+        return response()->json(['status' => true, 'data' => $meetings]);
+    }
+
+    // public function orgNextMeeting(Request $request)
+    // {
+    //     $user_id = Auth::id();
+    
+    //     // Ensuring we're comparing against today in the same timezone
+    //     $nextMeeting = Meeting::where('user_id', $user_id)
+    //         ->whereDate('date', '>=', Carbon::today()->toDateString()) // Ensure to use date only
+    //         ->orderBy('date', 'asc')
+    //         ->first();
+
+    //     if ($nextMeeting) {
+    //         return response()->json([
+    //             'status' => true,
+    //             'data' => [
+    //                 'date' => Carbon::parse($nextMeeting->date)->toDateString(),  // Format the date
+    //             ]
+    //         ], 200);
+    //     } else {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'No upcoming meetings found'
+    //         ], 404);
+    //     }
+    // }
+
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -23,8 +64,10 @@ class MeetingController extends Controller
             'short_name' => 'nullable|string',
             'subject' => 'nullable|string',
             'date' => 'nullable|date',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after_or_equal:start_time',
+            // 'start_time' => 'nullable|date_format:H:i',
+            'start_time' => 'nullable',
+            // 'end_time' => 'nullable|date_format:H:i|after_or_equal:start_time',
+            'end_time' => 'nullable',
             'meeting_type' => 'nullable|string|max:50',
             'timezone' => 'nullable|string|max:50',
             'meeting_mode' => 'nullable|string',
@@ -82,8 +125,10 @@ class MeetingController extends Controller
             'short_name' => 'nullable|string',
             'subject' => 'nullable|string',
             'date' => 'nullable|date',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after_or_equal:start_time',
+            // 'start_time' => 'nullable|date_format:H:i',
+            'start_time' => 'nullable',
+            // 'end_time' => 'nullable|date_format:H:i|after_or_equal:start_time',
+            'end_time' => 'nullable',
             'meeting_type' => 'nullable|string|max:50',
             'timezone' => 'nullable|string|max:50',
             'meeting_mode' => 'nullable|string',
