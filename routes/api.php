@@ -235,7 +235,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [MeetingController::class, 'store']);
         Route::put('/{id}', [MeetingController::class, 'update']);
         Route::delete('/{id}', [MeetingController::class, 'destroy']);
+        Route::get('/org-next-meeting', [MeetingController::class, 'orgNextMeeting']);
     });
+
     Route::group(['prefix' => 'meeting-minutes'], function () {
         Route::get('/', [MeetingMinutesController::class, 'index']);
         Route::get('/{id}', [MeetingMinutesController::class, 'show']);
