@@ -146,21 +146,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [RecognitionController::class, 'index']);
         Route::get('/{id}', [RecognitionController::class, 'show']);
         Route::post('/', [RecognitionController::class, 'store']);
-        Route::put('/{id}', [RecognitionController::class, 'update']);
+        Route::post('/{id}', [RecognitionController::class, 'update']);
         Route::delete('/{id}', [RecognitionController::class, 'destroy']);
     });
     Route::group(['prefix' => 'strategic-plans'], function () {
         Route::get('/', [StrategicPlanController::class, 'index']);
         Route::get('/{id}', [StrategicPlanController::class, 'show']);
         Route::post('/', [StrategicPlanController::class, 'store']);
-        Route::put('/{id}', [StrategicPlanController::class, 'update']);
+        Route::post('/{id}', [StrategicPlanController::class, 'update']);
         Route::delete('/{id}', [StrategicPlanController::class, 'destroy']);
     });
     Route::group(['prefix' => 'success-stories'], function () {
         Route::get('/', [SuccessStoryController::class, 'index']);
         Route::get('/{id}', [SuccessStoryController::class, 'show']);
         Route::post('/', [SuccessStoryController::class, 'store']);
-        Route::put('/{id}', [SuccessStoryController::class, 'update']);
+        Route::post('/{id}', [SuccessStoryController::class, 'update']);
         Route::delete('/{id}', [SuccessStoryController::class, 'destroy']);
     });
     Route::get('/reports', [OrgReportController::class, 'getIncomeReport']);
