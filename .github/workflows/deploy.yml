@@ -27,7 +27,7 @@ jobs:
           echo "${{ secrets.LARAVEL_ENV }}" > .env
 
       - name: Upload Laravel App Files (excluding /public)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.2.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -43,21 +43,18 @@ jobs:
             storage/
             .github/
             README.md
-          dangerously-ignore-upload-path: true
 
       - name: Upload Laravel Public Folder
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.2.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: public/
+          local-dir: ./public/
           server-dir: /home6/azonorg/my.azonation.com/
-          dangerously-ignore-upload-path: true
-
 
       - name: Upload .env file
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.2.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -65,11 +62,9 @@ jobs:
           local-dir: ./
           server-dir: /home6/azonorg/my.azonation.com/api/
           include: .env
-          dangerously-ignore-upload-path: true
-
 
       - name: Upload artisan runner script
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.2.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -77,9 +72,7 @@ jobs:
           local-dir: ./
           server-dir: /home6/azonorg/my.azonation.com/api/
           include: artisan-runner.php
-          dangerously-ignore-upload-path: true
-
 
       - name: Run Artisan Commands via HTTP
         run: |
-          curl https://my.azonation.com/api/artisan-runner.php?key=secure-token-here
+          curl "https://my.azonation.com/api/artisan-runner.php?key=secure-token-here"
