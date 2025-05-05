@@ -18,7 +18,7 @@ jobs:
           extensions: mbstring, bcmath, pdo, curl, fileinfo
 
       - name: Install Laravel Dependencies
-        run: composer install --no-dev --optimize-autoloader
+        run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
       - name: Upload Laravel Core (excluding public/)
         uses: SamKirkland/FTP-Deploy-Action@v4.2.0
@@ -37,7 +37,3 @@ jobs:
             storage/**
             .github/**
             README.md
-
-      - name: Run Artisan Commands via HTTP
-        run: |
-          curl "https://my.azonation.com/api/artisan-runner.php?key=secure-token-here"
