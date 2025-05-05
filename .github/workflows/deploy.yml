@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -18,22 +19,21 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, bcmath, pdo, curl, fileinfo
 
-      - name: Install Laravel dependencies
-        run: |
-          composer install --no-dev --optimize-autoloader
+      - name: Install Laravel Dependencies
+        run: composer install --no-dev --optimize-autoloader
 
-      - name: Generate .env file from secret
+      - name: Generate .env File
         run: |
           echo "${{ secrets.LARAVEL_ENV }}" > .env
 
-      - name: Upload Laravel App Files (excluding /public)
+      - name: Upload Laravel Core (excluding public/)
         uses: SamKirkland/FTP-Deploy-Action@v4.2.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: /home6/azonorg/my.azonation.com/api/
+          server-dir: /home6/azonorg/api/
           exclude: |
             .git*
             node_modules*
@@ -51,26 +51,26 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./public/
-          server-dir: /home6/azonorg/my.azonation.com/
+          server-dir: /home6/azonorg/public_html/api/
 
-      - name: Upload .env file
+      - name: Upload .env File
         uses: SamKirkland/FTP-Deploy-Action@v4.2.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: /home6/azonorg/my.azonation.com/api/
+          server-dir: /home6/azonorg/api/
           include: .env
 
-      - name: Upload artisan runner script
+      - name: Upload Artisan Runner Script
         uses: SamKirkland/FTP-Deploy-Action@v4.2.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: /home6/azonorg/my.azonation.com/api/
+          server-dir: /home6/azonorg/api/
           include: artisan-runner.php
 
       - name: Run Artisan Commands via HTTP
