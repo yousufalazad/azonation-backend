@@ -21,40 +21,31 @@ class MeetingController extends Controller
         return response()->json(['status' => true, 'data' => $meetings]);
     }
 
+
     public function orgNextMeeting(Request $request)
     {
         $user_id = Auth::id();
-        $meetings = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')
-            ->leftJoin('conduct_types', 'meetings.conduct_type_id', '=', 'conduct_types.id')
-            ->where('meetings.user_id', $user_id)
-            ->get();
-        return response()->json(['status' => true, 'data' => $meetings]);
-    }
-
-    // public function orgNextMeeting(Request $request)
-    // {
-    //     $user_id = Auth::id();
     
-    //     // Ensuring we're comparing against today in the same timezone
-    //     $nextMeeting = Meeting::where('user_id', $user_id)
-    //         ->whereDate('date', '>=', Carbon::today()->toDateString()) // Ensure to use date only
-    //         ->orderBy('date', 'asc')
-    //         ->first();
+        // Ensuring we're comparing against today in the same timezone
+        $nextMeeting = Meeting::where('user_id', $user_id)
+            ->whereDate('date', '>=', Carbon::today()->toDateString()) // Ensure to use date only
+            ->orderBy('date', 'asc')
+            ->first();
 
-    //     if ($nextMeeting) {
-    //         return response()->json([
-    //             'status' => true,
-    //             'data' => [
-    //                 'date' => Carbon::parse($nextMeeting->date)->toDateString(),  // Format the date
-    //             ]
-    //         ], 200);
-    //     } else {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'No upcoming meetings found'
-    //         ], 404);
-    //     }
-    // }
+        if ($nextMeeting) {
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'date' => Carbon::parse($nextMeeting->date)->toDateString(),  // Format the date
+                ]
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'No upcoming meetings found'
+            ], 404);
+        }
+    }
 
 
     public function store(Request $request)

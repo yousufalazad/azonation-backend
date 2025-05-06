@@ -74,6 +74,31 @@ class OrgMemberController extends Controller
         ]);
     }
 
+    public function thisYearNewMemberCount(Request $request)
+    {
+        $userId = Auth::id();
+        $thisYearNewMemberCount = OrgMember::where('org_type_user_id', $userId)
+            ->whereYear('created_at', date('Y'))
+            ->count();
+        return response()->json([
+            'status' => true,
+            'data' => $thisYearNewMemberCount
+        ]);
+    }
+    public function thisMonthNewMemberCount(Request $request)
+    {
+        $userId = Auth::id();
+        $thisMonthNewMemberCount = OrgMember::where('org_type_user_id', $userId)
+            ->whereYear('created_at', date('Y'))
+            ->whereMonth('created_at', date('m'))
+            ->count();
+        return response()->json([
+            'status' => true,
+            'data' => $thisMonthNewMemberCount
+        ]);
+    }
+    
+
     public function search(Request $request)
     {
         $query = $request->input('query');
