@@ -37,3 +37,4 @@ jobs:
             storage/**
             .github/**
             README.md
+          transfer-mode: binary  # Force binary transfer mode
