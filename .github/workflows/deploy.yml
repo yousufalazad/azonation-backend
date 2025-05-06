@@ -29,8 +29,8 @@ jobs:
           local-dir: ./
           server-dir: ./api/
           exclude: |
-            **/.git*
-            **/node_modules/*
+            .git*
+            node_modules/**
             public/**
             tests/**
             vendor/**
