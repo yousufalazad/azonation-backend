@@ -1,40 +1,40 @@
-name: Deploy Laravel Backend to cPanel
-on:
-  push:
-    branches:
-      - master
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# name: Deploy Laravel Backend to cPanel
+# on:
+#   push:
+#     branches:
+#       - master
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, bcmath, pdo, curl, fileinfo
+#       - name: Setup PHP
+#         uses: shivammathur/setup-php@v2
+#         with:
+#           php-version: '8.2'
+#           extensions: mbstring, bcmath, pdo, curl, fileinfo
 
-      - name: Install Laravel Dependencies
-        run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+#       - name: Install Laravel Dependencies
+#         run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
-      - name: Upload Laravel Core (excluding public/)
-        uses: SamKirkland/FTP-Deploy-Action@v4.2.0
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: ./api/
-          exclude: |
-            .git*
-            node_modules/**
-            public/**
-            tests/**
-            vendor/**
-            storage/**
-            .github/**
-            README.md
-          transfer-mode: binary  # Force binary transfer mode
+#       - name: Upload Laravel Core (excluding public/)
+#         uses: SamKirkland/FTP-Deploy-Action@v4.2.0
+#         with:
+#           server: ${{ secrets.FTP_SERVER }}
+#           username: ${{ secrets.FTP_USERNAME }}
+#           password: ${{ secrets.FTP_PASSWORD }}
+#           local-dir: ./
+#           server-dir: ./api/
+#           exclude: |
+#             .git*
+#             node_modules/**
+#             public/**
+#             tests/**
+#             vendor/**
+#             storage/**
+#             .github/**
+#             README.md
+#           transfer-mode: binary  # Force binary transfer mode
