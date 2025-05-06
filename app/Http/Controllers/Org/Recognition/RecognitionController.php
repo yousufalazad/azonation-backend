@@ -9,6 +9,7 @@ use App\Models\RecognitionImage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -57,16 +58,16 @@ class RecognitionController extends Controller
             'description' => 'required|string',
             'recognition_date' => 'required|date',
             'privacy_setup_id' => 'required|integer',
-            'status' => 'required|integer',
+            'is_active' => 'required|integer',
         ]);
         try {
             $recognition = Recognition::create([
-                'user_id' => $request->user()->id,
+                'user_id' => Auth::id(),
                 'title' => $request->title,
                 'description' => $request->description,
                 'recognition_date' => $request->recognition_date,
                 'privacy_setup_id' => $request->privacy_setup_id,
-                'status' => $request->status,
+                'is_active' => $request->is_active,
             ]);
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
@@ -123,7 +124,7 @@ class RecognitionController extends Controller
             'description' => 'required|string',
             'recognition_date' => 'required|date',
             'privacy_setup_id' => 'required|integer',
-            'status' => 'required|integer',
+            'is_active' => 'required|integer',
         ]);
         try {
             $recognition = Recognition::where('id', $id)->first();
@@ -139,7 +140,7 @@ class RecognitionController extends Controller
                 'description' => $request->description,
                 'recognition_date' => $request->recognition_date,
                 'privacy_setup_id' => $request->privacy_setup_id,
-                'status' => $request->status,
+                'is_active' => $request->is_active,
             ]);
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {

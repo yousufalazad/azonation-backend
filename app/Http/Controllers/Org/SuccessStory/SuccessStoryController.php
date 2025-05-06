@@ -62,7 +62,7 @@ class SuccessStoryController extends Controller
         ]);
         try {
             $story = new SuccessStory();
-            $story->user_id = $request->user()->id;
+            $story->user_id = Auth::id();
             $story->title = $validatedData['title'];
             $story->story = $validatedData['story'];
             $story->status = $validatedData['status'];

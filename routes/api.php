@@ -187,7 +187,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/create', [OrgMemberController::class, 'store']);
         Route::post('/check', [OrgMemberController::class, 'checkMember']);
         Route::put('/{id}', [OrgMemberController::class, 'update']);
-        Route::delete('/{id}', [OrgMemberController::class, 'destroy']);        
+        Route::delete('/{id}', [OrgMemberController::class, 'destroy']);
+        Route::get('/this-year-new-member-count', [OrgMemberController::class, 'thisYearNewMemberCount']);     
     });
 
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
@@ -235,8 +236,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [MeetingController::class, 'store']);
         Route::put('/{id}', [MeetingController::class, 'update']);
         Route::delete('/{id}', [MeetingController::class, 'destroy']);
-        Route::get('/org-next-meeting', [MeetingController::class, 'orgNextMeeting']);
     });
+    Route::get('/org-next-meeting', [MeetingController::class, 'orgNextMeeting']);
+
 
     Route::group(['prefix' => 'meeting-minutes'], function () {
         Route::get('/', [MeetingMinutesController::class, 'index']);

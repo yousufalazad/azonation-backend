@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -64,7 +65,7 @@ class HistoryController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
         ]);
         $history = new History();
-        $history->user_id = $request->user()->id;
+        $history->user_id = Auth::id();
         $history->title = $validatedData['title'];
         $history->history = $validatedData['history'];
         $history->is_active = $validatedData['is_active'];

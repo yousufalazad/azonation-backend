@@ -12,11 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('histories', function (Blueprint $table) {
-            $table->id(); // Primary key
+            $table->id();
 
             // Foreign key to the users table (organization owner)
             $table->foreignId('user_id')
-                ->unique() // Ensures one history per organization
                 ->constrained('users')
                 ->onDelete('cascade'); // Cascade on delete to remove associated history
 

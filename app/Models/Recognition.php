@@ -15,7 +15,7 @@ class Recognition extends Model
         'description',
         'recognition_date',
         'privacy_setup_id',
-        'status',
+        'is_active',
     ];
     protected $hidden=[
         'created_at',
