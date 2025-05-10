@@ -76,6 +76,11 @@ use App\Http\Controllers\SuperAdmin\Financial\Storage\EverydayStorageBillingCont
 use App\Http\Controllers\SuperAdmin\PaymentGateway\StripeController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
+Route::get('/test', function () {
+    return response()->json(['status' => 'Laravel is running']);
+});
+
+
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
@@ -84,6 +89,8 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode
 Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
+
+// ----------------------- Need to separate only index outside auth --------------------
 Route::group(['prefix' => 'countries'], function () {
     Route::get('/', [CountryController::class, 'index']);
     Route::post('/', [CountryController::class, 'store']);
