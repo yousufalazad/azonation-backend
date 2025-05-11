@@ -19,7 +19,7 @@ $commands = [
     'config:cache',
     'route:cache',
     'view:cache',
-    'migrate --force',
+    // 'migrate --force',
 ];
 
 foreach ($commands as $command) {
