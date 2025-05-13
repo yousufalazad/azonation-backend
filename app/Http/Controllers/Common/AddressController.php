@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Address;
 use Illuminate\Http\Request;
 
@@ -15,6 +16,9 @@ class AddressController extends Controller
     {
         // $userId = auth()->user()->id;
         $userId = Auth::id();
+        // return $address = Cache::remember('user_address_' . $userId, 60, function () use ($userId) {
+        //     Address::where('user_id', $userId)->first();
+        // });
         $address = Address::where('user_id', $userId)->first();
         if ($address) {
             return response()->json([
