@@ -58,6 +58,7 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
         }
+
         $this->sendEmail($user);
         return response()->json([
             'status' => true,

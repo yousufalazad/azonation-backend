@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+
 
 class User extends Authenticatable
 {
@@ -96,7 +98,7 @@ class User extends Authenticatable
         return $this->hasMany(ManagementAndStorageBilling::class, 'user_id', 'id')->where('is_active', true);
     }
 
-    public function regionCurrency ()
+    public function regionCurrency()
     {
         return $this->hasOne(RegionCurrency::class, 'region_id', 'region_id')->where('is_active', true);
     }
@@ -110,6 +112,27 @@ class User extends Authenticatable
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn(['reset_code', 'reset_code_expires_at']);
+        });
+    }
+
+    // app/Models/User.php or your specific model
+
+
+    public static function generateUniqueAzonId()
+    {
+        do {
+            $azonId = str_pad(mt_rand(0, 9999999999999), 13, '0', STR_PAD_LEFT);
+        } while (self::where('azon_id', $azonId)->exists());
+
+        return $azonId;
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->azon_id = self::generateUniqueAzonId();
         });
     }
 }
