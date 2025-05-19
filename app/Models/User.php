@@ -127,12 +127,36 @@ class User extends Authenticatable
         return $azonId;
     }
 
+    // public static function generateUniqueUsername($name = null)
+    // {
+    //     // Converts name to lowercase and removes all non-alphabetic characters
+    //     $base = $name ? preg_replace('/[^a-z]/', '', strtolower($name)) : 'user';
+
+    //     do {
+    //         // Generates a 3-letter random alphabet-only suffix
+    //         $suffix = self::randomLetters();
+    //         $username = $base . $suffix;
+    //     } while (self::where('username', $username)->exists()); // Ensures uniqueness
+
+    //     return $username;
+    // }
+
+    // public static function randomLetters($length = 3)
+    // {
+    //     //Generates random alphabetic characters
+    //     return substr(str_shuffle(str_repeat('abcdefghijklmnopqrstuvwxyz', $length)), 0, $length);
+    // }
+
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($model) {
+            //Generates unique 13-digit numeric azon_id
             $model->azon_id = self::generateUniqueAzonId();
+
+            //Generates unique, alphabet-only username based on name
+            // $model->username = self::generateUniqueUsername($model->name);
         });
     }
 }

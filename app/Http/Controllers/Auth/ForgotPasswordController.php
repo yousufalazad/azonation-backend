@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordResetCodeMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -26,10 +27,12 @@ class ForgotPasswordController extends Controller
         $user->save();
 
         // Send email
-        Mail::raw("Your password reset code is: $code", function ($message) use ($user) {
-            $message->to($user->email)
-                    ->subject('Password Reset Code');
-        });
+        Mail::to($user->email)->queue(new PasswordResetCodeMail($code));
+
+        // Mail::raw("Your password reset code is: $code", function ($message) use ($user) {
+        //     $message->to($user->email)
+        //             ->subject('Password Reset Code');
+        // });
 
         return response()->json([
             'status' => true,

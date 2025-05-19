@@ -14,6 +14,8 @@ use App\Mail\OrgUserRegisteredMail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 
+
+
 class AuthController extends Controller
 {
     public function register(Request $request)
@@ -97,11 +99,11 @@ class AuthController extends Controller
     public function sendEmail($user)
     {
         if ($user->type == 'individual') {
-            Mail::to($user->email)->send(new IndividualUserRegisteredMail($user));
+            Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
         } elseif ($user->type == 'organisation') {
-            Mail::to($user->email)->send(new OrgUserRegisteredMail($user));
+            Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
         } elseif ($user->type == 'superadmin') {
-            Mail::to($user->email)->send(new SuperAdminUserRegisteredMail($user));
+            Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
         }
     }
     protected function success($message, $data = [], $status = 200)
