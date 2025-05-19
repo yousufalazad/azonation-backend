@@ -1,0 +1,29 @@
+ALTER TABLE `meeting_attendances` CHANGE `attendance_type_id` `attendance_type_id` BIGINT(20) UNSIGNED NULL;
+
+
+ALTER TABLE `personal_access_tokens` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `meeting_guest_attendances` CHANGE `attendance_type_id` `attendance_type_id` BIGINT(20) UNSIGNED NULL;
+
+ALTER TABLE `meeting_minutes` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT, CHANGE `privacy_setup_id` `privacy_setup_id` BIGINT(20) UNSIGNED NULL, CHANGE `approval_status` `approval_status` TINYINT(4) NULL DEFAULT '0' COMMENT 'Approval status: 0 = Pending, 1 = Approved, 2 = Rejected', CHANGE `is_publish` `is_publish` TINYINT(1) NULL DEFAULT '0' COMMENT 'Is the meeting minutes published?', CHANGE `is_active` `is_active` TINYINT(1) NULL DEFAULT '1' COMMENT 'Is the meeting minutes active or inactive?';
+
+ALTER TABLE `event_summaries` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT, CHANGE `total_guest_attendance` `total_guest_attendance` INT(11) NULL DEFAULT '0' COMMENT 'Total number of guests who attended the event', CHANGE `total_expense` `total_expense` INT(11) NULL DEFAULT '0' COMMENT 'Total expense for the event', CHANGE `privacy_setup_id` `privacy_setup_id` BIGINT(20) UNSIGNED NULL, CHANGE `is_active` `is_active` TINYINT(1) NULL DEFAULT '1' COMMENT 'Indicates whether the event summary is active or inactive', CHANGE `is_publish` `is_publish` TINYINT(1) NULL DEFAULT '0' COMMENT 'Indicates whether the event summary is published and visible to users';
+ALTER TABLE `event_summary_files` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `event_summary_images` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `event_attendances` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT, CHANGE `user_id` `user_id` BIGINT(20) UNSIGNED NULL, CHANGE `attendance_type_id` `attendance_type_id` BIGINT(20) UNSIGNED NULL;
+
+ALTER TABLE `event_attendances` CHANGE `event_id` `org_event_id` BIGINT(20) UNSIGNED NOT NULL;
+
+ALTER TABLE `event_guest_attendances` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT, CHANGE `attendance_type_id` `attendance_type_id` BIGINT(20) UNSIGNED NULL;
+
+ALTER TABLE `projects` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `project_attendances` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT, CHANGE `user_id` `user_id` BIGINT(20) UNSIGNED NULL, CHANGE `attendance_type_id` `attendance_type_id` BIGINT(20) UNSIGNED NULL;
+
+ALTER TABLE `project_guest_attendances` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT, CHANGE `attendance_type_id` `attendance_type_id` BIGINT(20) UNSIGNED NULL;
+
+ALTER TABLE `project_summaries` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT, CHANGE `total_member_participation` `total_member_participation` INT(11) NULL DEFAULT '0' COMMENT 'Total number of members who participated in the project', CHANGE `total_guest_participation` `total_guest_participation` INT(11) NULL DEFAULT '0' COMMENT 'Total number of guests who participated in the project', CHANGE `total_participation` `total_participation` INT(11) NULL DEFAULT '0' COMMENT 'Total number of participants in the project', CHANGE `total_beneficial_person` `total_beneficial_person` INT(11) NULL DEFAULT '0' COMMENT 'Total number of individuals who benefited from the project', CHANGE `total_communities_impacted` `total_communities_impacted` INT(11) NULL DEFAULT '0' COMMENT 'Total number of communities impacted by the project', CHANGE `total_expense` `total_expense` INT(11) NULL DEFAULT '0' COMMENT 'Total expense for the project', CHANGE `privacy_setup_id` `privacy_setup_id` BIGINT([...]
+
+ALTER TABLE `project_summary_files` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `project_summary_images` CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT;

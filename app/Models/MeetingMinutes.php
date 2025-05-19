@@ -32,4 +32,13 @@ class MeetingMinutes extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function documents()
+    {
+        return $this->hasMany(MeetingMinuteFile::class, 'meeting_minute_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(MeetingMinuteImage::class, 'meeting_minute_id');
+    }
 }

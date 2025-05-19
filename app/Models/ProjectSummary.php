@@ -38,4 +38,13 @@ class ProjectSummary extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function documents()
+    {
+        return $this->hasMany(ProjectSummaryFile::class, 'project_summary_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(ProjectSummaryImage::class, 'project_summary_id');
+    }
 }

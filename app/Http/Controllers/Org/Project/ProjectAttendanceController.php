@@ -27,8 +27,8 @@ class ProjectAttendanceController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'org_project_id' => 'required',
-            'user_id' => 'required',
-            'attendance_type_id' => 'required',
+            'user_id' => 'nullable',
+            'attendance_type_id' => 'nullable',
             'time' => 'nullable',
             'note' => 'nullable',
             'is_active' => 'nullable',
@@ -58,8 +58,8 @@ class ProjectAttendanceController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'org_project_id' => 'required',
-            'user_id' => 'required',
-            'attendance_type_id' => 'required',
+            'user_id' => 'nullable',
+            'attendance_type_id' => 'nullable',
             'time' => 'nullable',
             'note' => 'nullable',
             'is_active' => 'nullable',

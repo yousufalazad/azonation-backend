@@ -26,7 +26,6 @@ class EventController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'name' => 'required|string|max:255',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
@@ -42,7 +41,6 @@ class EventController extends Controller
         }
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|required|string|max:255',
-            'name' => 'sometimes|required|string|max:255',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);

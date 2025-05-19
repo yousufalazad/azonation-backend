@@ -40,14 +40,14 @@ class MeetingMinutesController extends Controller
                 : null;
             return $document;
         });
+
+        // dd($meetingMinute);exit;
         return response()->json(['status' => true, 'data' => $meetingMinute], 200);
     }
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required|integer|exists:meetings,id',
-            'privacy_setup_id' => 'required|integer|exists:privacy_setups,id',
-            'is_active' => 'required|boolean',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -74,42 +74,42 @@ class MeetingMinutesController extends Controller
         $meetingMinutes->is_publish = $request->is_publish;
         $meetingMinutes->is_active = $request->is_active;
         $meetingMinutes->save();
-        if ($request->hasFile('documents')) {
-            foreach ($request->file('documents') as $document) {
-                $documentPath = $document->storeAs(
-                    'org/meeting-minute/file',
-                    Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                    'public'
-                );
-                MeetingMinuteFile::create([
-                    'meeting_minute_id' => $meetingMinutes->id,
-                    'file_path' => $documentPath,
-                    'file_name' => $document->getClientOriginalName(),
-                    'mime_type' => $document->getClientMimeType(),
-                    'file_size' => $document->getSize(),
-                    'is_public' => true,
-                    'is_active' => true,
-                ]);
-            }
-        }
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imagePath = $image->storeAs(
-                    'org/meeting-minute/image',
-                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                    'public'
-                );
-                MeetingMinuteImage::create([
-                    'meeting_minute_id' => $meetingMinutes->id,
-                    'file_path' => $imagePath,
-                    'file_name' => $image->getClientOriginalName(),
-                    'mime_type' => $image->getClientMimeType(),
-                    'file_size' => $image->getSize(),
-                    'is_public' => true,
-                    'is_active' => true,
-                ]);
-            }
-        }
+        // if ($request->hasFile('documents')) {
+        //     foreach ($request->file('documents') as $document) {
+        //         $documentPath = $document->storeAs(
+        //             'org/meeting-minute/file',
+        //             Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+        //             'public'
+        //         );
+        //         MeetingMinuteFile::create([
+        //             'meeting_minute_id' => $meetingMinutes->id,
+        //             'file_path' => $documentPath,
+        //             'file_name' => $document->getClientOriginalName(),
+        //             'mime_type' => $document->getClientMimeType(),
+        //             'file_size' => $document->getSize(),
+        //             'is_public' => true,
+        //             'is_active' => true,
+        //         ]);
+        //     }
+        // }
+        // if ($request->hasFile('images')) {
+        //     foreach ($request->file('images') as $image) {
+        //         $imagePath = $image->storeAs(
+        //             'org/meeting-minute/image',
+        //             Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+        //             'public'
+        //         );
+        //         MeetingMinuteImage::create([
+        //             'meeting_minute_id' => $meetingMinutes->id,
+        //             'file_path' => $imagePath,
+        //             'file_name' => $image->getClientOriginalName(),
+        //             'mime_type' => $image->getClientMimeType(),
+        //             'file_size' => $image->getSize(),
+        //             'is_public' => true,
+        //             'is_active' => true,
+        //         ]);
+        //     }
+        // }
         return response()->json([
             'status' => true,
             'data' => $meetingMinutes,
@@ -121,11 +121,11 @@ class MeetingMinutesController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required|integer|exists:meetings,id',
-            'prepared_by' => 'required|integer|exists:users,id',
-            'reviewed_by' => 'required|integer|exists:users,id',
-            'privacy_setup_id' => 'required|integer|exists:privacy_setups,id',
-            'is_active' => 'required|boolean',
-            'file_attachments' => 'nullable|file|mimes:pdf,doc,docx|max:1024',
+            // 'prepared_by' => 'required|integer|exists:users,id',
+            // 'reviewed_by' => 'required|integer|exists:users,id',
+            // 'privacy_setup_id' => 'required|integer|exists:privacy_setups,id',
+            // 'is_active' => 'required|boolean',
+            // 'file_attachments' => 'nullable|file|mimes:pdf,doc,docx|max:1024',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -135,18 +135,18 @@ class MeetingMinutesController extends Controller
         }
         try {
             $meetingMinutes = MeetingMinutes::findOrFail($id);
-            if ($request->hasFile('file_attachments')) {
-                if ($meetingMinutes->file_attachments && Storage::exists('public/' . $meetingMinutes->file_attachments)) {
-                    Storage::delete('public/' . $meetingMinutes->file_attachments);
-                }
-                $file = $request->file('file_attachments');
-                $fileAttachmentPath = $file->storeAs(
-                    'org/meeting-minute/file',
-                    now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
-                    'public'
-                );
-                $meetingMinutes->file_attachments = $fileAttachmentPath;
-            }
+            // if ($request->hasFile('file_attachments')) {
+            //     if ($meetingMinutes->file_attachments && Storage::exists('public/' . $meetingMinutes->file_attachments)) {
+            //         Storage::delete('public/' . $meetingMinutes->file_attachments);
+            //     }
+            //     $file = $request->file('file_attachments');
+            //     $fileAttachmentPath = $file->storeAs(
+            //         'org/meeting-minute/file',
+            //         now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
+            //         'public'
+            //     );
+            //     $meetingMinutes->file_attachments = $fileAttachmentPath;
+            // }
             $meetingMinutes->meeting_id = $request->meeting_id;
             $meetingMinutes->prepared_by = $request->prepared_by;
             $meetingMinutes->reviewed_by = $request->reviewed_by;
@@ -165,6 +165,43 @@ class MeetingMinutesController extends Controller
             $meetingMinutes->is_publish = $request->is_publish;
             $meetingMinutes->is_active = $request->is_active;
             $meetingMinutes->save();
+            // if ($request->hasFile('documents')) {
+            //     foreach ($request->file('documents') as $document) {
+            //         $documentPath = $document->storeAs(
+            //             'org/meeting-minute/file',
+            //             Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+            //             'public'
+            //         );
+            //         MeetingMinuteFile::create([
+            //             'meeting_minute_id' => $meetingMinutes->id,
+            //             'file_path' => $documentPath,
+            //             'file_name' => $document->getClientOriginalName(),
+            //             'mime_type' => $document->getClientMimeType(),
+            //             'file_size' => $document->getSize(),
+            //             'is_public' => true,
+            //             'is_active' => true,
+            //         ]);
+            //     }
+            // }
+            // if ($request->hasFile('images')) {
+            //     foreach ($request->file('images') as $image) {
+            //         $imagePath = $image->storeAs(
+            //             'org/meeting-minute/image',
+            //             Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+            //             'public'
+            //         );
+            //         MeetingMinuteImage::create([
+            //             'meeting_minute_id' => $meetingMinutes->id,
+            //             'file_path' => $imagePath,
+            //             'file_name' => $image->getClientOriginalName(),
+            //             'mime_type' => $image->getClientMimeType(),
+            //             'file_size' => $image->getSize(),
+            //             'is_public' => true,
+            //             'is_active' => true,
+            //         ]);
+            //     }
+            // }
+
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
