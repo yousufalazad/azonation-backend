@@ -29,7 +29,7 @@ class MeetingAttendanceController extends Controller
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
             'user_id' => 'required',
-            'attendance_type_id' => 'required',
+            'attendance_type_id' => 'nullable',
             'date' => 'nullable',
             'time' => 'nullable',
             'note' => 'nullable',
@@ -62,7 +62,7 @@ class MeetingAttendanceController extends Controller
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
             'user_id' => 'required',
-            'attendance_type_id' => 'required',
+            'attendance_type_id' => 'nullable',
             'date' => 'nullable',
             'time' => 'nullable',
             'note' => 'nullable',

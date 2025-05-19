@@ -18,17 +18,41 @@ class ProjectSummaryController extends Controller
         $projectSummaries = ProjectSummary::all();
         return response()->json(['status' => true, 'data' => $projectSummaries], 200);
     }
+    public function show($id)
+    {
+        $projectSummary =  ProjectSummary::select('project_summaries.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
+            ->leftJoin('privacy_setups', 'project_summaries.privacy_setup_id', '=', 'privacy_setups.id')
+            ->with(['images', 'documents'])
+            ->where('project_summaries.id', $id)->first();
+        if (!$projectSummary) {
+            return response()->json(['status' => false, 'message' => 'Event Summary not found'], 404);
+        }
+         $projectSummary->images = $projectSummary->images->map(function ($image) {
+            $image->image_url = $image->file_path
+                ? url(Storage::url($image->file_path))
+                : null;
+            return $image;
+        });
+        $projectSummary->documents = $projectSummary->documents->map(function ($document) {
+            $document->document_url = $document->file_path
+                ? url(Storage::url($document->file_path))
+                : null;
+            return $document;
+        });
+        return response()->json(['status' => true, 'data' => $projectSummary], 200);
+    }
+    
     public function create() {}
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'org_project_id' => 'required|integer',
-            'total_member_participation' => 'required|integer',
-            'total_guest_participation' => 'required|integer',
-            'total_participation' => 'required|integer',
-            'total_beneficial_person' => 'required|integer',
-            'total_communities_impacted' => 'required|integer',
-            'total_expense' => 'required',
+            'total_member_participation' => 'nullable|integer',
+            'total_guest_participation' => 'nullable|integer',
+            'total_participation' => 'nullable|integer',
+            'total_beneficial_person' => 'nullable|integer',
+            'total_communities_impacted' => 'nullable|integer',
+            'total_expense' => 'nullable',
             'summary' => 'nullable|string',
             'highlights' => 'nullable|string',
             'feedback' => 'nullable|string',
@@ -39,9 +63,9 @@ class ProjectSummaryController extends Controller
             'file_attachment' => 'nullable|file|mimes:pdf,doc,docx',
             'next_steps' => 'nullable|string',
             'outcomes' => 'nullable|string',
-            'privacy_setup_id' => 'required|integer',
-            'is_active' => 'required',
-            'is_publish' => 'required',
+            'privacy_setup_id' => 'nullable|integer',
+            'is_active' => 'nullable',
+            'is_publish' => 'nullable',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -140,27 +164,18 @@ class ProjectSummaryController extends Controller
             ], 500);
         }
     }
-    public function show($id)
-    {
-        $projectSummary =  ProjectSummary::select('project_summaries.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
-            ->leftJoin('privacy_setups', 'project_summaries.privacy_setup_id', '=', 'privacy_setups.id')
-            ->where('project_summaries.id', $id)->first();
-        if (!$projectSummary) {
-            return response()->json(['status' => false, 'message' => 'Event Summary not found'], 404);
-        }
-        return response()->json(['status' => true, 'data' => $projectSummary], 200);
-    }
+    
     public function edit(ProjectSummary $projectSummary) {}
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'org_project_id' => 'required|integer',
-            'total_member_participation' => 'required|integer',
-            'total_guest_participation' => 'required|integer',
-            'total_participation' => 'required|integer',
-            'total_beneficial_person' => 'required|integer',
-            'total_communities_impacted' => 'required|integer',
-            'total_expense' => 'required',
+            'total_member_participation' => 'nullable|integer',
+            'total_guest_participation' => 'nullable|integer',
+            'total_participation' => 'nullable|integer',
+            'total_beneficial_person' => 'nullable|integer',
+            'total_communities_impacted' => 'nullable|integer',
+            'total_expense' => 'nullable',
             'summary' => 'nullable|string',
             'highlights' => 'nullable|string',
             'feedback' => 'nullable|string',
@@ -171,9 +186,9 @@ class ProjectSummaryController extends Controller
             'file_attachment' => 'nullable|file|mimes:pdf,doc,docx',
             'next_steps' => 'nullable|string',
             'outcomes' => 'nullable|string',
-            'privacy_setup_id' => 'required|integer',
-            'is_active' => 'required',
-            'is_publish' => 'required',
+            'privacy_setup_id' => 'nullable|integer',
+            'is_active' => 'nullable',
+            'is_publish' => 'nullable',
         ]);
         if ($validator->fails()) {
             $errors = $validator->errors();

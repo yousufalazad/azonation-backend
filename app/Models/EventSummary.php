@@ -20,8 +20,6 @@ class EventSummary extends Model
         'suggestions',
         'financial_overview',
         'total_expense',
-        'image_attachment',
-        'file_attachment',
         'next_steps',
         'created_by',
         'updated_by',
@@ -34,4 +32,13 @@ class EventSummary extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function documents()
+    {
+        return $this->hasMany(EventSummaryFile::class, 'event_summary_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(EventSummaryImage::class, 'event_summary_id');
+    }
 }

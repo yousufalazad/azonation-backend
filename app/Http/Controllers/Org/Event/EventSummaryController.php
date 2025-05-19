@@ -44,25 +44,22 @@ class EventSummaryController extends Controller
     }
     public function store(Request $request)
     {
-        // dd($request->all());
-        // exit;
+       
         $validator = Validator::make($request->all(), [
-            'event_id' => 'required|integer',
-            'total_member_attendance' => 'required|integer',
-            'total_guest_attendance' => 'required|integer',
-            'summary' => 'nullable|string',
-            'highlights' => 'nullable|string',
-            'feedback' => 'nullable|string',
-            'challenges' => 'nullable|string',
-            'suggestions' => 'nullable|string',
-            'financial_overview' => 'nullable|string',
-            'total_expense' => 'required|numeric',
-            'image_attachment' => 'nullable|file|mimes:jpg,jpeg,png',
-            'file_attachment' => 'nullable|file|mimes:pdf,doc,docx',
-            'next_steps' => 'nullable|string',
-            'privacy_setup_id' => 'required|integer',
-            'is_active' => 'boolean',
-            'is_publish' => 'boolean',
+            // 'event_id' => 'required|integer',
+            // 'total_member_attendance' => 'required|integer',
+            // 'total_guest_attendance' => 'nullable|integer',
+            // 'summary' => 'nullable|string',
+            // 'highlights' => 'nullable|string',
+            // 'feedback' => 'nullable|string',
+            // 'challenges' => 'nullable|string',
+            // 'suggestions' => 'nullable|string',
+            // 'financial_overview' => 'nullable|string',
+            // 'total_expense' => 'nullable|numeric',
+            // 'next_steps' => 'nullable|string',
+            // 'privacy_setup_id' => 'nullable|integer',
+            // 'is_active' => 'nullable|boolean',
+            // 'is_publish' => 'nullable|boolean',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -71,26 +68,9 @@ class EventSummaryController extends Controller
             ], 422);
         }
         try {
-            $imageAttachmentPath = null;
-            if ($request->hasFile('image_attachment')) {
-                $image = $request->file('image_attachment');
-                $imageAttachmentPath = $image->storeAs(
-                    'org/event/image',
-                    now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                    'public'
-                );
-            }
-            $fileAttachmentPath = null;
-            if ($request->hasFile('file_attachment')) {
-                $file = $request->file('file_attachment');
-                $fileAttachmentPath = $file->storeAs(
-                    'org/event/file',
-                    now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
-                    'public'
-                );
-            }
+           
             $eventSummary = new EventSummary();
-            $eventSummary->event_id = $request->event_id;
+            $eventSummary->org_event_id  = $request->event_id;
             $eventSummary->total_member_attendance = $request->total_member_attendance;
             $eventSummary->total_guest_attendance = $request->total_guest_attendance;
             $eventSummary->summary = $request->summary;
@@ -100,8 +80,6 @@ class EventSummaryController extends Controller
             $eventSummary->suggestions = $request->suggestions;
             $eventSummary->financial_overview = $request->financial_overview;
             $eventSummary->total_expense = $request->total_expense;
-            $eventSummary->image_attachment = $imageAttachmentPath;
-            $eventSummary->file_attachment = $fileAttachmentPath;
             $eventSummary->next_steps = $request->next_steps;
             $eventSummary->privacy_setup_id = $request->privacy_setup_id;
             $eventSummary->is_active = $request->is_active;
@@ -111,7 +89,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/event/file',
+                        'org/event-summary/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -129,7 +107,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/event/image',
+                        'org/event-summary/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
@@ -160,20 +138,20 @@ class EventSummaryController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'event_id' => 'required|integer',
-            'total_member_attendance' => 'required|integer',
-            'total_guest_attendance' => 'required|integer',
-            'summary' => 'nullable|string',
-            'highlights' => 'nullable|string',
-            'feedback' => 'nullable|string',
-            'challenges' => 'nullable|string',
-            'suggestions' => 'nullable|string',
-            'financial_overview' => 'nullable|string',
-            'total_expense' => 'required|numeric',
-            'next_steps' => 'nullable|string',
-            'privacy_setup_id' => 'required|integer',
-            'is_active' => 'boolean',
-            'is_publish' => 'boolean',
+            // 'event_id' => 'required|integer',
+            // 'total_member_attendance' => 'required|integer',
+            // 'total_guest_attendance' => 'nullable|integer',
+            // 'summary' => 'nullable|string',
+            // 'highlights' => 'nullable|string',
+            // 'feedback' => 'nullable|string',
+            // 'challenges' => 'nullable|string',
+            // 'suggestions' => 'nullable|string',
+            // 'financial_overview' => 'nullable|string',
+            // 'total_expense' => 'nullable|numeric',
+            // 'next_steps' => 'nullable|string',
+            // 'privacy_setup_id' => 'nullable|integer',
+            // 'is_active' => 'nullable|boolean',
+            // 'is_publish' => 'nullable|boolean',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -183,25 +161,8 @@ class EventSummaryController extends Controller
         }
         try {
             $eventSummary = EventSummary::findOrFail($id);
-            $imageAttachmentPath = $eventSummary->image_attachment;
-            if ($request->hasFile('image_attachment')) {
-                $image = $request->file('image_attachment');
-                $imageAttachmentPath = $image->storeAs(
-                    'org/event/image',
-                    now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                    'public'
-                );
-            }
-            $fileAttachmentPath = $eventSummary->file_attachment;
-            if ($request->hasFile('file_attachment')) {
-                $file = $request->file('file_attachment');
-                $fileAttachmentPath = $file->storeAs(
-                    'org/event/file',
-                    now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
-                    'public'
-                );
-            }
-            $eventSummary->event_id = $request->event_id;
+            
+            $eventSummary->org_event_id  = $request->org_event_id;
             $eventSummary->total_member_attendance = $request->total_member_attendance;
             $eventSummary->total_guest_attendance = $request->total_guest_attendance;
             $eventSummary->summary = $request->summary;
@@ -211,8 +172,6 @@ class EventSummaryController extends Controller
             $eventSummary->suggestions = $request->suggestions;
             $eventSummary->financial_overview = $request->financial_overview;
             $eventSummary->total_expense = $request->total_expense;
-            $eventSummary->image_attachment = $imageAttachmentPath;
-            $eventSummary->file_attachment = $fileAttachmentPath;
             $eventSummary->next_steps = $request->next_steps;
             $eventSummary->privacy_setup_id = $request->privacy_setup_id;
             $eventSummary->is_active = $request->is_active;
@@ -222,7 +181,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/event/file',
+                        'org/event-summary/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
@@ -240,7 +199,7 @@ class EventSummaryController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/event/image',
+                        'org/event-summary/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
