@@ -34,7 +34,7 @@ class AddMemberSuccessMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Add Member Success Mail',
+            subject: 'Add Member Success Email',
         );
     }
 
