@@ -251,7 +251,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [MeetingMinutesController::class, 'index']);
         Route::get('/{id}', [MeetingMinutesController::class, 'show']);
         Route::post('/', [MeetingMinutesController::class, 'store']);
-        Route::put('/{id}', [MeetingMinutesController::class, 'update']);
+        Route::post('/{id}', [MeetingMinutesController::class, 'update']);
         Route::delete('/{id}', [MeetingMinutesController::class, 'destroy']);
     });
     Route::group(['prefix' => 'meeting-attendances'], function () {
@@ -295,7 +295,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [EventSummaryController::class, 'index']);
         Route::get('/{id}', [EventSummaryController::class, 'show']);
         Route::post('/', [EventSummaryController::class, 'store']);
-        Route::put('/{id}', [EventSummaryController::class, 'update']);
+        Route::post('/{id}', [EventSummaryController::class, 'update']);
         Route::delete('/{id}', [EventSummaryController::class, 'destroy']);
     });
     Route::group(['prefix' => 'projects'], function () {
@@ -324,7 +324,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProjectSummaryController::class, 'index']);
         Route::get('/{id}', [ProjectSummaryController::class, 'show']);
         Route::post('/', [ProjectSummaryController::class, 'store']);
-        Route::put('/{id}', [ProjectSummaryController::class, 'update']);
+        Route::post('/{id}', [ProjectSummaryController::class, 'update']);
         Route::delete('/{id}', [ProjectSummaryController::class, 'destroy']);
     });
     Route::group(['prefix' => 'founders'], function () {

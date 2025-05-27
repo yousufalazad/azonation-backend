@@ -52,12 +52,15 @@ class OfficeDocumentController extends Controller
     }
     public function store(Request $request)
     {
+        // dd($request->all());exit;
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'string|max:20000',
             'privacy_setup_id' => 'nullable|integer',
+            'is_active' => 'nullable|integer',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+
         ]);
         $user_id = $request->user()->id;
         DB::beginTransaction();
@@ -67,6 +70,7 @@ class OfficeDocumentController extends Controller
             $officeDocument->description = $validatedData['description'];
             $officeDocument->privacy_setup_id = $validatedData['privacy_setup_id'];
             $officeDocument->user_id = $user_id;
+            $officeDocument->is_active = $validatedData['is_active'];
             $officeDocument->save();
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
@@ -124,8 +128,9 @@ class OfficeDocumentController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'string|max:20000',
             'privacy_setup_id' => 'nullable|integer',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'is_active' => 'nullable|integer',
+            // 'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            // 'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
         ]);
         $user_id = $request->user()->id;
         DB::beginTransaction();
@@ -134,6 +139,7 @@ class OfficeDocumentController extends Controller
             $officeDocument->title = $validatedData['title'];
             $officeDocument->description = $validatedData['description'];
             $officeDocument->privacy_setup_id = $validatedData['privacy_setup_id'];
+            $officeDocument->is_active = $validatedData['is_active'];
             $officeDocument->user_id = $user_id;
             $officeDocument->save();
             if ($request->hasFile('documents')) {
