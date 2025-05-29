@@ -35,7 +35,17 @@ return new class extends Migration
                 ->comment('User name snapshot for billing reference');
 
             // Payment gateway used for the transaction
-            $table->string('gateway')->comment('Payment gateway used for the transaction (e.g., PayPal, Stripe, etc.)');
+            $table->enum('gateway_type', ['stripe', 'paypal', 'sslcommerze', 'bkash', 'rocket', 'upi', 'alipay', 'applepay', 'gpay'])
+                ->comment('The payment gateway used for the transaction, e.g., Stripe, PayPal.');
+
+
+            //payer_country and payer_currency_rate
+            $table->string('payer_country', 30)->nullable()
+                ->comment('The country of the payer, full country name).');
+
+            $table->decimal('payer_currency_rate', 10, 4)->nullable()
+                ->comment('The exchange rate of the payer\'s currency against the payment currency at the time of the transaction.');
+
 
             // Transaction ID from the payment gateway
             $table->string('transaction_id')->nullable()->comment('Unique transaction ID from the payment gateway');

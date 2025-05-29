@@ -4,11 +4,10 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use function Laravel\Prompts\table;
+
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('payments', function (Blueprint $table) {
@@ -36,21 +35,25 @@ return new class extends Migration
             $table->decimal('payment_amount', 10, 2)
                 ->comment('The amount of money paid in this transaction.');
 
-            $table->string('payment_method')->nullable()
-                ->comment('The method used for payment, e.g., Credit Card, PayPal, or Bank Transfer.');
-
             $table->date('payment_date')
                 ->comment('The date the payment was made.');
 
             $table->string('transaction_id')->nullable()
                 ->comment('A unique identifier provided by the payment gateway for tracking the transaction.');
 
-            $table->string('payment_gateway', 30)->nullable()
+            // Payment gateway used for the transaction
+            $table->enum('gateway_type', ['stripe', 'paypal', 'sslcommerze', 'bkash', 'rocket', 'upi', 'alipay', 'applepay', 'gpay'])
                 ->comment('The payment gateway used for the transaction, e.g., Stripe, PayPal.');
 
-                $table->string('gateway_response', 30)->nullable()
+            $table->string('gateway_response', 30)->nullable()
                 ->comment('The payment gateway response, e.g., Stripe, PayPal.');
 
+            //payer_country and payer_currency_rate
+            $table->string('payer_country', 30)->nullable()
+                ->comment('The country of the payer, full country name).');
+            
+                $table->decimal('payer_currency_rate', 10, 4)->nullable()
+                ->comment('The exchange rate of the payer\'s currency against the payment currency at the time of the transaction.');
 
             $table->enum('payment_status', ['initiated', 'completed', 'failed', 'pending', 'refunded'])
                 ->default('initiated')

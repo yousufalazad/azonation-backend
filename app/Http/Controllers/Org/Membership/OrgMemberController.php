@@ -40,13 +40,13 @@ class OrgMemberController extends Controller
             ->where('is_active', '1')
             ->get();
 
-            $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
-                $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
-                    ? url(Storage::url($member->memberProfileImage->image_path))
-                    : null;
-                unset($member->memberProfileImage);
-                return $member;
-            });
+        $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
+            $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
+                ? url(Storage::url($member->memberProfileImage->image_path))
+                : null;
+            unset($member->memberProfileImage);
+            return $member;
+        });
         return response()->json([
             'status' => true,
             'data' => $getOrgAllMembers
@@ -97,9 +97,9 @@ class OrgMemberController extends Controller
             'data' => $thisMonthNewMemberCount
         ]);
     }
-    
 
-    public function search(Request $request)
+
+    public function X_search(Request $request)
     {
         $query = $request->input('query');
         $results = User::where('type', 'individual')
@@ -128,6 +128,50 @@ class OrgMemberController extends Controller
         ]);
     }
 
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $results = User::where('type', 'individual')
+            ->where(function ($q) use ($query) {
+                $q->where('azon_id', 'like', "%{$query}%")
+                    ->orWhere('name', 'like', "%{$query}%")
+                    ->orWhere('username', 'like', "%{$query}%")
+                    ->orWhere('email', 'like', "%{$query}%")
+                    ->orWhereRaw("CONCAT(dialing_codes.dialing_code, phone_numbers.phone_number) LIKE ?", ["%{$query}%"]);
+            })
+            ->leftJoin('addresses', 'addresses.user_id', '=', 'users.id')
+            ->leftJoin('phone_numbers', 'phone_numbers.user_id', '=', 'users.id')
+            ->leftJoin('dialing_codes', 'dialing_codes.id', '=', 'phone_numbers.dialing_code_id')
+            ->with('individualProfileImage')
+            ->select(
+                'users.*',
+                'addresses.city',
+                'dialing_codes.dialing_code',
+                'phone_numbers.phone_number'
+            )
+            ->get();
+
+        if ($results->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'User not found'], 404);
+        }
+
+        // Append full image URL to each user
+        $results->each(function ($user) {
+            if ($user->individualProfileImage) {
+                $user->image_url = $user->individualProfileImage->image_path
+                    ? url(Storage::url($user->individualProfileImage->image_path))
+                    : null;
+            }
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $results
+        ]);
+    }
+
+
     // Check if the individual is already a member of the organization, used in create function on member folder
     public function checkMember(Request $request)
     {
@@ -150,7 +194,8 @@ class OrgMemberController extends Controller
 
     public function create() {}
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $validated = $request->validate([
             'org_type_user_id' => 'required|exists:users,id',
             'individual_type_user_id' => 'required|exists:users,id',
