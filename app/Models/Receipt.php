@@ -13,7 +13,7 @@ class Receipt extends Model
         'invoice_id',
         'user_id',
         'amount_received',
-        'payment_method',
+        'gateway_type',
         'transaction_reference',
         'payment_date',
         'note',

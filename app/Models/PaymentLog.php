@@ -16,7 +16,7 @@ class PaymentLog extends Model
         'gateway',
         'transaction_id',
         'payment_status',
-        'payment_method',
+        'gateway_type',
         'currency',
         'amount_paid',
         'exchange_rate',

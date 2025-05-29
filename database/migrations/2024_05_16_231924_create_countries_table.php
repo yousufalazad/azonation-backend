@@ -18,7 +18,7 @@ return new class extends Migration
     {
         Schema::create('countries', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
-            $table->string('name')
+            $table->string('name', 30)
                 ->unique()
                 ->comment('Full country name (e.g., United States, France). Includes most recognised countries.');
 
