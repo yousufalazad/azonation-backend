@@ -113,6 +113,8 @@ class User extends Authenticatable
         return $this->hasOne(Currency::class, 'currency_id', 'id')->where('is_active', true);
     }
 
+    
+
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
