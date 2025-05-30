@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 
 
-
 class AuthController extends Controller
 {
     public function register(Request $request)
@@ -34,7 +33,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        if($request->country_id){
+        if ($request->country_id) {
             $user->userCountry()->create([
                 'user_id' => $user->id,
                 'country_id' => $request->country_id,
@@ -61,13 +60,23 @@ class AuthController extends Controller
             ]);
         }
 
-        $this->sendEmail($user);
+        //send email to user based on type
+        if ($user->type == 'individual') {
+            Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
+        } elseif ($user->type == 'organisation') {
+            Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
+        } elseif ($user->type == 'superadmin') {
+            Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
+        }
+
+        // $this->sendEmail($user);
         return response()->json([
             'status' => true,
             'message' => 'Registration successful',
             'data' => $user
         ]);
     }
+
     public function login(Request $request)
     {
         $request->validate([
@@ -96,16 +105,16 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
         ]);
     }
-    public function sendEmail($user)
-    {
-        if ($user->type == 'individual') {
-            Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
-        } elseif ($user->type == 'organisation') {
-            Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
-        } elseif ($user->type == 'superadmin') {
-            Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
-        }
-    }
+    // public function sendEmail($user)
+    // {
+    //     if ($user->type == 'individual') {
+    //         Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
+    //     } elseif ($user->type == 'organisation') {
+    //         Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
+    //     } elseif ($user->type == 'superadmin') {
+    //         Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
+    //     }
+    // }
     protected function success($message, $data = [], $status = 200)
     {
         return response()->json(data: [
