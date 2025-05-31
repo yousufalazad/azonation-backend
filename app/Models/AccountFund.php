@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AccountFund extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'name', 'status'];
+    protected $fillable = ['user_id', 'name', 'is_active'];
 
 
     protected $hidden = [
