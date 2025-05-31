@@ -23,7 +23,7 @@ return new class extends Migration
                 ->comment('The name of the fund.');
 
             // Fund status: 1 = Active, 0 = Inactive
-            $table->boolean('status')
+            $table->boolean('is_active')
                 ->default(1)
                 ->comment('Fund status: 1 = Active, 0 = Inactive.');
 

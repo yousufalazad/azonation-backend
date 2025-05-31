@@ -7,6 +7,10 @@ use App\Mail\SuperAdminUserRegisteredMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\UserCountry;
+use App\Models\ManagementSubscription;
+use App\Models\StorageSubscription;
+use App\Models\Fund;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\IndividualUserRegisteredMail;
@@ -57,6 +61,11 @@ class AuthController extends Controller
                 'subscription_status' => 'active',
                 'is_active' => 1,
                 'created_at' => now(),
+            ]);
+            $user->Fund->create([
+                'user_id' => $user->id,
+                'fund_name' => 'Default Fund',
+                'is_active' => 1,
             ]);
         }
 

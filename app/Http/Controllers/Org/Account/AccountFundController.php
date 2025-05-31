@@ -17,7 +17,7 @@ class AccountFundController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'status' => 'required|in:0,1',
+            'is_active' => 'required|in:0,1',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
@@ -25,11 +25,11 @@ class AccountFundController extends Controller
         try {
             $user_id = $request->user()->id;
             Log::info('Creating fund for user ID: ' . $user_id);
-            Log::info('Fund data: ', ['name' => $request->name, 'status' => $request->status]);
+            Log::info('Fund data: ', ['name' => $request->name, 'is_active' => $request->is_active]);
             $fund = AccountFund::create([
                 'user_id' => $user_id,
                 'name' => $request->name,
-                'status' => $request->status,
+                'is_active' => $request->is_active,
             ]);
             return response()->json(['status' => true, 'data' => $fund, 'message' => 'Fund created successfully.'], 201);
         } catch (\Exception $e) {
@@ -41,7 +41,7 @@ class AccountFundController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'status' => 'required|in:0,1',
+            'is_active' => 'required|in:0,1',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
@@ -52,7 +52,7 @@ class AccountFundController extends Controller
         }
         $fund->update([
             'name' => $request->name,
-            'status' => $request->status,
+            'is_active' => $request->is_active,
         ]);
         return response()->json(['status' => true, 'data' => $fund, 'message' => 'Fund updated successfully.'], 200);
     }
