@@ -27,4 +27,13 @@ class Event extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function documents()
+    {
+        return $this->hasMany(EventFile::class, 'event_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(EventImage::class, 'event_id');
+    }
 }

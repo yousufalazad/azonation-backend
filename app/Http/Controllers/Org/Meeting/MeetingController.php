@@ -2,12 +2,15 @@
 namespace App\Http\Controllers\Org\Meeting;
 use App\Http\Controllers\Controller;
 use App\Models\Meeting;
+use App\Models\MeetingFile;
+use App\Models\MeetingImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
 
 class MeetingController extends Controller
 {
@@ -96,17 +99,67 @@ class MeetingController extends Controller
         $input['user_id'] = $request->user()->id;
         $input['created_by'] = $request->user()->id;
         $meeting = Meeting::create($input);
+        
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $document) {
+                $documentPath = $document->storeAs(
+                    'org/meeting/file',
+                    Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+                    'public'
+                );
+                MeetingFile::create([
+                    'meeting_id' => $meeting->id,
+                    'file_path' => $documentPath,
+                    'file_name' => $document->getClientOriginalName(),
+                    'mime_type' => $document->getClientMimeType(),
+                    'file_size' => $document->getSize(),
+                    'is_public' => true,
+                    'is_active' => true,
+                ]);
+            }
+        }
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath = $image->storeAs(
+                    'org/meeting/image',
+                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                    'public'
+                );
+                MeetingImage::create([
+                    'meeting_id' => $meeting->id,
+                    'image_path' => $imagePath,
+                    'file_name' => $image->getClientOriginalName(),
+                    'mime_type' => $image->getClientMimeType(),
+                    'file_size' => $image->getSize(),
+                    'is_public' => true,
+                    'is_active' => true,
+                ]);
+            }
+        }
         return response()->json(['status' => true, 'message' => 'Meeting created successfully', 'data' => $meeting], 201);
     }
     public function show($id)
     {
         $meeting = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')
+            ->with(['images', 'documents'])
             ->leftJoin('conduct_types', 'meetings.conduct_type_id', '=', 'conduct_types.id')
             ->where('meetings.id', $id)
             ->first();
         if (!$meeting) {
             return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
         }
+        $meeting->images = $meeting->images->map(function ($image) {
+            $image->image_url = $image->image_path
+                ? url(Storage::url($image->image_path))
+                : null;
+            return $image;
+        });
+        $meeting->documents = $meeting->documents->map(function ($document) {
+            $document->document_url = $document->file_path
+                ? url(Storage::url($document->file_path))
+                : null;
+            return $document;
+        });
         return response()->json(['status' => true, 'data' => $meeting], 200);
     }
     public function update(Request $request, $id)
@@ -160,6 +213,43 @@ class MeetingController extends Controller
         $input = $request->all();
         $input['updated_by'] = $request->user()->id;
         $meeting->update($input);
+
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $document) {
+                $documentPath = $document->storeAs(
+                    'org/meeting/file',
+                    Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+                    'public'
+                );
+                MeetingFile::create([
+                    'meeting_id' => $meeting->id,
+                    'file_path' => $documentPath,
+                    'file_name' => $document->getClientOriginalName(),
+                    'mime_type' => $document->getClientMimeType(),
+                    'file_size' => $document->getSize(),
+                    'is_public' => true,
+                    'is_active' => true,
+                ]);
+            }
+        }
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath = $image->storeAs(
+                    'org/meeting/image',
+                    Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
+                    'public'
+                );
+                MeetingImage::create([
+                    'meeting_id' => $meeting->id,
+                    'image_path' => $imagePath,
+                    'file_name' => $image->getClientOriginalName(),
+                    'mime_type' => $image->getClientMimeType(),
+                    'file_size' => $image->getSize(),
+                    'is_public' => true,
+                    'is_active' => true,
+                ]);
+            }
+        }
         return response()->json(['status' => true, 'message' => 'Meeting updated successfully', 'data' => $meeting]);
     }
     public function destroy($id)

@@ -59,6 +59,15 @@ class Meeting extends Model
         'updated_at',
     ];
 
+    public function documents()
+    {
+        return $this->hasMany(MeetingFile::class, 'meeting_id');
+    }
+    public function images()
+    {
+        return $this->hasMany(MeetingImage::class, 'meeting_id');
+    }
+
     /**
      * Define the relationship to the user who created the meeting.
      */
