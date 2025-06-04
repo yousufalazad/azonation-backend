@@ -241,7 +241,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [MeetingController::class, 'index']);
         Route::get('/{id}', [MeetingController::class, 'show']);
         Route::post('/', [MeetingController::class, 'store']);
-        Route::put('/{id}', [MeetingController::class, 'update']);
+        Route::post('/{id}', [MeetingController::class, 'update']);
         Route::delete('/{id}', [MeetingController::class, 'destroy']);
     });
     Route::get('/org-next-meeting', [MeetingController::class, 'orgNextMeeting']);
@@ -273,7 +273,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/event/{eventId}', [EventController::class, 'getEvent']);
         Route::get('/', [EventController::class, 'index']);
         Route::post('/', [EventController::class, 'store']);
-        Route::put('/{eventId}', [EventController::class, 'update']);
+        Route::post('/{eventId}', [EventController::class, 'update']);
         Route::delete('/{eventId}', [EventController::class, 'destroy']);
     });
     Route::group(['prefix' => 'event-attendances'], function () {
@@ -302,7 +302,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProjectController::class, 'index']);
         Route::get('/{projectId}', [ProjectController::class, 'show']);
         Route::post('/', [ProjectController::class, 'store']);
-        Route::put('/{userId}', [ProjectController::class, 'update']);
+        Route::post('/{userId}', [ProjectController::class, 'update']);
         Route::delete('/{id}', [ProjectController::class, 'destroy']);
     });
     Route::group(['prefix' => 'project-attendances'], function () {

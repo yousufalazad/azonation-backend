@@ -10,7 +10,13 @@ class AccountFundController extends Controller
 {
     public function index()
     {
-        $funds = AccountFund::all();
+        $user_id = Auth()->user()->id;
+        $funds = AccountFund::where('user_id', $user_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        if ($funds->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'No funds found.'], 404);
+        }
         return response()->json(['status' => true, 'data' => $funds], 200);
     }
     public function store(Request $request)
