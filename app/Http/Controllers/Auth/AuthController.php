@@ -7,10 +7,6 @@ use App\Mail\SuperAdminUserRegisteredMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use App\Models\UserCountry;
-use App\Models\ManagementSubscription;
-use App\Models\StorageSubscription;
-use App\Models\Fund;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\IndividualUserRegisteredMail;
@@ -24,14 +20,18 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
+            'first_name' => 'nullable|string|max:50',
+            'last_name' => 'nullable|string|max:50',
+            'org_name' => 'nullable|string|max:100',
             'email' => 'required|string|email|max:100|unique:users',
             'country_id' => 'required|numeric|max:999',
-            'type' => 'required|string|max:12',
+            'type' => 'required|string|max:12|in:individual,organisation',
             'password' => 'required|string|min:8',
         ]);
         $user = User::create([
-            'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'org_name' => $request->org_name,
             'email' => $request->email,
             'type' => $request->type,
             'password' => Hash::make($request->password),
@@ -62,9 +62,9 @@ class AuthController extends Controller
                 'is_active' => 1,
                 'created_at' => now(),
             ]);
-            $user->Fund->create([
-                'user_id' => $user->id,
-                'fund_name' => 'Default Fund',
+            $user->accountFund()->create([
+                'user_id' => $user->user_id,
+                'name' => 'General Fund',
                 'is_active' => 1,
             ]);
         }
@@ -103,7 +103,10 @@ class AuthController extends Controller
         $token = $tokenResult->plainTextToken;
         return $this->success(message: 'Successfully logged in', data: [
             'id' => $user->id,
-            'name' => $user->name,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'org_name' => $user->org_name,
+            'country_name' => $user->userCountry ? $user->userCountry->country->name : null,
             'email' => $user->email,
             'type' => $user->type,
             'azon_id' => $user->azon_id,

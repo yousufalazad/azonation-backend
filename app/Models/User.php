@@ -17,7 +17,9 @@ class User extends Authenticatable
 
     protected $fillable = [
         'azon_id',
-        'name',
+        'first_name',
+        'last_name',
+        'org_name',
         'type',
         'shortname',
         'username',
@@ -79,6 +81,15 @@ class User extends Authenticatable
     {
         return $this->hasOne(ManagementSubscription::class, 'user_id', 'id')->where('is_active', true);
     }
+     public function storageSubscription()
+    {
+        return $this->hasOne(StorageSubscription::class, 'user_id', 'id')->where('is_active', true);
+    }
+
+     public function accountFund()
+    {
+        return $this->hasMany(AccountFund::class, 'user_id', 'id')->where('is_active', true);
+    }
 
     //for user subscription package
     public function managementPackage()
@@ -93,10 +104,7 @@ class User extends Authenticatable
         )->where('is_active', true);
     }
 
-    public function storageSubscription()
-    {
-        return $this->hasOne(StorageSubscription::class, 'user_id', 'id')->where('is_active', true);
-    }
+   
 
     public function managementAndStorageBilling()
     {
