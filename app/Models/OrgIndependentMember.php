@@ -11,11 +11,6 @@ class OrgIndependentMember extends Model
 
     protected $table = 'org_independent_members';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'user_id',
         'first_name',
