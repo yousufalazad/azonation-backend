@@ -22,7 +22,7 @@ class OrgMemberController extends Controller
     public function getOrgAllMemberName(Request $request)
     {
         $userId = Auth::id();
-        $getOrgAllMemberName = OrgMember::with(['individual:id,name', 'membershipType',])
+        $getOrgAllMemberName = OrgMember::with(['individual:id,first_name,last_name', 'membershipType',])
             ->where('org_type_user_id', $userId)
             ->where('is_active', '1')
             ->get();
@@ -35,7 +35,7 @@ class OrgMemberController extends Controller
     public function index(Request $request)
     {
         $userId = Auth::id();
-        $getOrgAllMembers = OrgMember::with(['individual:id,name,azon_id', 'membershipType', 'memberProfileImage'])
+        $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
             ->where('org_type_user_id', $userId)
             ->where('is_active', '1')
             ->get();
@@ -135,7 +135,8 @@ class OrgMemberController extends Controller
         $results = User::where('type', 'individual')
             ->where(function ($q) use ($query) {
                 $q->where('azon_id', 'like', "%{$query}%")
-                    ->orWhere('name', 'like', "%{$query}%")
+                    ->orWhere('first_name', 'like', "%{$query}%")
+                    ->orWhere('last_name', 'like', "%{$query}%")
                     ->orWhere('username', 'like', "%{$query}%")
                     ->orWhere('email', 'like', "%{$query}%")
                     ->orWhereRaw("CONCAT(dialing_codes.dialing_code, phone_numbers.phone_number) LIKE ?", ["%{$query}%"]);

@@ -103,9 +103,9 @@ class AuthController extends Controller
         $token = $tokenResult->plainTextToken;
         return $this->success(message: 'Successfully logged in', data: [
             'id' => $user->id,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'org_name' => $user->org_name,
+            'first_name' => $user->first_name ? $user->first_name : null,
+            'last_name' => $user->last_name ? $user->last_name : null,
+            'org_name' => $user->org_name ? $user->org_name : "issue here",
             'country_name' => $user->userCountry ? $user->userCountry->country->name : null,
             'email' => $user->email,
             'type' => $user->type,
