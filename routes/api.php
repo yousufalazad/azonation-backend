@@ -188,8 +188,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [OfficeDocumentController::class, 'destroy']);
     });
     Route::group(['prefix' => 'org-members'], function () {
-        Route::get('/list/{userId}', [OrgMemberController::class, 'getMemberList']);
         Route::get('/', [OrgMemberController::class, 'index']);
+        Route::get('/list/{userId}', [OrgMemberController::class, 'getMemberList']);
         Route::post('/search', [OrgMemberController::class, 'search']);
         Route::post('/create', [OrgMemberController::class, 'store']);
         Route::post('/check', [OrgMemberController::class, 'checkMember']);
