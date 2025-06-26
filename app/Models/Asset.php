@@ -13,6 +13,8 @@ class Asset extends Model
         'user_id',
         'name',
         'description',
+        'start_date',
+        'end_date',
         'quantity',
         'value_amount',
         'inkind_value',
