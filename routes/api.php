@@ -337,7 +337,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{assetId}', [AssetController::class, 'getAssetDetails']);
         Route::get('/', [AssetController::class, 'index']);
         Route::post('/', [AssetController::class, 'store']);
-        Route::put('/{id}', [AssetController::class, 'update']);
+        Route::post('/{id}', [AssetController::class, 'update']);
         Route::delete('/{id}', [AssetController::class, 'destroy']);
     });
     Route::group(['prefix' => 'privacy-setups'], function () {

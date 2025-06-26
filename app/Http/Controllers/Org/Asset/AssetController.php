@@ -21,16 +21,28 @@ class AssetController extends Controller
     {
         $user_id = $request->user()->id;
         $assets = DB::table('assets as a')
+            ->select(
+                'a.id as id',
+                'a.user_id as user_id',
+                'a.name as name',
+                'a.description as description',
+                'a.is_long_term as is_long_term',
+                'a.quantity as quantity',
+                'a.value_amount as value_amount',
+                'a.inkind_value as inkind_value',
+                'a.is_tangible as is_tangible',
+                'ps.name as privacy_setup_name',
+                'a.is_active as is_active',
+                'u.name as responsible_user_name',
+                'aal.assignment_start_date as assignment_start_date',
+                'aal.assignment_end_date as assignment_end_date',
+                'als.name as asset_lifecycle_statuses_name',
+                'aal.note as note'
+            )
             ->join('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
+            ->join('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
             ->join('users as u', 'aal.responsible_user_id', '=', 'u.id')
             ->join('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
-            ->select(
-                'a.name as name',
-                'a.quantity as quantity',
-                'u.first_name as responsible_user_first_name',
-                'u.last_name as responsible_user_last_name',
-                'als.name as asset_lifecycle_statuses_name',
-            )
             ->where('a.user_id', '=', $user_id)
             ->get();
         return response()->json(['status' => true, 'data' => $assets], 200);
@@ -43,6 +55,8 @@ class AssetController extends Controller
                 'a.user_id as user_id',
                 'a.name as name',
                 'a.description as description',
+                'a.start_date as start_date',
+                'a.end_date as end_date',
                 'a.is_long_term as is_long_term',
                 'a.quantity as quantity',
                 'a.value_amount as value_amount',
@@ -114,6 +128,8 @@ class AssetController extends Controller
             'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
             'is_long_term' => 'nullable|boolean',
             'quantity' => 'nullable|integer',
             'value_amount' => 'nullable|numeric',
@@ -192,6 +208,8 @@ class AssetController extends Controller
             'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
             'is_long_term' => 'nullable|boolean',
             'quantity' => 'nullable|integer',
             'value_amount' => 'nullable|numeric',
