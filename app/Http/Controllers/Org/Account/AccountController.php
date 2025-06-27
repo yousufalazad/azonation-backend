@@ -69,8 +69,9 @@ class AccountController extends Controller
     }
     public function store(Request $request)
     {
+        $userId = Auth::id();
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            // 'user_id' => 'required|exists:users,id',
             'fund_id' => 'required|exists:account_funds,id',
             'date' => 'required|date',
             'transaction_title' => 'required|string|max:100',
@@ -80,7 +81,7 @@ class AccountController extends Controller
         ]);
         try {
             $transaction = Account::create([
-                'user_id' => $validatedData['user_id'],
+                'user_id' => $userId,
                 'fund_id' => $validatedData['fund_id'],
                 'date' => $validatedData['date'],
                 'transaction_title' => $validatedData['transaction_title'],
