@@ -53,7 +53,7 @@ class OrgIndependentMemberController extends Controller
 
         $validatedData = $request->validate([
             'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
+            'last_name' => 'nullable|string|max:50',
             'email' => 'nullable|email',
             'mobile' => 'nullable|string|max:15',
             'address' => 'nullable|string|max:100',
