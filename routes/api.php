@@ -170,8 +170,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}', [SuccessStoryController::class, 'update']);
         Route::delete('/{id}', [SuccessStoryController::class, 'destroy']);
     });
-    Route::get('/reports', [OrgReportController::class, 'getIncomeReport']);
-    Route::get('/org-expense-reports', [OrgReportController::class, 'getExpenseReport']);
+   
     Route::get('/notifications/get-all/{userId}', [NotificationController::class, 'getNotifications']);
     Route::get('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
     Route::get('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
@@ -370,6 +369,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::group(['prefix' => 'receipts'], function () {
         Route::get('/org-receipts', [ReceiptController::class, 'orgIndex']);
     });
+
+    // Route::group(['prefix' => 'stripe'], function () {
+    //     Route::post('/create-checkout-session', [StripeController::class, 'createCheckoutSession']);
+    //     Route::post('/webhook', [StripeController::class, 'handleWebhook']);
+    //     Route::get('/checkout-success', [StripeController::class, 'checkoutSuccess']);
+    //     Route::get('/checkout-cancel', [StripeController::class, 'checkoutCancel']);
+    // });
+
+    Route::group(['prefix' => 'reports'], function () {
+        Route::get('/membership-growth', [OrgReportController::class, 'getMembershipGrowthReport']);
+    });
+     Route::get('/reports', [OrgReportController::class, 'getIncomeReport']);
+    Route::get('/org-expense-reports', [OrgReportController::class, 'getExpenseReport']);
+
+
     
 
 
