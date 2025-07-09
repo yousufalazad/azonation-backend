@@ -135,6 +135,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [AccountFundController::class, 'update']);
         Route::delete('/{id}', [AccountFundController::class, 'destroy']);
     });
+    Route::group(['prefix'=> 'accounts-transaction-currencies'], function () {
+        Route::get('/', [AccountController::class, 'getAccountsTransactionCurrency']);
+        Route::post('/', [AccountController::class, 'storeAccountsTransactionCurrency']);
+        Route::put('/{id}', [AccountController::class, 'updateAccountsTransactionCurrency']);
+    });
     Route::group(['prefix' => 'histories'], function () {
         Route::get('/', [HistoryController::class, 'index']);
         Route::get('/{id}', [HistoryController::class, 'show']);
