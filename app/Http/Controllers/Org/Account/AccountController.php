@@ -1,14 +1,16 @@
 <?php
+
 namespace App\Http\Controllers\Org\Account;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Account;
+use App\Models\AccountsTransactionCurrency;
 use App\Models\AccountTransactionImage;
 use App\Models\AccountTransactionFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
@@ -36,10 +38,10 @@ class AccountController extends Controller
         try {
             $userId = Auth::id();
             $transactions = Account::orderBy('date', 'desc')
-                ->with(['funds','images', 'documents'])
+                ->with(['funds', 'images', 'documents'])
                 ->where('user_id', $userId)
                 ->get();
-                
+
             $transactions = $transactions->map(function ($transaction) {
                 $transaction->images = $transaction->images->map(function ($image) {
                     $image->image_url = $image->file_path
@@ -225,6 +227,97 @@ class AccountController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.'
+            ], 500);
+        }
+    }
+
+    public function getAccountsTransactionCurrency(Request $request)
+    {
+        try {
+            $user_id = Auth::id();
+            $accountsTransactionCurrency = AccountsTransactionCurrency::where('user_id', $user_id)
+                ->with(['currency'])
+                ->first();
+
+            return response()->json([
+                'status' => true,
+                'data' => $accountsTransactionCurrency
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error fetching transaction currency: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching the transaction currency. Please try again.'
+            ], 500);
+        }
+    }
+
+    public function storeAccountsTransactionCurrency(Request $request)
+    {
+        try {
+            $user_id = Auth::id();
+
+            $validatedData = $request->validate([
+                'currency_id' => 'required|exists:currencies,id',
+                'is_active' => 'nullable|boolean'
+            ]);
+
+            // ✅ Optional: check if already exists to avoid duplicate insert
+            $exists = AccountsTransactionCurrency::where('user_id', $user_id)->exists();
+
+            if ($exists) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Transaction currency already exists for this user.'
+                ], 409); // Conflict
+            }
+
+            $validatedData['user_id'] = $user_id;
+
+            $accountsTransactionCurrency = AccountsTransactionCurrency::create($validatedData);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Transaction currency created successfully',
+                'data' => $accountsTransactionCurrency
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Error creating transaction currency: ' . $e->getMessage());
+
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while creating the transaction currency.',
+                'error' => $e->getMessage() // optional for debugging
+            ], 500);
+        }
+    }
+
+
+    public function updateAccountsTransactionCurrency(Request $request, $id)
+    {
+        try {
+            $validatedData = $request->validate([
+                'currency_id' => 'required|exists:currencies,id',
+                'is_active' => 'boolean'
+            ]);
+            $accountsTransactionCurrency = AccountsTransactionCurrency::where('id', $id)->first();
+            if (!$accountsTransactionCurrency) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Transaction currency not found.'
+                ], 404);
+            }
+            $accountsTransactionCurrency->update($validatedData);
+            return response()->json([
+                'status' => true,
+                'message' => 'Transaction currency updated successfully',
+                'data' => $accountsTransactionCurrency
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error updating transaction currency: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while updating the transaction currency. Please try again.'
             ], 500);
         }
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('user_id')
-                ->nullable()
+                ->unique()
                 ->constrained('users')
                 ->onDelete('cascade')
                 ->comment('Reference to the user associated with Organizations user ID'); // Organization's user ID
