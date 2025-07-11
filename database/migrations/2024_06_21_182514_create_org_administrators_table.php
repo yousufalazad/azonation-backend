@@ -12,18 +12,20 @@ return new class extends Migration
             $table->id();
 
             // Foreign key to 'users' table
-            $table->foreignId('org_user_id')
+            $table->foreignId('org_type_user_id')
                 ->constrained('users')
                 ->onDelete('cascade'); // Cascade on delete to remove associated addresses when user is deleted
 
             // Foreign key to 'users' table for individual users
-            $table->foreignId('individual_user_id')
+            $table->foreignId('individual_type_user_id')
                 ->constrained('users')
                 ->onDelete('cascade');
 
-            $table->date('from_date')->nullable();
+            $table->date('start_date')->nullable();
             $table->date('end_date')->nullable(); //Automatic date capture when change to new individual ID, can't editable (PUT not considerable), always new created
-            $table->tinyInteger('status')->nullable()->default(1);
+            $table->string('admin_note')->nullable(); // Admin notes, optional field
+            $table->boolean('is_primary')->nullable()->default(1); // Indicates if this is the primary administrator
+            $table->boolean('is_active')->nullable()->default(1);
             $table->timestamps();
         });
     }

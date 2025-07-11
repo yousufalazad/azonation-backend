@@ -11,9 +11,10 @@ return new class extends Migration
         Schema::create('payment_gateway_settings', function (Blueprint $table) {
             $table->id();
             $table->string('gateway_name'); // stripe, paypal, bkash, etc.
-            $table->boolean('is_active')->default(true);
+            
             $table->json('credentials'); // store API keys/secrets securely (encrypted if possible)
             $table->enum('environment', ['sandbox', 'live'])->default('sandbox');
+            $table->boolean('is_active')->default(true);            
             $table->timestamps();
         });
     }

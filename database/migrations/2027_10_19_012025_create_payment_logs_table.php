@@ -29,6 +29,9 @@ return new class extends Migration
                 ->onDelete('set null')
                 ->comment('User who made the payment, null if anonymous.');
 
+                 // Transaction ID from the payment gateway
+            $table->string('transaction_id')->nullable()->comment('Unique transaction ID from the payment gateway');
+
             // Store user details statically for historical reference
             $table->string('user_name')
                 ->nullable()
@@ -47,9 +50,7 @@ return new class extends Migration
                 ->comment('The exchange rate of the payer\'s currency against the payment currency at the time of the transaction.');
 
 
-            // Transaction ID from the payment gateway
-            $table->string('transaction_id')->nullable()->comment('Unique transaction ID from the payment gateway');
-
+           
             // Status of the payment process
             $table->enum('payment_status', ['initiated', 'completed', 'failed', 'pending', 'refunded'])
                 ->default('initiated')

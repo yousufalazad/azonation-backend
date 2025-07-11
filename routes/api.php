@@ -112,6 +112,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/', [PhoneNumberController::class, 'update']);
         Route::get('/dialing-codes', [PhoneNumberController::class, 'getAllDialingCodes']);
     });
+
+    
     Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
     Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
     Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
@@ -222,10 +224,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [OrgIndependentMemberController::class, 'destroy']);
     });
     Route::group(['prefix' => 'org-administrators'], function () {
-        Route::post('/', [OrgAdministratorController::class, 'index']);
+        Route::post('/org-administrators/check', [OrgAdministratorController::class, 'checkAdministratorExists']);
+        Route::get('/primary', [OrgAdministratorController::class, 'getPrimaryAdministrator']);
+        Route::get('/', [OrgAdministratorController::class, 'index']);
         Route::post('/', [OrgAdministratorController::class, 'store']);
-        Route::get('/{orgId}', [OrgAdministratorController::class, 'show']);
-        Route::put('/{orgId}', [OrgAdministratorController::class, 'update']);
+        Route::put('/{id}', [OrgAdministratorController::class, 'update']);
+        Route::delete('/{id}', [OrgAdministratorController::class, 'destroy']);
     });
     Route::group(['prefix' => 'committees'], function () {
         Route::get('/', [CommitteeController::class, 'index']);
