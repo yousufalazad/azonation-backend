@@ -4,25 +4,40 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 
 class OrgAdministrator extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'org_id',
-        'individual_id',
-        'from_date',
+        'org_type_user_id',
+        'individual_type_user_id',
+        'start_date',
         'end_date',
-        'status'
+        'admin_note',
+        'is_primary',
+        'is_active'
     ];
 
-    protected $hidden=[
+    protected $hidden = [
         'created_at',
         'updated_at'
     ];
 
-    public function individual()
+    public function individualUser()
     {
-        return $this->belongsTo(Individual::class, 'individual_id', 'id');
+        return $this->belongsTo(User::class, 'individual_type_user_id', 'id');
+    }
+
+    public function orgUser()
+    {
+        return $this->belongsTo(User::class, 'org_type_user_id', 'id');
+    }
+
+     public function administratorProfileImage(): BelongsTo
+    {
+        return $this->belongsTo(ProfileImage::class, 'individual_type_user_id', 'user_id');
     }
 }
