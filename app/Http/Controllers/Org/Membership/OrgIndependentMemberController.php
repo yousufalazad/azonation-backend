@@ -59,7 +59,7 @@ class OrgIndependentMemberController extends Controller
             'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
             'is_active' => 'nullable|boolean',
-            // 'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
         ]);
 
         $validatedData['user_id'] = $request->user()->id;
@@ -73,7 +73,7 @@ class OrgIndependentMemberController extends Controller
             $image = $request->file('image_path'); // ⬅️ Single file only
 
             $imagePath = $image->storeAs(
-                'org/independent-independentMember/image',
+                'org/independent_member/image',
                 Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                 'public'
             );
