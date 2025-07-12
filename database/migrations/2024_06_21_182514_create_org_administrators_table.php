@@ -20,10 +20,11 @@ return new class extends Migration
             $table->foreignId('individual_type_user_id')
                 ->constrained('users')
                 ->onDelete('cascade');
-
+            $table->string('first_name', 50)->nullable();
+            $table->string('last_name', 50)->nullable(); // Optional last name for the individual user
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable(); //Automatic date capture when change to new individual ID, can't editable (PUT not considerable), always new created
-            $table->string('admin_note')->nullable(); // Admin notes, optional field
+            $table->string('admin_note', 255)->nullable(); // Admin notes, optional field
             $table->boolean('is_primary')->nullable()->default(1); // Indicates if this is the primary administrator
             $table->boolean('is_active')->nullable()->default(1);
             $table->timestamps();

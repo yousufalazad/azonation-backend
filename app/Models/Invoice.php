@@ -37,6 +37,21 @@ class Invoice extends Model
         'updated_at'
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id', 'id');
+    }
+
+    public function administrator()
+    {
+        return $this->belongsTo(OrgAdministrator::class, 'user_id', 'org_type_user_id');
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -54,13 +69,5 @@ class Invoice extends Model
             // Prefix the random string with 'I' for the Invoice code
             $model->invoice_code = 'I' . $randomString;
         });
-    }
-
-    /**
-     * Relationship with the Order model
-     */
-    public function order()
-    {
-        return $this->belongsTo(Order::class, 'order_id');
     }
 }

@@ -115,6 +115,11 @@ class OrderController extends Controller
     }
     public function store(Request $request)
     {
+
+        // 'attn_org_administrator',
+        // 'billing_phone_number',
+        // 'billing_email',
+
         $validated = $request->validate([
             'user_id' => 'required|integer',
             'user_name' => 'required|string|max:255',
