@@ -35,8 +35,8 @@ return new class extends Migration
             ->comment('Optional detailed description of the transaction.');
                 
             // Foreign key referencing the account_funds table
-            $table->foreignId('fund_id')
-                ->constrained('account_funds')
+            $table->foreignId('accounts_fund_id')
+                ->constrained('accounts_funds')
                 ->onDelete('cascade')
                 ->comment('Reference to the specific fund associated with the transaction.');
                 
@@ -52,10 +52,10 @@ return new class extends Migration
             $table->decimal('amount', 15, 2)
                 ->comment('Total amount of the transaction.');
 
-            // Fund status: 1 = Active, 0 = Inactive
-            $table->boolean('status')
+            // Transaction status: 1 = Active, 0 = Inactive
+            $table->boolean('is_active')
             ->default(1)
-            ->comment('Status: 1 = Active, 0 = Inactive.');
+            ->comment('is_active: 1 = Active, 0 = Inactive.');
                   
             $table->timestamps();
         });

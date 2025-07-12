@@ -9,6 +9,7 @@ use Illuminate\Console\Scheduling\Schedule;
 class GenerateManagementAndStorageBillingOrder extends Command
 {
     protected $signature = 'generate:management-and-storage-billing-order'; // Command name
+    // Command name: php artisan generate:management-and-storage-billing-order
     protected $description = 'Generate management and storage billing order for all users'; // Command description
 
     public function handle()

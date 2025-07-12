@@ -100,7 +100,7 @@ class ManagementAndStorageBillingController extends Controller
             Log::info('Fetched users:', ['users' => $users->toArray()]);
             $userBill = $users->map(function ($user) {
                 $userId = $user->id;
-                $userName = $user->name;
+                $org_name = $user->first_name . ' ' . $user->last_name;
                 $billCalculationResponse = $this->billCalculation($userId);
                 $billCalculationData = $billCalculationResponse->getData(true);
                 $userCurrencyResponse = $this->getUserCurrency($userId);
@@ -112,7 +112,7 @@ class ManagementAndStorageBillingController extends Controller
                 try {
                     ManagementAndStorageBilling::create([
                         'user_id' => $userId,
-                        'user_name' => $userName,
+                        'org_name' => $org_name,
                         'service_month' => Carbon::now()->subMonth()->format('F'),
                         'service_year' => Carbon::now()->subMonth()->format('Y'),
                         'billing_month' => Carbon::now()->format('F'),

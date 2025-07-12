@@ -1,17 +1,20 @@
 <?php
-namespace App\Http\Controllers\Org\Account;
+namespace App\Http\Controllers\Org\Accounts;
 use App\Http\Controllers\Controller;
+
+use App\Models\AccountsFund;
 use Illuminate\Http\Request;
-use App\Models\AccountFund;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
-class AccountFundController extends Controller
+class AccountsFundController extends Controller
 {
     public function index()
     {
-        $user_id = Auth()->user()->id;
-        $funds = AccountFund::where('user_id', $user_id)
+        $user_id = Auth::id();
+        $funds = AccountsFund::where('user_id', $user_id)
+            ->where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->get();
         if ($funds->isEmpty()) {
@@ -23,7 +26,7 @@ class AccountFundController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'is_active' => 'required|in:0,1',
+            'is_active' => 'nullable|boolean|in:0,1',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
@@ -32,10 +35,10 @@ class AccountFundController extends Controller
             $user_id = $request->user()->id;
             Log::info('Creating fund for user ID: ' . $user_id);
             Log::info('Fund data: ', ['name' => $request->name, 'is_active' => $request->is_active]);
-            $fund = AccountFund::create([
+            $fund = AccountsFund::create([
                 'user_id' => $user_id,
                 'name' => $request->name,
-                'is_active' => $request->is_active,
+                'is_active' => $request->is_active ?? true, // Default to true if not provided
             ]);
             return response()->json(['status' => true, 'data' => $fund, 'message' => 'Fund created successfully.'], 201);
         } catch (\Exception $e) {
@@ -47,24 +50,24 @@ class AccountFundController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'is_active' => 'required|in:0,1',
+            'is_active' => 'nullable|boolean|in:0,1',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
-        $fund = AccountFund::find($id);
+        $fund = AccountsFund::find($id);
         if (!$fund) {
             return response()->json(['status' => false, 'message' => 'Fund not found.'], 404);
         }
         $fund->update([
             'name' => $request->name,
-            'is_active' => $request->is_active,
-        ]);
+            'is_active' => $request->is_active ?? true, // Default to true if not provided
+        ])->fresh(); // Refresh the model to get the updated data
         return response()->json(['status' => true, 'data' => $fund, 'message' => 'Fund updated successfully.'], 200);
     }
     public function destroy($id)
     {
-        $fund = AccountFund::find($id);
+        $fund = AccountsFund::find($id);
         if (!$fund) {
             return response()->json(['status' => false, 'message' => 'Fund not found.'], 404);
         }

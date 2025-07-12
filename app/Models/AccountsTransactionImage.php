@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class AccountTransactionImage extends Model
+class AccountsTransactionImage extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'account_id',   // ID of the related account
+        'accounts_id',   // ID of the related account
         'file_path',    // Path where the file is stored
         'file_name',    // Original name of the file
         'mime_type',    // MIME type (e.g., image/jpeg, application/pdf)

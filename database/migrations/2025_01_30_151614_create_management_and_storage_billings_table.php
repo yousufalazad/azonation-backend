@@ -24,7 +24,7 @@ return new class extends Migration
                 ->comment('References the user for billing. Null if user is deleted.');
 
             // Static user details for reference
-            $table->string('user_name', length: 255)->nullable()->comment('User name snapshot for billing reference');
+            $table->string('org_name', length: 255)->nullable()->comment('User name snapshot for billing reference');
 
             // $table->foreignId('product_id')
             //     ->constrained('products')

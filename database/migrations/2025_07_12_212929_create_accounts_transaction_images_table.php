@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('account_transaction_images', function (Blueprint $table) {
+        Schema::create('accounts_transaction_images', function (Blueprint $table) {
             $table->id();
-            
             // Foreign key referencing the office_records table
-            $table->foreignId('account_id')
+            $table->foreignId('accounts_id')
                 ->constrained('accounts')
                 ->onDelete('cascade')
-                ->comment('accounts primary id');
+                ->comment('Accounts primary id');
             
             $table->string('file_path')->comment('The storage path or URL of the document file');
             $table->string('file_name')->nullable()->comment('The original file name of the uploaded document');
@@ -36,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('account_transaction_images');
+        Schema::dropIfExists('accounts_transaction_images');
     }
 };

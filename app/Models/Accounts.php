@@ -2,21 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Account extends Model
+class Accounts extends Model
 {
-    use HasFactory;
     protected $fillable = [
         'transaction_code',
         'user_id',
         'transaction_title',
         'description',
-        'fund_id',
+        'accounts_fund_id',
         'date',
         'type',
-        'amount'
+        'amount',
+        'is_active'
     ];
     protected $hidden = [
         'created_at',
@@ -25,16 +24,16 @@ class Account extends Model
 
     public function funds()
     {
-        return $this->belongsTo(AccountFund::class, 'fund_id', 'id');
+        return $this->belongsTo(AccountsFund::class, 'accounts_fund_id', 'id');
     }
 
     public function documents()
     {
-        return $this->hasMany(AccountTransactionFile::class, 'account_id');
+        return $this->hasMany(AccountsTransactionFile::class, 'accounts_id');
     }
     public function images()
     {
-        return $this->hasMany(AccountTransactionImage::class, 'account_id');
+        return $this->hasMany(AccountsTransactionImage::class, 'accounts_id');
     }
 
     // Relationship to User

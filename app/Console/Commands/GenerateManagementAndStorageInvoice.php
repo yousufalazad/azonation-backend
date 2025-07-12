@@ -10,6 +10,7 @@ class GenerateManagementAndStorageInvoice extends Command
 {
     
     protected $signature = 'generate:management-and-storage-invoice';
+    //consol command: php artisan generate:management-and-storage-invoice
     protected $description = 'Generate management and Storage invoice for all organizations';
 
     

@@ -14,7 +14,7 @@ class Invoice extends Model
         'order_code',
         'order_id',
         'user_id',
-        'user_name',
+        'org_name',
         'description',
         'total_amount',
         'amount_paid',

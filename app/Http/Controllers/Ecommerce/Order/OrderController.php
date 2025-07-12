@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Ecommerce\Order;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\ManagementAndStorageBilling;
@@ -8,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderDetail;
 use App\Models\Product;
+use App\Models\RegionalTaxRate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -33,23 +36,44 @@ class OrderController extends Controller
                     if (!$user) {
                         continue;
                     }
+
+                    $subTotal = $billing->total_management_bill_amount + $billing->total_storage_bill_amount;
+                    $shippingCost = 0;
+                    $discountAmount = 0;
+                    $totalBeforeTax = $subTotal + $shippingCost - $discountAmount;
+
+                    $userCountryRegionId = $user->userCountry->country->region_id ?? null;
+                    if (!$userCountryRegionId) {
+                        Log::error('User country region ID not found for user: ' . $user->id);
+                        continue;
+                    }
+                    $taxRate = RegionalTaxRate::where('region_id', $userCountryRegionId)
+                        ->where('is_active', true)
+                        ->value('tax_rate') ?? 0; // Assuming tax_rate is a percentage, e.g., 15 for 15%
+                    
+                    $totalTax = ($taxRate > 0) ? ($totalBeforeTax * $taxRate / 100) : 0;
+                    $creditApplied = 0;
+                    $totalAmount = $totalBeforeTax + $totalTax - $creditApplied;
                     $order = Order::create([
                         'user_id'        => $billing->user_id,
                         'billing_code'   => $billing->billing_code,
                         'order_date'     => Carbon::now(),
-                        'user_name'      => $billing->user_name,
-                        'sub_total'      => $billing->total_management_bill_amount + $billing->total_storage_bill_amount,
-                        'discount_amount' => 0,
-                        'shipping_cost'  => 0,
-                        'total_tax'      => 0,
-                        'credit_applied' => 0,
-                        'total_amount'   => $billing->total_management_bill_amount + $billing->total_storage_bill_amount,
+                        'org_name'      => $billing->org_name,
+                        'sub_total'      => $subTotal,
+                        'shipping_cost'  =>  $shippingCost,
+                        'discount_amount' => $discountAmount,
+                        'credit_applied' => $creditApplied,
+                        'tax_rate'       => $taxRate,
+                        'total_tax'      => $totalTax,
+                        'total_amount'   => $totalAmount,
                         'discount_title' => null,
-                        'tax_rate'       => null,
                         'currency_code'  => $billing->currency_code,
                         'coupon_code'    => null,
                         'payment_method' => 'Bank Transfer',
                         'billing_address' => 'User registered billing address',
+                        'billing_phone'  => $user->phone ?? 'Unknown',
+                        'billing_email'  => $user->email ?? 'Unknown',
+                        'attn_org_administrator' => $user->first_name . ' ' . $user->last_name,
                         'user_country'   => $user->country ?? 'Unknown',
                         'user_region'    => $user->region ?? 'Unknown',
                         'is_active'      => true
@@ -117,12 +141,12 @@ class OrderController extends Controller
     {
 
         // 'attn_org_administrator',
-        // 'billing_phone_number',
+        // 'billing_phone',
         // 'billing_email',
 
         $validated = $request->validate([
             'user_id' => 'required|integer',
-            'user_name' => 'required|string|max:255',
+            'org_name' => 'required|string|max:255',
             'order_code' => 'required|string|max:255',
             'total_amount' => 'required|numeric',
             'is_active' => 'required|boolean',
@@ -144,7 +168,7 @@ class OrderController extends Controller
                 'billing_code'    => $request->billing_code ?? '',
                 'order_code'      => $request->order_code ?? '',
                 'order_date'      => $request->order_date ?? Carbon::now(),
-                'user_name'       => $request->user_name ?? '',
+                'org_name'       => $request->org_name ?? '',
                 'sub_total'       => $request->sub_total ?? 0,
                 'discount_amount' => $request->discount_amount ?? 0,
                 'shipping_cost'   => $request->shipping_cost ?? 0,
@@ -157,6 +181,9 @@ class OrderController extends Controller
                 'coupon_code'     => $request->coupon_code ?? '',
                 'payment_method'  => $request->payment_method ?? '',
                 'billing_address' => $request->billing_address ?? '',
+                'billing_phone' => $request->billing_phone_number ?? '',
+                'billing_email' => $request->billing_email ?? '',
+                'attn_org_administrator' => $request->attn_org_administrator ?? '',
                 'user_country'    => $request->user_country ?? '',
                 'user_region'     => $request->user_region ?? '',
                 'is_active'       => $request->is_active ?? 1,
@@ -217,7 +244,7 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|integer',
-            'user_name' => 'required|string|max:255',
+            'org_name' => 'required|string|max:255',
             'order_code' => 'required|string|max:255',
             'total_amount' => 'required|numeric',
             'is_active' => 'required|boolean',
@@ -253,7 +280,7 @@ class OrderController extends Controller
                 'billing_code'    => $request->billing_code ?? $order->billing_code,
                 'order_code'      => $request->order_code,
                 'order_date'      => $request->order_date ?? $order->order_date,
-                'user_name'       => $request->user_name,
+                'org_name'       => $request->org_name,
                 'sub_total'       => $request->sub_total ?? $order->sub_total,
                 'discount_amount' => $request->discount_amount ?? $order->discount_amount,
                 'shipping_cost'   => $request->shipping_cost ?? $order->shipping_cost,

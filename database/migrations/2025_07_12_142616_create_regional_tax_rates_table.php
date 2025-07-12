@@ -11,19 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tax_rates', function (Blueprint $table) {
+        Schema::create('regional_tax_rates', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('region_id')
                 ->constrained('regions')
                 ->cascadeOnDelete()
-                ->unique() 
+                ->unique()
                 ->comment('Foreign key referencing the regions table');
 
             $table->decimal('tax_rate', 3, 2)->comment('Tax rate for the region in percentage');
-            
-            $table->boolean('is_active')->default(true)->comment('Whether the regional tax rate is active or inactive');
 
+            $table->boolean('is_active')->default(true)->comment('Whether the regional tax rate is active or inactive');
             $table->timestamps();
         });
     }
@@ -33,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tax_rates');
+        Schema::dropIfExists('regional_tax_rates');
     }
 };
