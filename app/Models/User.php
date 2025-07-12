@@ -53,24 +53,43 @@ class User extends Authenticatable
         return $this->hasOne(ProfileImage::class, 'user_id', 'id');
     }
 
-    //for user price rate
-    public function userCountry()
+    public function orgProfileImage(): HasOne
     {
-        return $this->hasOne(UserCountry::class, 'user_id', 'id');
-    }
-    //for user price rate
-    public function country()
-    {
-        return $this->hasOne(Country::class, 'country_id', 'id');
+        return $this->hasOne(ProfileImage::class, 'id', 'org_type_user_id');
     }
 
-    //for user price rate
+
+    public function orgAdministrator()
+    {
+        return $this->hasOne(OrgAdministrator::class, 'org_type_user_id', 'id')->where('is_primary', 1);
+    }
+
+    public function address()
+    {
+        return $this->hasOne(Address::class, 'user_id', 'id');
+    }
+
+    public function phoneNumber()
+    {
+        return $this->hasOne(PhoneNumber::class, 'user_id', 'id');
+    }
+
+
+    public function userCountry()
+    {
+        return $this->hasOne(UserCountry::class, 'user_id', 'id')->where('is_active', true);
+    }
+
+    public function country()
+    {
+        return $this->hasOne(Country::class, 'id', 'user_id');
+    }
+
     public function countryRegion()
     {
         return $this->hasOne(CountryRegion::class, 'country_id', 'region_id');
     }
 
-    //for user price rate
     public function region()
     {
         return $this->belongsTo(Region::class, 'region_id', 'id');
@@ -81,12 +100,12 @@ class User extends Authenticatable
     {
         return $this->hasOne(ManagementSubscription::class, 'user_id', 'id')->where('is_active', true);
     }
-     public function storageSubscription()
+    public function storageSubscription()
     {
         return $this->hasOne(StorageSubscription::class, 'user_id', 'id')->where('is_active', true);
     }
 
-     public function accountFund()
+    public function accountFund()
     {
         return $this->hasMany(AccountFund::class, 'user_id', 'id')->where('is_active', true);
     }
@@ -104,14 +123,14 @@ class User extends Authenticatable
         )->where('is_active', true);
     }
 
-   
+
 
     public function managementAndStorageBilling()
     {
         return $this->hasMany(ManagementAndStorageBilling::class, 'user_id', 'id')->where('is_active', true);
     }
 
-    public function regionCurrency ()
+    public function regionCurrency()
     {
         return $this->hasOne(RegionCurrency::class, 'region_id', 'region_id')->where('is_active', true);
     }
@@ -121,7 +140,7 @@ class User extends Authenticatable
         return $this->hasOne(Currency::class, 'currency_id', 'id')->where('is_active', true);
     }
 
-    
+
 
     public function down()
     {

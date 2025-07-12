@@ -14,6 +14,8 @@ class OrgAdministrator extends Model
     protected $fillable = [
         'org_type_user_id',
         'individual_type_user_id',
+        'first_name',
+        'last_name',
         'start_date',
         'end_date',
         'admin_note',

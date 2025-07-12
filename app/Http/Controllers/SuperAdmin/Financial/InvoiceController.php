@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\SuperAdmin\Financial;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Invoice;
@@ -109,19 +111,68 @@ class InvoiceController extends Controller
         }
         return response()->json(['status' => true, 'data' => $invoice], 200);
     }
+
     public function show($invoiceId)
     {
         $invoice = Invoice::with([
             'order',
             'order.orderDetail',
             'order.orderItems',
-            'order.user',
         ])->find($invoiceId);
+
         if (!$invoice) {
             return response()->json(['status' => false, 'message' => 'Invoice not found'], 404);
         }
-        return response()->json(['status' => true, 'data' => $invoice], 200);
+
+        // Flatten response
+        $data = [
+            'org_administrator_full_name' => $invoice->order->attn_org_administrator ?? null,
+            'billing_address' => $invoice->order->billing_address ?? null,
+            'user_country' => $invoice->order->user_country ?? null,
+            'billing_phone' => $invoice->order->billing_phone ?? null,
+            'billing_email' => $invoice->order->billing_email ?? null,
+            'invoice' => $invoice
+        ];
+
+        return response()->json(['status' => true, 'data' => $data], 200);
     }
+
+    
+    public function show_with_user_current_address($invoiceId)
+    {
+        $invoice = Invoice::with([
+            'user.orgAdministrator.individualUser',
+            'user.address',
+            'user.phoneNumber.dialingCode',
+            'user.userCountry.country',
+            'order',
+            'order.orderDetail',
+            'order.orderItems',
+        ])->find($invoiceId);
+
+        if (!$invoice) {
+            return response()->json(['status' => false, 'message' => 'Invoice not found'], 404);
+        }
+
+        // Flatten response
+        $data = [
+            'administrator_first_name' => $invoice->user->orgAdministrator->individualUser->first_name ?? null,
+            'administrator_last_name' => $invoice->user->orgAdministrator->individualUser->last_name ?? null,
+            'address_line_one' => $invoice->user->address->address_line_one ?? null,
+            'address_line_two' => $invoice->user->address->address_line_two ?? null,
+            'address_city' => $invoice->user->address->city ?? null,
+            'address_state' => $invoice->user->address->state_or_region ?? null,
+            'address_postal_code' => $invoice->user->address->postal_code ?? null,
+            'org_country_name' => $invoice->user->userCountry->country->name ?? null,
+            'org_email' => $invoice->user->email,
+            'dialing_code' => $invoice->user->phoneNumber->dialingCode->dialing_code ?? null,
+            'org_phone_number' => $invoice->user->phoneNumber->phone_number ?? null,
+            'invoice' => $invoice
+        ];
+
+        return response()->json(['status' => true, 'data' => $data], 200);
+    }
+
     public function edit(Invoice $invoice) {}
     public function update(Request $request, $id)
     {

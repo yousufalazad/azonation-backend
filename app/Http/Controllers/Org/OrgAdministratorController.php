@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 
 class OrgAdministratorController extends Controller
 {
@@ -84,7 +85,6 @@ class OrgAdministratorController extends Controller
     {
         $validated = $request->validate([
             'individual_type_user_id' => 'required|exists:users,id',
-            // 'start_date' => 'nullable|date',
             'admin_note' => 'nullable|string',
             'is_primary' => 'nullable|boolean',
             'is_active' => 'nullable|boolean'
@@ -94,11 +94,21 @@ class OrgAdministratorController extends Controller
             $userId = Auth::id();
             $today = Carbon::now()->toDateString();
 
+            $previousAdministratorUserId = OrgAdministrator::where('org_type_user_id', $userId)
+            ->where('is_primary', 1)
+            ->first(['individual_type_user_id']);
+
+            // Fetch first_name and last_name of the previous administrator from users table
+            $previousAdministratorName = User::where('id', $previousAdministratorUserId->individual_type_user_id)
+                ->first(['first_name', 'last_name']);
+
             // Set is_primary = 0 and end_date = today for all current primary administrators only
             OrgAdministrator::where('org_type_user_id', $userId)
                 ->where('is_primary', 1)
                 ->update([
                     'is_primary' => 0,
+                    'first_name' => $previousAdministratorName->first_name ?? null,
+                    'last_name' => $previousAdministratorName->last_name ?? null,
                     'end_date' => $today
                 ]);
 

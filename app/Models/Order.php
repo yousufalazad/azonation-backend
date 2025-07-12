@@ -30,6 +30,9 @@ class Order extends Model
 
         'payment_method',
         'billing_address',
+        'attn_org_administrator',
+        'billing_phone_number',
+        'billing_email',
 
         'user_country',
         'user_region',
@@ -42,30 +45,24 @@ class Order extends Model
    
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    // public function invoice()
-    // {
-    //     return $this->hasOne(Invoice::class);
-    // }
+    
     public function invoice()
     {
-        return $this->hasOne(Invoice::class, 'order_id');
+        return $this->hasOne(Invoice::class, 'order_id', 'id');
     }
-    // public function orderDetails()
-    // {
-    //     return $this->hasMany(OrderDetail::class, 'order_id');
-    // }
+   
 
     public function orderDetail()
     {
-        return $this->hasOne(OrderDetail::class, 'order_id');
+        return $this->hasOne(OrderDetail::class, 'order_id', 'id');
     }
 
     public function orderItems()
     {
-        return $this->hasMany(OrderItem::class, 'order_id');
+        return $this->hasMany(OrderItem::class, 'order_id', 'id');
     }
 
    

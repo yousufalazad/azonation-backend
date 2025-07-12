@@ -21,4 +21,9 @@ class PhoneNumber extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function dialingCode()
+    {
+        return $this->belongsTo(DialingCode::class, 'dialing_code_id', 'id');
+    }
 }
