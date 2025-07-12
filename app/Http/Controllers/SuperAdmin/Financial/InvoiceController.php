@@ -53,7 +53,7 @@ class InvoiceController extends Controller
                 'billing_code'  => $order->billing_code,
                 'order_code'     => $order->order_code,
                 'user_id'        => $order->user_id,
-                'user_name'      => $order->user_name,
+                'org_name'      => $order->org_name,
                 'description'    => 'Invoice for order: ' . $order->order_code,
                 'total_amount'   => $order->total_amount,
                 'amount_paid'    => 0,
@@ -79,7 +79,7 @@ class InvoiceController extends Controller
             'order_code'     => 'nullable|string',
             'order_id'       => 'nullable|integer',
             'user_id'        => 'required|integer|exists:users,id',
-            'user_name'      => 'required|string',
+            'org_name'      => 'required|string',
             'description'    => 'nullable|string',
             'total_amount'   => 'required|numeric',
             'amount_paid'    => 'required|numeric',
@@ -131,6 +131,7 @@ class InvoiceController extends Controller
             'user_country' => $invoice->order->user_country ?? null,
             'billing_phone' => $invoice->order->billing_phone ?? null,
             'billing_email' => $invoice->order->billing_email ?? null,
+            'total_tax' => $invoice->order->total_tax ?? null,
             'invoice' => $invoice
         ];
 
@@ -182,7 +183,7 @@ class InvoiceController extends Controller
             'order_code'     => 'nullable|string',
             'order_id'       => 'nullable|integer',
             'user_id'        => 'required|integer|exists:users,id',
-            'user_name'      => 'required|string',
+            'org_name'      => 'required|string',
             'description'    => 'nullable|string',
             'total_amount'   => 'required|numeric',
             'amount_paid'    => 'required|numeric',

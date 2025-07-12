@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('account_transaction_files', function (Blueprint $table) {
+        Schema::create('accounts_transaction_files', function (Blueprint $table) {
             $table->id();
-            
             // Foreign key referencing the office_records table
-            $table->foreignId('account_id')
+            $table->foreignId('accounts_id')
                 ->constrained('accounts')
                 ->onDelete('cascade')
                 ->comment('accounts primary id');
@@ -36,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('account_transaction_files');
+        Schema::dropIfExists('accounts_transaction_files');
     }
 };

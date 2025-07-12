@@ -14,7 +14,7 @@ class Order extends Model
         'billing_code',
         'order_code',
         'order_date',
-        'user_name',
+        'org_name',
 
         'sub_total',
         'discount_amount',

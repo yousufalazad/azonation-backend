@@ -1,45 +1,29 @@
 <?php
 
-namespace App\Http\Controllers\Org\Account;
+namespace App\Http\Controllers\Org\Accounts;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Account;
+use App\Models\Accounts;
 use App\Models\AccountsTransactionCurrency;
-use App\Models\AccountTransactionImage;
-use App\Models\AccountTransactionFile;
+use App\Models\AccountsTransactionImage;
+use App\Models\AccountsTransactionFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
-class AccountController extends Controller
+class AccountsController extends Controller
 {
-    public function __getTransactions()
-    {
-        try {
-            $transactions = Account::orderBy('date', 'desc')
-                ->get();
-            return response()->json([
-                'status' => true,
-                'data' => $transactions
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Error fetching packages: ' . $e->getMessage());
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.'
-            ], 500);
-        }
-    }
     public function index()
     {
         try {
             $userId = Auth::id();
-            $transactions = Account::orderBy('date', 'desc')
-                ->with(['funds', 'images', 'documents'])
-                ->where('user_id', $userId)
+            $transactions = Accounts::where('user_id', $userId)
+                ->where('is_active', true)
+                ->with(['funds:id,name', 'images', 'documents'])
+                ->orderBy('date', 'desc')
                 ->get();
 
             $transactions = $transactions->map(function ($transaction) {
@@ -74,32 +58,35 @@ class AccountController extends Controller
         $userId = Auth::id();
         $validatedData = $request->validate([
             // 'user_id' => 'required|exists:users,id',
-            'fund_id' => 'required|exists:account_funds,id',
+            'accounts_fund_id' => 'required|exists:accounts_funds,id',
             'date' => 'required|date',
             'transaction_title' => 'required|string|max:100',
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:0',
-            'description' => 'string|max:255'
+            'description' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean'
         ]);
         try {
-            $transaction = Account::create([
+            $transaction = Accounts::create([
                 'user_id' => $userId,
-                'fund_id' => $validatedData['fund_id'],
+                'accounts_fund_id' => $validatedData['accounts_fund_id'],
                 'date' => $validatedData['date'],
                 'transaction_title' => $validatedData['transaction_title'],
                 'type' => $validatedData['type'],
                 'amount' => $validatedData['amount'],
-                'description' => $validatedData['description']
-            ]);
+                'description' => $validatedData['description'],
+                'is_active' => $validatedData['is_active'] ?? true, // Default to true if not provided
+            ])->fresh(); // Refresh the model to get the updated data
+
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/account/file',
+                        'org/accounts/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
-                    AccountTransactionFile::create([
-                        'account_id' => $transaction->id,
+                    AccountsTransactionFile::create([
+                        'accounts_id' => $transaction->id,
                         'file_path' => $documentPath,
                         'file_name' => $document->getClientOriginalName(),
                         'mime_type' => $document->getClientMimeType(),
@@ -112,12 +99,12 @@ class AccountController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/account/image',
+                        'org/accounts/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
-                    AccountTransactionImage::create([
-                        'account_id' => $transaction->id,
+                    AccountsTransactionImage::create([
+                        'accounts_id' => $transaction->id,
                         'file_path' => $imagePath,
                         'file_name' => $image->getClientOriginalName(),
                         'mime_type' => $image->getClientMimeType(),
@@ -144,15 +131,16 @@ class AccountController extends Controller
     {
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'fund_id' => 'required|exists:account_funds,id',
+            'accounts_fund_id' => 'required|exists:accounts_funds,id',
             'date' => 'required|date',
             'transaction_title' => 'required|string|max:100',
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:0',
-            'description' => 'string|max:255'
+            'description' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean'
         ]);
         try {
-            $transaction = Account::where('id', $id)->first();
+            $transaction = Accounts::where('id', $id)->first();
             if (!$transaction) {
                 return response()->json([
                     'status' => false,
@@ -160,15 +148,16 @@ class AccountController extends Controller
                 ], 404);
             }
             $transaction->update($validatedData);
+
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/account/doc',
+                        'org/accounts/doc',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
-                    AccountTransactionFile::create([
-                        'account_id' => $transaction->id,
+                    AccountsTransactionFile::create([
+                        'accounts_id' => $transaction->id,
                         'file_path' => $documentPath,
                         'file_name' => $document->getClientOriginalName(),
                         'mime_type' => $document->getClientMimeType(),
@@ -181,12 +170,12 @@ class AccountController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/account/image',
+                        'org/accounts/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
-                    AccountTransactionImage::create([
-                        'account_id' => $transaction->id,
+                    AccountsTransactionImage::create([
+                        'accounts_id' => $transaction->id,
                         'file_path' => $imagePath,
                         'file_name' => $image->getClientOriginalName(),
                         'mime_type' => $image->getClientMimeType(),
@@ -211,7 +200,7 @@ class AccountController extends Controller
     public function destroy($id)
     {
         try {
-            $transaction = Account::where('id', $id)->first();
+            $transaction = Accounts::where('id', $id)->first();
             if (!$transaction) {
                 return response()->json([
                     'status' => false,
@@ -219,6 +208,11 @@ class AccountController extends Controller
                 ], 404);
             }
             $transaction->delete();
+            // Optionally delete associated files and images
+            // AccountsTransactionFile::where('accounts_id', $id)->delete();
+            // AccountsTransactionImage::where('accounts_id', $id)->delete();
+            // Storage::deleteDirectory('public/org/accounts/file/' . $id);
+            // Storage::deleteDirectory('public/org/accounts/image/' . $id);
             return response()->json([
                 'status' => true,
                 'message' => 'Transaction deleted successfully'
@@ -291,7 +285,6 @@ class AccountController extends Controller
             ], 500);
         }
     }
-
 
     public function updateAccountsTransactionCurrency(Request $request, $id)
     {

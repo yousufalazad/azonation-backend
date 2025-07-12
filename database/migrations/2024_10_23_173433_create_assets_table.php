@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,18 +17,27 @@ return new class extends Migration
 
             // Foreign key to the 'users' table
             $table->foreignId('user_id')
-                ->constrained()
+                ->constrained('users')
                 ->onDelete('cascade')
                 ->comment('Org user for the asset.');
 
             // Name of the asset
             $table->string('name', 100)
+                ->nullable()
                 ->comment('Name of the asset.');
 
             // Short description of the asset
             $table->string('description', 255)
                 ->nullable()
                 ->comment('Short description of the asset.');
+
+            $table->date('start_date')
+                ->nullable()
+                ->comment('Start date of the asset.');
+                
+            $table->date('end_date')
+                ->nullable()
+                ->comment('End date of the asset, if applicable.');
 
             // Type of the asset
             $table->boolean('is_long_term')
@@ -58,7 +68,6 @@ return new class extends Migration
             //Foreign key referencing the privacy setups table (privacy settings)
             $table->foreignId('privacy_setup_id')
                 ->constrained('privacy_setups')
-                ->onDelete('cascade')
                 ->nullable()
                 ->comment('Privacy level of the asset (e.g., public, private, only members. etc).');
 

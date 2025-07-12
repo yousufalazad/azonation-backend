@@ -11,7 +11,7 @@ class ManagementAndStorageBilling extends Model
     protected $fillable = [
         //'billing_code',
         'user_id',
-        'user_name',
+        'org_name',
         'service_month',
         'service_year',
         'billing_month',

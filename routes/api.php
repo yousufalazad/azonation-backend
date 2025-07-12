@@ -15,8 +15,8 @@ use App\Http\Controllers\Ecommerce\Order\OrderItemController;
 use App\Http\Controllers\Ecommerce\Order\OrderController;
 use App\Http\Controllers\Ecommerce\Order\OrderDetailController;
 use App\Http\Controllers\Individual\IndividualController;
-use App\Http\Controllers\Org\Account\AccountController;
-use App\Http\Controllers\Org\Account\AccountFundController;
+use App\Http\Controllers\Org\Accounts\AccountsController;
+use App\Http\Controllers\Org\Accounts\AccountsFundController;
 use App\Http\Controllers\Org\Asset\AssetController;
 use App\Http\Controllers\Org\Asset\AssetLifecycleStatusController;
 use App\Http\Controllers\Org\Committee\CommitteeController;
@@ -59,7 +59,7 @@ use App\Http\Controllers\SuperAdmin\Settings\CountryRegionController;
 use App\Http\Controllers\SuperAdmin\Settings\CurrencyController;
 use App\Http\Controllers\SuperAdmin\Settings\DesignationController;
 use App\Http\Controllers\SuperAdmin\Settings\DialingCodeController;
-use App\Http\Controllers\SuperAdmin\Settings\LanguageListController;
+use App\Http\Controllers\SuperAdmin\Settings\LanguageController;
 use App\Http\Controllers\SuperAdmin\Settings\MembershipTypeController;
 use App\Http\Controllers\SuperAdmin\Settings\PrivacySetupController;
 use App\Http\Controllers\SuperAdmin\Settings\RegionController;
@@ -126,21 +126,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/current-month-bill-calculation', [EverydayMemberCountAndBillingController::class, 'currentMonthBillCalculation']);
     });
     Route::group(['prefix' => 'transactions'], function () {
-        Route::get('/', [AccountController::class, 'index']);
-        Route::post('/', [AccountController::class, 'store']);
-        Route::put('/{id}', [AccountController::class, 'update']);
-        Route::delete('/{id}', [AccountController::class, 'destroy']);
+        Route::get('/', [AccountsController::class, 'index']);
+        Route::post('/', [AccountsController::class, 'store']);
+        Route::put('/{id}', [AccountsController::class, 'update']);
+        Route::delete('/{id}', [AccountsController::class, 'destroy']);
     });
     Route::group(['prefix' => 'funds'], function () {
-        Route::get('/', [AccountFundController::class, 'index']);
-        Route::post('/', [AccountFundController::class, 'store']);
-        Route::put('/{id}', [AccountFundController::class, 'update']);
-        Route::delete('/{id}', [AccountFundController::class, 'destroy']);
+        Route::get('/', [AccountsFundController::class, 'index']);
+        Route::post('/', [AccountsFundController::class, 'store']);
+        Route::put('/{id}', [AccountsFundController::class, 'update']);
+        Route::delete('/{id}', [AccountsFundController::class, 'destroy']);
     });
     Route::group(['prefix'=> 'accounts-transaction-currencies'], function () {
-        Route::get('/', [AccountController::class, 'getAccountsTransactionCurrency']);
-        Route::post('/', [AccountController::class, 'storeAccountsTransactionCurrency']);
-        Route::put('/{id}', [AccountController::class, 'updateAccountsTransactionCurrency']);
+        Route::get('/', [AccountsController::class, 'getAccountsTransactionCurrency']);
+        Route::post('/', [AccountsController::class, 'storeAccountsTransactionCurrency']);
+        Route::put('/{id}', [AccountsController::class, 'updateAccountsTransactionCurrency']);
     });
     Route::group(['prefix' => 'histories'], function () {
         Route::get('/', [HistoryController::class, 'index']);
@@ -485,10 +485,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [DesignationController::class, 'destroy']);
     });
     Route::group(['prefix' => 'languages'], function () {
-        Route::get('/', [LanguageListController::class, 'index']);
-        Route::post('/', [LanguageListController::class, 'store']);
-        Route::put('/{id}', [LanguageListController::class, 'update']);
-        Route::delete('/{id}', [LanguageListController::class, 'destroy']);
+        Route::get('/', [LanguageController::class, 'index']);
+        Route::post('/', [LanguageController::class, 'store']);
+        Route::put('/{id}', [LanguageController::class, 'update']);
+        Route::delete('/{id}', [LanguageController::class, 'destroy']);
     });
     Route::group(['prefix' => 'time-zone-setups'], function () {
         Route::get('/', [TimeZoneSetupController::class, 'index']);

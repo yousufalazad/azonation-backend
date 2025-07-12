@@ -30,7 +30,7 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->comment('Reference to the user who owns the invoice');
 
-            $table->string('user_name', length: 100)->nullable()->comment('User name snapshot for billing reference');
+            $table->string('org_name', length: 100)->nullable()->comment('User name snapshot for billing reference');
 
             $table->string('description', length: 100)->nullable()->comment('Description for invoice reference');
 
