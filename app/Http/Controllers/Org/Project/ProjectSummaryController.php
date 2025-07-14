@@ -46,7 +46,7 @@ class ProjectSummaryController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'org_project_id' => 'required|integer',
+            'project_id' => 'required|integer',
             'total_member_participation' => 'nullable|integer',
             'total_guest_participation' => 'nullable|integer',
             'total_participation' => 'nullable|integer',
@@ -93,7 +93,7 @@ class ProjectSummaryController extends Controller
                 );
             }
             $projectSummary = new ProjectSummary();
-            $projectSummary->org_project_id = $request->org_project_id;
+            $projectSummary->project_id = $request->project_id;
             $projectSummary->total_member_participation = $request->total_member_participation;
             $projectSummary->total_guest_participation = $request->total_guest_participation;
             $projectSummary->total_participation = $request->total_participation;
@@ -169,7 +169,7 @@ class ProjectSummaryController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'org_project_id' => 'required|integer',
+            'project_id' => 'required|integer',
             'total_member_participation' => 'nullable|integer',
             'total_guest_participation' => 'nullable|integer',
             'total_participation' => 'nullable|integer',
@@ -203,7 +203,7 @@ class ProjectSummaryController extends Controller
         }
         try {
             $projectSummary = ProjectSummary::findOrFail($id);
-            $projectSummary->org_project_id = $request->org_project_id;
+            $projectSummary->project_id = $request->project_id;
             $projectSummary->total_member_participation = $request->total_member_participation;
             $projectSummary->total_guest_participation = $request->total_guest_participation;
             $projectSummary->total_participation = $request->total_participation;

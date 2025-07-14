@@ -10,7 +10,7 @@ class ProjectSummary extends Model
     use HasFactory;
 
     protected $fillable = [
-        'org_event_id',
+        'project_id',
         'total_member_participation',
         'total_guest_participation',
         'total_participation',

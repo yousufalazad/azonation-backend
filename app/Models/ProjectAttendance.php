@@ -10,8 +10,8 @@ class ProjectAttendance extends Model
     use HasFactory;
 
     protected $fillable = [
-        'org_project_id',
-        'user_id', 
+        'project_id',
+        'user_id',
         'attendance_type_id',
         // 'date', 
         'time', 

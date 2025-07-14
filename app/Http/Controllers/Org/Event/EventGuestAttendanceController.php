@@ -20,7 +20,7 @@ class EventGuestAttendanceController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'org_event_id' => 'required',
+            'event_id' => 'required',
             'guest_name' => 'required',
             'about_guest' => 'nullable',
             'attendance_type_id' => 'nullable',
@@ -35,7 +35,7 @@ class EventGuestAttendanceController extends Controller
         try {
             Log::info('Event Attendance data: ', ['attendance_type_id' => $request->attendance_type_id, 'user_id' => $request->user_id]);
             $eventAttendance = EventGuestAttendance::create([
-                'org_event_id' => $request->org_event_id,
+                'event_id' => $request->event_id,
                 'guest_name' => $request->guest_name,
                 'about_guest' => $request->about_guest,
                 'attendance_type_id' => $request->attendance_type_id,
@@ -55,7 +55,7 @@ class EventGuestAttendanceController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'org_event_id' => 'required',
+            'event_id' => 'required',
             'guest_name' => 'required',
             'about_guest' => 'nullable',
             'attendance_type_id' => 'nullable',
@@ -72,7 +72,7 @@ class EventGuestAttendanceController extends Controller
             return response()->json(['status' => false, 'message' => 'Event Attendance not found.'], 404);
         }
         $eventAttendance->update([
-            'org_event_id' => $request->org_event_id,
+            'event_id' => $request->event_id,
             'guest_name' => $request->guest_name,
             'about_guest' => $request->about_guest,
             'attendance_type_id' => $request->attendance_type_id,

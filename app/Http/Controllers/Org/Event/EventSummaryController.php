@@ -70,7 +70,7 @@ class EventSummaryController extends Controller
         try {
            
             $eventSummary = new EventSummary();
-            $eventSummary->org_event_id  = $request->event_id;
+            $eventSummary->event_id  = $request->event_id;
             $eventSummary->total_member_attendance = $request->total_member_attendance;
             $eventSummary->total_guest_attendance = $request->total_guest_attendance;
             $eventSummary->summary = $request->summary;
@@ -162,7 +162,7 @@ class EventSummaryController extends Controller
         try {
             $eventSummary = EventSummary::findOrFail($id);
             
-            $eventSummary->org_event_id  = $request->org_event_id;
+            $eventSummary->event_id  = $request->event_id;
             $eventSummary->total_member_attendance = $request->total_member_attendance;
             $eventSummary->total_guest_attendance = $request->total_guest_attendance;
             $eventSummary->summary = $request->summary;

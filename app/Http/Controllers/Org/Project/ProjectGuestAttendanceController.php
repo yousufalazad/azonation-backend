@@ -20,7 +20,7 @@ class ProjectGuestAttendanceController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'org_project_id' => 'required',
+            'project_id' => 'required',
             'guest_name' => 'required',
             'about_guest' => 'nullable',
             'attendance_type_id' => 'nullable',
@@ -35,7 +35,7 @@ class ProjectGuestAttendanceController extends Controller
         try {
             Log::info('project Attendance data: ', ['attendance_type_id' => $request->attendance_type_id, 'user_id' => $request->user_id]);
             $projectAttendance = ProjectGuestAttendance::create([
-                'org_project_id' => $request->org_project_id,
+                'project_id' => $request->project_id,
                 'guest_name' => $request->guest_name,
                 'about_guest' => $request->about_guest,
                 'attendance_type_id' => $request->attendance_type_id,
@@ -55,7 +55,7 @@ class ProjectGuestAttendanceController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'org_project_id' => 'required',
+            'project_id' => 'required',
             'guest_name' => 'required',
             'about_guest' => 'nullable',
             'attendance_type_id' => 'nullable',
@@ -72,7 +72,7 @@ class ProjectGuestAttendanceController extends Controller
             return response()->json(['status' => false, 'message' => 'project Attendance not found.'], 404);
         }
         $projectAttendance->update([
-            'org_project_id' => $request->org_project_id,
+            'project_id' => $request->project_id,
             'guest_name' => $request->guest_name,
             'about_guest' => $request->about_guest,
             'attendance_type_id' => $request->attendance_type_id,

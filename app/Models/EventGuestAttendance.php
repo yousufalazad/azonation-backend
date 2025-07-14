@@ -9,7 +9,7 @@ class EventGuestAttendance extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'org_event_id',
+        'event_id',
         'guest_name', 
         'about_guest', 
         'attendance_type_id', 
