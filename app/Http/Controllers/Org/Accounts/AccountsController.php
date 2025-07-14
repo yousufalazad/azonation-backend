@@ -130,7 +130,6 @@ class AccountsController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'accounts_fund_id' => 'required|exists:accounts_funds,id',
             'date' => 'required|date',
             'transaction_title' => 'required|string|max:100',
@@ -140,6 +139,7 @@ class AccountsController extends Controller
             'is_active' => 'nullable|boolean'
         ]);
         try {
+            $validatedData['user_id'] = Auth::id(); // Ensure user_id is set to the authenticated user
             $transaction = Accounts::where('id', $id)->first();
             if (!$transaction) {
                 return response()->json([

@@ -10,7 +10,7 @@ class ProjectGuestAttendance extends Model
     use HasFactory;
 
     protected $fillable = [
-        'org_project_id',
+        'project_id',
         'guest_name', 
         'about_guest', 
         'attendance_type_id', 
