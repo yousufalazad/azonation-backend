@@ -17,7 +17,7 @@ class MeetingAttendanceController extends Controller
     }
     public function index()
     {
-        $meetingAttendance = MeetingAttendance::select('meeting_attendances.*', 'users.name as user_name', 'attendance_types.name as attendance_types_name')
+        $meetingAttendance = MeetingAttendance::select('meeting_attendances.*', 'users.first_name as user_first_name', 'users.last_name as user_last_name', 'attendance_types.name as attendance_types_name')
             ->leftJoin('users', 'meeting_attendances.user_id', '=', 'users.id')
             ->leftJoin('attendance_types', 'meeting_attendances.attendance_type_id', '=', 'attendance_types.id')
             ->get();

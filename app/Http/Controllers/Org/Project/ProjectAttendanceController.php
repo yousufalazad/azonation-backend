@@ -16,7 +16,7 @@ class ProjectAttendanceController extends Controller
     }
     public function index()
     {
-        $projectAttendance = ProjectAttendance::select('project_attendances.*', 'users.name as user_name', 'attendance_types.name as attendance_types_name')
+        $projectAttendance = ProjectAttendance::select('project_attendances.*', 'users.first_name as user_first_name', 'users.last_name as user_last_name', 'attendance_types.name as attendance_types_name')
             ->leftJoin('users', 'project_attendances.user_id', '=', 'users.id')
             ->leftJoin('attendance_types', 'project_attendances.attendance_type_id', '=', 'attendance_types.id')
             ->get();

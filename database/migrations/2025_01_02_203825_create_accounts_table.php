@@ -21,7 +21,7 @@ return new class extends Migration
             
             // Foreign key referencing the users table (creator or responsible user)
             $table->foreignId('user_id')
-                ->constrained()
+                ->constrained('users')
                 ->onDelete('cascade')
                 ->comment('Reference to the user associated with the transaction.');
                 
