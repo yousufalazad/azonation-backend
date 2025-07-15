@@ -1,7 +1,9 @@
 <?php
-namespace App\Http\Controllers\SuperAdmin\PaymentGateway;
+
+namespace App\Http\Controllers\PaymentGateway;
 use App\Http\Controllers\Controller;
 
+use App\Models\StripePayment;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
@@ -9,9 +11,9 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use Carbon\Carbon;
 
-class StripeController extends Controller
+class StripePaymentController extends Controller
 {
-    public function stripeCreateCheckoutSession(Request $request, $invoiceId)
+     public function stripeCreateCheckoutSession(Request $request, $invoiceId)
     {
         $invoice = Invoice::findOrFail($invoiceId);
         
@@ -117,5 +119,4 @@ class StripeController extends Controller
 
     return response()->json(['status' => 'success']);
 }
-
 }
