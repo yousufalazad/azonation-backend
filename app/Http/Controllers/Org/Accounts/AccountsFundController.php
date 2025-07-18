@@ -12,8 +12,8 @@ class AccountsFundController extends Controller
 {
     public function index()
     {
-        $user_id = Auth::id();
-        $funds = AccountsFund::where('user_id', $user_id)
+        $userId = Auth::id();
+        $funds = AccountsFund::where('user_id', $userId)
             ->where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -32,11 +32,9 @@ class AccountsFundController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
         try {
-            $user_id = $request->user()->id;
-            Log::info('Creating fund for user ID: ' . $user_id);
-            Log::info('Fund data: ', ['name' => $request->name, 'is_active' => $request->is_active]);
+            $userId = Auth::id();
             $fund = AccountsFund::create([
-                'user_id' => $user_id,
+                'user_id' => $userId,
                 'name' => $request->name,
                 'is_active' => $request->is_active ?? true, // Default to true if not provided
             ]);
