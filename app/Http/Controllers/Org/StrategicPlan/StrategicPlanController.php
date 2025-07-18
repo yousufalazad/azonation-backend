@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class StrategicPlanController extends Controller
@@ -17,7 +18,11 @@ class StrategicPlanController extends Controller
     public function index()
     {
         try {
-            $strategicPlans = StrategicPlan::with('user:id,name')->get();
+            $userId = Auth::id();
+            $strategicPlans = StrategicPlan::where('user_id', $userId)
+                ->where('is_active', true)
+                ->with(['documents', 'images'])
+                ->get();
             return response()->json([
                 'status' => true,
                 'data' => $strategicPlans
@@ -56,9 +61,9 @@ class StrategicPlanController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'plan' => 'required|string|max:5000',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'status' => 'required|boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'is_active' => 'nullable|boolean',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -73,7 +78,7 @@ class StrategicPlanController extends Controller
                 'plan' => $request->plan,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
-                'status' => $request->status,
+                'is_active' => $request->is_active,
             ]);
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
@@ -128,9 +133,9 @@ class StrategicPlanController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'plan' => 'required|string|max:5000',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'status' => 'required|boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'is_active' => 'nullable|boolean',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -145,7 +150,7 @@ class StrategicPlanController extends Controller
                 'plan' => $request->plan,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
-                'status' => $request->status,
+                'is_active' => $request->is_active,
             ]);
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {

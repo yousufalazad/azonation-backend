@@ -28,9 +28,14 @@ return new class extends Migration
                 ->comment('Individual ID');
 
             // Founder details
-            $table->string('name')->nullable(); // name of the founder
+            //$table->string('name')->nullable(); // need to change to full_name
+            $table->string('full_name', 100)->nullable(); // name of the founder
+            $table->string('email', 50)->nullable(); // email of the founder
+            $table->string('mobile', 20)->nullable(); // mobile number of the founder
+            $table->string('address', 255)->nullable(); // address of the founder
+            $table->string('note', 255)->nullable(); // additional notes about the founder
+            
             $table->string('designation')->nullable(); // designation of the founder
-
             $table->boolean('is_active')->default(true); // Active status
 
             $table->timestamps(); // Created at and updated at timestamps

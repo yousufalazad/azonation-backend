@@ -12,8 +12,13 @@ class Founder extends Model
     protected $fillable = [
         'user_id',
         'founder_user_id', // individual type user_id
-        'name',
-        'designation'
+        'full_name',
+        'designation',
+        'email',
+        'mobile',
+        'address',
+        'note',
+        'is_active',
     ];
 
     protected $hidden = [
