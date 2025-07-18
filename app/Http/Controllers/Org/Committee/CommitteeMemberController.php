@@ -14,7 +14,7 @@ class CommitteeMemberController extends Controller
         $committeeMember = CommitteeMember::where('committee_id', $id)
             ->leftJoin('users', 'committee_members.user_id', '=', 'users.id')
             ->leftJoin('designations', 'committee_members.designation_id', '=', 'designations.id')
-            ->select('committee_members.*', 'users.name as user_name', 'designations.name as designation_name')
+            ->select('committee_members.*', 'users.first_name',  'users.last_name', 'designations.name as designation_name')
             ->get();
         if ($committeeMember->isEmpty()) {
             return response()->json(['status' => false, 'message' => 'No committee members found'], 404);
@@ -24,14 +24,15 @@ class CommitteeMemberController extends Controller
     public function create() {}
     public function store(Request $request)
     {
+        // dd($request->all());exit;
         $validator = Validator::make($request->all(), [
-            'committee_id' => 'required|integer',
-            'user_id' => 'required|integer',
-            'designation_id' => 'required|integer',
+            'committee_id' => 'required',
+            'user_id' => 'required',
+            'designation_id' => 'required',
             'start_date' => 'nullable',
             'end_date' => 'nullable',
             'note' => 'nullable',
-            'status' => 'nullable',
+            'is_active' => 'nullable',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -47,7 +48,7 @@ class CommitteeMemberController extends Controller
             $committeeMember->start_date = $request->start_date;
             $committeeMember->end_date = $request->end_date;
             $committeeMember->note = $request->note;
-            $committeeMember->status = $request->status;
+            $committeeMember->is_active = $request->is_active;           
             $committeeMember->save();
             return response()->json([
                 'status' => true,
@@ -82,7 +83,7 @@ class CommitteeMemberController extends Controller
             'start_date' => 'nullable',
             'end_date' => 'nullable',
             'note' => 'nullable',
-            'status' => 'required',
+            'is_active' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -98,7 +99,7 @@ class CommitteeMemberController extends Controller
             $committeeMember->start_date = $request->start_date;
             $committeeMember->end_date = $request->end_date;
             $committeeMember->note = $request->note;
-            $committeeMember->status = $request->status;
+            $committeeMember->is_active = $request->is_active;
             $committeeMember->save();
             return response()->json([
                 'status' => true,

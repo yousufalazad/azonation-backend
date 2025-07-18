@@ -15,6 +15,7 @@ class OrgReportController extends Controller
     public function getIncomeReport(Request $request)
     {
         try {
+            $userId = Auth::id();
             $endDate = Carbon::now();
             $startDate = $endDate->copy()->subMonths(11)->startOfMonth();
 
@@ -25,6 +26,7 @@ class OrgReportController extends Controller
                     DB::raw('SUM(amount) as total_income')
                 )
                 ->where('type', 'income') // Assuming 'type' is the column that differentiates income and expense
+                ->where('user_id', $userId) // Filter by the authenticated user's ID
                 ->whereBetween('date', [$startDate, $endDate])
                 ->groupBy('year', 'month')
                 ->orderByRaw('YEAR(date) ASC, MONTH(date) ASC')
@@ -46,6 +48,7 @@ class OrgReportController extends Controller
     public function getExpenseReport(Request $request)
     {
         try {
+            $userId = Auth::id();
             // Get first day of 11 months ago and last day of current month
             $startDate = Carbon::now()->subMonths(11)->startOfMonth();
             $endDate = Carbon::now()->endOfMonth();
@@ -57,6 +60,7 @@ class OrgReportController extends Controller
                     DB::raw('SUM(amount) as total_expense')
                 )
                 ->where('type', 'expense')
+                ->where('user_id', $userId) // Filter by the authenticated user's ID
                 ->whereBetween('date', [$startDate, $endDate])
                 ->groupBy('year', 'month')
                 ->orderByRaw('YEAR(date), MONTH(date)')

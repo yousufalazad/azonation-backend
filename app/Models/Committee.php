@@ -15,7 +15,7 @@ class Committee extends Model
         'start_date',
         'end_date',
         'note',
-        'status'
+        'is_active'
     ];
 
     protected $hidden=[

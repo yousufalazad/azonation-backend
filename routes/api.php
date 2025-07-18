@@ -590,10 +590,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [OrderDetailController::class, 'update']);
         Route::delete('/{id}', [OrderDetailController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'payment-gateway-stripe'], function () {
-        Route::get('/checkout/{invoiceId}', [StripeController::class, 'stripeCreateCheckoutSession']);
-        Route::get('/success/{invoiceId}', [StripeController::class, 'stripeSuccess']);
-        Route::get('/cancel/{invoiceId}', [StripeController::class, 'stripeCancel']);
-        Route::post('/webhook', [StripeController::class, 'stripeHandleWebhook']);
-    });
+    // Route::group(['prefix' => 'payment-gateway-stripe'], function () {
+    //     Route::get('/checkout/{invoiceId}', [StripeController::class, 'stripeCreateCheckoutSession']);
+    //     Route::get('/success/{invoiceId}', [StripeController::class, 'stripeSuccess']);
+    //     Route::get('/cancel/{invoiceId}', [StripeController::class, 'stripeCancel']);
+    //     Route::post('/webhook', [StripeController::class, 'stripeHandleWebhook']);
+    // });
 });

@@ -31,7 +31,7 @@ class CommitteeController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'note' => $request->note,
-            'status' => $request->status,
+            'is_active' => $request->is_active,
         ]);
         return response()->json(['message' => 'Committee created successfully', 200]);
     }
@@ -45,7 +45,7 @@ class CommitteeController extends Controller
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'note' => 'nullable|string',
-            'status' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
         ]);
         $committee = Committee::where('id', $id)->first();
         if (!$committee) {
@@ -57,7 +57,7 @@ class CommitteeController extends Controller
             'start_date' => $validatedData['start_date'],
             'end_date' => $validatedData['end_date'],
             'note' => $validatedData['note'],
-            'status' => $validatedData['status'],
+            'is_active' => $validatedData['is_active'],
         ]);
         return response()->json(['message' => 'Committee updated successfully'], 200);
     }

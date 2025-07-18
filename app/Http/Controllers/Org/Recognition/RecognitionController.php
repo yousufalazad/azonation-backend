@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Org\Recognition;
+
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
@@ -18,7 +20,9 @@ class RecognitionController extends Controller
     public function index()
     {
         try {
-            $recognitions = Recognition::get();
+            $recognitions = Recognition::select('recognitions.*', 'privacy_setups.name as privacy_name')
+                ->leftJoin('privacy_setups', 'recognitions.privacy_setup_id', '=', 'privacy_setups.id')
+                ->get();
             return response()->json([
                 'status' => true,
                 'data' => $recognitions
@@ -53,12 +57,13 @@ class RecognitionController extends Controller
     }
     public function store(Request $request)
     {
+        // dd($request->all());exit;
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable',
             'recognition_date' => 'required|date',
             'privacy_setup_id' => 'required|integer',
-            'is_active' => 'required|integer',
+            'is_active' => 'nullable',
         ]);
         try {
             $recognition = Recognition::create([

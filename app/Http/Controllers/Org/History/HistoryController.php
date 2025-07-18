@@ -18,7 +18,10 @@ class HistoryController extends Controller
     public function index()
     {
         try {
-            $histories = History::with('user:id,name')->get();
+            $userId = Auth::id();
+            $histories = History::where('user_id', $userId)
+            ->where('is_active', true)
+            ->get();
             return response()->json([
                 'status' => true,
                 'data' => $histories,

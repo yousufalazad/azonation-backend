@@ -18,7 +18,8 @@ class SuccessStoryController extends Controller
     public function index()
     {
         try {
-            $stories = SuccessStory::with('user:id,name')->get();
+            $userId = Auth::id();
+            $stories = SuccessStory::where('user_id', $userId)->get();
             return response()->json([
                 'status' => true,
                 'data' => $stories
@@ -58,14 +59,14 @@ class SuccessStoryController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'story' => 'required|string',
-            'status' => 'required|boolean',
+            'is_active' => 'null|boolean',
         ]);
         try {
             $story = new SuccessStory();
             $story->user_id = Auth::id();
             $story->title = $validatedData['title'];
             $story->story = $validatedData['story'];
-            $story->status = $validatedData['status'];
+            $story->is_active = $validatedData['is_active'];
             // dd($story);exit;
             $story->save();
             if ($request->hasFile('documents')) {
@@ -120,7 +121,7 @@ class SuccessStoryController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'story' => 'required|string',
-            'status' => 'required|boolean',
+            'is_active' => 'nullable|boolean',
         ]);
         try {
             $story = SuccessStory::find($id);
@@ -132,7 +133,7 @@ class SuccessStoryController extends Controller
             }
             $story->title = $validated['title'];
             $story->story = $validated['story'];
-            $story->status = $validated['status'];
+            $story->is_active = $validated['is_active'];
             $story->save();
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
