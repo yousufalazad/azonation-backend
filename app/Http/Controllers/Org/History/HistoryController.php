@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Org\History;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\History;
@@ -18,10 +20,9 @@ class HistoryController extends Controller
     public function index()
     {
         try {
-            $userId = Auth::id();
-            $histories = History::where('user_id', $userId)
-            ->where('is_active', true)
-            ->get();
+            $histories = History::select('histories.*', 'privacy_setups.name as privacy_name')
+                ->leftJoin('privacy_setups', 'histories.privacy_setup_id', '=', 'privacy_setups.id')
+                ->with('user:id,name')->get();
             return response()->json([
                 'status' => true,
                 'data' => $histories,
@@ -36,7 +37,9 @@ class HistoryController extends Controller
     }
     public function show($id)
     {
-        $history = History::where('id', $id)
+        $history = History::select('histories.*', 'privacy_setups.name as privacy_name')
+            ->leftJoin('privacy_setups', 'histories.privacy_setup_id', '=', 'privacy_setups.id')
+            ->where('histories.id', $id)
             ->with(['images', 'documents'])
             ->first();
         if (!$history) {
@@ -63,6 +66,7 @@ class HistoryController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'history' => 'required|string|max:20000',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
             'is_active' => 'required|integer',
             'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:100240',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
@@ -71,6 +75,7 @@ class HistoryController extends Controller
         $history->user_id = Auth::id();
         $history->title = $validatedData['title'];
         $history->history = $validatedData['history'];
+        $history->privacy_setup_id = $validatedData['privacy_setup_id'] ?? null;
         $history->is_active = $validatedData['is_active'];
         $history->save();
         if ($request->hasFile('documents')) {
@@ -120,6 +125,7 @@ class HistoryController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'history' => 'required|string|max:20000',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
             'is_active' => 'required|integer',
         ]);
         try {
@@ -127,6 +133,7 @@ class HistoryController extends Controller
             $history->update([
                 'title' => $validatedData['title'],
                 'history' => $validatedData['history'],
+                'privacy_setup_id' => $validatedData['privacy_setup_id'] ?? null,
                 'is_active' => $validatedData['is_active'],
             ]);
             if ($request->hasFile('documents')) {

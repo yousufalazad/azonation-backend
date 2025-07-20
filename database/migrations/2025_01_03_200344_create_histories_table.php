@@ -22,7 +22,11 @@ return new class extends Migration
             // Organization history details
             $table->string('title', 255)->nullable(); // Limit title to 255 characters
             $table->longText('history')->nullable(); // Detailed history of the organization, limit handled in app layer
-
+            
+            $table->foreignId('privacy_setup_id')
+                ->nullable()
+                ->constrained('privacy_setups')
+                ->onDelete('cascade');
             // Status of the history record
             $table->boolean('is_active')->default(true)->comment('0 = inactive, 1 = active');
 

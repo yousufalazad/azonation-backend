@@ -28,6 +28,10 @@ return new class extends Migration
             $table->date('start_date')->nullable(); // Start date of the plan
             $table->date('end_date')->nullable(); // End date of the plan
 
+            $table->foreignId('privacy_setup_id')
+                ->nullable()
+                ->constrained('privacy_setups')
+                ->onDelete('cascade');
             // Status of the strategic plan
             $table->boolean('status')->default(1)->comment('0 = inactive, 1 = active');
 
