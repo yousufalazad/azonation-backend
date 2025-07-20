@@ -13,12 +13,21 @@ class History extends Model
         'user_id',
         'title',
         'history',
-        'is_active'
+        'privacy_setup_id',
+        'is_active',
+        'image',
+        'document'
     ];
     protected $hidden = [
         'created_at',
         'updated_at'
     ];
+
+    // If you have a relationship to the user model
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function documents()
     {

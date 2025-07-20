@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Org\SuccessStory;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\SuccessStory;
@@ -18,8 +20,9 @@ class SuccessStoryController extends Controller
     public function index()
     {
         try {
-            $userId = Auth::id();
-            $stories = SuccessStory::where('user_id', $userId)->get();
+            $stories = SuccessStory::select('success_stories.*', 'privacy_setups.name as privacy_name')
+                ->leftJoin('privacy_setups', 'success_stories.privacy_setup_id', '=', 'privacy_setups.id')
+                ->with('user:id,name')->get();
             return response()->json([
                 'status' => true,
                 'data' => $stories
@@ -33,7 +36,9 @@ class SuccessStoryController extends Controller
     }
     public function show($id)
     {
-        $successStory =  SuccessStory::where('id', $id)
+        $successStory =  SuccessStory::select('success_stories.*', 'privacy_setups.name as privacy_name')
+            ->leftJoin('privacy_setups', 'success_stories.privacy_setup_id', '=', 'privacy_setups.id')
+            ->where('success_stories.id', $id)
             ->with(['images', 'documents'])
             ->first();
         if (!$successStory) {
@@ -59,14 +64,16 @@ class SuccessStoryController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'story' => 'required|string',
-            'is_active' => 'null|boolean',
+            'status' => 'required|boolean',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
         ]);
         try {
             $story = new SuccessStory();
             $story->user_id = Auth::id();
             $story->title = $validatedData['title'];
             $story->story = $validatedData['story'];
-            $story->is_active = $validatedData['is_active'];
+            $story->status = $validatedData['status'];
+            $story->privacy_setup_id = $validatedData['privacy_setup_id'] ?? null;
             // dd($story);exit;
             $story->save();
             if ($request->hasFile('documents')) {
@@ -121,7 +128,8 @@ class SuccessStoryController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'story' => 'required|string',
-            'is_active' => 'nullable|boolean',
+            'status' => 'required|boolean',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
         ]);
         try {
             $story = SuccessStory::find($id);
@@ -133,7 +141,8 @@ class SuccessStoryController extends Controller
             }
             $story->title = $validated['title'];
             $story->story = $validated['story'];
-            $story->is_active = $validated['is_active'];
+            $story->status = $validated['status'];
+            $story->privacy_setup_id = $validated['privacy_setup_id'] ?? null;
             $story->save();
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {

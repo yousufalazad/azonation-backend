@@ -14,7 +14,9 @@ class StrategicPlan extends Model
         'plan',
         'start_date',
         'end_date',
-        'is_active'
+        'privacy_setup_id',
+        'status',
+        'image'
     ];
 
     protected $hidden = [
@@ -22,6 +24,12 @@ class StrategicPlan extends Model
         'updated_at'
     ];
     
+    // If you have a relationship to the user model
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function documents()
     {
         return $this->hasMany(StrategicPlanFile::class, 'strategic_plan_id');

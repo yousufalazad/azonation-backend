@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Org\StrategicPlan;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\StrategicPlan;
@@ -10,7 +12,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class StrategicPlanController extends Controller
@@ -18,11 +19,9 @@ class StrategicPlanController extends Controller
     public function index()
     {
         try {
-            $userId = Auth::id();
-            $strategicPlans = StrategicPlan::where('user_id', $userId)
-                ->where('is_active', true)
-                ->with(['documents', 'images'])
-                ->get();
+            $strategicPlans = StrategicPlan::select('strategic_plans.*', 'privacy_setups.name as privacy_name')
+                ->leftJoin('privacy_setups', 'strategic_plans.privacy_setup_id', '=', 'privacy_setups.id')
+                ->with('user:id,name')->get();
             return response()->json([
                 'status' => true,
                 'data' => $strategicPlans
@@ -34,10 +33,12 @@ class StrategicPlanController extends Controller
             ], 500);
         }
     }
-    
+
     public function show($id)
     {
-        $strategicPlan =  StrategicPlan::where('id', $id)
+        $strategicPlan =  StrategicPlan::select('strategic_plans.*', 'privacy_setups.name as privacy_name')
+            ->leftJoin('privacy_setups', 'strategic_plans.privacy_setup_id', '=', 'privacy_setups.id')
+            ->where('strategic_plans.id', $id)
             ->first();
         if (!$strategicPlan) {
             return response()->json(['status' => false, 'message' => 'Strategic Plan not found'], 404);
@@ -60,10 +61,11 @@ class StrategicPlanController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'plan' => 'required|string|max:5000',
+            'plan' => 'nullable|string|max:5000',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'is_active' => 'nullable|boolean',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
+            'status' => 'required|boolean',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -78,7 +80,8 @@ class StrategicPlanController extends Controller
                 'plan' => $request->plan,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
-                'is_active' => $request->is_active,
+                'privacy_setup_id' => $request->privacy_setup_id,
+                'status' => $request->status,
             ]);
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
@@ -130,12 +133,14 @@ class StrategicPlanController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // dd($request->all());exit;
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'plan' => 'required|string|max:5000',
+            'plan' => 'nullable|string|max:5000',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'is_active' => 'nullable|boolean',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
+            'status' => 'required|boolean',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -146,11 +151,13 @@ class StrategicPlanController extends Controller
         try {
             $strategicPlan = StrategicPlan::findOrFail($id);
             $strategicPlan->update([
+                'user_id' => $request->user()->id,
                 'title' => $request->title,
                 'plan' => $request->plan,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
-                'is_active' => $request->is_active,
+                'privacy_setup_id' => $request->privacy_setup_id,
+                'status' => $request->status,
             ]);
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {

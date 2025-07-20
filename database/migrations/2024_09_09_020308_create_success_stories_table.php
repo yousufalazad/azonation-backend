@@ -22,8 +22,11 @@ return new class extends Migration
 
             // Success story details
             $table->string('title')->nullable(); // Optional title for the success story
-            $table->string('image')->nullable(); // Optional image for the success story
             $table->longText('story')->nullable(); // Detailed success story content
+            $table->foreignId('privacy_setup_id')
+                ->nullable()
+                ->constrained('privacy_setups')
+                ->onDelete('cascade');
 
             // Status of the success story
             $table->boolean('status')->default(1)->comment('0 = inactive, 1 = active');
