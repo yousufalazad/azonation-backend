@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GatewayCredential;
+use App\Models\AlipayPayment;
 use Illuminate\Http\Request;
 
-class GatewayCredentialController extends Controller
+class AlipayPaymentController extends Controller
 {
-
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
         //
@@ -26,17 +28,13 @@ class GatewayCredentialController extends Controller
      */
     public function store(Request $request)
     {
-        // Encrypt
-        $encrypted = Crypt::encryptString('your-secret-key');
-
-        // Decrypt
-        $decrypted = Crypt::decryptString($encrypted);
+        //
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(GatewayCredential $gatewayCredential)
+    public function show(AlipayPayment $alipayPayment)
     {
         //
     }
@@ -44,7 +42,7 @@ class GatewayCredentialController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(GatewayCredential $gatewayCredential)
+    public function edit(AlipayPayment $alipayPayment)
     {
         //
     }
@@ -52,7 +50,7 @@ class GatewayCredentialController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, GatewayCredential $gatewayCredential)
+    public function update(Request $request, AlipayPayment $alipayPayment)
     {
         //
     }
@@ -60,7 +58,7 @@ class GatewayCredentialController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(GatewayCredential $gatewayCredential)
+    public function destroy(AlipayPayment $alipayPayment)
     {
         //
     }
