@@ -47,7 +47,7 @@ return new class extends Migration
                 ->comment('The date and time the payment was completed.');
 
             // Payment gateway used for the transaction
-            $table->enum('gateway_type', ['stripe', 'paypal', 'sslcommerze', 'bkash', 'rocket', 'upi', 'alipay', 'applepay', 'gpay'])
+            $table->enum('gateway_type', ['stripe', 'paypal', 'sslcommerze', 'bkash', 'rocket', 'upi', 'alipay'])
                 ->comment('The payment gateway used for the transaction, e.g., Stripe, PayPal.');
 
             //payment method
