@@ -111,3 +111,71 @@ return new class extends Migration
         Schema::dropIfExists('payments');
     }
 };
+
+// User / Payer info
+            $table->unsignedBigInteger('user_id')->nullable()->index(); // Supports guest checkout
+            $table->string('payer_name')->nullable();
+            $table->string('payer_email')->nullable();
+
+            // General payment info
+            $table->string('gateway_name'); // paypal, stripe, sslcommerz, razorpay, etc.
+            $table->string('gateway_payment_id')->nullable(); // External payment ID
+            $table->string('payment_method')->nullable(); // card, upi, paypal, etc.
+            $table->string('status')->nullable(); // completed, failed, pending, refunded
+            $table->decimal('amount', 10, 2)->default(0);
+            $table->decimal('refund_amount', 10, 2)->nullable();
+            $table->string('currency', 10)->default('USD');
+
+            $table->string('description')->nullable(); // Optional description
+            $table->string('source_type')->nullable(); // manual, gateway, offline, etc.
+            $table->timestamp('payment_time')->nullable();
+            $table->boolean('is_refunded')->default(false);
+
+            // Linkable to system modules (optional)
+            $table->unsignedBigInteger('invoice_id')->nullable();
+            $table->unsignedBigInteger('subscription_id')->nullable();
+
+            // For webhook correlation
+            $table->uuid('external_reference_id')->nullable(); // e.g., order_id or merchant_ref
+
+            // Soft delete & timestamps
+            $table->softDeletes();
+            $table->timestamps();
+
+            // Indexes
+            $table->index(['gateway_name', 'gateway_payment_id']);
+            $table->index(['status', 'currency']);
+
+             // User / Payer info
+            $table->unsignedBigInteger('user_id')->nullable()->index(); // Supports guest checkout
+            $table->string('payer_name')->nullable();
+            $table->string('payer_email')->nullable();
+
+            // General payment info
+            $table->string('gateway_name'); // paypal, stripe, sslcommerz, razorpay, etc.
+            $table->string('gateway_payment_id')->nullable(); // External payment ID
+            $table->string('payment_method')->nullable(); // card, upi, paypal, etc.
+            $table->string('status')->nullable(); // completed, failed, pending, refunded
+            $table->decimal('amount', 10, 2)->default(0);
+            $table->decimal('refund_amount', 10, 2)->nullable();
+            $table->string('currency', 10)->default('USD');
+
+            $table->string('description')->nullable(); // Optional description
+            $table->string('source_type')->nullable(); // manual, gateway, offline, etc.
+            $table->timestamp('payment_time')->nullable();
+            $table->boolean('is_refunded')->default(false);
+
+            // Linkable to system modules (optional)
+            $table->unsignedBigInteger('invoice_id')->nullable();
+            $table->unsignedBigInteger('subscription_id')->nullable();
+
+            // For webhook correlation
+            $table->uuid('external_reference_id')->nullable(); // e.g., order_id or merchant_ref
+
+            // Soft delete & timestamps
+            $table->softDeletes();
+            $table->timestamps();
+
+            // Indexes
+            $table->index(['gateway_name', 'gateway_payment_id']);
+            $table->index(['status', 'currency']);

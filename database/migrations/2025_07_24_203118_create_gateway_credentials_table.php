@@ -12,8 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('gateway_credentials', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->string('gateway'); // e.g., stripe, paypal, sslcommerz
+            $table->string('key'); // Encrypted API key
+            $table->string('secret'); // Encrypted API secret
+
+            $table->json('extra_config')->nullable(); // Optional JSON metadata (e.g., webhook secret, environment)
+
+            $table->string('status')->default('active'); // active, inactive
         });
     }
 
