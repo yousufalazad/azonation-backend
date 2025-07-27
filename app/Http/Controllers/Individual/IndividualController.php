@@ -72,11 +72,11 @@ class IndividualController extends Controller
             // Fetch committee list for this org
             $committees = $committeesByOrg[$orgId] ?? collect();
 
-// Fetch responsible assets
-        $responsibleAssets = Asset::where('user_id', $orgId)
-            ->where('responsible_user_id', $userId)
-            ->select('id', 'name', 'quantity', 'responsible_user_id', 'start_date')
-            ->get();
+            // Fetch responsible assets
+            $responsibleAssets = Asset::where('user_id', $orgId)
+                ->where('responsible_user_id', $userId)
+                ->select('id', 'name', 'quantity', 'responsible_user_id', 'start_date')
+                ->get();
 
             $orgWiseData[] = [
                 'org_id' => $orgId,
@@ -107,96 +107,96 @@ class IndividualController extends Controller
         ]);
     }
     public function summary()
-{
-    $userId = Auth::id();
+    {
+        $userId = Auth::id();
 
-    // Get connected organisations
-    $connectedOrgs = OrgMember::where('individual_type_user_id', $userId)
-        ->leftJoin('users as connectedorg', 'org_members.org_type_user_id', '=', 'connectedorg.id')
-        ->select('org_members.*', 'connectedorg.org_name')
-        ->get();
-
-    $hasConnection = $connectedOrgs->isNotEmpty();
-
-    // Group committee memberships by organisation
-    $committeesByOrg = CommitteeMember::with('committee:id,name,user_id,start_date')
-        ->where('user_id', $userId)
-        ->get()
-        ->groupBy(fn($item) => optional($item->committee)->user_id);
-
-    // Get all active asset assignments for the user
-    $assignmentLogs = \App\Models\AssetAssignmentLog::with(['asset:id,name,quantity,user_id'])
-        ->where('responsible_user_id', $userId)
-        ->where('is_active', true)
-        ->get()
-        ->groupBy(fn($log) => optional($log->asset)->user_id); // Group by organisation ID
-
-    $orgWiseData = [];
-
-    foreach ($connectedOrgs as $org) {
-        $orgId = $org->org_type_user_id;
-
-        // Fetch next 2 meetings
-        $nextMeetings = Meeting::where('user_id', $orgId)
-            ->where('date', '>=', now())
-            ->orderBy('date')
-            ->limit(2)
+        // Get connected organisations
+        $connectedOrgs = OrgMember::where('individual_type_user_id', $userId)
+            ->leftJoin('users as connectedorg', 'org_members.org_type_user_id', '=', 'connectedorg.id')
+            ->select('org_members.*', 'connectedorg.org_name')
             ->get();
 
-        // Fetch next 2 events
-        $upcomingEvents = Event::where('user_id', $orgId)
-            ->where('date', '>=', now())
-            ->orderBy('date')
-            ->limit(2)
-            ->get();
+        $hasConnection = $connectedOrgs->isNotEmpty();
 
-        // Fetch next 2 projects
-        $upcomingProjects = Project::where('user_id', $orgId)
-            ->where('start_date', '>=', now())
-            ->orderBy('start_date')
-            ->limit(2)
-            ->get();
+        // Group committee memberships by organisation
+        $committeesByOrg = CommitteeMember::with('committee:id,name,user_id,start_date')
+            ->where('user_id', $userId)
+            ->get()
+            ->groupBy(fn($item) => optional($item->committee)->user_id);
 
-        // Committees
-        $committees = $committeesByOrg[$orgId] ?? collect();
+        // Get all active asset assignments for the user
+        $assignmentLogs = \App\Models\AssetAssignmentLog::with(['asset:id,name,quantity,user_id'])
+            ->where('responsible_user_id', $userId)
+            ->where('is_active', true)
+            ->get()
+            ->groupBy(fn($log) => optional($log->asset)->user_id); // Group by organisation ID
 
-        // Responsible Assets
-        $responsibleAssets = $assignmentLogs[$orgId] ?? collect();
-        $assetsFormatted = $responsibleAssets->map(function ($log) {
-            return [
-                'asset_id' => $log->asset_id,
-                'name' => optional($log->asset)->name,
-                'quantity' => optional($log->asset)->quantity,
-                'assignment_start_date' => $log->assignment_start_date,
-            ];
-        })->values();
+        $orgWiseData = [];
 
-        $orgWiseData[] = [
-            'org_id' => $orgId,
-            'org_name' => $org->org_name,
-            'next_meetings' => $nextMeetings,
-            'upcoming_events' => $upcomingEvents,
-            'upcoming_projects' => $upcomingProjects,
-            'committees' => $committees->map(function ($member) {
+        foreach ($connectedOrgs as $org) {
+            $orgId = $org->org_type_user_id;
+
+            // Fetch next 2 meetings
+            $nextMeetings = Meeting::where('user_id', $orgId)
+                ->where('date', '>=', now())
+                ->orderBy('date')
+                ->limit(2)
+                ->get();
+
+            // Fetch next 2 events
+            $upcomingEvents = Event::where('user_id', $orgId)
+                ->where('date', '>=', now())
+                ->orderBy('date')
+                ->limit(2)
+                ->get();
+
+            // Fetch next 2 projects
+            $upcomingProjects = Project::where('user_id', $orgId)
+                ->where('start_date', '>=', now())
+                ->orderBy('start_date')
+                ->limit(2)
+                ->get();
+
+            // Committees
+            $committees = $committeesByOrg[$orgId] ?? collect();
+
+            // Responsible Assets
+            $responsibleAssets = $assignmentLogs[$orgId] ?? collect();
+            $assetsFormatted = $responsibleAssets->map(function ($log) {
                 return [
-                    'id' => optional($member->committee)->id,
-                    'name' => optional($member->committee)->name,
-                    'start_date' => optional($member->committee)->start_date,
+                    'asset_id' => $log->asset_id,
+                    'name' => optional($log->asset)->name,
+                    'quantity' => optional($log->asset)->quantity,
+                    'assignment_start_date' => $log->assignment_start_date,
                 ];
-            })->values(),
-            'responsible_assets' => $assetsFormatted,
-        ];
-    }
+            })->values();
 
-    return response()->json([
-        'status' => true,
-        'data' => [
-            'has_connection' => $hasConnection,
-            'connected_organisations' => $connectedOrgs,
-            'organisations_summary' => $orgWiseData,
-        ],
-    ]);
-}
+            $orgWiseData[] = [
+                'org_id' => $orgId,
+                'org_name' => $org->org_name,
+                'next_meetings' => $nextMeetings,
+                'upcoming_events' => $upcomingEvents,
+                'upcoming_projects' => $upcomingProjects,
+                'committees' => $committees->map(function ($member) {
+                    return [
+                        'id' => optional($member->committee)->id,
+                        'name' => optional($member->committee)->name,
+                        'start_date' => optional($member->committee)->start_date,
+                    ];
+                })->values(),
+                'responsible_assets' => $assetsFormatted,
+            ];
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'has_connection' => $hasConnection,
+                'connected_organisations' => $connectedOrgs,
+                'organisations_summary' => $orgWiseData,
+            ],
+        ]);
+    }
 
 
 
@@ -315,6 +315,53 @@ class IndividualController extends Controller
             'data' => $result
         ]);
     }
+
+    public function assets()
+    {
+        $userId = Auth::id();
+
+        // Get connected organisations
+        $orgs = OrgMember::with('org:id,org_name')
+            ->where('individual_type_user_id', $userId)
+            ->get();
+
+        $orgIds = $orgs->pluck('org_type_user_id');
+
+        // Fetch all active assignment logs for the user with asset info
+        $assignmentLogs = AssetAssignmentLog::with(['asset:id,name,quantity,user_id'])
+            ->where('responsible_user_id', $userId)
+            ->where('is_active', true)
+            ->get();
+
+        // Group logs by organisation ID (asset.user_id)
+        $assetsByOrg = $assignmentLogs->groupBy(fn($log) => optional($log->asset)->user_id);
+
+        // Map response per organisation
+        $result = $orgs->map(function ($org) use ($assetsByOrg) {
+            $orgId = $org->org_type_user_id;
+
+            $assets = $assetsByOrg[$orgId] ?? collect();
+
+            return [
+                'org_id' => $orgId,
+                'org_name' => optional($org->org)->org_name ?? 'Unknown',
+                'assets' => $assets->map(function ($log) {
+                    return [
+                        'asset_id' => $log->asset_id,
+                        'name' => optional($log->asset)->name,
+                        'quantity' => optional($log->asset)->quantity,
+                        'assignment_start_date' => $log->assignment_start_date,
+                    ];
+                })->values(),
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $result,
+        ]);
+    }
+
 
 
     protected function success($message, $data = [], $status = 200)

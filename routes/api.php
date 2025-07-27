@@ -410,6 +410,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('auth:sanctum')->get('/individual/events', [IndividualController::class, 'events']);
     Route::middleware('auth:sanctum')->get('/individual/committees', [IndividualController::class, 'committees']);
     Route::middleware('auth:sanctum')->get('/individual/projects', [IndividualController::class, 'projects']);
+    Route::middleware('auth:sanctum')->get('/individual/assets', [IndividualController::class, 'assets']);
 
     // ----------------------- Superadmin --------------------
     Route::get('/super_admin_profile_image/{userId}', [SuperAdminController::class, 'getSuperAdminProfileImage']);
