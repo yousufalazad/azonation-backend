@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('payment_webhook_logs', function (Blueprint $table) {
             $table->id();
-            // Optional linkage to the payment
-            $table->unsignedBigInteger('payment_id')->nullable()->index();
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            
 
             // General info
             $table->string('gateway_name'); // e.g., stripe, paypal, sslcommerz
@@ -24,6 +28,17 @@ return new class extends Migration
             $table->timestamp('received_at')->useCurrent();
             $table->string('ip_address')->nullable(); // IP from where webhook came
             $table->string('user_agent')->nullable(); // Optional
+            $table->boolean('is_chargeback')->default(false)
+                ->comment('Indicates if the payment has been charged back by the payer.');
+
+            $table->string('webhook_id')->nullable()
+                ->comment('A unique identifier for the webhook event, if provided by the gateway.');
+            $table->string('payer_country')->nullable();
+
+            $table->string('payer_name')->nullable()
+                ->comment('Name of the person who made the payment, if available.');
+            $table->string('payer_email')->nullable()
+                ->comment('Email of the person who made the payment, if available.');
 
             // Processing status
             $table->string('status')->default('pending'); // pending, processed, failed, skipped

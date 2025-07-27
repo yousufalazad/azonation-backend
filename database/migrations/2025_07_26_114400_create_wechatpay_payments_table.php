@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('wechatpay_payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index(); // Nullable for guests
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
 
             // Identifiers
             $table->string('wechat_transaction_id')->index(); // WeChat transaction ID

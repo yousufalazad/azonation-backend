@@ -12,8 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('authorizenet_payments', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index(); // nullable for guest
+           $table->id();
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
 
             // Transaction identifiers
             $table->string('transaction_id')->index(); // Authorize.Net transId

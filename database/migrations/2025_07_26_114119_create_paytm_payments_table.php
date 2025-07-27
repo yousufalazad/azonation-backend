@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('paytm_payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index(); // Optional, for guest checkout
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
 
             // Identifiers
             $table->string('order_id')->index(); // Your system's Order ID

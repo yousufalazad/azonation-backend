@@ -12,9 +12,17 @@ return new class extends Migration
     public function up(): void
     {
          Schema::create('stripe_payments', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            // $table->unsignedBigInteger('user_id')->nullable(); // nullable for guest users
-            // $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->id();
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
 
             $table->string('payment_intent_id');
             $table->string('charge_id')->nullable();
@@ -24,6 +32,7 @@ return new class extends Migration
 
             $table->decimal('amount', 10, 2);
             $table->string('currency', 10);
+            $table->decimal('payment_fee', 10, 2)->nullable()->comment('The fee charged by the payment gateway for processing the transaction.');
 
             $table->string('payment_method');
             $table->string('payment_method_type');
