@@ -18,8 +18,13 @@ class Committee extends Model
         'is_active'
     ];
 
-    protected $hidden=[
+    protected $hidden = [
         'created_at',
         'updated_at'
     ];
+
+    public function organisation()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

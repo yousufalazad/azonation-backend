@@ -24,6 +24,11 @@ class OrgMember extends Model
         'updated_at'
     ];
 
+    public function org()
+    {
+        return $this->belongsTo(User::class, 'org_type_user_id');
+    }
+
     public function individual(): BelongsTo
     {
         return $this->belongsTo(User::class, 'individual_type_user_id', 'id');
