@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('razorpay_payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index(); // Nullable for guest checkout
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
 
             // Razorpay identifiers
             $table->string('razorpay_payment_id')->index();

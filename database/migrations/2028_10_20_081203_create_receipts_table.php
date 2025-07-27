@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('receipts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
 
             // Unique receipt identifier (e.g., "AZON-RCT-123456789")
             $table->string('receipt_code', 15)
@@ -24,13 +34,6 @@ return new class extends Migration
                 ->constrained('invoices')
                 ->onDelete('cascade')
                 ->comment('References the invoice for which the payment was made.');
-
-            // Foreign key linking to the 'users' table
-            $table->foreignId('user_id')
-            ->nullable()
-            ->constrained()
-            ->onDelete('set null')
-            ->comment('The user who made the payment.');
             
 
             // Amount received

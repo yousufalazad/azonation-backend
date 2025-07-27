@@ -13,14 +13,31 @@ return new class extends Migration
     {
         Schema::create('ssl_commerz_payments', function (Blueprint $table) {
             $table->id();
-            //$table->unsignedBigInteger('user_id')->nullable()->index(); // Optional for guest checkout
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
+
+            $table->string('payer_name')
+                ->nullable()
+                ->comment('Person name who make the payment');
+
+            $table->string('payer_email')->nullable()->comment('Person email address who make the payment');
 
             $table->string('tran_id')->index(); // Merchant-generated transaction ID
             $table->string('val_id')->nullable(); // SSLCommerz validation ID
 
             $table->decimal('amount', 10, 2)->default(0);
+            $table->decimal('payment_fee', 10, 2)->nullable();
             $table->string('currency', 10)->default('BDT');
-
+            $table->string('payer_country', 30)->nullable()
+                ->comment('The country of the payer, full country name).');
             $table->string('store_id')->nullable();
             $table->string('status')->nullable(); // Pending, Processing, Failed, etc.
 

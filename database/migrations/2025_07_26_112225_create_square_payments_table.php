@@ -13,11 +13,18 @@ return new class extends Migration
     {
         Schema::create('square_payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index(); // Nullable for guests
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
 
             // Square transaction identifiers
-            $table->string('payment_id')->index(); // Square payment ID
-            $table->string('order_id')->nullable();
             $table->string('customer_id')->nullable();
             $table->string('location_id')->nullable();
 

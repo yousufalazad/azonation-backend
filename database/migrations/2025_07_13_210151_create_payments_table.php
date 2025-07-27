@@ -11,15 +11,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payments', function (Blueprint $table) {
-            $table->id(); // Primary key
+            $table->id();
 
             // Unique identifier for the payment transaction
-            $table->string('azonation_transaction_id')->nullable()
+            $table->string('azon_payment_txn_id')->unique()->nullable()
                 ->comment('A unique identifier for tracking the payment transaction.');
-
-            // Unique identifier for the payment gateway transaction
-            $table->string('gateway_transaction_id')->nullable()
-                ->comment('A unique identifier provided by the payment gateway for tracking the transaction.');
 
             // Foreign key to the 'invoices' table
             $table->foreignId('invoice_id')
@@ -35,69 +31,62 @@ return new class extends Migration
                 ->onDelete('set null')
                 ->comment('User who made the payment, null if anonymous.');
 
-            // Store user details statically for historical reference
+            // User / Payer info
             $table->string('user_name')
                 ->nullable()
-                ->comment('User name snapshot for billing reference');
+                ->comment('User name / org name snapshot for payment reference');
 
-            $table->decimal('paid_amount', 10, 2)
-                ->comment('The amount of money paid in this transaction.');
-
-            $table->dateTimeTz('paid_at')->nullable()
-                ->comment('The date and time the payment was completed.');
+            $table->string('user_email')->nullable()->comment('User/org email snapshot for payment reference');
 
             // Payment gateway used for the transaction
-            $table->enum('gateway_type', ['stripe', 'paypal', 'sslcommerze', 'bkash', 'rocket', 'upi', 'alipay'])
-                ->comment('The payment gateway used for the transaction, e.g., Stripe, PayPal.');
+            $table->foreignId('payment_gateway_id')
+                ->nullable()
+                ->constrained('payment_gateways')
+                ->onDelete('set null')
+                ->comment('References the payment_gateways table');
+
+            // Unique identifier for the payment gateway transaction, For webhook correlation
+            $table->string('gateway_reference_id')->nullable()->index()
+                ->comment('Gateway-specific reference or transaction ID.');
 
             //payment method
-            $table->string('payment_method', 30)
+            $table->string('payment_method', 50)
                 ->nullable()
                 ->comment('The method of payment used, e.g., card, bank transfer, etc.');
 
-            $table->string('gateway_response', 30)->nullable()
-                ->comment('The payment gateway response, e.g., Stripe, PayPal.');
+            $table->enum('source_type', ['gateway', 'manual', 'admin'])
+                ->default('gateway')
+                ->comment('Source of this payment: gateway, manual, or admin override.');
 
-            $table->string('payment_reference')->nullable()
-                ->comment('Reference ID provided by the payment gateway for this transaction (e.g., PayPal payment ID).');
-
-            $table->enum('transaction_status', ['successful', 'Failed', 'pending', 'processing', 'cancelled', 'refunded', 'chargeback', 'disputed', 'error', 'unknown', 'in_progress', 'partially_refunded', 'partially_charged', 'partially_failed', 'partially_cancelled'])
+            $table->enum('transaction_status', ['successful', 'failed', 'pending', 'processing', 'cancelled', 'refunded', 'chargeback', 'disputed', 'error', 'unknown', 'partially_refunded', 'partially_charged', 'partially_failed'])
                 ->default('pending')
                 ->comment('Current payment status of the transaction');
 
-            //payer_country and payer_currency_rate
-            $table->string('payer_country', 30)->nullable()
-                ->comment('The country of the payer, full country name).');
+            $table->decimal('amount', 15, 2)->default(0)
+                ->comment('The amount of this transaction.');
 
-            $table->decimal('payer_currency_rate', 10, 4)->nullable()
-                ->comment('The exchange rate of the payer\'s currency against the payment currency at the time of the transaction.');
+            $table->string('currency', 10)->comment('Currency code or symbol, e.g., USD, EUR, BDT');
 
-            $table->enum('payment_status', ['initiated', 'completed', 'failed', 'pending', 'refunded'])
-                ->default('initiated')
-                ->comment('The status of the payment: initiated, completed, failed, pending, or refunded');
+            $table->dateTimeTz('payment_time')->nullable()
+                ->comment('The date and time the payment.');
 
-            $table->decimal('payment_fee', 10, 2)->nullable()->comment('The fee charged by the payment gateway for processing the transaction.');
-            $table->decimal('remaining_due', 10, 2)->comment('Remaining amount due');
-            $table->string('currency_code', 3)->comment('Currency code for the payment transaction');
-            $table->string('paid_currency', 3)
-                ->comment('The currency of the payment (ISO 4217 code, e.g., USD, GBP).');
+            $table->string('payer_country', 50)->nullable()
+                ->comment('Full country name of the payer');
+
+            $table->boolean('is_refunded')->default(false)
+                ->comment('Indicates if the transaction has been refunded.');
+
+            $table->boolean('has_dispute')->default(false)
+                ->comment('Indicates if the payment is under dispute or chargeback.');
 
             $table->text('payment_note')->nullable()
-                ->comment('Additional notes or information about the payment.');
-
-            $table->softDeletes()
-                ->comment('Allows for soft deletion of payment records, enabling them to be restored later if needed.');
+                ->comment('Any optional note or remark related to the payment');
 
             $table->boolean('is_active')->default(true)
                 ->comment('Indicates whether the payment record is active or inactive (e.g., deactivated due to errors or disputes).');
 
-
-            // Use Carbon's timestamp for paid_at column instead of date for better compatibility with different DBMS
-
-            //$table->timestamps('paid_at');
-
-            // $table->date('payment_date')
-            //     ->comment('The date the payment was made.');
+            $table->softDeletes()
+                ->comment('Allows for soft deletion of payment records, enabling them to be restored later if needed.');
 
             $table->timestamps();
         });
@@ -111,71 +100,3 @@ return new class extends Migration
         Schema::dropIfExists('payments');
     }
 };
-
-// User / Payer info
-            $table->unsignedBigInteger('user_id')->nullable()->index(); // Supports guest checkout
-            $table->string('payer_name')->nullable();
-            $table->string('payer_email')->nullable();
-
-            // General payment info
-            $table->string('gateway_name'); // paypal, stripe, sslcommerz, razorpay, etc.
-            $table->string('gateway_payment_id')->nullable(); // External payment ID
-            $table->string('payment_method')->nullable(); // card, upi, paypal, etc.
-            $table->string('status')->nullable(); // completed, failed, pending, refunded
-            $table->decimal('amount', 10, 2)->default(0);
-            $table->decimal('refund_amount', 10, 2)->nullable();
-            $table->string('currency', 10)->default('USD');
-
-            $table->string('description')->nullable(); // Optional description
-            $table->string('source_type')->nullable(); // manual, gateway, offline, etc.
-            $table->timestamp('payment_time')->nullable();
-            $table->boolean('is_refunded')->default(false);
-
-            // Linkable to system modules (optional)
-            $table->unsignedBigInteger('invoice_id')->nullable();
-            $table->unsignedBigInteger('subscription_id')->nullable();
-
-            // For webhook correlation
-            $table->uuid('external_reference_id')->nullable(); // e.g., order_id or merchant_ref
-
-            // Soft delete & timestamps
-            $table->softDeletes();
-            $table->timestamps();
-
-            // Indexes
-            $table->index(['gateway_name', 'gateway_payment_id']);
-            $table->index(['status', 'currency']);
-
-             // User / Payer info
-            $table->unsignedBigInteger('user_id')->nullable()->index(); // Supports guest checkout
-            $table->string('payer_name')->nullable();
-            $table->string('payer_email')->nullable();
-
-            // General payment info
-            $table->string('gateway_name'); // paypal, stripe, sslcommerz, razorpay, etc.
-            $table->string('gateway_payment_id')->nullable(); // External payment ID
-            $table->string('payment_method')->nullable(); // card, upi, paypal, etc.
-            $table->string('status')->nullable(); // completed, failed, pending, refunded
-            $table->decimal('amount', 10, 2)->default(0);
-            $table->decimal('refund_amount', 10, 2)->nullable();
-            $table->string('currency', 10)->default('USD');
-
-            $table->string('description')->nullable(); // Optional description
-            $table->string('source_type')->nullable(); // manual, gateway, offline, etc.
-            $table->timestamp('payment_time')->nullable();
-            $table->boolean('is_refunded')->default(false);
-
-            // Linkable to system modules (optional)
-            $table->unsignedBigInteger('invoice_id')->nullable();
-            $table->unsignedBigInteger('subscription_id')->nullable();
-
-            // For webhook correlation
-            $table->uuid('external_reference_id')->nullable(); // e.g., order_id or merchant_ref
-
-            // Soft delete & timestamps
-            $table->softDeletes();
-            $table->timestamps();
-
-            // Indexes
-            $table->index(['gateway_name', 'gateway_payment_id']);
-            $table->index(['status', 'currency']);

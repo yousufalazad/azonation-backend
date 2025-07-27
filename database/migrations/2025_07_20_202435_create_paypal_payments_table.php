@@ -12,8 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('paypal_payments', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->id();
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
             $table->string('paypal_order_id')->index();
             $table->string('paypal_payment_id')->nullable();
             $table->string('paypal_capture_id')->nullable();
@@ -29,6 +38,7 @@ return new class extends Migration
             $table->string('invoice_id')->nullable();
             $table->string('custom_id')->nullable();
             $table->timestamp('payment_time')->nullable();
+            $table->decimal('payment_fee', 10, 2)->nullable()->comment('The fee charged by the payment gateway for processing the transaction.');
 
             // Refund-related columns
             $table->string('refund_id')->nullable();

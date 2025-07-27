@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('twocheckout_payments', function (Blueprint $table) {
             $table->id();
-            //$table->unsignedBigInteger('user_id')->nullable()->index(); // Optional, if guest checkout allowed
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
+
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
 
             $table->string('order_number')->index(); // 2Checkout Order Number
             $table->string('merchant_order_id')->nullable(); // Your internal order ID

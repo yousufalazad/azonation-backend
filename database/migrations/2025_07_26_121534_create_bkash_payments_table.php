@@ -13,9 +13,17 @@ return new class extends Migration
     {
         Schema::create('bkash_payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable()->index()->comment('Reference to user, nullable for guest checkout');
+            $table->foreignId('payment_id')
+                ->constrained('payments')
+                ->onDelete('cascade')
+                ->comment('Reference to the main payments table');
 
-            $table->string('payment_id')->index()->comment('bKash Payment ID (paymentID)');
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null')
+                ->comment('User who submitted the manual payment (nullable for anonymous)');
+
             $table->string('trx_id')->nullable()->comment('bKash Transaction ID (trxID)');
             $table->string('merchant_invoice_number')->nullable()->comment('Merchant-provided invoice or order ID');
 
