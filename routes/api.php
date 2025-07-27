@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Common\UserCountryController;
@@ -113,13 +114,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dialing-codes', [PhoneNumberController::class, 'getAllDialingCodes']);
     });
 
-    
+
     Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
     Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
     Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
     Route::put('update-password/{userId}', [AuthController::class, 'updatePassword']);
     Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
-    
+
     //Org finance related api
     Route::group(['prefix' => 'org-financial'], function () {
         Route::get('/sub-month-bill-calculation', [EverydayMemberCountAndBillingController::class, 'subMonthBillCalculation']);
@@ -137,7 +138,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [AccountsFundController::class, 'update']);
         Route::delete('/{id}', [AccountsFundController::class, 'destroy']);
     });
-    Route::group(['prefix'=> 'accounts-transaction-currencies'], function () {
+    Route::group(['prefix' => 'accounts-transaction-currencies'], function () {
         Route::get('/', [AccountsController::class, 'getAccountsTransactionCurrency']);
         Route::post('/', [AccountsController::class, 'storeAccountsTransactionCurrency']);
         Route::put('/{id}', [AccountsController::class, 'updateAccountsTransactionCurrency']);
@@ -177,7 +178,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}', [SuccessStoryController::class, 'update']);
         Route::delete('/{id}', [SuccessStoryController::class, 'destroy']);
     });
-   
+
     Route::get('/notifications/get-all/{userId}', [NotificationController::class, 'getNotifications']);
     Route::get('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
     Route::get('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
@@ -185,7 +186,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update']);
     Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
     Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
-    
+
     Route::group(['prefix' => 'office-documents'], function () {
         Route::get('/', [OfficeDocumentController::class, 'index']);
         Route::get('/{id}', [OfficeDocumentController::class, 'show']);
@@ -201,7 +202,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/check', [OrgMemberController::class, 'checkMember']);
         Route::put('/{id}', [OrgMemberController::class, 'update']);
         Route::delete('/{id}', [OrgMemberController::class, 'destroy']);
-        Route::get('/this-year-new-member-count', [OrgMemberController::class, 'thisYearNewMemberCount']);     
+        Route::get('/this-year-new-member-count', [OrgMemberController::class, 'thisYearNewMemberCount']);
     });
 
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
@@ -215,7 +216,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('{id}', [FamilyMemberController::class, 'destroy']);
     });
 
-    
+
     Route::group(['prefix' => 'independent-members'], function () {
         Route::get('/', [OrgIndependentMemberController::class, 'index']);
         Route::get('/{id}', [OrgIndependentMemberController::class, 'show']);
@@ -389,11 +390,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::group(['prefix' => 'reports'], function () {
         Route::get('/membership-growth', [OrgReportController::class, 'getMembershipGrowthReport']);
     });
-     Route::get('/reports', [OrgReportController::class, 'getIncomeReport']);
+    Route::get('/reports', [OrgReportController::class, 'getIncomeReport']);
     Route::get('/org-expense-reports', [OrgReportController::class, 'getExpenseReport']);
 
 
-    
+
 
 
 
@@ -404,12 +405,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrganisationByIndividualId']);
     Route::get('/individual-users', [IndividualController::class, 'getIndividualUser']);
 
+    Route::middleware('auth:sanctum')->get('/individual/dashboard-summary', [IndividualController::class, 'summary']);
+    Route::middleware('auth:sanctum')->get('/individual/meetings', [IndividualController::class, 'meetings']);
+    Route::middleware('auth:sanctum')->get('/individual/events', [IndividualController::class, 'events']);
+    Route::middleware('auth:sanctum')->get('/individual/committees', [IndividualController::class, 'committees']);
+    Route::middleware('auth:sanctum')->get('/individual/projects', [IndividualController::class, 'projects']);
+
     // ----------------------- Superadmin --------------------
     Route::get('/super_admin_profile_image/{userId}', [SuperAdminController::class, 'getSuperAdminProfileImage']);
     Route::post('/super_admin_profile_image/{userId}', [SuperAdminController::class, 'updateSuperAdminProfileImage']);
     Route::get('/super_admin_user_data/{id}', [SuperAdminController::class, 'show']);
     Route::get('/management-pricings', [ManagementPricingController::class, 'getUserPriceRate']);
-    
+
 
     Route::group(['prefix' => 'management-and-storage-billings'], function () {
         Route::get('/', [ManagementAndStorageBillingController::class, 'index']);
@@ -434,7 +441,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('{id}', [EverydayStorageBillingController::class, 'update']);
         Route::delete('{id}', [EverydayStorageBillingController::class, 'destroy']);
     });
-    
+
     Route::group(['prefix' => 'management-pricings'], function () {
         Route::get('/', [ManagementPricingController::class, 'index']);
         Route::put('/update', [ManagementPricingController::class, 'update']);
@@ -453,7 +460,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('{id}', [RegionalTaxRateController::class, 'update']);
         Route::delete('{id}', [RegionalTaxRateController::class, 'destroy']);
     });
-    
+
     Route::group(['prefix' => 'dialing-codes'], function () {
         Route::get('/', [DialingCodeController::class, 'index']);
         Route::post('/', [DialingCodeController::class, 'store']);

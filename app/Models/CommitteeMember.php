@@ -22,4 +22,9 @@ class CommitteeMember extends Model
         'created_at',
         'updated_at'
     ];
+    
+    public function committee()
+    {
+        return $this->belongsTo(Committee::class);
+    }
 }
