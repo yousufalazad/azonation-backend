@@ -407,10 +407,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('auth:sanctum')->get('/individual/dashboard-summary', [IndividualController::class, 'summary']);
     Route::middleware('auth:sanctum')->get('/individual/meetings', [IndividualController::class, 'meetings']);
-    Route::middleware('auth:sanctum')->get('/individual/events', [IndividualController::class, 'events']);
+    Route::middleware('auth:sanctum')->get('/individual/past_meetings', [IndividualController::class, 'past_meetings']);
+    Route::middleware('auth:sanctum')->get('/individual/events', [IndividualController::class, 'past_events']);
+    Route::middleware('auth:sanctum')->get('/individual/past_events', [IndividualController::class, 'events']);
     Route::middleware('auth:sanctum')->get('/individual/committees', [IndividualController::class, 'committees']);
+    Route::middleware('auth:sanctum')->get('/individual/past_committees', [IndividualController::class, 'past_committees']);
     Route::middleware('auth:sanctum')->get('/individual/projects', [IndividualController::class, 'projects']);
+    Route::middleware('auth:sanctum')->get('/individual/past_projects', [IndividualController::class, 'past_projects']);
     Route::middleware('auth:sanctum')->get('/individual/assets', [IndividualController::class, 'assets']);
+    Route::middleware('auth:sanctum')->get('/individual/past_assets', [IndividualController::class, 'past_assets']);
 
     // ----------------------- Superadmin --------------------
     Route::get('/super_admin_profile_image/{userId}', [SuperAdminController::class, 'getSuperAdminProfileImage']);

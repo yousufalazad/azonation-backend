@@ -82,6 +82,7 @@ class IndividualController extends Controller
                     'name' => optional($log->asset)->name,
                     'quantity' => optional($log->asset)->quantity,
                     'assignment_start_date' => $log->assignment_start_date,
+                    'asset_lifecycle_status_id' => $log->asset_lifecycle_statuses_id,
                 ];
             })->values();
 
@@ -96,6 +97,7 @@ class IndividualController extends Controller
                         'id' => optional($member->committee)->id,
                         'name' => optional($member->committee)->name,
                         'start_date' => optional($member->committee)->start_date,
+                        'designation_id' => $member->designation_id,
                     ];
                 })->values(),
                 'responsible_assets' => $assetsFormatted,
@@ -119,6 +121,36 @@ class IndividualController extends Controller
         // Join committee data and include org name from users
         $committees = CommitteeMember::with('committee:id,name,user_id')
             ->where('user_id', $userId)
+            ->whereRaw('(end_date >= ? OR end_date IS NULL)', [now()])
+            ->get()
+            ->groupBy(fn($member) => optional($member->committee)->user_id);
+
+        // Get all related org names
+        $orgs = OrgMember::with('org:id,org_name')
+            ->where('individual_type_user_id', $userId)
+            ->get();
+
+        $result = $orgs->map(function ($org) use ($committees) {
+            return [
+                'org_id' => $org->org_type_user_id,
+                'org_name' => optional($org->org)->org_name ?? 'Unknown',
+                'committees' => $committees[$org->org_type_user_id] ?? [],
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $result
+        ]);
+    }
+    public function past_committees()
+    {
+        $userId = Auth::id();
+
+        // Join committee data and include org name from users
+        $committees = CommitteeMember::with('committee:id,name,user_id')
+            ->where('user_id', $userId)
+            ->where('end_date', '<=', now())
             ->get()
             ->groupBy(fn($member) => optional($member->committee)->user_id);
 
@@ -170,8 +202,66 @@ class IndividualController extends Controller
             'data' => $result
         ]);
     }
+    public function past_meetings()
+    {
+        $userId = Auth::id();
+
+        $orgs = OrgMember::with('org:id,org_name')
+            ->where('individual_type_user_id', $userId)
+            ->get();
+
+        $orgIds = $orgs->pluck('org_type_user_id');
+
+        $meetings = Meeting::whereIn('user_id', $orgIds)
+            ->where('date', '<=', now())
+            ->orderBy('date')
+            ->get()
+            ->groupBy('user_id');
+
+        $result = $orgs->map(function ($org) use ($meetings) {
+            return [
+                'org_id' => $org->org_type_user_id,
+                'org_name' => optional($org->org)->org_name ?? 'Unknown',
+                'meetings' => $meetings[$org->org_type_user_id] ?? [],
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $result
+        ]);
+    }
 
     public function events()
+    {
+        $userId = Auth::id();
+
+        $orgs = OrgMember::with('org:id,org_name')
+            ->where('individual_type_user_id', $userId)
+            ->get();
+
+        $orgIds = $orgs->pluck('org_type_user_id');
+
+        $events = Event::whereIn('user_id', $orgIds)
+            ->where('date', '<=', now())
+            ->orderBy('date')
+            ->get()
+            ->groupBy('user_id');
+
+        $result = $orgs->map(function ($org) use ($events) {
+            return [
+                'org_id' => $org->org_type_user_id,
+                'org_name' => optional($org->org)->org_name ?? 'Unknown',
+                'events' => $events[$org->org_type_user_id] ?? [],
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $result
+        ]);
+    }
+    public function past_events()
     {
         $userId = Auth::id();
 
@@ -231,6 +321,36 @@ class IndividualController extends Controller
         ]);
     }
 
+    public function past_projects()
+    {
+        $userId = Auth::id();
+
+        $orgs = OrgMember::with('org:id,org_name')
+            ->where('individual_type_user_id', $userId)
+            ->get();
+
+        $orgIds = $orgs->pluck('org_type_user_id');
+
+        $projects = Project::whereIn('user_id', $orgIds)
+            ->where('start_date', '<=', now())
+            ->orderBy('start_date')
+            ->get()
+            ->groupBy('user_id');
+
+        $result = $orgs->map(function ($org) use ($projects) {
+            return [
+                'org_id' => $org->org_type_user_id,
+                'org_name' => optional($org->org)->org_name ?? 'Unknown',
+                'projects' => $projects[$org->org_type_user_id] ?? [],
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $result
+        ]);
+    }
+
     public function assets()
     {
         $userId = Auth::id();
@@ -244,6 +364,7 @@ class IndividualController extends Controller
 
         // Fetch all active assignment logs for the user with asset info
         $assignmentLogs = AssetAssignmentLog::with(['asset:id,name,quantity,user_id'])
+            ->whereRaw('(assignment_end_date >= ? OR assignment_end_date IS NULL)', [now()])
             ->where('responsible_user_id', $userId)
             ->where('is_active', true)
             ->get();
@@ -266,6 +387,57 @@ class IndividualController extends Controller
                         'name' => optional($log->asset)->name,
                         'quantity' => optional($log->asset)->quantity,
                         'assignment_start_date' => $log->assignment_start_date,
+                        'assignment_end_date' => $log->assignment_end_date,
+                        'asset_lifecycle_status_id' => $log->asset_lifecycle_statuses_id,
+                    ];
+                })->values(),
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $result,
+        ]);
+    }
+
+    public function past_assets()
+    {
+        $userId = Auth::id();
+
+        // Get connected organisations
+        $orgs = OrgMember::with('org:id,org_name')
+            ->where('individual_type_user_id', $userId)
+            ->get();
+
+        $orgIds = $orgs->pluck('org_type_user_id');
+
+        // Fetch all active assignment logs for the user with asset info
+        $assignmentLogs = AssetAssignmentLog::with(['asset:id,name,quantity,user_id'])
+            ->where('assignment_end_date', '<=', now())
+            ->where('responsible_user_id', $userId)
+            ->where('is_active', true)
+            ->get();
+
+        // Group logs by organisation ID (asset.user_id)
+        $assetsByOrg = $assignmentLogs->groupBy(fn($log) => optional($log->asset)->user_id);
+
+        // Map response per organisation
+        $result = $orgs->map(function ($org) use ($assetsByOrg) {
+            $orgId = $org->org_type_user_id;
+
+            $assets = $assetsByOrg[$orgId] ?? collect();
+
+            return [
+                'org_id' => $orgId,
+                'org_name' => optional($org->org)->org_name ?? 'Unknown',
+                'assets' => $assets->map(function ($log) {
+                    return [
+                        'asset_id' => $log->asset_id,
+                        'name' => optional($log->asset)->name,
+                        'quantity' => optional($log->asset)->quantity,
+                        'assignment_start_date' => $log->assignment_start_date,
+                        'assignment_end_date' => $log->assignment_end_date,
+                        'asset_lifecycle_status_id' => $log->asset_lifecycle_statuses_id,
                     ];
                 })->values(),
             ];
