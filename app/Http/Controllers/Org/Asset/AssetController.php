@@ -26,6 +26,8 @@ class AssetController extends Controller
                 'a.user_id as user_id',
                 'a.name as name',
                 'a.description as description',
+                'a.start_date as start_date',
+                'a.end_date as end_date',
                 'a.is_long_term as is_long_term',
                 'a.quantity as quantity',
                 'a.value_amount as value_amount',
