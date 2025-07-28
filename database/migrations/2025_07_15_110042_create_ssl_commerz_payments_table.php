@@ -33,19 +33,14 @@ return new class extends Migration
             $table->string('tran_id')->index(); // Merchant-generated transaction ID
             $table->string('val_id')->nullable(); // SSLCommerz validation ID
 
-            $table->decimal('amount', 10, 2)->default(0);
             $table->decimal('payment_fee', 10, 2)->nullable();
-            $table->string('currency', 10)->default('BDT');
-            $table->string('payer_country', 30)->nullable()
-                ->comment('The country of the payer, full country name).');
-            $table->string('store_id')->nullable();
-            $table->string('status')->nullable(); // Pending, Processing, Failed, etc.
+            
 
             // Card details (masked & descriptive)
             $table->string('card_type')->nullable(); // Visa, MasterCard, etc.
             $table->string('card_no')->nullable(); // Masked card number
             $table->string('bank_tran_id')->nullable(); // Bank transaction reference
-
+ 
             $table->string('card_issuer')->nullable();
             $table->string('card_brand')->nullable();
             $table->string('card_issuer_country')->nullable();

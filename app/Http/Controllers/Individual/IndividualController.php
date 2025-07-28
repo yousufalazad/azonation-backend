@@ -7,10 +7,8 @@ use App\Models\Individual;
 use App\Models\OrgMember;
 use App\Models\Meeting;
 use App\Models\Event;
-use App\Models\Committee;
 use App\Models\CommitteeMember;
 use App\Models\Project;
-use App\Models\Asset;
 use App\Models\AssetAssignmentLog;
 use App\Models\ProfileImage;
 use Illuminate\Http\Request;
@@ -22,90 +20,6 @@ use Illuminate\Support\Facades\Auth;
 
 class IndividualController extends Controller
 {
-
-
-    public function Xsummary()
-    {
-        $userId = Auth::id();
-
-        // Get connected organisations
-        $connectedOrgs = OrgMember::where('individual_type_user_id', $userId)
-            ->leftJoin('users as connectedorg', 'org_members.org_type_user_id', '=', 'connectedorg.id')
-            ->select('org_members.*', 'connectedorg.org_name')
-            ->get();
-
-        $hasConnection = $connectedOrgs->isNotEmpty();
-
-        // Fetch committees where user is a member
-        $committeesByOrg = CommitteeMember::with('committee:id,name,user_id,start_date')
-            ->where('user_id', $userId)
-            ->get()
-            ->groupBy(fn($item) => optional($item->committee)->user_id); // group by org_id
-
-        // Prepare array for organisation-wise data
-        $orgWiseData = [];
-
-        foreach ($connectedOrgs as $org) {
-            $orgId = $org->org_type_user_id;
-
-            // Fetch next 2 meetings for this org
-            $nextMeetings = Meeting::where('user_id', $orgId)
-                ->where('date', '>=', now())
-                ->orderBy('date')
-                ->limit(2)
-                ->get();
-
-            // Fetch next 2 events for this org
-            $upcomingEvents = Event::where('user_id', $orgId)
-                ->where('date', '>=', now())
-                ->orderBy('date')
-                ->limit(2)
-                ->get();
-
-            // Fetch next 2 projects for this org
-            $upcomingProjects = Project::where('user_id', $orgId)
-                ->where('start_date', '>=', now())
-                ->orderBy('start_date')
-                ->limit(2)
-                ->get();
-
-            // Fetch committee list for this org
-            $committees = $committeesByOrg[$orgId] ?? collect();
-
-            // Fetch responsible assets
-            $responsibleAssets = Asset::where('user_id', $orgId)
-                ->where('responsible_user_id', $userId)
-                ->select('id', 'name', 'quantity', 'responsible_user_id', 'start_date')
-                ->get();
-
-            $orgWiseData[] = [
-                'org_id' => $orgId,
-                'org_name' => $org->org_name,
-                'next_meetings' => $nextMeetings,
-                'upcoming_events' => $upcomingEvents,
-                'upcoming_projects' => $upcomingProjects,
-                'committees' => $committees->map(function ($member) {
-                    return [
-                        'id' => $member->committee->id ?? null,
-                        'name' => $member->committee->name ?? null,
-                        'start_date' => $member->committee->start_date ?? null,
-                    ];
-                })->values(),
-
-                'responsible_assets' => $responsibleAssets,
-
-            ];
-        }
-
-        return response()->json([
-            'status' => true,
-            'data' => [
-                'has_connection' => $hasConnection,
-                'connected_organisations' => $connectedOrgs,
-                'organisations_summary' => $orgWiseData,
-            ],
-        ]);
-    }
     public function summary()
     {
         $userId = Auth::id();
@@ -371,7 +285,6 @@ class IndividualController extends Controller
             'data' => $data
         ], $status);
     }
-
 
     public function getProfileImage($userId)
     {
