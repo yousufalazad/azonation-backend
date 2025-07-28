@@ -198,66 +198,6 @@ class IndividualController extends Controller
         ]);
     }
 
-
-
-    public function meetings()
-    {
-        $userId = Auth::id();
-
-        $orgs = OrgMember::with('org:id,org_name')
-            ->where('individual_type_user_id', $userId)
-            ->get();
-
-        $orgIds = $orgs->pluck('org_type_user_id');
-
-        $meetings = Meeting::whereIn('user_id', $orgIds)
-            ->orderBy('date')
-            ->get()
-            ->groupBy('user_id');
-
-        $result = $orgs->map(function ($org) use ($meetings) {
-            return [
-                'org_id' => $org->org_type_user_id,
-                'org_name' => optional($org->org)->org_name ?? 'Unknown',
-                'meetings' => $meetings[$org->org_type_user_id] ?? [],
-            ];
-        });
-
-        return response()->json([
-            'status' => true,
-            'data' => $result
-        ]);
-    }
-
-    public function events()
-    {
-        $userId = Auth::id();
-
-        $orgs = OrgMember::with('org:id,org_name')
-            ->where('individual_type_user_id', $userId)
-            ->get();
-
-        $orgIds = $orgs->pluck('org_type_user_id');
-
-        $events = Event::whereIn('user_id', $orgIds)
-            ->orderBy('date')
-            ->get()
-            ->groupBy('user_id');
-
-        $result = $orgs->map(function ($org) use ($events) {
-            return [
-                'org_id' => $org->org_type_user_id,
-                'org_name' => optional($org->org)->org_name ?? 'Unknown',
-                'events' => $events[$org->org_type_user_id] ?? [],
-            ];
-        });
-
-        return response()->json([
-            'status' => true,
-            'data' => $result
-        ]);
-    }
-
     public function committees()
     {
         $userId = Auth::id();
@@ -287,6 +227,66 @@ class IndividualController extends Controller
         ]);
     }
 
+    public function meetings()
+    {
+        $userId = Auth::id();
+
+        $orgs = OrgMember::with('org:id,org_name')
+            ->where('individual_type_user_id', $userId)
+            ->get();
+
+        $orgIds = $orgs->pluck('org_type_user_id');
+
+        $meetings = Meeting::whereIn('user_id', $orgIds)
+            ->where('date', '>=', now())
+            ->orderBy('date')
+            ->get()
+            ->groupBy('user_id');
+
+        $result = $orgs->map(function ($org) use ($meetings) {
+            return [
+                'org_id' => $org->org_type_user_id,
+                'org_name' => optional($org->org)->org_name ?? 'Unknown',
+                'meetings' => $meetings[$org->org_type_user_id] ?? [],
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $result
+        ]);
+    }
+
+    public function events()
+    {
+        $userId = Auth::id();
+
+        $orgs = OrgMember::with('org:id,org_name')
+            ->where('individual_type_user_id', $userId)
+            ->get();
+
+        $orgIds = $orgs->pluck('org_type_user_id');
+
+        $events = Event::whereIn('user_id', $orgIds)
+            ->where('date', '>=', now())
+            ->orderBy('date')
+            ->get()
+            ->groupBy('user_id');
+
+        $result = $orgs->map(function ($org) use ($events) {
+            return [
+                'org_id' => $org->org_type_user_id,
+                'org_name' => optional($org->org)->org_name ?? 'Unknown',
+                'events' => $events[$org->org_type_user_id] ?? [],
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $result
+        ]);
+    }
+
     public function projects()
     {
         $userId = Auth::id();
@@ -298,6 +298,7 @@ class IndividualController extends Controller
         $orgIds = $orgs->pluck('org_type_user_id');
 
         $projects = Project::whereIn('user_id', $orgIds)
+            ->where('start_date', '>=', now())
             ->orderBy('start_date')
             ->get()
             ->groupBy('user_id');
@@ -361,8 +362,6 @@ class IndividualController extends Controller
             'data' => $result,
         ]);
     }
-
-
 
     protected function success($message, $data = [], $status = 200)
     {
