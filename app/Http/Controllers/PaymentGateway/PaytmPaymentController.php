@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 
-use App\Models\PaymentGateway;
+use App\Models\PaytmPayment;
 use Illuminate\Http\Request;
 
-class PaymentGatewayController extends Controller
+class PaytmPaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class PaymentGatewayController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PaymentGateway $paymentGateway)
+    public function show(PaytmPayment $paytmPayment)
     {
         //
     }
@@ -42,7 +43,7 @@ class PaymentGatewayController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PaymentGateway $paymentGateway)
+    public function edit(PaytmPayment $paytmPayment)
     {
         //
     }
@@ -50,7 +51,7 @@ class PaymentGatewayController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PaymentGateway $paymentGateway)
+    public function update(Request $request, PaytmPayment $paytmPayment)
     {
         //
     }
@@ -58,7 +59,7 @@ class PaymentGatewayController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PaymentGateway $paymentGateway)
+    public function destroy(PaytmPayment $paytmPayment)
     {
         //
     }

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 
-use App\Models\TapPayment;
+use App\Models\SquarePayment;
 use Illuminate\Http\Request;
 
-class TapPaymentController extends Controller
+class SquarePaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class TapPaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TapPayment $tapPayment)
+    public function show(SquarePayment $squarePayment)
     {
         //
     }
@@ -42,7 +43,7 @@ class TapPaymentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TapPayment $tapPayment)
+    public function edit(SquarePayment $squarePayment)
     {
         //
     }
@@ -50,7 +51,7 @@ class TapPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TapPayment $tapPayment)
+    public function update(Request $request, SquarePayment $squarePayment)
     {
         //
     }
@@ -58,7 +59,7 @@ class TapPaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TapPayment $tapPayment)
+    public function destroy(SquarePayment $squarePayment)
     {
         //
     }

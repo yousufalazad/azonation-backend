@@ -10,10 +10,9 @@ class EventAttendance extends Model
     use HasFactory;
 
     protected $fillable = [
-        'org_event_id',
+        'event_id',
         'user_id', 
         'attendance_type_id', 
-        // 'date', 
         'time', 
         'note', 
         'is_active'

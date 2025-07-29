@@ -25,17 +25,22 @@ class Project extends Model
         'conduct_type'
     ];
 
-    protected $hidden=[
+    protected $hidden = [
         'created_at',
         'updated_at'
     ];
 
-     public function documents()
+    public function documents()
     {
         return $this->hasMany(ProjectFile::class, 'project_id');
     }
     public function images()
     {
         return $this->hasMany(ProjectImage::class, 'project_id');
+    }
+
+    public function projectAttendances()
+    {
+        return $this->hasMany(ProjectAttendance::class, 'project_id');
     }
 }

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 
-use App\Models\PaymentRefund;
+use App\Models\ManualPayment;
 use Illuminate\Http\Request;
 
-class PaymentRefundController extends Controller
+class ManualPaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class PaymentRefundController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PaymentRefund $paymentRefund)
+    public function show(ManualPayment $manualPayment)
     {
         //
     }
@@ -42,7 +43,7 @@ class PaymentRefundController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PaymentRefund $paymentRefund)
+    public function edit(ManualPayment $manualPayment)
     {
         //
     }
@@ -50,7 +51,7 @@ class PaymentRefundController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PaymentRefund $paymentRefund)
+    public function update(Request $request, ManualPayment $manualPayment)
     {
         //
     }
@@ -58,7 +59,7 @@ class PaymentRefundController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PaymentRefund $paymentRefund)
+    public function destroy(ManualPayment $manualPayment)
     {
         //
     }

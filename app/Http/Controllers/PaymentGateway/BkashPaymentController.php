@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 use App\Models\BkashPayment;
 use Illuminate\Http\Request;
 

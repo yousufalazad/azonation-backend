@@ -13,7 +13,6 @@ class ProjectAttendance extends Model
         'project_id',
         'user_id',
         'attendance_type_id',
-        // 'date', 
         'time', 
         'note', 
         'is_active'

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 
-use App\Models\TwocheckoutPayment;
+use App\Models\PaypalPayment;
 use Illuminate\Http\Request;
 
-class TwocheckoutPaymentController extends Controller
+class PaypalPaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class TwocheckoutPaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(TwocheckoutPayment $twocheckoutPayment)
+    public function show(PaypalPayment $paypalPayment)
     {
         //
     }
@@ -42,7 +43,7 @@ class TwocheckoutPaymentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TwocheckoutPayment $twocheckoutPayment)
+    public function edit(PaypalPayment $paypalPayment)
     {
         //
     }
@@ -50,7 +51,7 @@ class TwocheckoutPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TwocheckoutPayment $twocheckoutPayment)
+    public function update(Request $request, PaypalPayment $paypalPayment)
     {
         //
     }
@@ -58,7 +59,7 @@ class TwocheckoutPaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TwocheckoutPayment $twocheckoutPayment)
+    public function destroy(PaypalPayment $paypalPayment)
     {
         //
     }

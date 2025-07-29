@@ -76,6 +76,13 @@ class Meeting extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function meetingAttendances()
+    {
+        return $this->hasMany(MeetingAttendance::class, 'meeting_id');
+    }
+
+
+
     /**
      * Define the relationship to the conduct type.
      */

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 
-use App\Models\PaymentWebhookLogs;
+use App\Models\RazorpayPayment;
 use Illuminate\Http\Request;
 
-class PaymentWebhookLogsController extends Controller
+class RazorpayPaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class PaymentWebhookLogsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PaymentWebhookLogs $paymentWebhookLogs)
+    public function show(RazorpayPayment $razorpayPayment)
     {
         //
     }
@@ -42,7 +43,7 @@ class PaymentWebhookLogsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PaymentWebhookLogs $paymentWebhookLogs)
+    public function edit(RazorpayPayment $razorpayPayment)
     {
         //
     }
@@ -50,7 +51,7 @@ class PaymentWebhookLogsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PaymentWebhookLogs $paymentWebhookLogs)
+    public function update(Request $request, RazorpayPayment $razorpayPayment)
     {
         //
     }
@@ -58,7 +59,7 @@ class PaymentWebhookLogsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PaymentWebhookLogs $paymentWebhookLogs)
+    public function destroy(RazorpayPayment $razorpayPayment)
     {
         //
     }

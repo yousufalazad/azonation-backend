@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\WechatpayPayment;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
+use App\Models\TwocheckoutPayment;
 use Illuminate\Http\Request;
 
-class WechatpayPaymentController extends Controller
+class TwocheckoutPaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class WechatpayPaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(WechatpayPayment $wechatpayPayment)
+    public function show(TwocheckoutPayment $twocheckoutPayment)
     {
         //
     }
@@ -42,7 +42,7 @@ class WechatpayPaymentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(WechatpayPayment $wechatpayPayment)
+    public function edit(TwocheckoutPayment $twocheckoutPayment)
     {
         //
     }
@@ -50,7 +50,7 @@ class WechatpayPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, WechatpayPayment $wechatpayPayment)
+    public function update(Request $request, TwocheckoutPayment $twocheckoutPayment)
     {
         //
     }
@@ -58,7 +58,7 @@ class WechatpayPaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WechatpayPayment $wechatpayPayment)
+    public function destroy(TwocheckoutPayment $twocheckoutPayment)
     {
         //
     }

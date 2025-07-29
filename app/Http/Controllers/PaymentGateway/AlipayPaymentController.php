@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 
-use App\Models\ManualPayment;
+use App\Models\AlipayPayment;
 use Illuminate\Http\Request;
 
-class ManualPaymentController extends Controller
+class AlipayPaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class ManualPaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ManualPayment $manualPayment)
+    public function show(AlipayPayment $alipayPayment)
     {
         //
     }
@@ -42,7 +43,7 @@ class ManualPaymentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ManualPayment $manualPayment)
+    public function edit(AlipayPayment $alipayPayment)
     {
         //
     }
@@ -50,7 +51,7 @@ class ManualPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ManualPayment $manualPayment)
+    public function update(Request $request, AlipayPayment $alipayPayment)
     {
         //
     }
@@ -58,7 +59,7 @@ class ManualPaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ManualPayment $manualPayment)
+    public function destroy(AlipayPayment $alipayPayment)
     {
         //
     }
