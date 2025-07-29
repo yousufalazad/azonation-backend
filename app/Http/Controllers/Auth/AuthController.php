@@ -7,6 +7,9 @@ use App\Mail\SuperAdminUserRegisteredMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Referral;
+use App\Models\ReferralReward;
+use App\Models\ReferralCode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\IndividualUserRegisteredMail;
@@ -27,6 +30,8 @@ class AuthController extends Controller
             'country_id' => 'required|numeric|max:999',
             'type' => 'required|string|max:12|in:individual,organisation',
             'password' => 'required|string|min:8',
+            'referral' => 'nullable|string|max:100',
+            'referral_source' => 'nullable|string|max:50',
         ]);
         $user = User::create([
             'first_name' => $request->first_name,
@@ -67,16 +72,46 @@ class AuthController extends Controller
                 'name' => 'General Fund',
                 'is_active' => 1,
             ]);
+
+            $refCode = null;
+            $referrerId = null;
+
+            // Check if referral code exists
+            if ($request->referral) {
+                $refCode = ReferralCode::where('code', $request->referral)->where('status', 'active')->first();
+                if ($refCode && $refCode->user_id !== $user->id) {
+                    $referrerId = $refCode->user_id;
+                    $refCode->increment('times_used');
+                }
+            }
+
+            // Save referral record regardless of referral code validity
+            Referral::create([
+                'referral_code_id' => $refCode?->id,
+                'referrer_id' => $referrerId,
+                'referred_user_id' => $user->id,
+                'email' => $user->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'signup_completed' => true,
+                'reward_given' => false,
+                'referral_source' => $request->referral_source ?? null,
+            ]);
         }
 
-        //send email to user based on type
-        if ($user->type == 'individual') {
-            Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
-        } elseif ($user->type == 'organisation') {
-            Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
-        } elseif ($user->type == 'superadmin') {
-            Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
+        // Send email to user based on type
+        switch ($user->type) {
+            case 'individual':
+                Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
+                break;
+            case 'organisation':
+                Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
+                break;
+            case 'superadmin':
+                Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
+                break;
         }
+
 
         // $this->sendEmail($user);
         return response()->json([
@@ -143,6 +178,8 @@ class AuthController extends Controller
             'errors' => $errors
         ], $status);
     }
+
+
     public function verify($uuid)
     {
         $user = User::where('verification_token', $uuid)->first();
@@ -152,6 +189,26 @@ class AuthController extends Controller
         $user->email_verified_at = Carbon::now();
         $user->verification_token = null;
         $user->save();
+
+        $referral = Referral::where('referred_user_id', $user->id)->first();
+
+        if ($referral && ! $referral->reward_given) {
+            // Create reward
+            ReferralReward::create([
+                'referral_id' => $referral->id,
+                'user_id' => $referral->referrer_id,
+                'reward_type' => $referral->referralCode->reward_type ?? 'credit',
+                'amount' => $referral->referralCode->reward_value ?? 10,
+                'status' => 'approved',
+                'rewarded_at' => now(),
+                'notes' => 'Referral reward granted after user verification',
+            ]);
+
+            $referral->update([
+                'reward_given' => true,
+                'rewarded_at' => now(),
+            ]);
+        }
         return redirect('/')->with('success', 'Your email has been verified!');
     }
     public function nameUpdate(Request $request, $userId)
