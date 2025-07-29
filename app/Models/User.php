@@ -10,6 +10,24 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\ProfileImage;
+use App\Models\OrgAdministrator;
+use App\Models\Address;
+use App\Models\PhoneNumber;
+use App\Models\UserCountry;
+use App\Models\Country;
+use App\Models\CountryRegion;
+use App\Models\Region;
+use App\Models\ManagementSubscription;
+use App\Models\StorageSubscription;
+use App\Models\AccountsFund;
+use App\Models\ManagementPackage;
+use App\Models\ManagementAndStorageBilling;
+use App\Models\RegionCurrency;
+use App\Models\Currency;
+use App\Models\ReferralCode;
+use App\Models\Referral;
+use App\Models\ReferralReward;
 
 class User extends Authenticatable
 {
@@ -107,7 +125,7 @@ class User extends Authenticatable
 
     public function accountFund()
     {
-        return $this->hasMany(AccountFund::class, 'user_id', 'id')->where('is_active', true);
+        return $this->hasMany(AccountsFund::class, 'user_id', 'id')->where('is_active', true);
     }
 
     //for user subscription package
@@ -138,6 +156,47 @@ class User extends Authenticatable
     public function currency()
     {
         return $this->hasOne(Currency::class, 'currency_id', 'id')->where('is_active', true);
+    }
+
+    // User's own referral code
+    public function referralCode()
+    {
+        return $this->hasOne(ReferralCode::class);
+    }
+
+    // Referrals this user made (as referrer)
+    public function referralsMade()
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
+    }
+
+    // Referrals where this user was referred
+    public function referredBy()
+    {
+        return $this->hasOne(Referral::class, 'referred_user_id');
+    }
+
+    // Rewards received from referrals
+    public function referralRewards()
+    {
+        return $this->hasMany(ReferralReward::class);
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($user) {
+            if (! $user->referralCode) {
+                \App\Models\ReferralCode::create([
+                    'user_id' => $user->id,
+                    'code' => strtoupper('AZN' . str_pad($user->id, 6, '0', STR_PAD_LEFT)),
+                    'reward_type' => 'credit',
+                    'reward_value' => 10, // e.g. 10 points or dollars
+                    'status' => 'active',
+                ]);
+            }
+        });
     }
 
 

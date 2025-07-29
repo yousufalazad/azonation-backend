@@ -47,6 +47,7 @@ use App\Http\Controllers\Org\YearPlan\YearPlanController;
 use App\Http\Controllers\Org\FounderController;
 use App\Http\Controllers\Org\OrgAdministratorController;
 use App\Http\Controllers\Org\OrgProfileController;
+use App\Http\Controllers\Common\ReferralController;
 
 use App\Http\Controllers\SuperAdmin\Financial\ReceiptController;
 
@@ -120,6 +121,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
     Route::put('update-password/{userId}', [AuthController::class, 'updatePassword']);
     Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
+
+    Route::get('/referrals', [ReferralController::class, 'index']);
+    Route::get('/referrals/stats', [ReferralController::class, 'stats']);
+
 
     //Org finance related api
     Route::group(['prefix' => 'org-financial'], function () {

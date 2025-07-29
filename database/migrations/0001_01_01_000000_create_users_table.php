@@ -29,6 +29,9 @@ return new class extends Migration
 
             $table->string('reset_code')->nullable();
             $table->timestamp('reset_code_expires_at')->nullable();
+
+            //
+            
             
             $table->enum('activation_status', [
                 'active', 
