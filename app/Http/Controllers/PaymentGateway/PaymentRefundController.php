@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 
-use App\Models\AuthorizenetPayment;
+use App\Models\PaymentRefund;
 use Illuminate\Http\Request;
 
-class AuthorizenetPaymentController extends Controller
+class PaymentRefundController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +35,7 @@ class AuthorizenetPaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(AuthorizenetPayment $authorizenetPayment)
+    public function show(PaymentRefund $paymentRefund)
     {
         //
     }
@@ -42,7 +43,7 @@ class AuthorizenetPaymentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(AuthorizenetPayment $authorizenetPayment)
+    public function edit(PaymentRefund $paymentRefund)
     {
         //
     }
@@ -50,7 +51,7 @@ class AuthorizenetPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, AuthorizenetPayment $authorizenetPayment)
+    public function update(Request $request, PaymentRefund $paymentRefund)
     {
         //
     }
@@ -58,7 +59,7 @@ class AuthorizenetPaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(AuthorizenetPayment $authorizenetPayment)
+    public function destroy(PaymentRefund $paymentRefund)
     {
         //
     }

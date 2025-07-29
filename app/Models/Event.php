@@ -23,7 +23,7 @@ class Event extends Model
         'status',
         'conduct_type'
     ];
-    protected $hidden=[
+    protected $hidden = [
         'created_at',
         'updated_at'
     ];
@@ -35,5 +35,10 @@ class Event extends Model
     public function images()
     {
         return $this->hasMany(EventImage::class, 'event_id');
+    }
+
+    public function eventAttendances()
+    {
+        return $this->hasMany(EventAttendance::class, 'event_id');
     }
 }

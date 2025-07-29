@@ -1,13 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 
-use App\Models\GatewayCredential;
+use App\Models\PaymentWebhookLogs;
 use Illuminate\Http\Request;
 
-class GatewayCredentialController extends Controller
+class PaymentWebhookLogsController extends Controller
 {
-
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
         //
@@ -26,17 +29,13 @@ class GatewayCredentialController extends Controller
      */
     public function store(Request $request)
     {
-        // Encrypt
-        $encrypted = Crypt::encryptString('your-secret-key');
-
-        // Decrypt
-        $decrypted = Crypt::decryptString($encrypted);
+        //
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(GatewayCredential $gatewayCredential)
+    public function show(PaymentWebhookLogs $paymentWebhookLogs)
     {
         //
     }
@@ -44,7 +43,7 @@ class GatewayCredentialController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(GatewayCredential $gatewayCredential)
+    public function edit(PaymentWebhookLogs $paymentWebhookLogs)
     {
         //
     }
@@ -52,7 +51,7 @@ class GatewayCredentialController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, GatewayCredential $gatewayCredential)
+    public function update(Request $request, PaymentWebhookLogs $paymentWebhookLogs)
     {
         //
     }
@@ -60,7 +59,7 @@ class GatewayCredentialController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(GatewayCredential $gatewayCredential)
+    public function destroy(PaymentWebhookLogs $paymentWebhookLogs)
     {
         //
     }

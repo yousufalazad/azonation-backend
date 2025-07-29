@@ -11,6 +11,9 @@ use App\Models\CommitteeMember;
 use App\Models\Project;
 use App\Models\AssetAssignmentLog;
 use App\Models\ProfileImage;
+use App\Models\EventAttendance;
+use App\Models\MeetingAttendance;
+use App\Models\ProjectAttendance;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -39,7 +42,7 @@ class IndividualController extends Controller
             ->groupBy(fn($item) => optional($item->committee)->user_id);
 
         // Get all active asset assignments for the user
-        $assignmentLogs = \App\Models\AssetAssignmentLog::with(['asset:id,name,quantity,user_id'])
+        $assignmentLogs = AssetAssignmentLog::with(['asset:id,name,quantity,user_id'])
             ->where('responsible_user_id', $userId)
             ->where('is_active', true)
             ->get()
@@ -528,6 +531,106 @@ class IndividualController extends Controller
             return response()->json(['status' => false, 'message' => 'Individual data not found']);
         }
     }
+
+    public function attendance()
+    {
+        $userId = Auth::id();
+
+        $meetingsAttended = MeetingAttendance::where('user_id', $userId)->count();
+        $eventsAttended = EventAttendance::where('user_id', $userId)->count();
+        $projectsParticipated = ProjectAttendance::where('user_id', $userId)->count();
+
+        $upcomingMeetings = Meeting::with('meetingAttendances')
+            ->whereHas('meetingAttendances', fn($q) => $q->where('user_id', $userId))
+            ->whereDate('date', '>=', now())
+            ->get()
+            ->map(fn($m) => [
+                'id' => $m->id,
+                'type' => 'Meeting',
+                'title' => $m->name,
+                'date' => $m->date,
+                'status' => 'scheduled',
+            ]);
+
+        $upcomingEvents = Event::with('eventAttendances')
+            ->whereHas('eventAttendances', fn($q) => $q->where('user_id', $userId))
+            ->whereDate('date', '>=', now())
+            ->get()
+            ->map(fn($e) => [
+                'id' => $e->id,
+                'type' => 'Event',
+                'title' => $e->title,
+                'date' => $e->date,
+                'status' => 'scheduled',
+            ]);
+
+        $upcomingProjects = Project::with('projectAttendances')
+            ->whereHas('projectAttendances', fn($q) => $q->where('user_id', $userId))
+            ->whereDate('start_date', '>=', now())
+            ->get()
+            ->map(fn($p) => [
+                'id' => $p->id,
+                'type' => 'Project',
+                'title' => $p->title,
+                'date' => $p->start_date,
+                'status' => 'scheduled',
+            ]);
+
+        $pastMeetings = Meeting::with('meetingAttendances')
+            ->whereHas('meetingAttendances', fn($q) => $q->where('user_id', $userId))
+            ->whereDate('date', '<', now())
+            ->get()
+            ->map(fn($m) => [
+                'id' => $m->id,
+                'type' => 'Meeting',
+                'title' => $m->name,
+                'date' => $m->date,
+                'status' => 'attended',
+            ]);
+
+        $pastEvents = Event::with('eventAttendances')
+            ->whereHas('eventAttendances', fn($q) => $q->where('user_id', $userId))
+            ->whereDate('date', '<', now())
+            ->get()
+            ->map(fn($e) => [
+                'id' => $e->id,
+                'type' => 'Event',
+                'title' => $e->title,
+                'date' => $e->date,
+                'status' => 'attended',
+            ]);
+
+        $pastProjects = Project::with('projectAttendances')
+            ->whereHas('projectAttendances', fn($q) => $q->where('user_id', $userId))
+            ->whereDate('end_date', '<', now())
+            ->get()
+            ->map(fn($p) => [
+                'id' => $p->id,
+                'type' => 'Project',
+                'title' => $p->title,
+                'date' => $p->end_date,
+                'status' => 'attended',
+            ]);
+
+        return response()->json([
+            'stats' => [
+                'meetings_attended' => $meetingsAttended,
+                'events_attended' => $eventsAttended,
+                'projects_participated' => $projectsParticipated,
+            ],
+            'upcoming' => $upcomingMeetings
+                ->concat($upcomingEvents)
+                ->concat($upcomingProjects)
+                ->sortBy('date')
+                ->values(),
+            'past' => $pastMeetings
+                ->concat($pastEvents)
+                ->concat($pastProjects)
+                ->sortByDesc('date')
+                ->values(),
+        ]);
+    }
+
     public function edit(Individual $individual) {}
     public function update(Request $request, Individual $individual) {}
     public function destroy(Individual $individual) {}

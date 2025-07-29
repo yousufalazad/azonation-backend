@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\RazorpayPayment;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
+use App\Models\AuthorizenetPayment;
 use Illuminate\Http\Request;
 
-class RazorpayPaymentController extends Controller
+class AuthorizenetPaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class RazorpayPaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(RazorpayPayment $razorpayPayment)
+    public function show(AuthorizenetPayment $authorizenetPayment)
     {
         //
     }
@@ -42,7 +42,7 @@ class RazorpayPaymentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(RazorpayPayment $razorpayPayment)
+    public function edit(AuthorizenetPayment $authorizenetPayment)
     {
         //
     }
@@ -50,7 +50,7 @@ class RazorpayPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, RazorpayPayment $razorpayPayment)
+    public function update(Request $request, AuthorizenetPayment $authorizenetPayment)
     {
         //
     }
@@ -58,7 +58,7 @@ class RazorpayPaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(RazorpayPayment $razorpayPayment)
+    public function destroy(AuthorizenetPayment $authorizenetPayment)
     {
         //
     }

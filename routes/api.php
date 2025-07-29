@@ -1,11 +1,20 @@
 <?php
 
+//Common controllers
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Common\UserCountryController;
 use App\Http\Controllers\Common\AddressController;
 use App\Http\Controllers\Common\PhoneNumberController;
 use App\Http\Controllers\Common\NotificationController;
+use App\Http\Controllers\Common\ReferralController;
+
+
+// Individual controllers
+use App\Http\Controllers\Individual\IndividualController;
+
+// Organisation controllers
+use App\Http\Controllers\Common\UserCountryController;
+
 use App\Http\Controllers\Ecommerce\Category\BusinessTypeController;
 use App\Http\Controllers\Ecommerce\Category\CategoryController;
 use App\Http\Controllers\Ecommerce\Category\SubCategoryController;
@@ -15,7 +24,6 @@ use App\Http\Controllers\Ecommerce\Product\ProductController;
 use App\Http\Controllers\Ecommerce\Order\OrderItemController;
 use App\Http\Controllers\Ecommerce\Order\OrderController;
 use App\Http\Controllers\Ecommerce\Order\OrderDetailController;
-use App\Http\Controllers\Individual\IndividualController;
 use App\Http\Controllers\Org\Accounts\AccountsController;
 use App\Http\Controllers\Org\Accounts\AccountsFundController;
 use App\Http\Controllers\Org\Asset\AssetController;
@@ -47,7 +55,6 @@ use App\Http\Controllers\Org\YearPlan\YearPlanController;
 use App\Http\Controllers\Org\FounderController;
 use App\Http\Controllers\Org\OrgAdministratorController;
 use App\Http\Controllers\Org\OrgProfileController;
-use App\Http\Controllers\Common\ReferralController;
 
 use App\Http\Controllers\SuperAdmin\Financial\ReceiptController;
 
@@ -421,6 +428,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('auth:sanctum')->get('/individual/past_projects', [IndividualController::class, 'past_projects']);
     Route::middleware('auth:sanctum')->get('/individual/assets', [IndividualController::class, 'assets']);
     Route::middleware('auth:sanctum')->get('/individual/past_assets', [IndividualController::class, 'past_assets']);
+    Route::middleware('auth:sanctum')->get('/individual/attendance', [IndividualController::class, 'attendance']);
 
     // ----------------------- Superadmin --------------------
     Route::get('/super_admin_profile_image/{userId}', [SuperAdminController::class, 'getSuperAdminProfileImage']);

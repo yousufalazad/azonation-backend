@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\PaymentGateway;
+use App\Http\Controllers\Controller;
 
-use App\Models\PaypalPayment;
+use App\Models\GatewayCredential;
 use Illuminate\Http\Request;
 
-class PaypalPaymentController extends Controller
+class GatewayCredentialController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         //
@@ -28,13 +27,17 @@ class PaypalPaymentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Encrypt
+        $encrypted = Crypt::encryptString('your-secret-key');
+
+        // Decrypt
+        $decrypted = Crypt::decryptString($encrypted);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(PaypalPayment $paypalPayment)
+    public function show(GatewayCredential $gatewayCredential)
     {
         //
     }
@@ -42,7 +45,7 @@ class PaypalPaymentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PaypalPayment $paypalPayment)
+    public function edit(GatewayCredential $gatewayCredential)
     {
         //
     }
@@ -50,7 +53,7 @@ class PaypalPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PaypalPayment $paypalPayment)
+    public function update(Request $request, GatewayCredential $gatewayCredential)
     {
         //
     }
@@ -58,7 +61,7 @@ class PaypalPaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PaypalPayment $paypalPayment)
+    public function destroy(GatewayCredential $gatewayCredential)
     {
         //
     }
