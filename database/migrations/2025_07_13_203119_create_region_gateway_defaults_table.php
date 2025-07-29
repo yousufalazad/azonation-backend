@@ -31,7 +31,8 @@ return new class extends Migration
             $table->string('admin_note')->nullable()
                 ->comment('Admin note for the default gateway setting, e.g., "Default for BD region"');
 
-            $table->boolean('is_active')->default('active');
+            $table->boolean('is_active')->default(true)
+                ->comment('Whether this default setting is currently active');
             $table->timestamps();
         });
     }

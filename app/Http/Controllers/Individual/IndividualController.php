@@ -535,13 +535,14 @@ class IndividualController extends Controller
     public function attendance()
     {
         $userId = Auth::id();
+        $today = Carbon::today();
 
         $meetingsAttended = MeetingAttendance::where('user_id', $userId)->count();
         $eventsAttended = EventAttendance::where('user_id', $userId)->count();
         $projectsParticipated = ProjectAttendance::where('user_id', $userId)->count();
 
         // --- Attended Meetings ---
-        $pastMeetings = Meeting::whereDate('date', '<', now())
+        $pastMeetings = Meeting::whereDate('date', '<=', $today)
             ->whereHas('meetingAttendances', fn($q) => $q->where('user_id', $userId))
             ->get()
             ->map(fn($m) => [
@@ -552,8 +553,8 @@ class IndividualController extends Controller
                 'status' => 'attended',
             ]);
 
-        // --- Absent Meetings (no attendance record) ---
-        $pastMeetingsAbsent = Meeting::whereDate('date', '<', now())
+        // --- Absent Meetings ---
+        $pastMeetingsAbsent = Meeting::whereDate('date', '<=', $today)
             ->whereDoesntHave('meetingAttendances', fn($q) => $q->where('user_id', $userId))
             ->get()
             ->map(fn($m) => [
@@ -565,7 +566,7 @@ class IndividualController extends Controller
             ]);
 
         // --- Attended Events ---
-        $pastEvents = Event::whereDate('date', '<', now())
+        $pastEvents = Event::whereDate('date', '<=', $today)
             ->whereHas('eventAttendances', fn($q) => $q->where('user_id', $userId))
             ->get()
             ->map(fn($e) => [
@@ -576,8 +577,8 @@ class IndividualController extends Controller
                 'status' => 'attended',
             ]);
 
-        // --- Absent Events (no attendance record) ---
-        $pastEventsAbsent = Event::whereDate('date', '<', now())
+        // --- Absent Events ---
+        $pastEventsAbsent = Event::whereDate('date', '<=', $today)
             ->whereDoesntHave('eventAttendances', fn($q) => $q->where('user_id', $userId))
             ->get()
             ->map(fn($e) => [
@@ -589,7 +590,7 @@ class IndividualController extends Controller
             ]);
 
         // --- Participated Projects ---
-        $pastProjects = Project::whereDate('end_date', '<', now())
+        $pastProjects = Project::whereDate('end_date', '<=', $today)
             ->whereHas('projectAttendances', fn($q) => $q->where('user_id', $userId))
             ->get()
             ->map(fn($p) => [
@@ -600,8 +601,8 @@ class IndividualController extends Controller
                 'status' => 'attended',
             ]);
 
-        // --- Absent Projects (no attendance record) ---
-        $pastProjectsAbsent = Project::whereDate('end_date', '<', now())
+        // --- Absent Projects ---
+        $pastProjectsAbsent = Project::whereDate('end_date', '<=', $today)
             ->whereDoesntHave('projectAttendances', fn($q) => $q->where('user_id', $userId))
             ->get()
             ->map(fn($p) => [
@@ -631,6 +632,7 @@ class IndividualController extends Controller
                 ->values(),
         ]);
     }
+
 
 
     public function edit(Individual $individual) {}
