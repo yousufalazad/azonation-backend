@@ -540,45 +540,9 @@ class IndividualController extends Controller
         $eventsAttended = EventAttendance::where('user_id', $userId)->count();
         $projectsParticipated = ProjectAttendance::where('user_id', $userId)->count();
 
-        $upcomingMeetings = Meeting::with('meetingAttendances')
+        // --- Attended Meetings ---
+        $pastMeetings = Meeting::whereDate('date', '<', now())
             ->whereHas('meetingAttendances', fn($q) => $q->where('user_id', $userId))
-            ->whereDate('date', '>=', now())
-            ->get()
-            ->map(fn($m) => [
-                'id' => $m->id,
-                'type' => 'Meeting',
-                'title' => $m->name,
-                'date' => $m->date,
-                'status' => 'scheduled',
-            ]);
-
-        $upcomingEvents = Event::with('eventAttendances')
-            ->whereHas('eventAttendances', fn($q) => $q->where('user_id', $userId))
-            ->whereDate('date', '>=', now())
-            ->get()
-            ->map(fn($e) => [
-                'id' => $e->id,
-                'type' => 'Event',
-                'title' => $e->title,
-                'date' => $e->date,
-                'status' => 'scheduled',
-            ]);
-
-        $upcomingProjects = Project::with('projectAttendances')
-            ->whereHas('projectAttendances', fn($q) => $q->where('user_id', $userId))
-            ->whereDate('start_date', '>=', now())
-            ->get()
-            ->map(fn($p) => [
-                'id' => $p->id,
-                'type' => 'Project',
-                'title' => $p->title,
-                'date' => $p->start_date,
-                'status' => 'scheduled',
-            ]);
-
-        $pastMeetings = Meeting::with('meetingAttendances')
-            ->whereHas('meetingAttendances', fn($q) => $q->where('user_id', $userId))
-            ->whereDate('date', '<', now())
             ->get()
             ->map(fn($m) => [
                 'id' => $m->id,
@@ -588,9 +552,21 @@ class IndividualController extends Controller
                 'status' => 'attended',
             ]);
 
-        $pastEvents = Event::with('eventAttendances')
+        // --- Absent Meetings (no attendance record) ---
+        $pastMeetingsAbsent = Meeting::whereDate('date', '<', now())
+            ->whereDoesntHave('meetingAttendances', fn($q) => $q->where('user_id', $userId))
+            ->get()
+            ->map(fn($m) => [
+                'id' => $m->id,
+                'type' => 'Meeting',
+                'title' => $m->name,
+                'date' => $m->date,
+                'status' => 'absent',
+            ]);
+
+        // --- Attended Events ---
+        $pastEvents = Event::whereDate('date', '<', now())
             ->whereHas('eventAttendances', fn($q) => $q->where('user_id', $userId))
-            ->whereDate('date', '<', now())
             ->get()
             ->map(fn($e) => [
                 'id' => $e->id,
@@ -600,9 +576,21 @@ class IndividualController extends Controller
                 'status' => 'attended',
             ]);
 
-        $pastProjects = Project::with('projectAttendances')
+        // --- Absent Events (no attendance record) ---
+        $pastEventsAbsent = Event::whereDate('date', '<', now())
+            ->whereDoesntHave('eventAttendances', fn($q) => $q->where('user_id', $userId))
+            ->get()
+            ->map(fn($e) => [
+                'id' => $e->id,
+                'type' => 'Event',
+                'title' => $e->title,
+                'date' => $e->date,
+                'status' => 'absent',
+            ]);
+
+        // --- Participated Projects ---
+        $pastProjects = Project::whereDate('end_date', '<', now())
             ->whereHas('projectAttendances', fn($q) => $q->where('user_id', $userId))
-            ->whereDate('end_date', '<', now())
             ->get()
             ->map(fn($p) => [
                 'id' => $p->id,
@@ -612,24 +600,38 @@ class IndividualController extends Controller
                 'status' => 'attended',
             ]);
 
+        // --- Absent Projects (no attendance record) ---
+        $pastProjectsAbsent = Project::whereDate('end_date', '<', now())
+            ->whereDoesntHave('projectAttendances', fn($q) => $q->where('user_id', $userId))
+            ->get()
+            ->map(fn($p) => [
+                'id' => $p->id,
+                'type' => 'Project',
+                'title' => $p->title,
+                'date' => $p->end_date,
+                'status' => 'absent',
+            ]);
+
         return response()->json([
             'stats' => [
                 'meetings_attended' => $meetingsAttended,
                 'events_attended' => $eventsAttended,
                 'projects_participated' => $projectsParticipated,
             ],
-            'upcoming' => $upcomingMeetings
-                ->concat($upcomingEvents)
-                ->concat($upcomingProjects)
-                ->sortBy('date')
-                ->values(),
             'past' => $pastMeetings
                 ->concat($pastEvents)
                 ->concat($pastProjects)
                 ->sortByDesc('date')
                 ->values(),
+
+            'past_absent' => $pastMeetingsAbsent
+                ->concat($pastEventsAbsent)
+                ->concat($pastProjectsAbsent)
+                ->sortByDesc('date')
+                ->values(),
         ]);
     }
+
 
     public function edit(Individual $individual) {}
     public function update(Request $request, Individual $individual) {}

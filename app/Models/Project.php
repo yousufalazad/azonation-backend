@@ -21,7 +21,7 @@ class Project extends Model
         'venue_address',
         'requirements',
         'note',
-        'status',
+        'is_active',
         'conduct_type'
     ];
 

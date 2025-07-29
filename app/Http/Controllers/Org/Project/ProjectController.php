@@ -64,7 +64,7 @@ class ProjectController extends Controller
             'venue_address' => 'nullable|string',
             'requirements' => 'nullable|string',
             'note' => 'nullable|string',
-            'status' => 'nullable|string|max:50',
+            'is_active' => 'nullable|string|max:50',
             'conduct_type' => 'nullable|string|max:100',
             'documents.*' => 'nullable|file|mimes:pdf,doc,docx,xlsx,xls,ppt,pptx,jpg,jpeg,png|max:100240',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:100240',
@@ -139,7 +139,7 @@ class ProjectController extends Controller
             return $document;
         });
 
-        return response()->json(['status' => true, 'data' => $project], 200);
+        return response()->json(['is_active' => true, 'data' => $project], 200);
     }
     public function edit(Project $project) {}
     public function update(Request $request, $id)
@@ -156,7 +156,7 @@ class ProjectController extends Controller
             'venue_address' => 'nullable|string',
             'requirements' => 'nullable|string',
             'note' => 'nullable|string',
-            'status' => 'nullable|string',
+            'is_active' => 'nullable|string',
             'conduct_type' => 'nullable|string|max:100',
         ]);
 
@@ -236,7 +236,7 @@ class ProjectController extends Controller
         $project->venue_address = $request->input('venue_address');
         $project->requirements = $request->input('requirements');
         $project->note = $request->input('note');
-        $project->status = $request->input('status');
+        $project->is_active = $request->input('is_active');
         $project->conduct_type = $request->input('conduct_type');
         $project->save();
 
