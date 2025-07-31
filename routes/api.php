@@ -351,7 +351,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::group(['prefix' => 'founders'], function () {
         Route::get('/', [FounderController::class, 'index']);
         Route::post('/', [FounderController::class, 'store']);
-        Route::put('/{id}', [FounderController::class, 'update']);
+        Route::post('/{id}', [FounderController::class, 'update']);
         Route::delete('/{id}', [FounderController::class, 'destroy']);
     });
     Route::group(['prefix' => 'assets'], function () {
