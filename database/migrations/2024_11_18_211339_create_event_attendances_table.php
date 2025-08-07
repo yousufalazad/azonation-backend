@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('event_id')
                   ->constrained('events')
                   ->cascadeOnDelete()
-                  ->comment('Foreign key referencing the org_events table');
+                  ->comment('Foreign key referencing the events table');
 
             //Attendee
             $table->foreignId('user_id')

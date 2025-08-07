@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\Org\Asset;
-
 use App\Http\Controllers\Controller;
 
 use App\Models\Asset;
@@ -24,37 +22,34 @@ class AssetController extends Controller
         $user_id = $request->user()->id;
         $assets = DB::table('assets as a')
             ->select(
-                'a.id',
-                'a.user_id',
-                'a.name',
-                'a.description',
-                'a.start_date',
-                'a.end_date',
-                'a.is_long_term',
-                'a.quantity',
-                'a.value_amount',
-                'a.inkind_value',
-                'a.is_tangible',
+                'a.id as id',
+                'a.user_id as user_id',
+                'a.name as name',
+                'a.description as description',
+                'a.start_date as start_date',
+                'a.end_date as end_date',
+                'a.is_long_term as is_long_term',
+                'a.quantity as quantity',
+                'a.value_amount as value_amount',
+                'a.inkind_value as inkind_value',
+                'a.is_tangible as is_tangible',
                 'ps.name as privacy_setup_name',
-                'a.is_active',
+                'a.is_active as is_active',
                 'u.first_name as responsible_user_first_name',
                 'u.last_name as responsible_user_last_name',
-                'aal.assignment_start_date',
-                'aal.assignment_end_date',
+                'aal.assignment_start_date as assignment_start_date',
+                'aal.assignment_end_date as assignment_end_date',
                 'als.name as asset_lifecycle_statuses_name',
-                'aal.note'
+                'aal.note as note'
             )
-            ->leftJoin('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
-            ->leftJoin('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
-            ->leftJoin('users as u', 'aal.responsible_user_id', '=', 'u.id')
-            ->leftJoin('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
-            ->where('a.user_id', $user_id)
+            ->join('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
+            ->join('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
+            ->join('users as u', 'aal.responsible_user_id', '=', 'u.id')
+            ->join('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
+            ->where('a.user_id', '=', $user_id)
             ->get();
-
         return response()->json(['status' => true, 'data' => $assets], 200);
     }
-
-
     public function getAssetDetails($assetId)
     {
         $asset = DB::table('assets as a')
@@ -82,10 +77,10 @@ class AssetController extends Controller
                 'als.name as asset_lifecycle_statuses_name',
                 'aal.note as note'
             )
-            ->leftJoin('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
-            ->leftJoin('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
-            ->leftJoin('users as u', 'aal.responsible_user_id', '=', 'u.id')
-            ->leftJoin('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
+            ->join('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
+            ->join('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
+            ->join('users as u', 'aal.responsible_user_id', '=', 'u.id')
+            ->join('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
             ->where('a.id', '=', $assetId)
             ->first();
         if (!$asset) {
@@ -130,7 +125,7 @@ class AssetController extends Controller
         });
         return response()->json($asset);
     }
-
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -210,7 +205,7 @@ class AssetController extends Controller
             return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
         }
     }
-
+    
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -235,7 +230,6 @@ class AssetController extends Controller
         DB::beginTransaction();
         try {
             $asset = Asset::findOrFail($id);
-            // dd(vars: $validated);exit;
             $asset->update($validated);
             $assetAssignmentLog = AssetAssignmentLog::where('asset_id', $asset->id)->first();
             if ($assetAssignmentLog) {

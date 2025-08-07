@@ -67,8 +67,9 @@ return new class extends Migration
             
             //Foreign key referencing the privacy setups table (privacy settings)
             $table->foreignId('privacy_setup_id')
-                ->constrained('privacy_setups')
                 ->nullable()
+                ->constrained('privacy_setups')
+                ->onDelete('set null')
                 ->comment('Privacy level of the asset (e.g., public, private, only members. etc).');
 
             $table->boolean('is_active')

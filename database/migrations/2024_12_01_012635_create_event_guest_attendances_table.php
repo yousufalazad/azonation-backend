@@ -19,7 +19,7 @@ return new class extends Migration
                   ->constrained('events')
                   ->cascadeOnUpdate()
                   ->cascadeOnDelete()
-                  ->comment('Foreign key referencing the org_events table');
+                  ->comment('Foreign key referencing the events table');
 
             // Guest details and meeting attendance information
             $table->string('guest_name')->nullable()->comment('Name of the guest attending the meeting');

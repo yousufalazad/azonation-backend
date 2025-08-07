@@ -15,7 +15,6 @@ class History extends Model
         'history',
         'privacy_setup_id',
         'is_active',
-        'image',
         'document'
     ];
     protected $hidden = [
