@@ -30,4 +30,8 @@ class AssetAssignmentLog extends Model
     {
         return $this->belongsTo(Asset::class, 'asset_id');
     }
+    public function lifecycle()
+    {
+        return $this->belongsTo(AssetLifecycleStatus::class, 'asset_lifecycle_statuses_id', 'id');
+    }
 }

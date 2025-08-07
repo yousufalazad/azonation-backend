@@ -16,7 +16,6 @@ class StrategicPlan extends Model
         'end_date',
         'privacy_setup_id',
         'status',
-        'image'
     ];
 
     protected $hidden = [

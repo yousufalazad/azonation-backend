@@ -45,7 +45,6 @@ return new class extends Migration
             $table->string('receipt_url')->nullable(); // Receipt link
             $table->string('note')->nullable(); // Optional description or memo
 
-            $table->timestamp('created_at')->nullable(); // When payment was created
             $table->timestamp('completed_at')->nullable(); // When payment completed
 
             // Refund info

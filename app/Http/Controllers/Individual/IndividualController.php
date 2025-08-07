@@ -28,7 +28,8 @@ class IndividualController extends Controller
         $userId = Auth::id();
 
         // Get connected organisations
-        $connectedOrgs = OrgMember::where('individual_type_user_id', $userId)
+        $connectedOrgs = OrgMember::with(['membershipType:id,name'])
+            ->where('individual_type_user_id', $userId)
             ->leftJoin('users as connectedorg', 'org_members.org_type_user_id', '=', 'connectedorg.id')
             ->select('org_members.*', 'connectedorg.org_name')
             ->get();
@@ -42,11 +43,20 @@ class IndividualController extends Controller
             ->groupBy(fn($item) => optional($item->committee)->user_id);
 
         // Get all active asset assignments for the user
-        $assignmentLogs = AssetAssignmentLog::with(['asset:id,name,quantity,user_id'])
+        // $assignmentLogs = AssetAssignmentLog::with(['asset:id,name,quantity,user_id', 'lifecycle:id,name as lifecyclestaus'])
+        //     ->where('responsible_user_id', $userId)
+        //     ->where('is_active', true)
+        //     ->get()
+        //     ->groupBy(fn($log) => optional($log->asset)->user_id); // Group by organisation ID
+
+        $assignmentLogs = AssetAssignmentLog::with([
+            'asset:id,name,quantity,user_id',
+            'lifecycle:id,name'                  // eager load lifecycle status
+        ])
             ->where('responsible_user_id', $userId)
             ->where('is_active', true)
             ->get()
-            ->groupBy(fn($log) => optional($log->asset)->user_id); // Group by organisation ID
+            ->groupBy(fn($log) => optional($log->asset)->user_id); // group by org ID
 
         $orgWiseData = [];
 
@@ -86,6 +96,7 @@ class IndividualController extends Controller
                     'quantity' => optional($log->asset)->quantity,
                     'assignment_start_date' => $log->assignment_start_date,
                     'asset_lifecycle_status_id' => $log->asset_lifecycle_statuses_id,
+                    'asset_lifecycle_status_name' => optional($log->lifecycle)->name, // Include lifecycle status name
                 ];
             })->values();
 
