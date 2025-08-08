@@ -3,7 +3,7 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie', 'login'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*'],  // Change * to your frontend URL in production
+    'allowed_origins' =>  ['https://my.azonation.com', 'http://localhost:5173'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],

@@ -111,6 +111,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
     // ----------------------- Organisation --------------------
+
+    Route::get('/notifications/get-all/{userId}', [NotificationController::class, 'getNotifications']);
+    Route::post('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
+    Route::post('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
+    Route::get('/org-profile-data/{userId}', [OrgProfileController::class, 'index']);
+    Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update']);
+    Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
+    Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
+
+
     Route::group(['prefix' => 'addresses'], function () {
         Route::get('/', [AddressController::class, 'index']);
         Route::post('/', [AddressController::class, 'store']);
@@ -190,14 +200,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}', [SuccessStoryController::class, 'update']);
         Route::delete('/{id}', [SuccessStoryController::class, 'destroy']);
     });
-
-    Route::get('/notifications/get-all/{userId}', [NotificationController::class, 'getNotifications']);
-    Route::get('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
-    Route::get('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
-    Route::get('/org-profile-data/{userId}', [OrgProfileController::class, 'index']);
-    Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update']);
-    Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
-    Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
 
     Route::group(['prefix' => 'office-documents'], function () {
         Route::get('/', [OfficeDocumentController::class, 'index']);
