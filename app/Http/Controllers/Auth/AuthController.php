@@ -179,7 +179,6 @@ class AuthController extends Controller
         ], $status);
     }
 
-
     public function verify($uuid)
     {
         $user = User::where('verification_token', $uuid)->first();
@@ -210,6 +209,60 @@ class AuthController extends Controller
             ]);
         }
         return redirect('/')->with('success', 'Your email has been verified!');
+    }
+    public function firstNameUpdate(Request $request, $userId)
+    {
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:100',
+        ]);
+        try {
+            $user = User::findOrFail($userId);
+            $user->first_name = $validated['first_name'];
+            $user->save();
+            return response()->json([
+                'status' => true,
+                'message' => 'First Name updated successfully',
+                'data' => $user
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while updating the name',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    } 
+    public function lastNameUpdate(Request $request, $userId)
+    {
+        $validated = $request->validate([
+            'last_name' => 'required|string|max:100',
+        ]);
+        try {
+            $user = User::findOrFail($userId);
+            $user->last_name = $validated['last_name'];
+            $user->save();
+            return response()->json([
+                'status' => true,
+                'message' => 'Last Name updated successfully',
+                'data' => $user
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while updating the last_name',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
     public function nameUpdate(Request $request, $userId)
     {

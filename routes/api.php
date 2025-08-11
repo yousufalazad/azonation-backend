@@ -99,6 +99,8 @@ Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode']
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 
+
+
 // ----------------------- Need to separate only index outside auth --------------------
 Route::group(['prefix' => 'countries'], function () {
     Route::get('/', [CountryController::class, 'index']);
@@ -109,6 +111,16 @@ Route::group(['prefix' => 'countries'], function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::put('update-first-name/{userId}', [AuthController::class, 'firstNameUpdate']);
+    Route::put('update-last-name/{userId}', [AuthController::class, 'lastNameUpdate']);
+    Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
+    Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
+    Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
+    Route::put('update-password/{userId}', [AuthController::class, 'updatePassword']);
+    Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
+
+    Route::get('/referrals', [ReferralController::class, 'index']);
+    Route::get('/referrals/stats', [ReferralController::class, 'stats']);
 
     // ----------------------- Organisation --------------------
 
@@ -132,15 +144,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dialing-codes', [PhoneNumberController::class, 'getAllDialingCodes']);
     });
 
-
-    Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
-    Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
-    Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
-    Route::put('update-password/{userId}', [AuthController::class, 'updatePassword']);
-    Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
-
-    Route::get('/referrals', [ReferralController::class, 'index']);
-    Route::get('/referrals/stats', [ReferralController::class, 'stats']);
+    
 
 
     //Org finance related api
