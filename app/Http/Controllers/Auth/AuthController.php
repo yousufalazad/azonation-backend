@@ -30,8 +30,9 @@ class AuthController extends Controller
             'country_id' => 'required|numeric|max:999',
             'type' => 'required|string|max:12|in:individual,organisation',
             'password' => 'required|string|min:8',
-            'referral' => 'nullable|string|max:100',
-            'referral_source' => 'nullable|string|max:50',
+            'referral_source' => 'required|string|in:friend,social,search,referral,other',
+            'referral' => 'nullable|string|max:100|required_if:referral_source,referral,other',
+
         ]);
         $user = User::create([
             'first_name' => $request->first_name,
@@ -236,7 +237,7 @@ class AuthController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
-    } 
+    }
     public function lastNameUpdate(Request $request, $userId)
     {
         $validated = $request->validate([

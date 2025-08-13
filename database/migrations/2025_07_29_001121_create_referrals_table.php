@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('referrals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('referral_code_id')
+                ->nullable()
                 ->constrained('referral_codes')
                 ->onDelete('cascade')
                 ->comment('The referral code that was used');
 
             $table->foreignId('referrer_id')
+                ->nullable()
                 ->constrained('users')
                 ->onDelete('cascade')
                 ->comment('The user who shared the referral code');
