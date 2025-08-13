@@ -14,6 +14,8 @@ class Referral extends Model
         'referrer_id',
         'referred_user_id',
         'email',
+        'referral_source',
+        'notes',
         'ip_address',
         'user_agent',
         'signup_completed',
