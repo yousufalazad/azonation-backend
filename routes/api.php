@@ -113,6 +113,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::put('update-first-name/{userId}', [AuthController::class, 'firstNameUpdate']);
     Route::put('update-last-name/{userId}', [AuthController::class, 'lastNameUpdate']);
+    Route::put('update-first-last-name/{userId}', [AuthController::class, 'firstLastNameUpdate']);
     Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
     Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
     Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
@@ -139,9 +140,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [AddressController::class, 'update']);
     });
     Route::group(['prefix' => 'phone-numbers'], function () {
-        Route::get('/', [PhoneNumberController::class, 'show']);
-        Route::put('/', [PhoneNumberController::class, 'update']);
-        Route::get('/dialing-codes', [PhoneNumberController::class, 'getAllDialingCodes']);
+        Route::get('/', [PhoneNumberController::class, 'index']);
+        Route::get('/{id}', [PhoneNumberController::class, 'show']);
+        Route::post('/', [PhoneNumberController::class, 'store']);
+        Route::put('/{id}', [PhoneNumberController::class, 'update']);
+
+        // Route::get('/dialing-codes', [PhoneNumberController::class, 'getAllDialingCodes']);
     });
 
     

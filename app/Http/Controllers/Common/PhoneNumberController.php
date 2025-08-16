@@ -23,6 +23,7 @@ class PhoneNumberController extends Controller
                 'phone_numbers.*',
                 'dialing_codes.dialing_code'
             )->first();
+        // $PhoneNumber = PhoneNumber::where('user_id', $userId)->first();
         return response()->json([
             'status' => true,
             'data' => $PhoneNumber

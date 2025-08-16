@@ -30,9 +30,8 @@ class AuthController extends Controller
             'country_id' => 'required|numeric|max:999',
             'type' => 'required|string|max:12|in:individual,organisation',
             'password' => 'required|string|min:8',
-            'referral_source' => 'required|string|in:friend,social,search,referral,other',
-            'referral' => 'nullable|string|max:100|required_if:referral_source,referral,other',
-
+            'referral' => 'nullable|string|max:100',
+            'referral_source' => 'nullable|string|max:50',
         ]);
         $user = User::create([
             'first_name' => $request->first_name,
@@ -180,6 +179,7 @@ class AuthController extends Controller
         ], $status);
     }
 
+
     public function verify($uuid)
     {
         $user = User::where('verification_token', $uuid)->first();
@@ -211,14 +211,16 @@ class AuthController extends Controller
         }
         return redirect('/')->with('success', 'Your email has been verified!');
     }
-    public function firstNameUpdate(Request $request, $userId)
+    public function firstLastNameUpdate(Request $request, $userId)
     {
         $validated = $request->validate([
             'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
         ]);
         try {
             $user = User::findOrFail($userId);
             $user->first_name = $validated['first_name'];
+            $user->last_name = $validated['last_name'];
             $user->save();
             return response()->json([
                 'status' => true,
@@ -237,7 +239,7 @@ class AuthController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
-    }
+    } 
     public function lastNameUpdate(Request $request, $userId)
     {
         $validated = $request->validate([
