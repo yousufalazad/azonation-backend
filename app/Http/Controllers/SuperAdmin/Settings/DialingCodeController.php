@@ -14,6 +14,8 @@ class DialingCodeController extends Controller
         $dialingCodes = DialingCode::select('dialing_codes.*', 'countries.name as name')
             ->leftJoin('countries', 'dialing_codes.country_id', '=', 'countries.id')
             ->get();
+
+        // $dialingCodes = DialingCode::get();
         return response()->json(['status' => true, 'data' => $dialingCodes], 200);
     }
     public function create() {}
