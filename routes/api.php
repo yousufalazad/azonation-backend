@@ -424,7 +424,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/individual_profile_data/{userId}', [IndividualController::class, 'getProfileImage']);
     Route::get('/profileimage/{userId}', [IndividualController::class, 'getProfileImage']);
     Route::post('/profileimage/{userId}', [IndividualController::class, 'updateProfileImage']);
-    Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrganisationByIndividualId']);
+    // Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrganisationByIndividualId']);
+    Route::get('/connected-org-list', [IndividualController::class, 'getOrganisationByIndividualId']);
+
     Route::get('/individual-users', [IndividualController::class, 'getIndividualUser']);
 
     Route::middleware('auth:sanctum')->get('/individual/dashboard-summary', [IndividualController::class, 'summary']);
