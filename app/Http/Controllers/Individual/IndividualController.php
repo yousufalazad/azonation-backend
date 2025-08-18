@@ -520,10 +520,18 @@ class IndividualController extends Controller
         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
     }
 
-    public function getOrganisationByIndividualId($individualId)
+    public function getOrganisationByIndividualId()
     {
-        $organisations = OrgMember::where('individual_id', $individualId)
-            ->with('connectedorg')
+        // $organisations = OrgMember::where('individual_id', $individualId)
+        //     ->with('connectedorg')
+        //     ->get();
+        $userId = Auth::id();
+
+        // Get connected organisations
+        $organisations = OrgMember::with(['membershipType:id,name'])
+            ->where('individual_type_user_id', $userId)
+            ->leftJoin('users as connectedorg', 'org_members.org_type_user_id', '=', 'connectedorg.id')
+            ->select('org_members.*', 'connectedorg.org_name')
             ->get();
         return response()->json([
             'status' => true,
