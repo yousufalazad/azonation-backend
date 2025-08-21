@@ -39,7 +39,7 @@ return new class extends Migration
             $table->text('note')->nullable(); // Optional additional notes
 
             // Status and conduct type (in-person, remote, hybrid)
-            $table->tinyInteger('status')->default(0)->comment('0=Inactive, 1=Active')->nullable();
+            $table->boolean('is_active')->default(0)->comment('0=Inactive, 1=Active')->nullable();
             $table->tinyInteger('conduct_type')->default(0)->comment('0=None, 1=In-person, 2=Remote, 3=Hybrid')->nullable();
 
             $table->timestamps(); // Created at and updated at timestamps
