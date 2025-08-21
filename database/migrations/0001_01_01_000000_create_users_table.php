@@ -14,25 +14,19 @@ return new class extends Migration
         // Create the users table
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-
             $table->integer('azon_id')->unique()->nullable()->comment('Unique ID from an external system');
             $table->enum('type', ['individual', 'organisation', 'superadmin', 'guest'])->default('guest')->comment('Type of user account');
-            $table->string('name')->comment('Name of the user');
-            $table->string('shortname')->nullable()->comment('Shortname of the user');
-            $table->string('username')->unique()->nullable()->comment('Unique username for the user');
+            $table->string('first_name', 30)->nullable()->comment('First name of the user');
+            $table->string('last_name', 30)->nullable()->comment('Last name of the user');
+            $table->string('org_name', 200)->nullable()->comment('Organisation name');
+            $table->string('username', 30)->unique()->nullable()->comment('Unique username for the user');
             $table->string('email')->unique()->comment('Email address');
-            //$table->string('image')->nullable()->comment('Profile image URL');
             $table->uuid('verification_token')->nullable()->unique()->comment('Email verification token');
             $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');
             $table->string('password')->comment('Password hash');
             $table->rememberToken()->comment('Token for "remember me" functionality');
-
             $table->string('reset_code')->nullable();
             $table->timestamp('reset_code_expires_at')->nullable();
-
-            //
-            
-            
             $table->enum('activation_status', [
                 'active', 
                 'inactive', 
