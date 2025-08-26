@@ -15,6 +15,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Carbon;
+
 
 class OrgMemberController extends Controller
 {
@@ -35,9 +37,14 @@ class OrgMemberController extends Controller
     public function index(Request $request)
     {
         $userId = Auth::id();
+        $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
+
         $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
             ->where('org_type_user_id', $userId)
-            ->where('is_active', '1')
+            ->where(function ($query) use ($today) {
+                $query->whereNull('membership_end_date') // check for NULL
+                    ->orWhere('membership_end_date', '>=', $today); // not expired
+            })
             ->get();
 
         $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
@@ -47,11 +54,41 @@ class OrgMemberController extends Controller
             unset($member->memberProfileImage);
             return $member;
         });
+
         return response()->json([
             'status' => true,
             'data' => $getOrgAllMembers
         ]);
     }
+
+    public function getOrgFormerMembers(Request $request)
+    {
+        $userId = Auth::id();
+        $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
+
+        $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
+            ->where('org_type_user_id', $userId)
+            ->where('is_active', '1')
+            ->where(function ($query) use ($today) {
+                $query->whereNotNull('membership_end_date') // must have an end date
+                    ->where('membership_end_date', '<=', $today); // expired
+            })
+            ->get();
+
+        $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
+            $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
+                ? url(Storage::url($member->memberProfileImage->image_path))
+                : null;
+            unset($member->memberProfileImage);
+            return $member;
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $getOrgAllMembers
+        ]);
+    }
+
 
     // public function getOrgMembers($userId)
     // {
@@ -208,11 +245,17 @@ class OrgMemberController extends Controller
         ]);
         $individualUser = User::find($validated['individual_type_user_id']);
         $orgUser = User::find($validated['org_type_user_id']);
-        $orgName = $orgUser ? $orgUser->name : 'The Organization';
+        $orgName = $orgUser ? $orgUser->org_name : 'The Organization';
         if ($individualUser) {
-            Mail::to($individualUser->email)->queue(new AddMemberSuccessMail($individualUser->name, $orgName));
+            Mail::to($individualUser->email)->queue(new AddMemberSuccessMail($individualUser->first_name, $orgName));
         }
-        User::find($individualUser->id)->notify(new AddMemberSuccess($orgName));
+        // User::find($individualUser->id)->notify(new AddMemberSuccess($orgName));
+        // Send DB notification immediately (no queue)
+            $individualUser->notify(new AddMemberSuccess(
+                orgName: $orgUser->org_name ?? 'The Organization',
+                actorName: auth()->user()->name ?? 'System',
+                actorId: auth()->id()
+            ));
         return response()->json([
             'status' => true,
             'message' => 'Member added successfully',

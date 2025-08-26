@@ -14,7 +14,6 @@ class AccountsFundController extends Controller
     {
         $userId = Auth::id();
         $funds = AccountsFund::where('user_id', $userId)
-            ->where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->get();
         if ($funds->isEmpty()) {
@@ -46,21 +45,22 @@ class AccountsFundController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // dd($request->all());exit;
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'is_active' => 'nullable|boolean|in:0,1',
         ]);
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+            return response()->json(['status' => false, 'errors' => $validator->errors()], status: 422);
         }
         $fund = AccountsFund::find($id);
         if (!$fund) {
-            return response()->json(['status' => false, 'message' => 'Fund not found.'], 404);
+            return response()->json(['status' => false, 'message' => 'Fund not found.'], status: 404);
         }
         $fund->update([
             'name' => $request->name,
-            'is_active' => $request->is_active ?? true, // Default to true if not provided
-        ])->fresh(); // Refresh the model to get the updated data
+            'is_active' => $request->is_active ?? 1,
+        ]); 
         return response()->json(['status' => true, 'data' => $fund, 'message' => 'Fund updated successfully.'], 200);
     }
     public function destroy($id)

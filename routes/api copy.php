@@ -99,6 +99,8 @@ Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode']
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 
+
+
 // ----------------------- Need to separate only index outside auth --------------------
 Route::group(['prefix' => 'countries'], function () {
     Route::get('/', [CountryController::class, 'index']);
@@ -109,13 +111,17 @@ Route::group(['prefix' => 'countries'], function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::put('update-first-name/{userId}', [AuthController::class, 'firstNameUpdate']);
+    Route::put('update-last-name/{userId}', [AuthController::class, 'lastNameUpdate']);
+    Route::put('update-first-last-name/{userId}', [AuthController::class, 'firstLastNameUpdate']);
+    Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
+    Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
+    Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
+    Route::put('update-password/{userId}', [AuthController::class, 'updatePassword']);
+    Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
 
-    // Common for both Individual and Organisation
-    // Notifications
-    Route::get('/notifications/get-all', [NotificationController::class, 'getNotifications']);
-    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
-    Route::post('/notifications/mark-as-read/{notificationId}', [NotificationController::class, 'markAsRead']);
-    
+    Route::get('/referrals', [ReferralController::class, 'index']);
+    Route::get('/referrals/stats', [ReferralController::class, 'stats']);
 
     // ----------------------- Organisation --------------------
 
@@ -142,17 +148,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Route::get('/dialing-codes', [PhoneNumberController::class, 'getAllDialingCodes']);
     });
 
-    Route::put('update-first-last-name/{userId}', [AuthController::class, 'firstLastNameUpdate']);
-    Route::put('update-last-name/{userId}', [AuthController::class, 'lastNameUpdate']);
-
-    Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
-    Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
-    Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
-    Route::put('update-password/{userId}', [AuthController::class, 'updatePassword']);
-    Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
-
-    Route::get('/referrals', [ReferralController::class, 'index']);
-    Route::get('/referrals/stats', [ReferralController::class, 'stats']);
+    
 
 
     //Org finance related api
@@ -230,7 +226,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [OrgMemberController::class, 'destroy']);
         Route::get('/this-year-new-member-count', [OrgMemberController::class, 'thisYearNewMemberCount']);
     });
-    Route::get('/org-former-members', [OrgMemberController::class, 'getOrgFormerMembers']);
 
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
     Route::get('/total-org-member-count', [OrgMemberController::class, 'totalOrgMemberCount']);
@@ -291,6 +286,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [MeetingMinutesController::class, 'destroy']);
     });
     Route::group(['prefix' => 'meeting-attendances'], function () {
+        Route::get('/org-user-list', [MeetingAttendanceController::class, 'getOrgUse']);
         Route::get('/', [MeetingAttendanceController::class, 'index']);
         Route::get('/{id}', [MeetingAttendanceController::class, 'show']);
         Route::post('/', [MeetingAttendanceController::class, 'store']);
@@ -312,6 +308,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{eventId}', [EventController::class, 'destroy']);
     });
     Route::group(['prefix' => 'event-attendances'], function () {
+        Route::get('/get-org-user-list', [EventAttendanceController::class, 'getOrgUse']);
         Route::get('/', [EventAttendanceController::class, 'index']);
         Route::get('/{id}', [EventAttendanceController::class, 'show']);
         Route::post('/', [EventAttendanceController::class, 'store']);
@@ -340,6 +337,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [ProjectController::class, 'destroy']);
     });
     Route::group(['prefix' => 'project-attendances'], function () {
+        Route::get('/org-user-list', [ProjectAttendanceController::class, 'getOrgUse']);
         Route::get('/', [ProjectAttendanceController::class, 'index']);
         Route::get('/{id}', [ProjectAttendanceController::class, 'show']);
         Route::post('/', [ProjectAttendanceController::class, 'store']);
@@ -426,9 +424,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/individual_profile_data/{userId}', [IndividualController::class, 'getProfileImage']);
     Route::get('/profileimage/{userId}', [IndividualController::class, 'getProfileImage']);
     Route::post('/profileimage/{userId}', [IndividualController::class, 'updateProfileImage']);
-    Route::get('/individual-users', [IndividualController::class, 'getIndividualUser']);
     // Route::get('/connected-org-list/{userId}', [IndividualController::class, 'getOrganisationByIndividualId']);
     Route::get('/connected-org-list', [IndividualController::class, 'getOrganisationByIndividualId']);
+
+    Route::get('/individual-users', [IndividualController::class, 'getIndividualUser']);
 
     Route::middleware('auth:sanctum')->get('/individual/dashboard-summary', [IndividualController::class, 'summary']);
     Route::middleware('auth:sanctum')->get('/individual/meetings', [IndividualController::class, 'meetings']);

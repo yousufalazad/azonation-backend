@@ -7,14 +7,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class EventAttendanceController extends Controller
 {
-    public function getOrgUse()
-    {
-        $users = User::where('type', 'individual')->get();
-        return response()->json(['status' => true, 'data' => $users], 200);
-    }
     public function index()
     {
         $eventAttendance = EventAttendance::select('event_attendances.*', 'users.name as user_name', 'attendance_types.name as attendance_types_name')
