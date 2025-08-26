@@ -270,15 +270,15 @@ class AuthController extends Controller
     public function nameUpdate(Request $request, $userId)
     {
         $validated = $request->validate([
-            'org_name' => 'required|string|max:100',
+            'name' => 'required|string|max:100',
         ]);
         try {
             $user = User::findOrFail($userId);
-            $user->org_name = $validated['org_name'];
+            $user->name = $validated['name'];
             $user->save();
             return response()->json([
                 'status' => true,
-                'message' => 'Org Name updated successfully',
+                'message' => 'Name updated successfully',
                 'data' => $user
             ], 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {

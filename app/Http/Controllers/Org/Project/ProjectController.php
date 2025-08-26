@@ -139,7 +139,7 @@ class ProjectController extends Controller
             return $document;
         });
 
-        return response()->json(['is_active' => true, 'data' => $project], 200);
+        return response()->json(['status' => true, 'data' => $project], 200);
     }
     public function edit(Project $project) {}
     public function update(Request $request, $id)

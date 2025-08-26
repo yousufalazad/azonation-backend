@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Log;
 
 class ProjectAttendanceController extends Controller
 {
-    public function getOrgUse()
-    {
-        $users = User::where('type', 'individual')->get();
-        return response()->json(['status' => true, 'data' => $users], 200);
-    }
     public function index()
     {
         $projectAttendance = ProjectAttendance::select('project_attendances.*', 'users.first_name as user_first_name', 'users.last_name as user_last_name', 'attendance_types.name as attendance_types_name')

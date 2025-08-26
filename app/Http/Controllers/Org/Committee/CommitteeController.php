@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Org\Committee;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Committee;
@@ -35,7 +37,14 @@ class CommitteeController extends Controller
         ]);
         return response()->json(['message' => 'Committee created successfully', 200]);
     }
-    public function show(Committee $committee) {}
+    public function show($committeeId)
+    {
+        $committee = Committee::find($committeeId);
+        if (!$committee) {
+            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
+        }
+        return response()->json(['status' => true, 'data' => $committee], 200);
+    }
     public function edit(Committee $committee) {}
     public function update(Request $request, $id)
     {

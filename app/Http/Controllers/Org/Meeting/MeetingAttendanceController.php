@@ -10,11 +10,6 @@ use Illuminate\Support\Facades\Log;
 
 class MeetingAttendanceController extends Controller
 {
-    public function getOrgUse()
-    {
-        $users = User::where('type', 'individual')->get();
-        return response()->json(['status' => true, 'data' => $users], 200);
-    }
     public function index()
     {
         $meetingAttendance = MeetingAttendance::select('meeting_attendances.*', 'users.first_name as user_first_name', 'users.last_name as user_last_name', 'attendance_types.name as attendance_types_name')
