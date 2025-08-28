@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('reason', 100)->unique()->comment('Reason for membership termination');
             $table->string('description', 255)->nullable()->comment('Detailed description of the reason');
-            $table->boolean('is_active')->default(true)->comment('Whether this reason is active/usable');
+            $table->boolean('is_active')->default(true)->comment('Whether this reason is active/usable or inactive');
             $table->timestamps();
         });
     }
