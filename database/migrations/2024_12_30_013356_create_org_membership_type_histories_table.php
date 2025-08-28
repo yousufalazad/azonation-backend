@@ -23,12 +23,15 @@ return new class extends Migration
                 ->constrained('membership_types')
                 ->onDelete('set null')
                 ->comment('Previous membership type');
+
             $table->foreignId('new_membership_type_id')
                 ->nullable()
                 ->constrained('membership_types')
                 ->onDelete('set null')
                 ->comment('New membership type');
-            $table->integer('previous_type_duration_days')->nullable()->comment('Duration in days the member held the previous type');
+            $table->date('previous_membership_type_start')->nullable()->comment('Start date of the previous membership type');
+            $table->date('previous_membership_type_end')->nullable()->comment('End date of the previous membership type');
+            $table->integer('prev_member_type_duration_days')->nullable()->comment('Duration in days the member held the previous type');
             $table->date('changed_at')->nullable()->comment('Timestamp of the type change');
             $table->string('reason', 255)->nullable()->comment('Reason for the type change');
 

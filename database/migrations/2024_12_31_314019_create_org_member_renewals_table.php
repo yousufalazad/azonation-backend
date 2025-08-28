@@ -22,6 +22,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('membership_renewal_cycles')
                 ->nullOnDelete();
+                
             $table->foreignId('org_membership_renewal_cycle_id')
                 ->nullable()
                 ->constrained('org_membership_renewal_cycles')
