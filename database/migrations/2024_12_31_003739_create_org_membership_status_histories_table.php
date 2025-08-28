@@ -29,6 +29,9 @@ return new class extends Migration
                 ->constrained('membership_statuses')
                 ->onDelete('set null')
                 ->comment('New membership status');
+            
+            $table->date('previous_membership_status_start')->nullable()->comment('Start date of the previous membership status');
+            $table->date('previous_membership_status_end')->nullable()->comment('End date of the previous membership status');
 
             $table->integer('previous_status_duration_days')->nullable()->comment('Duration in days the member held the previous status');
 
