@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrgMembershipTypeCyclePrice;
+use App\Models\OrgMembershipRenewalPrice;
 use Illuminate\Http\Request;
 
-class OrgMembershipTypeCyclePriceController extends Controller
+class OrgMembershipRenewalPriceController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class OrgMembershipTypeCyclePriceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(OrgMembershipTypeCyclePrice $orgMembershipTypeCyclePrice)
+    public function show(OrgMembershipRenewalPrice $orgMembershipRenewalPrice)
     {
         //
     }
@@ -42,7 +42,7 @@ class OrgMembershipTypeCyclePriceController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OrgMembershipTypeCyclePrice $orgMembershipTypeCyclePrice)
+    public function edit(OrgMembershipRenewalPrice $orgMembershipRenewalPrice)
     {
         //
     }
@@ -50,7 +50,7 @@ class OrgMembershipTypeCyclePriceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, OrgMembershipTypeCyclePrice $orgMembershipTypeCyclePrice)
+    public function update(Request $request, OrgMembershipRenewalPrice $orgMembershipRenewalPrice)
     {
         //
     }
@@ -58,7 +58,7 @@ class OrgMembershipTypeCyclePriceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrgMembershipTypeCyclePrice $orgMembershipTypeCyclePrice)
+    public function destroy(OrgMembershipRenewalPrice $orgMembershipRenewalPrice)
     {
         //
     }

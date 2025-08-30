@@ -6,10 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('org_membership_type_cycle_prices', function (Blueprint $table) {
+        Schema::create('org_membership_renewal_prices', function (Blueprint $table) {
             $table->id();
 
             // Scope to organisation
@@ -80,8 +82,12 @@ return new class extends Migration
             $table->check('unit_amount_minor >= 0');
         });
     }
+
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('org_membership_type_cycle_prices');
+        Schema::dropIfExists('org_membership_renewal_prices');
     }
 };

@@ -54,7 +54,7 @@ return new class extends Migration
             $table->timestampTz('scheduled_for')->nullable();
             $table->unsignedSmallInteger('attempt_count')->default(0);
             $table->timestampTz('last_attempt_at')->nullable();
-
+                
             // Outcome timestamps
             $table->timestampTz('renewed_at')->nullable()
                 ->comment('When renewal took effect/was activated');
