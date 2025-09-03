@@ -36,9 +36,9 @@ return new class extends Migration
                 ->comment('Reference to the org membership renewal cycle');
 
             // Coverage window (store UTC, compute in org TZ)
-            $table->timestamp('period_start') ->nullable()->comment('Start of covered period (UTC)');
-            $table->timestamp('period_end') ->nullable()->comment('End of covered period (UTC)');
-
+            $table->timestamp('period_start')->nullable()->comment('Start of covered period (UTC)');
+            $table->timestamp('period_end')->nullable()->comment('End of covered period (UTC)');
+            $table->decimal('amount_paid')->nullable()->comment('Paid amount');
             // Process state
             $table->enum('status', [
                 'pending',

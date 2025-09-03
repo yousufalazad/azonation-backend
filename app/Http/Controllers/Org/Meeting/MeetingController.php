@@ -42,11 +42,6 @@ class MeetingController extends Controller
                     'date' => Carbon::parse($nextMeeting->date)->toDateString(),  // Format the date
                 ]
             ], 200);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'No upcoming meetings found'
-            ], 404);
         }
     }
 
