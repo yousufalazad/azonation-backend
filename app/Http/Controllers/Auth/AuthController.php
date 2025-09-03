@@ -7,6 +7,8 @@ use App\Mail\SuperAdminUserRegisteredMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\StoragePackage;
+use App\Models\ManagementPackage;
 use App\Models\Referral;
 use App\Models\ReferralReward;
 use App\Models\ReferralCode;
@@ -50,18 +52,21 @@ class AuthController extends Controller
             ]);
         }
 
+        $management_package_id = ManagementPackage::value('id'); // gets first id directly or null
         if ($request->type == 'organisation') {
             $user->managementSubscription()->create([
                 'user_id' => $user->user_id,
-                'management_package_id' => 1,
+                'management_package_id' => $management_package_id,
                 'start_date' => now(),
                 'subscription_status' => 'active',
                 'is_active' => 1,
                 'created_at' => now(),
             ]);
+
+            $storage_package_id = StoragePackage::value('id'); // gets first id directly or null
             $user->storageSubscription()->create([
                 'user_id' => $user->user_id,
-                'storage_package_id' => 1,
+                'storage_package_id' => $storage_package_id,
                 'start_date' => now(),
                 'subscription_status' => 'active',
                 'is_active' => 1,
@@ -239,7 +244,7 @@ class AuthController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
-    } 
+    }
     public function lastNameUpdate(Request $request, $userId)
     {
         $validated = $request->validate([
