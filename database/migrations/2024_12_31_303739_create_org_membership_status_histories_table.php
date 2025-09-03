@@ -13,12 +13,17 @@ return new class extends Migration
     {
         Schema::create('org_membership_status_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('org_member_id')
-                ->constrained('org_members')
+            $table->foreignId('org_type_user_id')
+                ->constrained('users')
                 ->onDelete('cascade')
-                ->comment('Reference to the organization member');
+                ->comment('Reference to the users for organisation');
 
-            $table->foreignId('previous_membership_status_id')
+            $table->foreignId('individual_type_user_id')
+                ->constrained('users')
+                ->onDelete('cascade')
+                ->comment('Reference to the users for organisation member');
+
+            $table->foreignId('prev_member_status_id')
                 ->nullable()
                 ->constrained('membership_statuses')
                 ->onDelete('set null')

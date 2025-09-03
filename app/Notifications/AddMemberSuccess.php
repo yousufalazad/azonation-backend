@@ -36,7 +36,7 @@ class AddMemberSuccess extends Notification
             'actor_name' => $this->actorName,
             'actor_id'   => $this->actorId,
             // 'url'        => null, // e.g. route('members.index') if you have one
-            'url'        => route('connected-organisations'),
+            // 'url'        => route('connected-organisations'),
         ];
     }
 }

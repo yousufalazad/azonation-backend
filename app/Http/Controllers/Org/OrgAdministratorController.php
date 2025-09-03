@@ -52,34 +52,18 @@ class OrgAdministratorController extends Controller
         ]);
     }
 
-    // public function getPrimaryAdministrator(Request $request)
-    // {
-    //     try {
-    //         $userId = Auth::id();
-    //         $primaryAdmin = OrgAdministrator::with(['individualUser'])
-    //             ->where('org_type_user_id', $userId)
-    //             ->where('is_primary', 1)
-    //             ->where('is_active', 1)
-    //             ->first();
-
-    //             $administrators = $primaryAdmin->map(function ($administrator) {
-    //             $administrator->image_url = $administrator->administratorProfileImage && $administrator->administratorProfileImage->image_path
-    //                 ? url(Storage::url($administrator->administratorProfileImage->image_path))
-    //                 : null;
-    //             unset($member->administratorProfileImage);
-    //             return $administrator;
-    //         });
-
-    //         if (!$primaryAdmin) {
-    //             return response()->json(['message' => 'No primary administrator found.'], 404);
-    //         }
-
-    //         return response()->json($primaryAdmin);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => 'Failed to retrieve primary administrator.'], 500);
-    //     }
-    // }
-
+    public function getPrimaryAdministrator(Request $request)
+    {
+        $userId = Auth::id();
+        $primaryAdministrator = OrgAdministrator::where('is_active', 1)
+            ->where('org_type_user_id', $userId)
+            ->where('is_primary', 1)
+            ->first();
+        return response()->json([
+            'status' => true,
+            'data' =>  $primaryAdministrator
+        ]);
+    }
 
     public function store(Request $request)
     {
@@ -95,8 +79,8 @@ class OrgAdministratorController extends Controller
             $today = Carbon::now()->toDateString();
 
             $previousAdministratorUserId = OrgAdministrator::where('org_type_user_id', $userId)
-            ->where('is_primary', 1)
-            ->first(['individual_type_user_id']);
+                ->where('is_primary', 1)
+                ->first(['individual_type_user_id']);
 
             // Fetch first_name and last_name of the previous administrator from users table
             $previousAdministratorName = User::where('id', $previousAdministratorUserId->individual_type_user_id)

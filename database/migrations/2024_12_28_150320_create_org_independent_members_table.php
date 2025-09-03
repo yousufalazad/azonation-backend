@@ -17,7 +17,8 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete()
                 ->comment('Foreign key: The user');
-            $table->string('name'); // Member's full name
+            $table->string('first_name'); // Member's first name
+            $table->string('last_name'); // Member's last name
             $table->string('email')->nullable(); // Member's email address (optional)
             $table->string('mobile')->nullable(); // Member's mobile number (optional)
             $table->text('address')->nullable(); // Member's address (optional)
