@@ -14,7 +14,11 @@ class MembershipTerminationReasonController extends Controller
      */
     public function index()
     {
-        //
+        $membershipTerminationReasons = MembershipTerminationReason::where('is_active', 1)->get();
+        return response()->json([
+            'status' => true,
+            'data' => $membershipTerminationReasons
+        ]);
     }
 
     /**

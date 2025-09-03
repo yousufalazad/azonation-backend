@@ -12,25 +12,32 @@ return new class extends Migration
         Schema::create('org_member_renewals', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('org_member_id')
-                ->constrained('org_members')
-                ->cascadeOnDelete()
-                ->comment('Organisation member');
+           $table->foreignId('org_type_user_id')
+                ->constrained('users')
+                ->onDelete('cascade')
+                ->comment('Reference to the users for organisation');
+
+            $table->foreignId('individual_type_user_id')
+                ->constrained('users')
+                ->onDelete('cascade')
+                ->comment('Reference to the users for organisation member');
 
             // What cycle & rule were applied at the time (snapshots by FK)
             $table->foreignId('membership_renewal_cycle_id')
                 ->nullable()
                 ->constrained('membership_renewal_cycles')
-                ->nullOnDelete();
+                ->onDelete('cascade')
+                ->comment('Reference to the membership renewal cycle');
                 
             $table->foreignId('org_membership_renewal_cycle_id')
                 ->nullable()
                 ->constrained('org_membership_renewal_cycles')
-                ->nullOnDelete();
+                ->onDelete('cascade')
+                ->comment('Reference to the org membership renewal cycle');
 
             // Coverage window (store UTC, compute in org TZ)
-            $table->timestampTz('period_start')->comment('Start of covered period (UTC)');
-            $table->timestampTz('period_end')->comment('End of covered period (UTC)');
+            $table->timestamp('period_start') ->nullable()->comment('Start of covered period (UTC)');
+            $table->timestamp('period_end') ->nullable()->comment('End of covered period (UTC)');
 
             // Process state
             $table->enum('status', [
@@ -51,17 +58,17 @@ return new class extends Migration
             $table->boolean('is_auto_renewal')->default(false);
 
             // Scheduling / retry telemetry
-            $table->timestampTz('scheduled_for')->nullable();
+            $table->timestamp('scheduled_for')->nullable();
             $table->unsignedSmallInteger('attempt_count')->default(0);
-            $table->timestampTz('last_attempt_at')->nullable();
+            $table->timestamp('last_attempt_at')->nullable();
                 
             // Outcome timestamps
-            $table->timestampTz('renewed_at')->nullable()
+            $table->timestamp('renewed_at')->nullable()
                 ->comment('When renewal took effect/was activated');
 
             // Optional linkage to billing domain (kept nullable since you manage them elsewhere)
-            $table->foreignId('invoice_id')->nullable()->constrained('invoices')->nullOnDelete();
-            $table->foreignId('payment_id')->nullable()->constrained('payments')->nullOnDelete();
+            // $table->foreignId('invoice_id')->nullable()->constrained('invoices')->nullOnDelete();
+            // $table->foreignId('payment_id')->nullable()->constrained('payments')->nullOnDelete();
 
             // Failure diagnostics
             $table->string('failure_code', 50)->nullable();         // e.g. card_declined, no_price
@@ -75,8 +82,8 @@ return new class extends Migration
             $table->timestamps();
 
             // Guards & query helpers
-            $table->unique(['org_member_id', 'period_start'], 'uq_orgmember_periodstart');
-            $table->index(['org_member_id', 'status', 'period_end'], 'idx_member_status_end');
+            $table->unique(['individual_type_user_id', 'period_start'], 'uq_orgmember_periodstart');
+            $table->index(['individual_type_user_id', 'status', 'period_end'], 'idx_member_status_end');
             $table->index(['scheduled_for'], 'idx_scheduled_for');
         });
     }

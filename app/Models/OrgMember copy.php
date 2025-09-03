@@ -16,11 +16,6 @@ class OrgMember extends Model
         'existing_membership_id',
         'membership_type_id',
         'membership_start_date',
-        'membership_status_id',
-        'approved_by',
-        'approved_at',
-        'membership_source',
-        'notes',
         'sponsored_user_id ',
         'is_active'
     ];
@@ -42,10 +37,6 @@ class OrgMember extends Model
     public function membershipType(): BelongsTo
     {
         return $this->belongsTo(MembershipType::class, 'membership_type_id', 'id');
-    }
-    public function membershipStatus(): BelongsTo
-    {
-        return $this->belongsTo(MembershipStatus::class, 'membership_status_id', 'id');
     }
 
     public function memberProfileImage(): BelongsTo

@@ -15,7 +15,7 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->comment('Organisation user');
 
-            $table->foreignId('membership_renewal_cycle_id')
+            $table->foreignId('member_renewal_cycle_id')
                 ->constrained('membership_renewal_cycles')
                 ->onDelete('cascade')
                 ->comment('Relation to membership renewal cycle');
@@ -44,7 +44,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['org_type_user_id', 'membership_renewal_cycle_id'], 'org_membership_renewal_unique');
+            $table->unique(['org_type_user_id', 'member_renewal_cycle_id'], 'org_membership_renewal_unique');
             $table->index(['org_type_user_id', 'is_active']);
             $table->index(['alignment', 'is_active']);
         });

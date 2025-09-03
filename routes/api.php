@@ -39,7 +39,11 @@ use App\Http\Controllers\Org\Meeting\MeetingController;
 use App\Http\Controllers\Org\Meeting\MeetingMinutesController;
 use App\Http\Controllers\Org\Meeting\MeetingAttendanceController;
 use App\Http\Controllers\Org\Meeting\MeetingGuestAttendanceController;
+use App\Http\Controllers\Org\Membership\MembershipStatusController;
+use App\Http\Controllers\Org\Membership\OrgMembershipTypeController;
 use App\Http\Controllers\Org\Membership\OrgMemberController;
+use App\Http\Controllers\Org\Membership\MembershipTerminationController;
+use App\Http\Controllers\Org\Membership\MembershipTerminationReasonController;
 use App\Http\Controllers\Org\Membership\FamilyMemberController;
 use App\Http\Controllers\Org\Membership\OrgIndependentMemberController;
 use App\Http\Controllers\Org\OfficeDocument\OfficeDocumentController;
@@ -82,6 +86,7 @@ use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementPricingContro
 use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementSubscriptionController;
 use App\Http\Controllers\SuperAdmin\Financial\Storage\EverydayStorageBillingController;
 
+
 use App\Http\Controllers\SuperAdmin\PaymentGateway\StripeController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
@@ -115,7 +120,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications/get-all', [NotificationController::class, 'getNotifications']);
     Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
     Route::post('/notifications/mark-as-read/{notificationId}', [NotificationController::class, 'markAsRead']);
-    
+
 
     // ----------------------- Organisation --------------------
 
@@ -220,16 +225,52 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [OfficeDocumentController::class, 'update']);
         Route::delete('/{id}', [OfficeDocumentController::class, 'destroy']);
     });
+
+    Route::group(['prefix' => 'membership-termination-reasons'], function () {
+        Route::get('/', [MembershipTerminationReasonController::class, 'index']);
+        Route::post('/', [MembershipTerminationReasonController::class, 'store']);
+        Route::put('/{id}', [MembershipTerminationReasonController::class, 'update']);
+        Route::delete('/{id}', [MembershipTerminationReasonController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'membership-terminations'], function () {
+        Route::get('/', [MembershipTerminationController::class, 'index']);
+        Route::get('/{id}', [MembershipTerminationController::class, 'show']);
+        Route::post('/', [MembershipTerminationController::class, 'store']);
+        Route::put('/{id}', [MembershipTerminationController::class, 'update']);
+        Route::delete('/{id}', [MembershipTerminationController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'membership-statuses'], function () {
+        Route::get('/', [MembershipStatusController::class, 'index']);
+        Route::get('/{id}', [MembershipStatusController::class, 'show']);
+        Route::post('/', [MembershipStatusController::class, 'store']);
+        Route::put('/{id}', [MembershipStatusController::class, 'update']);
+        Route::delete('/{id}', [MembershipStatusController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'org-membership-types'], function () {
+        Route::get('/', [OrgMembershipTypeController::class, 'index']);
+        Route::get('/{id}', [OrgMembershipTypeController::class, 'show']);
+        Route::post('/', [OrgMembershipTypeController::class, 'store']);
+        Route::put('/{id}', [OrgMembershipTypeController::class, 'update']);
+        Route::delete('/{id}', [OrgMembershipTypeController::class, 'destroy']);
+    });
+
     Route::group(['prefix' => 'org-members'], function () {
         Route::get('/', [OrgMemberController::class, 'index']);
         Route::get('/list/{userId}', [OrgMemberController::class, 'getMemberList']);
         Route::post('/search', [OrgMemberController::class, 'search']);
         Route::post('/create', [OrgMemberController::class, 'store']);
+        Route::get('/{id}', [OrgMemberController::class, 'show']);
         Route::post('/check', [OrgMemberController::class, 'checkMember']);
         Route::put('/{id}', [OrgMemberController::class, 'update']);
         Route::delete('/{id}', [OrgMemberController::class, 'destroy']);
         Route::get('/this-year-new-member-count', [OrgMemberController::class, 'thisYearNewMemberCount']);
     });
+
+
+
     Route::get('/org-former-members', [OrgMemberController::class, 'getOrgFormerMembers']);
 
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
@@ -629,6 +670,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [OrderDetailController::class, 'update']);
         Route::delete('/{id}', [OrderDetailController::class, 'destroy']);
     });
+
     // Route::group(['prefix' => 'payment-gateway-stripe'], function () {
     //     Route::get('/checkout/{invoiceId}', [StripeController::class, 'stripeCreateCheckoutSession']);
     //     Route::get('/success/{invoiceId}', [StripeController::class, 'stripeSuccess']);

@@ -82,7 +82,7 @@ return new class extends Migration
             // Helpful indexes (named to avoid >64 char limits)
             $table->index(['org_type_user_id', 'terminated_at'], 'idx_term_org_date');
             $table->index(['individual_type_user_id'], 'idx_term_individual');
-            $table->index(['org_member_id'], 'idx_term_org_member');
+            $table->index(['individual_type_user_id'], 'idx_term_org_member');
         });
     }
 

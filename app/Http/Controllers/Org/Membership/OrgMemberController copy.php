@@ -39,30 +39,7 @@ class OrgMemberController extends Controller
         $userId = Auth::id();
         $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
 
-        $getOrgAllMembers = OrgMember::with(['individual.phoneNumber', 'membershipStatus', 'membershipType', 'memberProfileImage'])
-            ->where('org_type_user_id', $userId)
-            ->get();
-
-        $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
-            $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
-                ? url(Storage::url($member->memberProfileImage->image_path))
-                : null;
-            unset($member->memberProfileImage);
-            return $member;
-        });
-
-        return response()->json([
-            'status' => true,
-            'data' => $getOrgAllMembers
-        ]);
-    }
-
-    public function X_index(Request $request)
-    {
-        $userId = Auth::id();
-        $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
-
-        $getOrgAllMembers = OrgMember::with(['individual.phoneNumber', 'membershipType', 'memberProfileImage'])
+        $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
             ->where('org_type_user_id', $userId)
             ->where(function ($query) use ($today) {
                 $query->whereNull('membership_end_date') // check for NULL
@@ -274,41 +251,17 @@ class OrgMemberController extends Controller
         }
         // User::find($individualUser->id)->notify(new AddMemberSuccess($orgName));
         // Send DB notification immediately (no queue)
-        $individualUser->notify(new AddMemberSuccess(
-            orgName: $orgUser->org_name ?? 'The Organization',
-            actorName: auth()->user()->name ?? 'System',
-            actorId: auth()->id()
-        ));
+            $individualUser->notify(new AddMemberSuccess(
+                orgName: $orgUser->org_name ?? 'The Organization',
+                actorName: auth()->user()->name ?? 'System',
+                actorId: auth()->id()
+            ));
         return response()->json([
             'status' => true,
             'message' => 'Member added successfully',
-            'data'    => ['id' => $orgMember->id], // ⬅️ include id
         ]);
     }
-    public function show($id)
-    {
-        $userId = Auth::id();
-
-        $member = OrgMember::with(['individual.phoneNumber', 'membershipStatus', 'membershipType', 'memberProfileImage'])
-            ->where('org_type_user_id', $userId)
-            ->where('id', $id)
-            ->first();
-
-        if (!$member) {
-            return response()->json(['status' => false, 'message' => 'Member not found'], 404);
-        }
-
-        $member->image_url = ($member->memberProfileImage && $member->memberProfileImage->image_path)
-            ? url(Storage::url($member->memberProfileImage->image_path))
-            : null;
-        unset($member->memberProfileImage);
-
-        return response()->json([
-            'status' => true,
-            'data'   => $member,
-        ]);
-    }
-
+    public function show(OrgMember $orgMember) {}
 
     public function edit(OrgMember $orgMember) {}
 
@@ -319,29 +272,16 @@ class OrgMemberController extends Controller
 
             // Validate the incoming request data
             $request->validate([
-                'existing_membership_id' => 'nullable|string|max:255',
+                'existing_membership_id' => 'required|string|max:255',
                 'membership_type_id' => 'nullable|numeric|exists:membership_types,id',
                 'membership_start_date' => 'nullable|date',
-                'membership_status_id' => 'nullable|exists:membership_statuses,id',
-                'approved_by' => 'nullable|exists:users,id',
-                'approved_at' => 'nullable|date',
-                'membership_source' => 'nullable|string|max:255',
-                'notes' => 'nullable|string',
-                'sponsored_user_id' => 'nullable|exists:users,id',
-                // 'is_active' => 'boolean',
+                'sponsored_user_id' => 'nullable|exists:users,id', // Individual type user ID
             ]);
             $member->existing_membership_id = $request->existing_membership_id;
             $member->membership_type_id = $request->membership_type_id;
             $member->membership_start_date = $request->membership_start_date;
-            $member->membership_status_id = $request->membership_status_id;
-            $member->approved_by = $request->approved_by;
-            $member->approved_at = $request->approved_at;
-            $member->membership_source = $request->membership_source;
-            $member->notes = $request->notes;
             $member->sponsored_user_id = $request->sponsored_user_id;
             // $member->is_active = $request->is_active;
-
-            // dd($member);exit;
             $member->save();
 
             return response()->json([

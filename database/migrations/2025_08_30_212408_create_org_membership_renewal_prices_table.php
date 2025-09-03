@@ -17,25 +17,26 @@ return new class extends Migration
             // Scope to organisation
             $table->foreignId('org_type_user_id')
                 ->constrained('users')
-                ->cascadeOnDelete()
+                ->onDelete('cascade')
                 ->comment('Organisation user id');
 
             // Org’s configured membership type
             $table->foreignId('org_membership_type_id')
                 ->constrained('org_membership_types')
-                ->cascadeOnDelete()
+                ->onDelete('cascade')
                 ->comment('Organisation membership type');
 
             // Org’s allowed cycle (e.g., Monthly, Yearly) for that type
-            $table->foreignId('org_membership_type_cycle_id')
-                ->constrained('org_membership_type_cycles')
-                ->cascadeOnDelete()
-                ->comment('Organisation membership type cycle');
+            $table->foreignId('org_mem_renewal_cycle_id')
+                ->constrained('org_membership_renewal_cycles')
+                ->onDelete('cascade')
+                ->comment('Organisation membership renewal cycle');
 
             // (Optional) global cycle reference to simplify joins/reporting
-            $table->foreignId('membership_renewal_cycle_id')->nullable()
+            $table->foreignId('member_renewal_cycle_id')->nullable()
                 ->constrained('membership_renewal_cycles')
-                ->nullOnDelete();
+                ->onDelete('cascade')
+                ->comment('Membership renewal cycle');
 
             // Money (minor units) + currency
             $table->string('currency', 3)->comment('ISO 4217 (e.g., GBP)');
@@ -57,13 +58,13 @@ return new class extends Migration
 
             // Upsert-friendly uniqueness. (Avoids duplicate “starts” for the same org/type/cycle/currency)
             $table->unique(
-                ['org_type_user_id', 'org_membership_type_id', 'org_membership_type_cycle_id', 'currency', 'valid_from'],
+                ['org_type_user_id', 'org_membership_type_id', 'org_mem_renewal_cycle_id', 'currency', 'valid_from'],
                 'uq_price_from'
             );
 
             // Common lookup: resolve current price quickly
             $table->index(
-                ['org_type_user_id', 'org_membership_type_id', 'org_membership_type_cycle_id', 'currency', 'is_active', 'valid_from'],
+                ['org_type_user_id', 'org_membership_type_id', 'org_mem_renewal_cycle_id', 'currency', 'is_active', 'valid_from'],
                 'idx_price_lookup'
             );
 
@@ -78,8 +79,8 @@ return new class extends Migration
             $table->index(['currency'], 'idx_price_currency');
 
             // Guards (MySQL 8+)
-            $table->check('valid_to IS NULL OR valid_from <= valid_to');
-            $table->check('unit_amount_minor >= 0');
+            // $table->check('valid_to IS NULL OR valid_from <= valid_to');
+            // $table->check('unit_amount_minor >= 0');
         });
     }
 

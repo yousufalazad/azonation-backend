@@ -39,6 +39,7 @@ return new class extends Migration
 
             // -------------------------------------------------------------------
             $table->foreignId('membership_status_id')
+                ->nullable()
                 ->constrained('membership_statuses')
                 ->onDelete('cascade')
                 ->comment('Lifecycle status of membership');
@@ -72,7 +73,7 @@ return new class extends Migration
         });
     }
 
-   
+
     public function down(): void
     {
         Schema::dropIfExists('org_members');
