@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrgMemberRenewal;
+use App\Models\OrgMembershipRenewal;
 use Illuminate\Http\Request;
 
-class OrgMemberRenewalController extends Controller
+class OrgMembershipRenewalController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class OrgMemberRenewalController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(OrgMemberRenewal $orgMemberRenewal)
+    public function show(OrgMembershipRenewal $orgMembershipRenewal)
     {
         //
     }
@@ -42,7 +42,7 @@ class OrgMemberRenewalController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OrgMemberRenewal $orgMemberRenewal)
+    public function edit(OrgMembershipRenewal $orgMembershipRenewal)
     {
         //
     }
@@ -50,7 +50,7 @@ class OrgMemberRenewalController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, OrgMemberRenewal $orgMemberRenewal)
+    public function update(Request $request, OrgMembershipRenewal $orgMembershipRenewal)
     {
         //
     }
@@ -58,7 +58,7 @@ class OrgMemberRenewalController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrgMemberRenewal $orgMemberRenewal)
+    public function destroy(OrgMembershipRenewal $orgMembershipRenewal)
     {
         //
     }
