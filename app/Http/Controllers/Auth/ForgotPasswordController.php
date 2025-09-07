@@ -76,7 +76,7 @@ class ForgotPasswordController extends Controller
     {
         $request->validate([
             'email' => 'required|email|exists:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::where('email', $request->email)->first();

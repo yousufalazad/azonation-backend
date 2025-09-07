@@ -7,6 +7,7 @@ use App\Http\Controllers\Common\AddressController;
 use App\Http\Controllers\Common\PhoneNumberController;
 use App\Http\Controllers\Common\NotificationController;
 use App\Http\Controllers\Common\ReferralController;
+use App\Http\Controllers\Auth\SocialAuthController;
 
 
 // Individual controllers
@@ -94,10 +95,13 @@ Route::get('/test', function () {
     return response()->json(['status' => 'Laravel is running']);
 });
 
-
+//Auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
+
+Route::post('/oauth/google/complete', [SocialAuthController::class, 'completeProfile'])->middleware('auth:sanctum');
+Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode']);
 Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode']);
@@ -114,6 +118,14 @@ Route::group(['prefix' => 'countries'], function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::put('update-first-last-name/{userId}', [AuthController::class, 'firstLastNameUpdate']);
+    Route::put('update-last-name/{userId}', [AuthController::class, 'lastNameUpdate']);
+
+    Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
+    Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
+    Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
+    Route::post('update-password/{userId}', [AuthController::class, 'updatePassword']);
+
 
     // Common for both Individual and Organisation
     // Notifications
@@ -147,13 +159,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Route::get('/dialing-codes', [PhoneNumberController::class, 'getAllDialingCodes']);
     });
 
-    Route::put('update-first-last-name/{userId}', [AuthController::class, 'firstLastNameUpdate']);
-    Route::put('update-last-name/{userId}', [AuthController::class, 'lastNameUpdate']);
 
-    Route::put('update-name/{userId}', [AuthController::class, 'nameUpdate']);
-    Route::put('update-username/{userId}', [AuthController::class, 'usernameUpdate']);
-    Route::put('update-email/{userId}', [AuthController::class, 'userEmailUpdate']);
-    Route::put('update-password/{userId}', [AuthController::class, 'updatePassword']);
     Route::get('org-all-bill', [ManagementAndStorageBillingController::class, 'orgAllBill']);
 
     Route::get('/referrals', [ReferralController::class, 'index']);
