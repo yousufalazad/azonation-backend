@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\SuperAdminUserRegisteredMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\StoragePackage;
@@ -12,7 +14,6 @@ use App\Models\ManagementPackage;
 use App\Models\Referral;
 use App\Models\ReferralReward;
 use App\Models\ReferralCode;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\IndividualUserRegisteredMail;
 use App\Mail\OrgUserRegisteredMail;
@@ -469,9 +470,51 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(Request $request)
+    public function X_logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged out successfully']);
     }
+
+    public function logout(Request $request)
+{
+    try {
+        // Revoke ALL personal access tokens (safest)
+        if ($request->user()) {
+            $request->user()->tokens()->delete();
+        }
+
+        // Log out of the session guard (clears authentication)
+        Auth::guard('web')->logout();
+
+        // Invalidate & regenerate session (CSRF token etc.)
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        // Explicitly forget cookies that can keep you logged in
+        $cookiesToForget = [
+            config('session.cookie', 'laravel_session'),
+            Auth::getRecallerName(), // remember_web_xxx
+            'XSRF-TOKEN',            // optional, nice to reset
+        ];
+
+        $response = response()->json(['message' => 'Logged out successfully']);
+
+        foreach ($cookiesToForget as $name) {
+            $response->headers->setCookie(
+                Cookie::forget($name, config('session.path', '/'), config('session.domain'))
+            );
+        }
+
+        return $response;
+
+    } catch (\Throwable $e) {
+        return response()->json([
+            'message' => 'Logout failed',
+            'error'   => $e->getMessage(),
+        ], 500);
+    }
+}
 }
