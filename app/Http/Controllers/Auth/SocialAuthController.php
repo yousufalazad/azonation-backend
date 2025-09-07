@@ -137,7 +137,7 @@ class SocialAuthController extends Controller
 
         // Your existing “organisation bootstrap” logic:
         if ($user->type === 'organisation') {
-            $management_package_id = \App\Models\ManagementPackage::value('id');
+            $management_package_id = ManagementPackage::value('id');
             $user->managementSubscription()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -148,7 +148,7 @@ class SocialAuthController extends Controller
                 ]
             );
 
-            $storage_package_id = \App\Models\StoragePackage::value('id');
+            $storage_package_id = StoragePackage::value('id');
             $user->storageSubscription()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
