@@ -276,8 +276,8 @@ class OrgMemberController extends Controller
         // Send DB notification immediately (no queue)
         $individualUser->notify(new AddMemberSuccess(
             orgName: $orgUser->org_name ?? 'The Organization',
-            actorName: auth()->user()->name ?? 'System',
-            actorId: auth()->id()
+            // actorName: auth()->user()->name ?? 'System',
+            // actorId: auth()->id()
         ));
         return response()->json([
             'status' => true,

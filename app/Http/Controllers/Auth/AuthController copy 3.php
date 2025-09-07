@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 
 
-
 class AuthController extends Controller
 {
     public function register(Request $request)
@@ -127,7 +126,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function Xremove_login(Request $request)
+    public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|string|email',
@@ -159,65 +158,6 @@ class AuthController extends Controller
         ]);
     }
 
-    public function login(Request $request)
-    {
-        $validated = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-            'remember_token' => 'required|boolean',
-        ]);
-
-        // 1) Find the user first so we can handle OAuth-only accounts nicely
-        $user = \App\Models\User::where('email', $validated['email'])->first();
-
-        if (!$user) {
-            return $this->error('Invalid credentials.');
-        }
-
-        // 2) If the account has no local password, guide them to Google or to set a password
-        if (is_null($user->password)) {
-            return $this->error(
-                'This account uses Google sign-in. Continue with Google, or set a password from your profile first.'
-            );
-        }
-
-        // 3) Attempt normal email/password login
-        $remember = (bool) $validated['remember_token'];
-        if (!\Illuminate\Support\Facades\Auth::attempt([
-            'email' => $validated['email'],
-            'password' => $validated['password'],
-        ], $remember)) {
-            return $this->error('Invalid credentials.');
-        }
-
-        // Refresh the authenticated user instance
-        $user = $request->user();
-
-        // (Optional) If you use a registration gate, block incomplete profiles
-        if (isset($user->registration_completed) && !$user->registration_completed) {
-            \Illuminate\Support\Facades\Auth::logout();
-            return $this->error('Please complete your profile via Google sign-in before logging in.');
-        }
-
-        // 4) Issue token and return payload (kept same shape as before)
-        $token = $user->createToken('Personal Access Token')->plainTextToken;
-
-        return $this->success(message: 'Successfully logged in', data: [
-            'id'            => $user->id,
-            'first_name'    => $user->first_name ?: null,
-            'last_name'     => $user->last_name ?: null,
-            'org_name'      => $user->org_name ?: null,
-            'country_name'  => $user->userCountry ? $user->userCountry->country->name : null,
-            'email'         => $user->email,
-            'type'          => $user->type,
-            'azon_id'       => $user->azon_id,
-            'username'      => $user->username,
-            'created_at'    => $user->created_at,
-            'updated_at'    => $user->updated_at,
-            'accessToken'   => $token,
-            'token_type'    => 'Bearer',
-        ]);
-    }
 
     public function me(Request $request)
     {
@@ -263,6 +203,7 @@ class AuthController extends Controller
             'errors' => $errors
         ], $status);
     }
+
 
     public function verify($uuid)
     {
@@ -406,6 +347,44 @@ class AuthController extends Controller
             'data' => $user
         ]);
     }
+    public function updatePassword(Request $request, $userId)
+    {
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required',
+            'password' => 'required|confirmed|string|min:8',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        try {
+            $user = User::findOrFail($userId);
+            if (!Hash::check($request->old_password, $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'The current password is incorrect.',
+                ], 422);
+            }
+            $user->password = Hash::make($request->password);
+            $user->save();
+            return response()->json([
+                'status' => true,
+                'message' => 'Password updated successfully.',
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found.',
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while updating the password: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 
     public function updatePassword(Request $request, $userId)
     {
@@ -422,7 +401,7 @@ class AuthController extends Controller
                 $rules['old_password'] = 'required';
             }
 
-            $validator = Validator::make($request->all(), $rules);
+            $validator = \Validator::make($request->all(), $rules);
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
@@ -432,13 +411,13 @@ class AuthController extends Controller
 
             // If a password exists, verify old_password and ensure new != old
             if (filled($user->password)) {
-                if (!Hash::check($request->old_password, $user->password)) {
+                if (!\Hash::check($request->old_password, $user->password)) {
                     return response()->json([
                         'status' => false,
                         'message' => 'The current password is incorrect.',
                     ], 422);
                 }
-                if (Hash::check($request->password, $user->password)) {
+                if (\Hash::check($request->password, $user->password)) {
                     return response()->json([
                         'status' => false,
                         'message' => 'New password must be different from the current password.',
@@ -447,7 +426,7 @@ class AuthController extends Controller
             }
 
             // Set/replace password
-            $user->password = Hash::make($request->password);
+            $user->password = \Hash::make($request->password);
             $user->save();
 
             return response()->json([

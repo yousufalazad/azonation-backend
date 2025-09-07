@@ -23,21 +23,31 @@ return new class extends Migration
             $table->string('email')->unique()->comment('Email address');
             $table->uuid('verification_token')->nullable()->unique()->comment('Email verification token');
             $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');
-            $table->string('password')->comment('Password hash');
+            $table->string('password')->nullable()->comment('Password hash');
             $table->rememberToken()->comment('Token for "remember me" functionality');
             $table->string('reset_code')->nullable();
             $table->timestamp('reset_code_expires_at')->nullable();
             $table->enum('activation_status', [
-                'active', 
-                'inactive', 
-                'pending', 
-                'hold', 
-                'under_review', 
-                'suspended', 
+                'active',
+                'inactive',
+                'pending',
+                'hold',
+                'under_review',
+                'suspended',
                 'banned'
             ])->default('active')
-              ->comment('User activation status: active, inactive, pending, hold, under review, suspended, or banned. Superadmin can modify if necessary.');
-            
+                ->comment('User activation status: active, inactive, pending, hold, under review, suspended, or banned. Superadmin can modify if necessary.');
+
+            // Fro Google Auth
+            $table->string('google_id')->nullable()->index();
+            $table->string('google_avatar')->nullable();
+            $table->boolean('registration_completed')->default(false);
+            // If you sometimes create Google-only users with no password:
+            // $table->string('password')->nullable()->change();
+            // Optional: provider columns if you plan to add more providers later
+            $table->string('oauth_provider')->nullable(); // 'google'
+            $table->string('oauth_refresh_token')->nullable();
+
             $table->timestamps();
         });
 
