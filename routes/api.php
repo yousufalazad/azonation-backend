@@ -42,6 +42,9 @@ use App\Http\Controllers\Org\Meeting\MeetingAttendanceController;
 use App\Http\Controllers\Org\Meeting\MeetingGuestAttendanceController;
 use App\Http\Controllers\Org\Membership\MembershipStatusController;
 use App\Http\Controllers\Org\Membership\OrgMembershipTypeController;
+use App\Http\Controllers\Org\Membership\OrgMembershipRenewalCycleController;
+use App\Http\Controllers\Org\Membership\OrgMembershipRenewalPriceController;
+use App\Http\Controllers\Org\Membership\OrgMembershipRenewalController;
 use App\Http\Controllers\Org\Membership\OrgMemberController;
 use App\Http\Controllers\Org\Membership\MembershipTerminationController;
 use App\Http\Controllers\Org\Membership\MembershipTerminationReasonController;
@@ -74,6 +77,7 @@ use App\Http\Controllers\SuperAdmin\Settings\CurrencyController;
 use App\Http\Controllers\SuperAdmin\Settings\DesignationController;
 use App\Http\Controllers\SuperAdmin\Settings\DialingCodeController;
 use App\Http\Controllers\SuperAdmin\Settings\LanguageController;
+use App\Http\Controllers\SuperAdmin\Settings\MembershipRenewalCycleController;
 use App\Http\Controllers\SuperAdmin\Settings\MembershipTypeController;
 use App\Http\Controllers\SuperAdmin\Settings\PrivacySetupController;
 use App\Http\Controllers\SuperAdmin\Settings\RegionController;
@@ -261,6 +265,30 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [OrgMembershipTypeController::class, 'store']);
         Route::put('/{id}', [OrgMembershipTypeController::class, 'update']);
         Route::delete('/{id}', [OrgMembershipTypeController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'org-membership-renewal-cycles'], function () {
+         Route::get('/', [OrgMembershipRenewalCycleController::class, 'index']);
+        Route::post('/', [OrgMembershipRenewalCycleController::class, 'store']);
+        Route::get('/{id}', [OrgMembershipRenewalCycleController::class, 'show']);
+        Route::put('/{id}', [OrgMembershipRenewalCycleController::class, 'update']);
+        Route::delete('/{id}', [OrgMembershipRenewalCycleController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'org-membership-renewal-prices'], function () {
+         Route::get('/', [OrgMembershipRenewalPriceController::class, 'index']);
+        Route::post('/', [OrgMembershipRenewalPriceController::class, 'store']);
+        Route::get('/{id}', [OrgMembershipRenewalPriceController::class, 'show']);
+        Route::put('/{id}', [OrgMembershipRenewalPriceController::class, 'update']);
+        Route::delete('/{id}', [OrgMembershipRenewalPriceController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'org-membership-renewals'], function () {
+         Route::get('/', [OrgMembershipRenewalController::class, 'index']);
+        Route::post('/', [OrgMembershipRenewalController::class, 'store']);
+        Route::get('/{id}', [OrgMembershipRenewalController::class, 'show']);
+        Route::put('/{id}', [OrgMembershipRenewalController::class, 'update']);
+        Route::delete('/{id}', [OrgMembershipRenewalController::class, 'destroy']);
     });
 
     Route::group(['prefix' => 'org-members'], function () {
@@ -559,6 +587,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [MembershipTypeController::class, 'store']);
         Route::put('/{id}', [MembershipTypeController::class, 'update']);
         Route::delete('/{id}', [MembershipTypeController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'membership-renewal-cycles'], function () {
+        Route::get('/', [MembershipRenewalCycleController::class, 'index']);
+        Route::post('/', [MembershipRenewalCycleController::class, 'store']);
+        Route::put('/{id}', [MembershipRenewalCycleController::class, 'update']);
+        Route::delete('/{id}', [MembershipRenewalCycleController::class, 'destroy']);
     });
     Route::group(['prefix' => 'designations'], function () {
         Route::get('/', [DesignationController::class, 'index']);
