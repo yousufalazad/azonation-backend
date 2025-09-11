@@ -45,7 +45,12 @@ class User extends Authenticatable
         'password',
         'verification_token',
         'email_verified_at',
-        'remember_token'
+        'remember_token',
+        'google_id',
+        'google_avatar',
+        'registration_completed',
+        'oauth_provider',
+        'oauth_refresh_token'
     ];
 
 

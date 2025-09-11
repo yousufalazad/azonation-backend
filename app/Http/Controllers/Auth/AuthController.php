@@ -43,6 +43,7 @@ class AuthController extends Controller
             'org_name' => $request->org_name,
             'email' => $request->email,
             'type' => $request->type,
+            'registration_completed' => true,
             'password' => Hash::make($request->password),
         ]);
 
@@ -128,38 +129,6 @@ class AuthController extends Controller
         ]);
     }
 
-    public function Xremove_login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-            'remember_token' => 'required|boolean',
-        ]);
-        $credentials = request(['email', 'password']);
-        $remember_token = $request->remember_token;
-        if (!Auth::attempt($credentials, $remember_token)) {
-            return $this->error('Unauthorized user');
-        }
-        $user = $request->user();
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->plainTextToken;
-        return $this->success(message: 'Successfully logged in', data: [
-            'id' => $user->id,
-            'first_name' => $user->first_name ? $user->first_name : null,
-            'last_name' => $user->last_name ? $user->last_name : null,
-            'org_name' => $user->org_name ? $user->org_name : "issue here",
-            'country_name' => $user->userCountry ? $user->userCountry->country->name : null,
-            'email' => $user->email,
-            'type' => $user->type,
-            'azon_id' => $user->azon_id,
-            'username' => $user->username,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-            'accessToken' => $token,
-            'token_type' => 'Bearer',
-        ]);
-    }
-
     public function login(Request $request)
     {
         $validated = $request->validate([
@@ -169,7 +138,7 @@ class AuthController extends Controller
         ]);
 
         // 1) Find the user first so we can handle OAuth-only accounts nicely
-        $user = \App\Models\User::where('email', $validated['email'])->first();
+        $user = User::where('email', $validated['email'])->first();
 
         if (!$user) {
             return $this->error('Invalid credentials.');
@@ -184,7 +153,7 @@ class AuthController extends Controller
 
         // 3) Attempt normal email/password login
         $remember = (bool) $validated['remember_token'];
-        if (!\Illuminate\Support\Facades\Auth::attempt([
+        if (!Auth::attempt([
             'email' => $validated['email'],
             'password' => $validated['password'],
         ], $remember)) {
@@ -196,7 +165,7 @@ class AuthController extends Controller
 
         // (Optional) If you use a registration gate, block incomplete profiles
         if (isset($user->registration_completed) && !$user->registration_completed) {
-            \Illuminate\Support\Facades\Auth::logout();
+            Auth::logout();
             return $this->error('Please complete your profile via Google sign-in before logging in.');
         }
 
@@ -296,6 +265,7 @@ class AuthController extends Controller
         }
         return redirect('/')->with('success', 'Your email has been verified!');
     }
+
     public function firstLastNameUpdate(Request $request, $userId)
     {
         $validated = $request->validate([
@@ -325,6 +295,7 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
     public function lastNameUpdate(Request $request, $userId)
     {
         $validated = $request->validate([
@@ -352,6 +323,7 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
     public function nameUpdate(Request $request, $userId)
     {
         $validated = $request->validate([
@@ -379,6 +351,7 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
     public function usernameUpdate(Request $request, $userId)
     {
         $request->validate([
@@ -393,6 +366,7 @@ class AuthController extends Controller
             'data' => $user
         ]);
     }
+
     public function userEmailUpdate(Request $request, $userId)
     {
         $request->validate([
@@ -470,51 +444,44 @@ class AuthController extends Controller
         }
     }
 
-    public function X_logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
-    }
-
     public function logout(Request $request)
-{
-    try {
-        // Revoke ALL personal access tokens (safest)
-        if ($request->user()) {
-            $request->user()->tokens()->delete();
+    {
+        try {
+            // Revoke ALL personal access tokens (safest)
+            if ($request->user()) {
+                $request->user()->tokens()->delete();
+            }
+
+            // Log out of the session guard (clears authentication)
+            Auth::guard('web')->logout();
+
+            // Invalidate & regenerate session (CSRF token etc.)
+            if ($request->hasSession()) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+
+            // Explicitly forget cookies that can keep you logged in
+            $cookiesToForget = [
+                config('session.cookie', 'laravel_session'),
+                Auth::getRecallerName(), // remember_web_xxx
+                'XSRF-TOKEN',            // optional, nice to reset
+            ];
+
+            $response = response()->json(['message' => 'Logged out successfully']);
+
+            foreach ($cookiesToForget as $name) {
+                $response->headers->setCookie(
+                    Cookie::forget($name, config('session.path', '/'), config('session.domain'))
+                );
+            }
+
+            return $response;
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Logout failed',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
-
-        // Log out of the session guard (clears authentication)
-        Auth::guard('web')->logout();
-
-        // Invalidate & regenerate session (CSRF token etc.)
-        if ($request->hasSession()) {
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-        }
-
-        // Explicitly forget cookies that can keep you logged in
-        $cookiesToForget = [
-            config('session.cookie', 'laravel_session'),
-            Auth::getRecallerName(), // remember_web_xxx
-            'XSRF-TOKEN',            // optional, nice to reset
-        ];
-
-        $response = response()->json(['message' => 'Logged out successfully']);
-
-        foreach ($cookiesToForget as $name) {
-            $response->headers->setCookie(
-                Cookie::forget($name, config('session.path', '/'), config('session.domain'))
-            );
-        }
-
-        return $response;
-
-    } catch (\Throwable $e) {
-        return response()->json([
-            'message' => 'Logout failed',
-            'error'   => $e->getMessage(),
-        ], 500);
     }
-}
 }

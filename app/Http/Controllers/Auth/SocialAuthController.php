@@ -5,9 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\StoragePackage;
 use App\Models\ManagementPackage;
@@ -16,7 +13,25 @@ use App\Models\ReferralCode;
 
 class SocialAuthController extends Controller
 {
-    public function redirectToGoogle()
+
+    public function redirectToGoogle(Request $request)
+    {
+        // Optional query toggles: /auth/google/redirect?new=1&consent=1
+        $prompt = $request->boolean('consent')
+            ? 'consent select_account'
+            : 'select_account';
+
+        return Socialite::driver('google')
+            ->redirectUrl(config('services.google.redirect'))     // ensure this matches your .env exactly
+            ->scopes(['openid', 'profile', 'email'])
+            ->with([
+                'prompt' => $prompt,              // 👈 always show account chooser
+                'login_hint' => '',            // optional: prefill specific email if you want
+                'include_granted_scopes' => 'true', // optional incremental auth
+            ])
+            ->redirect();
+    }
+    public function Delete_redirectToGoogle()
     {
         // If you need to set a custom redirect URL, update config/services.php for 'google.redirect'
         return Socialite::driver('google')->redirect();
