@@ -6,9 +6,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
-        "laravel/socialite": "^5.23",
+        "laravel/socialite": "^5.12",
         "laravel/tinker": "^2.9",
         "stripe/stripe-php": "^17.0"
     },
