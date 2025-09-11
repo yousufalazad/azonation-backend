@@ -10,6 +10,9 @@ use App\Models\StoragePackage;
 use App\Models\ManagementPackage;
 use App\Models\Referral;
 use App\Models\ReferralCode;
+use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Two\InvalidStateException;
+use GuzzleHttp\Exception\ClientException;
 
 class SocialAuthController extends Controller
 {
@@ -39,8 +42,44 @@ class SocialAuthController extends Controller
 
     public function handleGoogleCallback(Request $request)
     {
+        // 1) User cancelled / Google returned an error
+        if ($request->filled('error')) {
+            return $this->oauthAbort(
+                'access_denied',
+                $request->input('error_description', 'Sign-in was cancelled. Please try again.'),
+                $request
+            );
+        }
+
+        // 2) No "code" → nothing to exchange
+        if (!$request->filled('code')) {
+            return $this->oauthAbort('missing_code', 'No authorization code was returned.', $request);
+        }
+
+        try {
+            // Make sure provider uses the same redirect we used earlier
+            $redirect = config('services.google.redirect')
+                ?: rtrim(config('app.url'), '/') . '/auth/google/callback';
+            config(['services.google.redirect' => $redirect]);
+
+            // If you ever hit InvalidState in privacy-restricted browsers, add ->stateless() on both sides.
+            $googleUser = Socialite::driver('google')
+                ->user();
+
+        } catch (InvalidStateException $e) {
+            Log::warning('Google OAuth invalid state', ['ex' => $e->getMessage()]);
+            return $this->oauthAbort('invalid_state', 'Your session expired. Please try again.', $request);
+        } catch (ClientException $e) {
+            Log::warning('Google token exchange failed', ['ex' => $e->getMessage()]);
+            return $this->oauthAbort('token_exchange_failed', 'Could not complete Google sign-in. Please try again.', $request);
+        } catch (\Throwable $e) {
+            Log::error('Google OAuth unexpected error', ['ex' => $e]);
+            return $this->oauthAbort('server_error', 'Unexpected error during Google sign-in.', $request);
+        }
+
+        
         // If you're truly API-only/no sessions, use ->user()
-        $googleUser = Socialite::driver('google')->user();
+        //$googleUser = Socialite::driver('google')->user();
 
         // Google profile
         $googleId    = $googleUser->getId();
@@ -229,5 +268,16 @@ class SocialAuthController extends Controller
                 'token_type' => 'Bearer',
             ],
         ]);
+    }
+
+    private function oauthAbort(string $reason, string $message, Request $request)
+    {
+        $frontend = config('app.frontend_url', 'http://localhost:5173');
+        // Take user back to login with a friendly message you can display
+        $url = $frontend . '/?oauth=google&status=error'
+             . '&reason=' . urlencode($reason)
+             . '&message=' . urlencode($message);
+
+        return redirect()->away($url);
     }
 }
