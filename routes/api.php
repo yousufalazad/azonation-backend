@@ -133,7 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Common for both Individual and Organisation
     // Notifications
-    Route::get('/notifications/get-all', [NotificationController::class, 'getNotifications']);
+    Route::get('/notifications/get-all', [NotificationController::class, 'index']);
     Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
     Route::post('/notifications/mark-as-read/{notificationId}', [NotificationController::class, 'markAsRead']);
 

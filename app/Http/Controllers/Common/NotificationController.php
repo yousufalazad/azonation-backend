@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function getNotifications($userId)
+    public function index()
     {
+        $userId = Auth::id();
         if ($user = User::find($userId)) {
             $notifications = $user->notifications;
             return response()->json([
