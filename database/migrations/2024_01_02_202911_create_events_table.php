@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('events', function (Blueprint $table) {
@@ -19,8 +16,8 @@ return new class extends Migration
                 ->onDelete('cascade'); // Cascade on delete to remove associated addresses when user is deleted
 
 
-            $table->string('title');
-            $table->string('name')->nullable();
+            $table->string('title')->nullable();
+            $table->string('name');
             $table->string('short_description')->nullable();
             $table->string('description')->nullable();
             $table->date('date')->nullable();
@@ -35,9 +32,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('events');

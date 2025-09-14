@@ -46,7 +46,7 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
         ]);
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
@@ -95,8 +95,8 @@ class EventController extends Controller
         // dd($request->all());exit;
         // Validation
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'name' => 'nullable|string|max:255',
+            'title' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
             'date' => 'nullable',
