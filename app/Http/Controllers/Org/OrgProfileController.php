@@ -25,8 +25,9 @@ class OrgProfileController extends Controller
         ], $status);
     }
 
-    public function getLogo($userId)
+    public function getLogo()
     {
+        $userId = Auth::id();
         $logo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
         $imageUrl = $logo ? Storage::url($logo->image_path) : null;
         return response()->json([

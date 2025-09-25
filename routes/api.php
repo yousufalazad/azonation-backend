@@ -146,7 +146,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/org-profile-data/{userId}', [OrgProfileController::class, 'index']);
     Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update']);
     Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
-    Route::get('/org-profile/logo/{userId}', [OrgProfileController::class, 'getLogo']);
+    Route::get('/org-profile/logo', [OrgProfileController::class, 'getLogo']);
 
 
     Route::group(['prefix' => 'addresses'], function () {
