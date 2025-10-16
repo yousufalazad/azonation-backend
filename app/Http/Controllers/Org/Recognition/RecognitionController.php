@@ -22,6 +22,8 @@ class RecognitionController extends Controller
         try {
             $recognitions = Recognition::select('recognitions.*', 'privacy_setups.name as privacy_name')
                 ->leftJoin('privacy_setups', 'recognitions.privacy_setup_id', '=', 'privacy_setups.id')
+                ->where('recognitions.user_id', Auth::id())
+                ->orderBy('recognitions.id', 'desc')
                 ->get();
             return response()->json([
                 'status' => true,

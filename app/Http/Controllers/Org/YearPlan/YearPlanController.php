@@ -18,11 +18,20 @@ class YearPlanController extends Controller
     public function index()
     {
         try {
-            $yearPlans = YearPlan::all();
-            return response()->json(['status' => true, 'data' => $yearPlans], 200);
+            $yearPlans = YearPlan::where('user_id', Auth::id())
+                ->orderBy('id', 'desc')
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $yearPlans,
+            ], 200);
         } catch (\Exception $e) {
-            Log::error('Year Plan Index Error: ' . $e->getMessage());
-            return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to retrieve records.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
     public function store(Request $request)

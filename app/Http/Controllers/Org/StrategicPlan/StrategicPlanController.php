@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class StrategicPlanController extends Controller
 {
@@ -21,7 +22,11 @@ class StrategicPlanController extends Controller
         try {
             $strategicPlans = StrategicPlan::select('strategic_plans.*', 'privacy_setups.name as privacy_name')
                 ->leftJoin('privacy_setups', 'strategic_plans.privacy_setup_id', '=', 'privacy_setups.id')
-                ->with('user:id,name')->get();
+                ->where('strategic_plans.user_id', Auth::id())
+                ->orderBy('strategic_plans.id', 'desc')
+                ->get();
+                // ->with('user:id,name')->get();
+
             return response()->json([
                 'status' => true,
                 'data' => $strategicPlans

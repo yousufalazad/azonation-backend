@@ -22,7 +22,11 @@ class HistoryController extends Controller
         try {
             $histories = History::select('histories.*', 'privacy_setups.name as privacy_name')
                 ->leftJoin('privacy_setups', 'histories.privacy_setup_id', '=', 'privacy_setups.id')
-                ->with('user:id,name')->get();
+                ->where('histories.user_id', Auth::id())
+                ->orderBy('histories.id', 'desc')
+                ->get();
+                // ->with('user:id,name')->get();
+
             return response()->json([
                 'status' => true,
                 'data' => $histories,

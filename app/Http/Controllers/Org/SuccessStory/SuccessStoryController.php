@@ -22,7 +22,12 @@ class SuccessStoryController extends Controller
         try {
             $stories = SuccessStory::select('success_stories.*', 'privacy_setups.name as privacy_name')
                 ->leftJoin('privacy_setups', 'success_stories.privacy_setup_id', '=', 'privacy_setups.id')
-                ->with('user:id,name')->get();
+                ->where('success_stories.user_id', Auth::id())
+                ->orderBy('success_stories.id', 'desc')
+                ->get();
+
+                // ->with('user:id,name')->get();
+
             return response()->json([
                 'status' => true,
                 'data' => $stories
