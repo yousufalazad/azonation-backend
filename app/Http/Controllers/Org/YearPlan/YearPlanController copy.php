@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\Org\YearPlan;
-
 use App\Http\Controllers\Controller;
 
 use App\Models\YearPlan;
@@ -45,11 +43,11 @@ class YearPlanController extends Controller
             'goals' => 'nullable|string',
             'activities' => 'nullable|string',
             'budget' => 'required|numeric|min:0',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
+            'start_date' => 'required|date|before_or_equal:end_date',
+            'end_date' => 'required|date',
             'privacy_setup_id' => 'required|integer|in:1,2,3',
             'published' => 'required|boolean',
-            'status' => 'required|string|in:draft,approved,completed,archived',
+            'status' => 'required|integer|in:1,2,3,4',
         ]);
         DB::beginTransaction();
         try {
@@ -130,11 +128,11 @@ class YearPlanController extends Controller
             'goals' => 'nullable|string',
             'activities' => 'nullable|string',
             'budget' => 'required|numeric|min:0',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
+            'start_date' => 'required|date|before_or_equal:end_date',
+            'end_date' => 'required|date',
             'privacy_setup_id' => 'required|integer|in:1,2,3',
             'published' => 'required|boolean',
-            'status' => 'required|string|in:draft,approved,completed,archived',
+            'status' => 'required|integer|in:1,2,3,4',
         ]);
         try {
             $yearPlan = YearPlan::findOrFail($id);

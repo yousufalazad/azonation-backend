@@ -106,7 +106,7 @@ class EventController extends Controller
             'requirements' => 'nullable|string',
             'note' => 'nullable|string',
             'status' => 'nullable',
-            'conduct_type' => 'nullable|string|max:255',
+            'conduct_type' => 'nullable',
         
         ]);
 

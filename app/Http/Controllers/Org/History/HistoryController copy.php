@@ -25,7 +25,8 @@ class HistoryController extends Controller
                 ->where('histories.user_id', Auth::id())
                 ->orderBy('histories.id', 'desc')
                 ->get();
-                
+                // ->with('user:id,name')->get();
+
             return response()->json([
                 'status' => true,
                 'data' => $histories,
@@ -68,7 +69,7 @@ class HistoryController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'history' => 'nullable|string|max:20000',
+            'history' => 'required|string|max:20000',
             'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
             'is_active' => 'required|integer',
             'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:100240',
@@ -127,7 +128,7 @@ class HistoryController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'history' => 'nullable|string|max:20000',
+            'history' => 'required|string|max:20000',
             'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
             'is_active' => 'required|integer',
         ]);

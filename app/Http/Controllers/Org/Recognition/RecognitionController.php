@@ -68,6 +68,8 @@ class RecognitionController extends Controller
             'is_active' => 'nullable',
         ]);
         try {
+                    // dd($request->all());exit;
+
             $recognition = Recognition::create([
                 'user_id' => Auth::id(),
                 'title' => $request->title,
@@ -128,7 +130,7 @@ class RecognitionController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable',
             'recognition_date' => 'required|date',
             'privacy_setup_id' => 'required|integer',
             'is_active' => 'required|integer',

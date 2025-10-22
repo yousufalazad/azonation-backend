@@ -68,7 +68,7 @@ class SuccessStoryController extends Controller
 
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'story' => 'required|string',
+            'story' => 'nullable',
             'status' => 'required|boolean',
             'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
         ]);
@@ -132,7 +132,7 @@ class SuccessStoryController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'story' => 'required|string',
+            'story' => 'nullable',
             'status' => 'required|boolean',
             'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
         ]);

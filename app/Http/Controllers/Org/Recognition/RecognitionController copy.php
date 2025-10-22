@@ -1,102 +1,90 @@
 <?php
 
-namespace App\Http\Controllers\Org\StrategicPlan;
+namespace App\Http\Controllers\Org\Recognition;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\StrategicPlan;
-use App\Models\StrategicPlanFile;
-use App\Models\StrategicPlanImage;
 use Illuminate\Http\Request;
+use App\Models\Recognition;
+use App\Models\RecognitionFile;
+use App\Models\RecognitionImage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
-class StrategicPlanController extends Controller
+class RecognitionController extends Controller
 {
     public function index()
     {
         try {
-            $strategicPlans = StrategicPlan::select('strategic_plans.*', 'privacy_setups.name as privacy_name')
-                ->leftJoin('privacy_setups', 'strategic_plans.privacy_setup_id', '=', 'privacy_setups.id')
-                ->where('strategic_plans.user_id', Auth::id())
-                ->orderBy('strategic_plans.id', 'desc')
+            $recognitions = Recognition::select('recognitions.*', 'privacy_setups.name as privacy_name')
+                ->leftJoin('privacy_setups', 'recognitions.privacy_setup_id', '=', 'privacy_setups.id')
+                ->where('recognitions.user_id', Auth::id())
+                ->orderBy('recognitions.id', 'desc')
                 ->get();
-                // ->with('user:id,name')->get();
-
             return response()->json([
                 'status' => true,
-                'data' => $strategicPlans
-            ], 200);
+                'data' => $recognitions
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Failed to fetch strategic plans.'
+                'message' => 'An error occurred. Please try again.'
             ], 500);
         }
     }
-
     public function show($id)
     {
-        $strategicPlan =  StrategicPlan::select('strategic_plans.*', 'privacy_setups.name as privacy_name')
-            ->leftJoin('privacy_setups', 'strategic_plans.privacy_setup_id', '=', 'privacy_setups.id')
-            ->where('strategic_plans.id', $id)
+        $recognition =  Recognition::where('id', $id)
             ->first();
-        if (!$strategicPlan) {
-            return response()->json(['status' => false, 'message' => 'Strategic Plan not found'], 404);
+        if (!$recognition) {
+            return response()->json(['status' => false, 'message' => 'Recognition not found'], 404);
         }
-        $strategicPlan->images = $strategicPlan->images->map(function ($image) {
+        $recognition->images = $recognition->images->map(function ($image) {
             $image->image_url = $image->file_path
                 ? url(Storage::url($image->file_path))
                 : null;
             return $image;
         });
-        $strategicPlan->documents = $strategicPlan->documents->map(function ($document) {
+        $recognition->documents = $recognition->documents->map(function ($document) {
             $document->document_url = $document->file_path
                 ? url(Storage::url($document->file_path))
                 : null;
             return $document;
         });
-        return response()->json(['status' => true, 'data' => $strategicPlan], 200);
+        return response()->json(['status' => true, 'data' => $recognition], 200);
     }
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        // dd($request->all());exit;
+        $request->validate([
             'title' => 'required|string|max:255',
-            'plan' => 'nullable|string|max:5000',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'privacy_setup_id' => 'nullable',
-            'status' => 'required|boolean',
+            'description' => 'nullable',
+            'recognition_date' => 'required|date',
+            'privacy_setup_id' => 'required|integer',
+            'is_active' => 'nullable',
         ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => $validator->errors()
-            ], 400);
-        }
         try {
-            $strategicPlan = StrategicPlan::create([
-                'user_id' => $request->user()->id,
+            $recognition = Recognition::create([
+                'user_id' => Auth::id(),
                 'title' => $request->title,
-                'plan' => $request->plan,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
+                'description' => $request->description,
+                'recognition_date' => $request->recognition_date,
                 'privacy_setup_id' => $request->privacy_setup_id,
-                'status' => $request->status,
+                'is_active' => $request->is_active,
             ]);
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/strategic-plan/file',
+                        'org/recognition/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
-                    StrategicPlanFile::create([
-                        'strategic_plan_id' => $strategicPlan->id,
+                    RecognitionFile::create([
+                        'recognition_id' => $recognition->id,
                         'file_path' => $documentPath,
                         'file_name' => $document->getClientOriginalName(),
                         'mime_type' => $document->getClientMimeType(),
@@ -109,12 +97,12 @@ class StrategicPlanController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/strategic-plan/image',
+                        'org/recognition/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
-                    StrategicPlanImage::create([
-                        'strategic_plan_id' => $strategicPlan->id,
+                    RecognitionImage::create([
+                        'recognition_id' => $recognition->id,
                         'file_path' => $imagePath,
                         'file_name' => $image->getClientOriginalName(),
                         'mime_type' => $image->getClientMimeType(),
@@ -126,56 +114,50 @@ class StrategicPlanController extends Controller
             }
             return response()->json([
                 'status' => true,
-                'message' => 'Strategic plan created successfully.',
-                'data' => $strategicPlan
-            ], 201);
+                'message' => 'Recognition created successfully',
+                'data' => $recognition
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Failed to create strategic plan.'
+                'message' => 'Catch error: An error occurred. Please try again.'
             ], 500);
         }
     }
     public function update(Request $request, $id)
     {
-        // dd($request->all());exit;
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'title' => 'required|string|max:255',
-            'plan' => 'nullable|string|max:5000',
-            'start_date' => 'nullable',
-            'end_date' => 'nullable',
-            'privacy_setup_id' => 'nullable',
-            'status' => 'required|boolean',
+            'description' => 'required|string',
+            'recognition_date' => 'required|date',
+            'privacy_setup_id' => 'required|integer',
+            'is_active' => 'required|integer',
         ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => $validator->errors()
-            ], 400);
-        }
-        // dd($validator);
         try {
-            $strategicPlan = StrategicPlan::findOrFail($id);
-                    // dd($request->all());exit;
-
-            $strategicPlan->update([
+            $recognition = Recognition::where('id', $id)->first();
+            if (!$recognition) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Recognition not found'
+                ], 404);
+            }
+            $recognition->update([
                 'user_id' => $request->user()->id,
                 'title' => $request->title,
-                'plan' => $request->plan,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
+                'description' => $request->description,
+                'recognition_date' => $request->recognition_date,
                 'privacy_setup_id' => $request->privacy_setup_id,
-                'status' => $request->status,
+                'is_active' => $request->is_active,
             ]);
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $document) {
                     $documentPath = $document->storeAs(
-                        'org/strategic-plan/file',
+                        'org/recognition/file',
                         Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
                         'public'
                     );
-                    StrategicPlanFile::create([
-                        'strategic_plan_id' => $strategicPlan->id,
+                    RecognitionFile::create([
+                        'recognition_id' => $recognition->id,
                         'file_path' => $documentPath,
                         'file_name' => $document->getClientOriginalName(),
                         'mime_type' => $document->getClientMimeType(),
@@ -188,12 +170,12 @@ class StrategicPlanController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePath = $image->storeAs(
-                        'org/strategic-plan/image',
+                        'org/recognition/image',
                         Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
                         'public'
                     );
-                    StrategicPlanImage::create([
-                        'strategic_plan_id' => $strategicPlan->id,
+                    RecognitionImage::create([
+                        'recognition_id' => $recognition->id,
                         'file_path' => $imagePath,
                         'file_name' => $image->getClientOriginalName(),
                         'mime_type' => $image->getClientMimeType(),
@@ -205,29 +187,35 @@ class StrategicPlanController extends Controller
             }
             return response()->json([
                 'status' => true,
-                'message' => 'Strategic plan updated successfully.',
-                'data' => $strategicPlan
-            ], 200);
+                'message' => 'Recognition updated successfully',
+                'data' => $recognition
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Failed to update strategic plan.'
+                'message' => 'An error occurred. Please try again.'
             ], 500);
         }
     }
     public function destroy($id)
     {
         try {
-            $strategicPlan = StrategicPlan::findOrFail($id);
-            $strategicPlan->delete();
+            $recognition = Recognition::where('id', $id)->first();
+            if (!$recognition) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Recognition not found'
+                ], 404);
+            }
+            $recognition->delete();
             return response()->json([
                 'status' => true,
-                'message' => 'Strategic plan deleted successfully.'
-            ], 200);
+                'message' => 'Recognition deleted successfully'
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Failed to delete strategic plan.'
+                'message' => 'An error occurred. Please try again.'
             ], 500);
         }
     }
