@@ -77,29 +77,31 @@ class OrgAdministratorController extends Controller
         DB::transaction(function () use ($validated) {
             $userId = Auth::id();
             $today = Carbon::now()->toDateString();
+            $individual_type_user_id = $validated['individual_type_user_id'];
+            $individualUserData = User::where('id', $individual_type_user_id)
+                ->first(['first_name', 'last_name']);
+
 
             $previousAdministratorUserId = OrgAdministrator::where('org_type_user_id', $userId)
                 ->where('is_primary', 1)
                 ->first(['individual_type_user_id']);
 
-            // Fetch first_name and last_name of the previous administrator from users table
-            $previousAdministratorName = User::where('id', $previousAdministratorUserId->individual_type_user_id)
-                ->first(['first_name', 'last_name']);
-
-            // Set is_primary = 0 and end_date = today for all current primary administrators only
-            OrgAdministrator::where('org_type_user_id', $userId)
-                ->where('is_primary', 1)
-                ->update([
-                    'is_primary' => 0,
-                    'first_name' => $previousAdministratorName->first_name ?? null,
-                    'last_name' => $previousAdministratorName->last_name ?? null,
-                    'end_date' => $today
-                ]);
-
+            if ($previousAdministratorUserId) {
+                // Set is_primary = 0 and end_date = today for all current primary administrators only
+                OrgAdministrator::where('org_type_user_id', $userId)
+                    ->where('is_primary', 1)
+                    ->update([
+                        'is_primary' => 0,
+                        'end_date' => $today
+                    ]);
+            }
+            // No previous primary administrator found, proceed without updating
             OrgAdministrator::create([
                 'org_type_user_id' => $userId,
-                'individual_type_user_id' => $validated['individual_type_user_id'],
+                'individual_type_user_id' =>  $individual_type_user_id,
                 'start_date' => $today,
+                'first_name' => $individualUserData->first_name ?? null,
+                'last_name' => $individualUserData->last_name ?? null,
                 'admin_note' => $validated['admin_note'] ?? null,
                 'is_primary' => $validated['is_primary'] ?? 1,
                 'is_active' => $validated['is_active'] ?? 1,
