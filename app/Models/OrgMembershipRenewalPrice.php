@@ -13,7 +13,7 @@ class OrgMembershipRenewalPrice extends Model
         'org_type_user_id',
         'org_membership_type_id',
         'org_mem_renewal_cycle_id',
-        'member_renewal_cycle_id',
+        // 'member_renewal_cycle_id',
         'currency',
         'unit_amount_minor',
         'is_recurring',

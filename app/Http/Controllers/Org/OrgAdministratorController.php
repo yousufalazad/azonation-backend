@@ -59,6 +59,7 @@ class OrgAdministratorController extends Controller
             ->where('org_type_user_id', $userId)
             ->where('is_primary', 1)
             ->first();
+            
         return response()->json([
             'status' => true,
             'data' =>  $primaryAdministrator
@@ -172,3 +173,4 @@ class OrgAdministratorController extends Controller
         return response()->json(['message' => 'Administrator deleted successfully.']);
     }
 }
+

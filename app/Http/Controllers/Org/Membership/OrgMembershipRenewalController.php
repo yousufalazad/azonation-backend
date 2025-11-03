@@ -114,6 +114,7 @@ class OrgMembershipRenewalController extends Controller
             ], 404);
         }
 
+        // dd($request->all());exit;
         $validator = Validator::make($request->all(), [
             'individual_type_user_id' => 'nullable|integer',
             'membership_renewal_cycle_id' => 'required|exists:membership_renewal_cycles,id',
@@ -121,7 +122,7 @@ class OrgMembershipRenewalController extends Controller
             'period_end' => 'required|date|after_or_equal:period_start',
             'amount_paid' => 'nullable|numeric',
             'status' => 'required|string|max:50',
-            'initiated_by' => 'nullable|integer',
+            'initiated_by' => 'nullable',
             'initiated_source' => 'nullable|string|max:100',
             'attempt_count' => 'nullable|integer',
             'last_attempt_at' => 'nullable|date',

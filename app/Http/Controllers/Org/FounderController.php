@@ -101,7 +101,7 @@ class FounderController extends Controller
             'founder_user_id' => 'nullable',
             'full_name' => 'string|max:50',
             'designation' => 'nullable|string|max:50',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable|boolean',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:7168',
             'email' => 'nullable|email|max:50',
             'mobile' => 'nullable|string|max:50',
@@ -115,7 +115,7 @@ class FounderController extends Controller
             'founder_user_id' => $request->founder_user_id,
             'full_name' => $request->full_name,
             'designation' => $request->designation,
-            'is_active' => $request->is_active,
+            'is_active' => $request->is_active??1,
             'email' => $request->email,
             'mobile' => $request->mobile,
             'address' => $request->address,
@@ -153,8 +153,8 @@ class FounderController extends Controller
     {
         $request->validate([
             'full_name' => 'string|max:50',
-            'designation' => 'string|max:50',
-            'is_active' => 'boolean',
+            'designation' => 'nullable|string|max:50',
+            'is_active' => 'nullable|boolean',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:7168',
             'email' => 'nullable|email|max:50',
             'mobile' => 'nullable|string|max:50',

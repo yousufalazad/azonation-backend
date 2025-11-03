@@ -302,7 +302,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [OrgMemberController::class, 'destroy']);
     });
     Route::get('/this-year-new-member-count', [OrgMemberController::class, 'thisYearNewMemberCount']);
-    Route::get('/org-former-members', [OrgMemberController::class, 'getOrgFormerMembers']);
+    // Route::get('/org-terminated-members', [OrgMemberController::class, 'getOrgTerminatedMembers']);
+    Route::get('/org-terminated-members', [MembershipTerminationController::class, 'getOrgTerminatedMembers']);
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
     Route::get('/total-org-member-count', [OrgMemberController::class, 'totalOrgMemberCount']);
 

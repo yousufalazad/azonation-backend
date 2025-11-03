@@ -67,9 +67,9 @@ class StrategicPlanController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'plan' => 'nullable|string|max:5000',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'privacy_setup_id' => 'nullable',
+            'start_date' => 'nullable',
+            'end_date' => 'nullable',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
             'status' => 'required|boolean',
         ]);
         if ($validator->fails()) {
@@ -144,7 +144,7 @@ class StrategicPlanController extends Controller
             'plan' => 'nullable|string|max:5000',
             'start_date' => 'nullable',
             'end_date' => 'nullable',
-            'privacy_setup_id' => 'nullable',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
             'status' => 'required|boolean',
         ]);
         if ($validator->fails()) {
@@ -153,11 +153,8 @@ class StrategicPlanController extends Controller
                 'message' => $validator->errors()
             ], 400);
         }
-        // dd($validator);
         try {
             $strategicPlan = StrategicPlan::findOrFail($id);
-                    // dd($request->all());exit;
-
             $strategicPlan->update([
                 'user_id' => $request->user()->id,
                 'title' => $request->title,

@@ -55,7 +55,7 @@ class OfficeDocumentController extends Controller
         // dd($request->all());exit;
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'string|max:20000',
+            'description' => 'nullable|string|max:20000',
             'privacy_setup_id' => 'nullable|integer',
             'is_active' => 'nullable|integer',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -126,7 +126,7 @@ class OfficeDocumentController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'string|max:20000',
+            'description' => 'nullable|string|max:20000',
             'privacy_setup_id' => 'nullable|integer',
             'is_active' => 'nullable|integer',
             // 'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',

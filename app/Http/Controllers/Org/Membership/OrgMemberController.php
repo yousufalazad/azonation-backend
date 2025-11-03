@@ -84,33 +84,33 @@ class OrgMemberController extends Controller
         ]);
     }
 
-    public function getOrgFormerMembers(Request $request)
-    {
-        $userId = Auth::id();
-        $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
+    // public function getOrgTerminatedMembers(Request $request)
+    // {
+    //     $userId = Auth::id();
+    //     $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
 
-        $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
-            ->where('org_type_user_id', $userId)
-            ->where('is_active', '1')
-            ->where(function ($query) use ($today) {
-                $query->whereNotNull('membership_end_date') // must have an end date
-                    ->where('membership_end_date', '<=', $today); // expired
-            })
-            ->get();
+    //     $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
+    //         ->where('org_type_user_id', $userId)
+    //         ->where('is_active', '1')
+    //         ->where(function ($query) use ($today) {
+    //             $query->whereNotNull('membership_end_date') // must have an end date
+    //                 ->where('membership_end_date', '<=', $today); // expired
+    //         })
+    //         ->get();
 
-        $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
-            $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
-                ? url(Storage::url($member->memberProfileImage->image_path))
-                : null;
-            unset($member->memberProfileImage);
-            return $member;
-        });
+    //     $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
+    //         $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
+    //             ? url(Storage::url($member->memberProfileImage->image_path))
+    //             : null;
+    //         unset($member->memberProfileImage);
+    //         return $member;
+    //     });
 
-        return response()->json([
-            'status' => true,
-            'data' => $getOrgAllMembers
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $getOrgAllMembers
+    //     ]);
+    // }
 
 
     // public function getOrgMembers($userId)

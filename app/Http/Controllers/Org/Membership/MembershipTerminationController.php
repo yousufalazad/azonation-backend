@@ -8,9 +8,43 @@ use App\Models\MembershipTermination;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use App\Models\OrgMember;
+use App\Models\MembershipTerminations;
 use Exception;
 class MembershipTerminationController extends Controller
 {
+
+    // public function getOrgTerminatedMembers(Request $request)
+    // {
+    //     $userId = Auth::id();
+    //     $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
+
+    //     // $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
+    //     $getOrgAllMembers = MembershipTerminations ::with(['individual', 'membershipType', 'memberProfileImage'])
+    //         ->where('org_type_user_id', $userId)
+    //         ->where('is_active', '1')
+    //         ->where(function ($query) use ($today) {
+    //             $query->whereNotNull('membership_end_date') // must have an end date
+    //                 ->where('membership_end_date', '<=', $today); // expired
+    //         })
+    //         ->get();
+
+    //     $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
+    //         $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
+    //             ? url(Storage::url($member->memberProfileImage->image_path))
+    //             : null;
+    //         unset($member->memberProfileImage);
+    //         return $member;
+    //     });
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $getOrgAllMembers
+    //     ]);
+    // }
+
    // Get all membership terminations
     public function index()
     {

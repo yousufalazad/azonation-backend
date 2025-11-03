@@ -31,7 +31,7 @@ class OrgMembershipRenewalPriceController extends Controller
         $validator = Validator::make($request->all(), [
             'org_membership_type_id' => 'required|exists:org_membership_types,id',
             'org_mem_renewal_cycle_id' => 'nullable|exists:org_membership_renewal_cycles,id',
-            'member_renewal_cycle_id' => 'nullable|exists:membership_renewal_cycles,id',
+            // 'member_renewal_cycle_id' => 'nullable|exists:membership_renewal_cycles,id',
             'currency' => 'required|string|max:10',
             'unit_amount_minor' => 'required|integer',
             'is_recurring' => 'boolean',
@@ -56,7 +56,7 @@ class OrgMembershipRenewalPriceController extends Controller
             'org_type_user_id',
             'org_membership_type_id',
             'org_mem_renewal_cycle_id',
-            'member_renewal_cycle_id',
+            // 'member_renewal_cycle_id',
             'currency',
             'unit_amount_minor',
             'is_recurring',
@@ -107,7 +107,7 @@ class OrgMembershipRenewalPriceController extends Controller
         $validator = Validator::make($request->all(), [
             'org_membership_type_id' => 'required|exists:org_membership_types,id',
             'org_mem_renewal_cycle_id' => 'nullable|exists:org_membership_renewal_cycles,id',
-            'member_renewal_cycle_id' => 'nullable|exists:membership_renewal_cycles,id',
+            // 'member_renewal_cycle_id' => 'nullable|exists:membership_renewal_cycles,id',
             'currency' => 'required|string|max:10',
             'unit_amount_minor' => 'required|integer',
             'is_recurring' => 'boolean',
@@ -129,7 +129,7 @@ class OrgMembershipRenewalPriceController extends Controller
         $price->update($request->only([
             'org_membership_type_id',
             'org_mem_renewal_cycle_id',
-            'member_renewal_cycle_id',
+            // 'member_renewal_cycle_id',
             'currency',
             'unit_amount_minor',
             'is_recurring',
