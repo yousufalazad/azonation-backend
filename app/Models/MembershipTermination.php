@@ -24,19 +24,31 @@ class MembershipTermination extends Model
         'membership_status_before_termination',
         'membership_type_before_termination',
         'joined_at',
+        'more_info',
         'org_note',
     ];
-
 
     protected $casts = [
         'terminated_at' => 'datetime',
         'processed_at' => 'datetime',
         'rejoin_eligible' => 'boolean',
         'membership_duration_days' => 'integer',
+        'more_info' => 'array',
+
     ];
 
     protected $hidden = [
         'created_at',
         'updated_at',
     ];
+
+    public function org()
+    {
+        return $this->belongsTo(User::class, 'org_type_user_id');
+    }
+
+    public function individual()
+    {
+        return $this->belongsTo(User::class, 'individual_type_user_id',);
+    }
 }

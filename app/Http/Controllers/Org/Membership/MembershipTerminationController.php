@@ -10,40 +10,33 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use App\Models\OrgMember;
-use App\Models\MembershipTerminations;
 use Exception;
 class MembershipTerminationController extends Controller
 {
 
-    // public function getOrgTerminatedMembers(Request $request)
-    // {
-    //     $userId = Auth::id();
-    //     $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
+    public function getOrgTerminatedMembers(Request $request)
+    {
+        $userId = Auth::id();
+        $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
 
-    //     // $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
-    //     $getOrgAllMembers = MembershipTerminations ::with(['individual', 'membershipType', 'memberProfileImage'])
-    //         ->where('org_type_user_id', $userId)
-    //         ->where('is_active', '1')
-    //         ->where(function ($query) use ($today) {
-    //             $query->whereNotNull('membership_end_date') // must have an end date
-    //                 ->where('membership_end_date', '<=', $today); // expired
-    //         })
-    //         ->get();
+        // $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
+        $getOrgAllMembers = MembershipTermination::with(['individual'])
+            ->where('org_type_user_id', $userId)
+            ->get();
 
-    //     $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
-    //         $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
-    //             ? url(Storage::url($member->memberProfileImage->image_path))
-    //             : null;
-    //         unset($member->memberProfileImage);
-    //         return $member;
-    //     });
+        $getOrgAllMembers = $getOrgAllMembers->map(function ($member) {
+            $member->image_url = $member->memberProfileImage && $member->memberProfileImage->image_path
+                ? url(Storage::url($member->memberProfileImage->image_path))
+                : null;
+            unset($member->memberProfileImage);
+            return $member;
+        });
 
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => $getOrgAllMembers
-    //     ]);
-    // }
+        return response()->json([
+            'status' => true,
+            'data' => $getOrgAllMembers
+        ]);
+    }
 
    // Get all membership terminations
     public function index()
@@ -67,10 +60,12 @@ class MembershipTerminationController extends Controller
     // Store a new membership termination
     public function store(Request $request)
 {
+
     $validator = Validator::make($request->all(), [
         'org_type_user_id' => 'required|integer',
         'individual_type_user_id' => 'required|integer',
         'terminated_member_name' => 'required|string|max:255',
+        'existing_membership_id' => 'nullable',
         'terminated_member_email' => 'nullable|email|max:255',
         'terminated_member_mobile' => 'nullable|string|max:20',
         'terminated_at' => 'required|date',
@@ -94,7 +89,6 @@ class MembershipTerminationController extends Controller
 
     try {
         $data = $request->all();
-
         if ($request->hasFile('file_path')) {
             $document = $request->file('file_path');
             $filePath = $document->storeAs(
@@ -104,7 +98,15 @@ class MembershipTerminationController extends Controller
             );
             $data['file_path'] = $filePath; // Save to database
         }
+        $more_info = [
+            'existing_membership_id' =>  $request->existing_membership_id,
+            'date' => Carbon::now()->toDateString(),
+        ];
+        $data['more_info'] = $more_info;
 
+        // $data['more_info'] = json_encode($more_info);
+
+        // dd($data); exit;
         $termination = MembershipTermination::create($data);
 
         return response()->json([

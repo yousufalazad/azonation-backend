@@ -58,8 +58,8 @@ class OfficeDocumentController extends Controller
             'description' => 'nullable|string|max:20000',
             'privacy_setup_id' => 'nullable|integer',
             'is_active' => 'nullable|integer',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:1000240',
+            'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:1000240',
 
         ]);
         $user_id = $request->user()->id;

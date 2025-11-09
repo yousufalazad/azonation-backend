@@ -39,17 +39,17 @@ class YearPlanController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'start_year' => 'required|string|max:4',
-            'end_year' => 'required|string|max:4',
+            'user_id' => 'nullable|exists:users,id',
+            'start_year' => 'nullable|string|max:4',
+            'end_year' => 'nullable|string|max:4',
             'goals' => 'nullable|string',
             'activities' => 'nullable|string',
-            'budget' => 'required|numeric|min:0',
+            'budget' => 'nullable|numeric|min:0',
             'start_date' => 'nullable|date|before_or_equal:end_date',
             'end_date' => 'nullable|date',
-            'privacy_setup_id' => 'required|integer|in:1,2,3',
-            'published' => 'required|boolean',
-            'status' => 'required|string|in:draft,approved,completed,archived',
+            'privacy_setup_id' => 'nullable|integer|in:1,2,3',
+            'published' => 'nullable|boolean',
+            'status' => 'nullable|string|in:draft,approved,completed,archived',
         ]);
         DB::beginTransaction();
         try {
@@ -125,16 +125,16 @@ class YearPlanController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'start_year' => 'required|string|max:4',
-            'end_year' => 'required|string|max:4',
+            'start_year' => 'nullable|string|max:4',
+            'end_year' => 'nullable|string|max:4',
             'goals' => 'nullable|string',
             'activities' => 'nullable|string',
-            'budget' => 'required|numeric|min:0',
+            'budget' => 'nullable|numeric|min:0',
             'start_date' => 'nullable|date|before_or_equal:end_date',
             'end_date' => 'nullable|date',
-            'privacy_setup_id' => 'required|integer|in:1,2,3',
-            'published' => 'required|boolean',
-            'status' => 'required|string|in:draft,approved,completed,archived',
+            'privacy_setup_id' => 'nullable|integer|in:1,2,3',
+            'published' => 'nullable|boolean',
+            'status' => 'nullable|string|in:draft,approved,completed,archived',
         ]);
         try {
             $yearPlan = YearPlan::findOrFail($id);
