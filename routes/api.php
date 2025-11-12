@@ -50,6 +50,7 @@ use App\Http\Controllers\Org\Membership\MembershipTerminationController;
 use App\Http\Controllers\Org\Membership\MembershipTerminationReasonController;
 use App\Http\Controllers\Org\Membership\FamilyMemberController;
 use App\Http\Controllers\Org\Membership\OrgIndependentMemberController;
+use App\Http\Controllers\Org\Membership\UnlinkMemberController;
 use App\Http\Controllers\Org\OfficeDocument\OfficeDocumentController;
 use App\Http\Controllers\Org\Project\ProjectAttendanceController;
 use App\Http\Controllers\Org\Project\ProjectSummaryController;
@@ -322,6 +323,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [OrgIndependentMemberController::class, 'store']);
         Route::put('/{id}', [OrgIndependentMemberController::class, 'update']);
         Route::delete('/{id}', [OrgIndependentMemberController::class, 'destroy']);
+    });
+    Route::group(['prefix' => 'unlink-members'], function () {
+        Route::get('/', [UnlinkMemberController::class, 'index']);
+        Route::get('/{id}', [UnlinkMemberController::class, 'show']);
+        Route::post('/', [UnlinkMemberController::class, 'store']);
+        Route::put('/{id}', [UnlinkMemberController::class, 'update']);
+        Route::delete('/{id}', [UnlinkMemberController::class, 'destroy']);
     });
     Route::group(['prefix' => 'org-administrators'], function () {
         Route::post('/org-administrators/check', [OrgAdministratorController::class, 'checkAdministratorExists']);
