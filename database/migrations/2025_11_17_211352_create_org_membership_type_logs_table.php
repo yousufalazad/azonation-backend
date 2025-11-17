@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('org_membership_type_histories', function (Blueprint $table) {
+        Schema::create('org_membership_type_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('org_type_user_id')
                 ->constrained('users')
@@ -23,23 +23,18 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->comment('Reference to the users for organisation member');
 
-            $table->foreignId('prev_member_type_id')
+            $table->foreignId('membership_type_id')
                 ->nullable()
                 ->constrained('membership_types')
                 ->onDelete('set null')
                 ->comment('Previous membership type');
 
-            $table->foreignId('new_membership_type_id')
-                ->nullable()
-                ->constrained('membership_types')
-                ->onDelete('set null')
-                ->comment('New membership type');
-            $table->date('previous_membership_type_start')->nullable()->comment('Start date of the previous membership type');
-            $table->date('previous_membership_type_end')->nullable()->comment('End date of the previous membership type');
-            $table->integer('prev_member_type_duration_days')->nullable()->comment('Duration in days the member held the previous type');
+            $table->date('membership_type_start')->nullable()->comment('Start date of the previous membership type');
+            $table->date('membership_type_end')->nullable()->comment('End date of the previous membership type');
+        
+            $table->integer('membership_type_duration_days')->nullable()->comment('Duration in days the member held the previous type');
             $table->date('changed_at')->nullable()->comment('Timestamp of the type change');
             $table->string('reason', 255)->nullable()->comment('Reason for the type change');
-
 
             $table->timestamps();
         });
@@ -50,6 +45,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('org_membership_type_histories');
+        Schema::dropIfExists('org_membership_type_logs');
     }
 };

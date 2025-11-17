@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrgMembershipTypeHistory;
+use App\Models\OrgMembershipTypeLog;
 use Illuminate\Http\Request;
 
-class OrgMembershipTypeHistoryController extends Controller
+class OrgMembershipTypeLogController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class OrgMembershipTypeHistoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(OrgMembershipTypeHistory $orgMembershipTypeHistory)
+    public function show(OrgMembershipTypeLog $orgMembershipTypeLog)
     {
         //
     }
@@ -42,7 +42,7 @@ class OrgMembershipTypeHistoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OrgMembershipTypeHistory $orgMembershipTypeHistory)
+    public function edit(OrgMembershipTypeLog $orgMembershipTypeLog)
     {
         //
     }
@@ -50,7 +50,7 @@ class OrgMembershipTypeHistoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, OrgMembershipTypeHistory $orgMembershipTypeHistory)
+    public function update(Request $request, OrgMembershipTypeLog $orgMembershipTypeLog)
     {
         //
     }
@@ -58,7 +58,7 @@ class OrgMembershipTypeHistoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(OrgMembershipTypeHistory $orgMembershipTypeHistory)
+    public function destroy(OrgMembershipTypeLog $orgMembershipTypeLog)
     {
         //
     }

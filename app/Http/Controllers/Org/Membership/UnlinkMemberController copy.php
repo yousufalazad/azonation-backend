@@ -1,9 +1,8 @@
 <?php
-
 namespace App\Http\Controllers\Org\Membership;
 
 use App\Http\Controllers\Controller;
-use App\Models\UnlinkMemberImage;
+use App\Models\IndependentMemberImage;
 use App\Models\UnlinkMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -44,8 +43,12 @@ class UnlinkMemberController extends Controller
         ]);
     }
 
+
+
     public function store(Request $request)
     {
+        // dd(request()->all()); exit;
+
         $validatedData = $request->validate([
             'existing_membership_id' => 'nullable',
             'membership_type_id' => 'nullable',
@@ -78,8 +81,8 @@ class UnlinkMemberController extends Controller
             );
             Log::info('Image is now available');
 
-            UnlinkMemberImage::create([
-                'unlink_member_id' => $unlinkMember->id,
+            IndependentMemberImage::create([
+                'org_independent_member_id' => $unlinkMember->id,
                 'file_path' => $imagePath,
                 'file_name' => $image->getClientOriginalName(),
                 'mime_type' => $image->getClientMimeType(),
@@ -92,7 +95,6 @@ class UnlinkMemberController extends Controller
         }
         return response()->json(['status' => true, 'message' => 'unlink Member created successfully.', 'data' => $unlinkMember], 201);
     }
-    
     public function show($id)
     {
         // $unlinkMember = UnlinkMember::with('image')->find($id);
@@ -122,7 +124,7 @@ class UnlinkMemberController extends Controller
     {
         $unlinkMember = UnlinkMember::find($id);
         if (!$unlinkMember) {
-            return response()->json(['status' => false, 'message' => 'Unlink Member not found.'], 404);
+            return response()->json(['status' => false, 'message' => 'unlinkMember not found.'], 404);
         }
 
         $validatedData = $request->validate([
@@ -139,47 +141,22 @@ class UnlinkMemberController extends Controller
             'is_active' => 'nullable|boolean',
             'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-
-        $validatedData['user_id'] = $request->user()->id;
-
-        // Handle new image upload
         if ($request->hasFile('image_path')) {
-            $image = $request->file('image_path');
-
-            // Delete old image files from storage
-            $oldImages = UnlinkMemberImage::where('unlink_member_id', $unlinkMember->id)->get();
-            foreach ($oldImages as $oldImage) {
-                Storage::disk('public')->delete($oldImage->file_path);
-                $oldImage->delete();
+            if ($unlinkMember->image_path) {
+                Storage::disk('public')->delete($unlinkMember->image_path);
             }
-
-            // Upload new image
+            $image = $request->file('image_path');
+            $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $image->getClientOriginalExtension();
             $timestamp = Carbon::now()->format('YmdHis');
-            $newFileName = $timestamp . '_' . $image->getClientOriginalName();
+            $newFileName = $timestamp . '_' . $originalName . '.' . $extension;
             $path = $image->storeAs('org/unlink_member/image', $newFileName, 'public');
-
-            // Save new image record
-            UnlinkMemberImage::create([
-                'unlink_member_id' => $unlinkMember->id,
-                'file_path' => $path,
-                'file_name' => $image->getClientOriginalName(),
-                'mime_type' => $image->getClientMimeType(),
-                'file_size' => $image->getSize(),
-                'is_public' => true,
-                'is_active' => true,
-            ]);
+            $validatedData['image_path'] = $path;
         }
-
-        // Update unlink member info
+        $validatedData['user_id'] = $request->user()->id;
         $unlinkMember->update($validatedData);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Unlink Member updated successfully.',
-            'data' => $unlinkMember
-        ]);
+        return response()->json(['status' => true, 'message' => 'unlink Member updated successfully.', 'data' => $unlinkMember]);
     }
-
     public function destroy($id)
     {
         $unlinkMember = UnlinkMember::find($id);
@@ -193,4 +170,3 @@ class UnlinkMemberController extends Controller
         return response()->json(['status' => true, 'message' => 'Unlink member deleted successfully.']);
     }
 }
-
