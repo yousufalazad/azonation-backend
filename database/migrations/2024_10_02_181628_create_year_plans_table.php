@@ -21,6 +21,9 @@ return new class extends Migration
                 ->comment('Creator or responsible user for the year plan.');
 
 
+            // New field requested
+            $table->string('title', 200)->nullable()->after('user_id');
+
             // Start year of the plan (e.g., 2024)
             $table->year('start_year')
                 ->comment('The start year of the year plan.');

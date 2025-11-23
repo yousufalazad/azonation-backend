@@ -38,6 +38,6 @@ class UnlinkMember extends Model
     }
     public function image()
     {
-        return $this->hasOne(IndependentMemberImage::class, 'org_independent_member_id');
+        return $this->hasOne(UnlinkMemberImage::class, 'unlink_member_id');
     }
 }

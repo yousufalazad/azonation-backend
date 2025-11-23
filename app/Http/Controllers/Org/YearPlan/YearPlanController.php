@@ -39,6 +39,7 @@ class YearPlanController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+            'title' => 'required|string',
             'user_id' => 'nullable|exists:users,id',
             'start_year' => 'nullable|string|max:4',
             'end_year' => 'nullable|string|max:4',
@@ -125,6 +126,7 @@ class YearPlanController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
+            'title' => 'nullable|string',
             'start_year' => 'nullable|string|max:4',
             'end_year' => 'nullable|string|max:4',
             'goals' => 'nullable|string',

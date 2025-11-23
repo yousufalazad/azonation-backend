@@ -193,4 +193,3 @@ class UnlinkMemberController extends Controller
         return response()->json(['status' => true, 'message' => 'Unlink member deleted successfully.']);
     }
 }
-

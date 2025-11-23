@@ -10,6 +10,7 @@ class YearPlan extends Model
     use HasFactory;
 
     protected $fillable = [
+        'title',
         'user_id', 
         'start_year', 
         'end_year', 
