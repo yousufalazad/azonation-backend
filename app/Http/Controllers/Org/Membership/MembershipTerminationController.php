@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Exception;
+
 class MembershipTerminationController extends Controller
 {
 
@@ -38,7 +39,7 @@ class MembershipTerminationController extends Controller
         ]);
     }
 
-   // Get all membership terminations
+    // Get all membership terminations
     public function index()
     {
         try {
@@ -59,70 +60,70 @@ class MembershipTerminationController extends Controller
 
     // Store a new membership termination
     public function store(Request $request)
-{
+    {
+        $userId = Auth::id();
 
-    $validator = Validator::make($request->all(), [
-        'org_type_user_id' => 'required|integer',
-        'individual_type_user_id' => 'required|integer',
-        'terminated_member_name' => 'required|string|max:255',
-        'existing_membership_id' => 'nullable',
-        'terminated_member_email' => 'nullable|email|max:255',
-        'terminated_member_mobile' => 'nullable|string|max:20',
-        'terminated_at' => 'required|date',
-        'processed_at' => 'nullable|date',
-        'membership_termination_reason_id' => 'required|integer',
-        'org_administrator_id' => 'required|integer',
-        'rejoin_eligible' => 'required|boolean',
-        'file_path' => 'nullable|file|mimes:pdf,doc,docx,xlsx,xls,ppt,pptx,jpg,jpeg,png|max:102400',
-        'membership_duration_days' => 'nullable|integer',
-        'membership_status_before_termination' => 'required|string|max:100',
-        'org_note' => 'nullable|string',
-    ]);
+        $validator = Validator::make($request->all(), [
+            'org_type_user_id' => 'required|integer',
+            'individual_type_user_id' => 'required|integer',
+            'terminated_member_name' => 'required|string|max:255',
+            'existing_membership_id' => 'nullable',
+            'terminated_member_email' => 'nullable|email|max:255',
+            'terminated_member_mobile' => 'nullable|string|max:20',
+            'terminated_at' => 'required|date',
+            'processed_at' => 'nullable|date',
+            'membership_termination_reason_id' => 'required|integer',
+            'org_administrator_id' => 'required|integer',
+            'rejoin_eligible' => 'required|boolean',
+            'file_path' => 'nullable|file|mimes:pdf,doc,docx,xlsx,xls,ppt,pptx,jpg,jpeg,png|max:102400',
+            'membership_duration_days' => 'nullable|integer',
+            'membership_status_before_termination' => 'required|string|max:100',
+            'org_note' => 'nullable|string',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Validation failed.',
-            'errors' => $validator->errors()
-        ], 422);
-    }
-
-    try {
-        $data = $request->all();
-        if ($request->hasFile('file_path')) {
-            $document = $request->file('file_path');
-            $filePath = $document->storeAs(
-                'org/membership_termination/files',
-                now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                'public'
-            );
-            $data['file_path'] = $filePath; // Save to database
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors()
+            ], 422);
         }
-        $more_info = [
-            'existing_membership_id' =>  $request->existing_membership_id,
-            'date' => Carbon::now()->toDateString(),
-        ];
-        $data['more_info'] = $more_info;
 
-        // $data['more_info'] = json_encode($more_info);
+        try {
+            $data = $request->all();
+            if ($request->hasFile('file_path')) {
+                $document = $request->file('file_path');
+                $filePath = $document->storeAs(
+                    'org/membership_termination/files',
+                    now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
+                    'public'
+                );
+                $data['file_path'] = $filePath; // Save to database
+            }
+            $more_info = [
+                'existing_membership_id' =>  $request->existing_membership_id,
+                'date' => Carbon::now()->toDateString(),
+            ];
+            $data['more_info'] = $more_info;
 
-        // dd($data); exit;
-        $termination = MembershipTermination::create($data);
+            // $data['more_info'] = json_encode($more_info);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Membership termination created successfully.',
-            'data' => $termination
-        ], 201);
+            // dd($data); exit;
+            $termination = MembershipTermination::create($data);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => false,
-            'message' => 'An error occurred. Please try again.',
-            'error' => $e->getMessage()
-        ], 500);
+            return response()->json([
+                'status' => true,
+                'message' => 'Membership termination created successfully.',
+                'data' => $termination
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
 
     // Show a single membership termination
