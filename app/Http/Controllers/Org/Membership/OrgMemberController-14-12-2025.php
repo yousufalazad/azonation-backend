@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 
+
 class OrgMemberController extends Controller
 {
     use Notifiable;
@@ -313,178 +314,194 @@ class OrgMemberController extends Controller
 
     public function edit(OrgMember $orgMember) {}
 
+    public function X_update(Request $request, $id)
+    {
+        try {
+            $member = OrgMember::findOrFail($id);
 
+            // Store previous values before update
+            $previousStatusId = $member->membership_status_id ?? 0;
+            $previousTypeId   = $member->membership_type_id ?? 0;
+            $previousStartDateStatus = $member->membership_start_date;
+            $previousStartDateType = $member->membership_start_date;
+
+            // Validate the incoming request data
+            $request->validate([
+                'existing_membership_id' => 'nullable|string|max:255',
+                'membership_start_date' => 'nullable|date',
+                'membership_type_id' => 'nullable|numeric|exists:membership_types,id',
+                'membership_status_id' => 'nullable|exists:membership_statuses,id',
+                'approved_by' => 'nullable|exists:users,id',
+                'approved_at' => 'nullable|date',
+                'membership_source' => 'nullable|string|max:255',
+                'notes' => 'nullable|string',
+                'sponsored_user_id' => 'nullable|exists:users,id',
+            ]);
+
+            // UPDATE MEMBER DATA
+            $member->existing_membership_id = $request->existing_membership_id;
+            $member->membership_start_date = $request->membership_start_date;
+            $member->membership_type_id = $request->membership_type_id;
+            $member->membership_status_id = $request->membership_status_id;
+            $member->approved_by = $request->approved_by;
+            $member->approved_at = $request->approved_at;
+            $member->membership_source = $request->membership_source;
+            $member->notes = $request->notes;
+            $member->sponsored_user_id = $request->sponsored_user_id;
+            $member->save();
+
+            // SAVE STATUS LOG IF STATUS CHANGED
+            if ($previousStatusId != $request->membership_status_id) {
+
+                $endDate = now()->toDateString();
+                $durationDays = null;
+
+                if ($previousStartDateStatus) {
+                    $durationDays = now()->diffInDays($previousStartDateStatus);
+                }
+
+                OrgMembershipStatusLog::create([
+                    'org_type_user_id' => $member->org_type_user_id ?? 0,
+                    'individual_type_user_id' => $member->individual_user_id ?? 0,
+                    'membership_status_id' => $previousStatusId,
+                    'membership_status_start' => $previousStartDateStatus,
+                    'membership_status_end' => $endDate,
+                    'membership_status_duration_days' => $durationDays,
+                    'changed_at' => now(),
+                    'reason' => 'Membership status changed',
+                ]);
+            }
+
+            // SAVE TYPE LOG IF MEMBERSHIP TYPE CHANGED
+            if ($previousTypeId != $request->membership_type_id) {
+
+                $endDate = now()->toDateString();
+                $durationDays = null;
+
+                if ($previousStartDateType) {
+                    $durationDays = now()->diffInDays($previousStartDateType);
+                }
+
+                OrgMembershipTypeLog::create([
+                    'org_type_user_id' => $member->org_type_user_id ?? 0,
+                    'individual_type_user_id' => $member->individual_user_id ?? 0,
+                    'membership_type_id' => $previousTypeId,
+                    'membership_type_start' => $previousStartDateType,
+                    'membership_type_end' => $endDate,
+                    'membership_type_duration_days' => $durationDays,
+                    'changed_at' => now(),
+                    'reason' => 'Membership type changed',
+                ]);
+            }
+
+
+            // --------------------------
+            // RETURN SUCCESS RESPONSE
+            // --------------------------
+            return response()->json([
+                'status' => true,
+                'message' => 'Member updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred. Please try again.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function update(Request $request, $id)
     {
         try {
             $member = OrgMember::findOrFail($id);
 
-            /** ------------------------------
-             *  STORE PREVIOUS VALUES
-             * ------------------------------ */
-            $oldStatusId = $member->membership_status_id;
-            $oldTypeId   = $member->membership_type_id;
-
-            $orgTypeUserId        = $member->org_type_user_id ?: null;
+            // Store previous values before update
+            $previousStatusId = $member->membership_status_id;
+            $previousTypeId   = $member->membership_type_id;
+            $previousStartDateStatus = $member->membership_start_date;
+            $previousStartDateType   = $member->membership_start_date;
+            // Prepare FK-safe values (NULL instead of 0)
+            $orgTypeUserId = $member->org_type_user_id ?: null;
             $individualTypeUserId = $member->individual_type_user_id ?: null;
 
-            /** ------------------------------
-             *  VALIDATION
-             * ------------------------------ */
+            // Validate the incoming request data
             $request->validate([
                 'existing_membership_id' => 'nullable|string|max:255',
-                'membership_start_date'  => 'nullable|date',
-                'membership_type_id'     => 'nullable|numeric|exists:membership_types,id',
-                'membership_status_id'   => 'nullable|exists:membership_statuses,id',
-                'approved_by'            => 'nullable|exists:users,id',
-                'approved_at'            => 'nullable|date',
-                'membership_source'      => 'nullable|string|max:255',
-                'notes'                  => 'nullable|string',
-                'sponsored_user_id'      => 'nullable|exists:users,id',
-                'new_membership_status_started_from' => 'nullable|date',
-                'new_membership_type_started_from'   => 'nullable|date',
+                'membership_start_date' => 'nullable|date',
+                'membership_type_id' => 'nullable|numeric|exists:membership_types,id',
+                'membership_status_id' => 'nullable|exists:membership_statuses,id',
+                'approved_by' => 'nullable|exists:users,id',
+                'approved_at' => 'nullable|date',
+                'membership_source' => 'nullable|string|max:255',
+                'notes' => 'nullable|string',
+                'sponsored_user_id' => 'nullable|exists:users,id',
             ]);
 
-            /** ------------------------------
-             *  UPDATE MEMBER
-             * ------------------------------ */
-            $member->fill([
-                'existing_membership_id' => $request->existing_membership_id,
-                'membership_start_date'  => $request->membership_start_date,
-                'membership_type_id'     => $request->membership_type_id,
-                'membership_status_id'   => $request->membership_status_id,
-                'approved_by'            => $request->approved_by,
-                'approved_at'            => $request->approved_at,
-                'membership_source'      => $request->membership_source,
-                'notes'                  => $request->notes,
-                'sponsored_user_id'      => $request->sponsored_user_id,
-            ])->save();
+            // UPDATE MEMBER DATA
+            $member->existing_membership_id = $request->existing_membership_id;
+            $member->membership_start_date = $request->membership_start_date;
+            $member->membership_type_id = $request->membership_type_id;
+            $member->membership_status_id = $request->membership_status_id;
+            $member->approved_by = $request->approved_by;
+            $member->approved_at = $request->approved_at;
+            $member->membership_source = $request->membership_source;
+            $member->notes = $request->notes;
+            $member->sponsored_user_id = $request->sponsored_user_id;
+            $member->save();
 
-            /** ------------------------------
-             *  DATE HANDLING
-             * ------------------------------ */
-            $startDate  = $member->membership_start_date ? Carbon::parse($member->membership_start_date) : null;
-            $nowDate    = Carbon::now()->toDateString();
+            // SAVE STATUS LOG IF STATUS CHANGED
+            if ($previousStatusId && $previousStatusId != $request->membership_status_id) {
 
-            $endStatusDate = $request->new_membership_status_started_from ?? $nowDate;
-            $endTypeDate   = $request->new_membership_type_started_from ?? $nowDate;
+                $endDate = now()->toDateString();
+                $durationDays = $previousStartDateStatus
+                    ? now()->diffInDays($previousStartDateStatus)
+                    : null;
 
-            /** ======================================================
-             * 1) MEMBERSHIP STATUS LOG
-             * ====================================================== */
-
-            // CHECK IF FIRST ENTRY? INSERT START ROW IF NOT EXIST
-            if (! OrgMembershipStatusLog::where('org_type_user_id', $orgTypeUserId)
-                ->where('individual_type_user_id', $individualTypeUserId)
-                ->exists()) {
                 OrgMembershipStatusLog::create([
-                    'org_type_user_id'                => $orgTypeUserId,
-                    'individual_type_user_id'         => $individualTypeUserId,
-                    'membership_status_id'            => $request->membership_status_id ?? $oldStatusId,
-                    'membership_status_start'         => $startDate ?? now(),
-                    'membership_status_end'           => null,
-                    'membership_status_duration_days' => 0,
-                    'changed_at'                      => now(),
-                    'reason'                          => 'Initial log entry',
+                    'org_type_user_id' => $orgTypeUserId,
+                    'individual_type_user_id' => $individualTypeUserId,
+                    'membership_status_id' => $previousStatusId,
+                    'membership_status_start' => $previousStartDateStatus,
+                    'membership_status_end' => $endDate,
+                    'membership_status_duration_days' => $durationDays,
+                    'changed_at' => now(),
+                    'reason' => 'Membership status changed',
                 ]);
             }
 
-            // STATUS CHANGE CASE
-            if ($oldStatusId && $oldStatusId != $request->membership_status_id) {
+            // SAVE TYPE LOG IF TYPE CHANGED
+            if ($previousTypeId && $previousTypeId != $request->membership_type_id) {
 
-                // UPDATE PREVIOUS STATUS LOG
-                $oldStatusLog = OrgMembershipStatusLog::where('org_type_user_id', $orgTypeUserId)
-                    ->where('individual_type_user_id', $individualTypeUserId)
-                    ->whereNull('membership_status_end')
-                    ->first();
+                $endDate = now()->toDateString();
+                $durationDays = $previousStartDateType
+                    ? now()->diffInDays($previousStartDateType)
+                    : null;
 
-                if ($oldStatusLog && $startDate) {
-                    $duration = Carbon::parse( $startDate)->diffInDays($endStatusDate);
-
-                    $oldStatusLog->update([
-                        'membership_status_end'            => $endStatusDate,
-                        'membership_status_duration_days'  => $duration,
-                    ]);
-                }
-
-                // INSERT NEW STATUS LOG
-                OrgMembershipStatusLog::create([
-                    'org_type_user_id'                => $orgTypeUserId,
-                    'individual_type_user_id'         => $individualTypeUserId,
-                    'membership_status_id'            => $request->membership_status_id,
-                    'membership_status_start'         => $request->new_membership_status_started_from ?? now(),
-                    'membership_status_end'           => null,
-                    'membership_status_duration_days' => 0,
-                    'changed_at'                      => now(),
-                    'reason'                          => 'Membership status changed',
-                ]);
-            }
-
-            /** ======================================================
-             * 2) MEMBERSHIP TYPE LOG
-             * ====================================================== */
-
-            // CHECK IF FIRST ENTRY? INSERT START ROW IF NOT EXIST
-            if (! OrgMembershipTypeLog::where('org_type_user_id', $orgTypeUserId)
-                ->where('individual_type_user_id', $individualTypeUserId)
-                ->exists()) {
                 OrgMembershipTypeLog::create([
-                    'org_type_user_id'              => $orgTypeUserId,
-                    'individual_type_user_id'       => $individualTypeUserId,
-                    'membership_type_id'            => $request->membership_type_id ?? $oldTypeId,
-                    'membership_type_start'         => $startDate ?? now(),
-                    'membership_type_end'           => null,
-                    'membership_type_duration_days' => 0,
-                    'changed_at'                    => now(),
-                    'reason'                        => 'Initial log entry',
-                ]);
-            }
-
-            // TYPE CHANGE CASE
-            if ($oldTypeId && $oldTypeId != $request->membership_type_id) {
-
-                // UPDATE PREVIOUS TYPE LOG
-                $oldTypeLog = OrgMembershipTypeLog::where('org_type_user_id', $orgTypeUserId)
-                    ->where('individual_type_user_id', $individualTypeUserId)
-                    ->whereNull('membership_type_end')
-                    ->first();
-
-                if ($oldTypeLog && $startDate) {
-                    $duration = Carbon::parse($startDate)->diffInDays($endTypeDate);
-
-                    $oldTypeLog->update([
-                        'membership_type_end'           => $endTypeDate,
-                        'membership_type_duration_days' => $duration,
-                    ]);
-                }
-
-                // INSERT NEW TYPE LOG
-                OrgMembershipTypeLog::create([
-                    'org_type_user_id'              => $orgTypeUserId,
-                    'individual_type_user_id'       => $individualTypeUserId,
-                    'membership_type_id'            => $request->membership_type_id,
-                    'membership_type_start'         => $request->new_membership_type_started_from ?? now(),
-                    'membership_type_end'           => null,
-                    'membership_type_duration_days' => 0,
-                    'changed_at'                    => now(),
-                    'reason'                        => 'Membership type changed',
+                    'org_type_user_id' => $orgTypeUserId,
+                    'individual_type_user_id' => $individualTypeUserId,
+                    'membership_type_id' => $previousTypeId,
+                    'membership_type_start' => $previousStartDateType,
+                    'membership_type_end' => $endDate,
+                    'membership_type_duration_days' => $durationDays,
+                    'changed_at' => now(),
+                    'reason' => 'Membership type changed',
                 ]);
             }
 
             return response()->json([
-                'status'  => true,
+                'status' => true,
                 'message' => 'Member updated successfully.',
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'status'  => false,
+                'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error'   => $e->getMessage()
+                'error' => $e->getMessage()
             ], 500);
         }
     }
-
 
     public function destroy($id)
     {
