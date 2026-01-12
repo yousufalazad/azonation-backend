@@ -24,7 +24,7 @@ use Illuminate\Support\Carbon;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function registerX(Request $request)
     {
         $request->validate([
             'first_name' => 'nullable|string|max:50',
@@ -45,6 +45,117 @@ class AuthController extends Controller
             'type' => $request->type,
             'registration_completed' => true,
             'password' => Hash::make($request->password),
+        ]);
+
+        if ($request->country_id) {
+            $user->userCountry()->create([
+                'user_id' => $user->id,
+                'country_id' => $request->country_id,
+                'is_active' => 1,
+            ]);
+        }
+
+        $management_package_id = ManagementPackage::value('id'); // gets first id directly or null
+        if ($request->type == 'organisation') {
+            $user->managementSubscription()->create([
+                'user_id' => $user->user_id,
+                'management_package_id' => $management_package_id,
+                'start_date' => now(),
+                'subscription_status' => 'active',
+                'is_active' => 1,
+                'created_at' => now(),
+            ]);
+
+            $storage_package_id = StoragePackage::value('id'); // gets first id directly or null
+            $user->storageSubscription()->create([
+                'user_id' => $user->user_id,
+                'storage_package_id' => $storage_package_id,
+                'start_date' => now(),
+                'subscription_status' => 'active',
+                'is_active' => 1,
+                'created_at' => now(),
+            ]);
+            $user->accountFund()->create([
+                'user_id' => $user->user_id,
+                'name' => 'General Fund',
+                'is_active' => 1,
+            ]);
+
+            $refCode = null;
+            $referrerId = null;
+
+            // Check if referral code exists
+            if ($request->referral) {
+                $refCode = ReferralCode::where('code', $request->referral)->where('status', 'active')->first();
+                if ($refCode && $refCode->user_id !== $user->id) {
+                    $referrerId = $refCode->user_id;
+                    $refCode->increment('times_used');
+                }
+            }
+
+            // Save referral record regardless of referral code validity
+            Referral::create([
+                'referral_code_id' => $refCode?->id,
+                'referrer_id' => $referrerId,
+                'referred_user_id' => $user->id,
+                'email' => $user->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'signup_completed' => true,
+                'reward_given' => false,
+                'referral_source' => $request->referral_source ?? null,
+            ]);
+        }
+
+        // Send email to user based on type
+        switch ($user->type) {
+            case 'individual':
+                Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
+                break;
+            case 'organisation':
+                Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
+                break;
+            case 'superadmin':
+                Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
+                break;
+        }
+
+
+        // $this->sendEmail($user);
+        return response()->json([
+            'status' => true,
+            'message' => 'Registration successful',
+            'data' => $user
+        ]);
+    }
+
+     public function register(Request $request)
+    {
+        $request->validate([
+            'first_name' => 'nullable|string|max:50',
+            'last_name' => 'nullable|string|max:50',
+            'org_name' => 'nullable|string|max:100',
+            'email' => 'required|string|email|max:100|unique:users',
+            'country_id' => 'required|numeric|max:999',
+            'type' => 'required|string|max:12|in:individual,organisation',
+            'password' => 'required|string|min:8',
+            'referral' => 'nullable|string|max:100',
+            'referral_source' => 'nullable|string|max:50',
+        ]);
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'org_name' => $request->org_name,
+            'email' => $request->email,
+            'type' => $request->type,
+            'registration_completed' => true,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $user->userLanguage()->create([
+            'user_id' => $user->id,
+            'language_id' => 1, // Default language_id set to 1
+            'is_active' => 1,
         ]);
 
         if ($request->country_id) {

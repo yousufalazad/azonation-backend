@@ -8,6 +8,8 @@ use App\Http\Controllers\Common\PhoneNumberController;
 use App\Http\Controllers\Common\NotificationController;
 use App\Http\Controllers\Common\ReferralController;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Common\UserLanguageController;
+
 
 
 // Individual controllers
@@ -615,6 +617,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [LanguageController::class, 'store']);
         Route::put('/{id}', [LanguageController::class, 'update']);
         Route::delete('/{id}', [LanguageController::class, 'destroy']);
+    });
+    Route::group(['prefix' => 'user-languages'], function () {
+        Route::get('/language-name', [UserLanguageController::class, 'getUserLanguage']);
+        Route::get('/', [UserLanguageController::class, 'index']);
+        Route::get('/{id}', [UserLanguageController::class, 'show']);
+        Route::post('/', [UserLanguageController::class, 'store']);
+        Route::put('/{id}', [UserLanguageController::class, 'update']);
+        Route::delete('/{id}', [UserLanguageController::class, 'destroy']);
     });
     Route::group(['prefix' => 'time-zone-setups'], function () {
         Route::get('/', [TimeZoneSetupController::class, 'index']);
