@@ -18,14 +18,14 @@ return new class extends Migration
             $table->foreignId('user_id')
                 ->constrained('users')
                 ->onDelete('cascade'); // Cascade on delete to remove associated addresses when user is deleted
-
             // Address fields
-            $table->string('address_line_one')->nullable(); 
+            $table->string('address_line_one')->nullable();
             $table->string('address_line_two')->nullable();
-            $table->string('city')->nullable(); 
-            $table->string('state_or_region')->nullable(); 
-            $table->string('postal_code')->nullable(); 
-
+            $table->string('city')->nullable();
+            $table->string('state_or_region')->nullable();
+            $table->string('postcode')->nullable();
+            // Flexible storage for all fields
+            $table->json('components');
             $table->timestamps();
         });
     }

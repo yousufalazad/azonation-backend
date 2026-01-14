@@ -9,6 +9,9 @@ use App\Http\Controllers\Common\NotificationController;
 use App\Http\Controllers\Common\ReferralController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Common\UserLanguageController;
+use App\Http\Controllers\Common\NotificationNameController;
+use App\Http\Controllers\Common\UserNotificationController;
+
 
 
 
@@ -153,6 +156,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::group(['prefix' => 'addresses'], function () {
+        Route::get('/address-format', [AddressController::class, 'getAddressFormat']);
         Route::get('/', [AddressController::class, 'index']);
         Route::post('/', [AddressController::class, 'store']);
         Route::put('/{id}', [AddressController::class, 'update']);
@@ -626,6 +630,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [UserLanguageController::class, 'update']);
         Route::delete('/{id}', [UserLanguageController::class, 'destroy']);
     });
+
+    Route::group(['prefix' => 'notification-names'], function () {
+        Route::get('/', [NotificationNameController::class, 'index']);
+        Route::post('/', [NotificationNameController::class, 'store']);
+        Route::get('/{id}', [NotificationNameController::class, 'show']);
+        Route::put('/{id}', [NotificationNameController::class, 'update']);
+        Route::delete('/{id}', [NotificationNameController::class, 'destroy']);
+    });
+    Route::group(['prefix' => 'user-notifications'], function () {
+        Route::get('/', [UserNotificationController::class, 'index']);
+        Route::post('/', [UserNotificationController::class, 'store']);
+        Route::get('/{id}', [UserNotificationController::class, 'show']);
+        Route::put('/{id}', [UserNotificationController::class, 'update']);
+        Route::delete('/{id}', [UserNotificationController::class, 'destroy']);
+    });
+
+
+
     Route::group(['prefix' => 'time-zone-setups'], function () {
         Route::get('/', [TimeZoneSetupController::class, 'index']);
         Route::post('/', [TimeZoneSetupController::class, 'store']);

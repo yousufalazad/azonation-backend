@@ -14,10 +14,16 @@ class Address extends Model
         'address_line_two',
         'city',
         'state_or_region',
-        'postal_code'
+        'postcode',
+        'components',
     ];
 
-    protected $hidden=[
+
+    protected $casts = [
+        'components' => 'array',
+    ];
+
+    protected $hidden = [
         'created_at',
         'updated_at'
     ];
