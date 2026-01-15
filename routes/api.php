@@ -32,6 +32,8 @@ use App\Http\Controllers\Ecommerce\Order\OrderController;
 use App\Http\Controllers\Ecommerce\Order\OrderDetailController;
 use App\Http\Controllers\Org\Accounts\AccountsController;
 use App\Http\Controllers\Org\Accounts\AccountsFundController;
+use App\Http\Controllers\Org\FundManagement\FundManagementController;
+use App\Http\Controllers\Org\FundManagement\FundController;
 use App\Http\Controllers\Org\Asset\AssetController;
 use App\Http\Controllers\Org\Asset\AssetLifecycleStatusController;
 use App\Http\Controllers\Org\Committee\CommitteeController;
@@ -182,23 +184,45 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/sub-month-bill-calculation', [EverydayMemberCountAndBillingController::class, 'subMonthBillCalculation']);
         Route::get('/current-month-bill-calculation', [EverydayMemberCountAndBillingController::class, 'currentMonthBillCalculation']);
     });
-    Route::group(['prefix' => 'transactions'], function () {
-        Route::get('/', [AccountsController::class, 'index']);
-        Route::post('/', [AccountsController::class, 'store']);
-        Route::put('/{id}', [AccountsController::class, 'update']);
-        Route::delete('/{id}', [AccountsController::class, 'destroy']);
-    });
+    // Route::group(['prefix' => 'transactions'], function () {
+    //     Route::get('/', [AccountsController::class, 'index']);
+    //     Route::post('/', [AccountsController::class, 'store']);
+    //     Route::put('/{id}', [AccountsController::class, 'update']);
+    //     Route::delete('/{id}', [AccountsController::class, 'destroy']);
+    // });
+    // Route::group(['prefix' => 'funds'], function () {
+    //     Route::get('/', [AccountsFundController::class, 'index']);
+    //     Route::post('/', [AccountsFundController::class, 'store']);
+    //     Route::put('/{id}', [AccountsFundController::class, 'update']);
+    //     Route::delete('/{id}', [AccountsFundController::class, 'destroy']);
+    // });
+    // Route::group(['prefix' => 'accounts-transaction-currencies'], function () {
+    //     Route::get('/', [AccountsController::class, 'getAccountsTransactionCurrency']);
+    //     Route::post('/', [AccountsController::class, 'storeAccountsTransactionCurrency']);
+    //     Route::put('/{id}', [AccountsController::class, 'updateAccountsTransactionCurrency']);
+    // });
+
     Route::group(['prefix' => 'funds'], function () {
-        Route::get('/', [AccountsFundController::class, 'index']);
-        Route::post('/', [AccountsFundController::class, 'store']);
-        Route::put('/{id}', [AccountsFundController::class, 'update']);
-        Route::delete('/{id}', [AccountsFundController::class, 'destroy']);
+        Route::get('/', [FundController::class, 'index']);
+        Route::post('/', [FundController::class, 'store']);
+        Route::put('/{id}', [FundController::class, 'update']);
+        Route::delete('/{id}', [FundController::class, 'destroy']);
     });
+    Route::group(['prefix' => 'fund-transactions'], function () {
+        Route::get('/', [FundManagementController::class, 'index']);
+        Route::post('/', [FundManagementController::class, 'store']);
+        Route::put('/{id}', [FundManagementController::class, 'update']);
+        Route::delete('/{id}', [FundManagementController::class, 'destroy']);
+    });
+    
     Route::group(['prefix' => 'accounts-transaction-currencies'], function () {
-        Route::get('/', [AccountsController::class, 'getAccountsTransactionCurrency']);
-        Route::post('/', [AccountsController::class, 'storeAccountsTransactionCurrency']);
-        Route::put('/{id}', [AccountsController::class, 'updateAccountsTransactionCurrency']);
+        Route::get('/', [FundManagementController::class, 'getTransactionCurrency']);
+        Route::post('/', [FundManagementController::class, 'storeTransactionCurrency']);
+        Route::put('/{id}', [FundManagementController::class, 'updateTransactionCurrency']);
     });
+
+
+
     Route::group(['prefix' => 'histories'], function () {
         Route::get('/', [HistoryController::class, 'index']);
         Route::get('/{id}', [HistoryController::class, 'show']);
