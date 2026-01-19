@@ -128,9 +128,10 @@ class User extends Authenticatable
         return $this->hasOne(StorageSubscription::class, 'user_id', 'id')->where('is_active', true);
     }
 
-    public function accountFund()
+    // funds owned by the user , fund managed by the user fund manager
+    public function fund()
     {
-        return $this->hasMany(AccountsFund::class, 'user_id', 'id')->where('is_active', true);
+        return $this->hasMany(Fund::class, 'user_id', 'id')->where('is_active', true);
     }
 
     //for user subscription package

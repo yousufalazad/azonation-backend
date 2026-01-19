@@ -186,7 +186,7 @@ class AuthController extends Controller
                 'is_active' => 1,
                 'created_at' => now(),
             ]);
-            $user->accountFund()->create([
+            $user->fund()->create([
                 'user_id' => $user->user_id,
                 'name' => 'General Fund',
                 'is_active' => 1,
