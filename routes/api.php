@@ -107,6 +107,35 @@ Route::get('/test', function () {
     return response()->json(['status' => 'Laravel is running']);
 });
 
+
+use App\Http\Controllers\Role\RoleController;
+use App\Http\Controllers\Role\PermissionController;
+use App\Http\Controllers\Role\UserRoleController;
+// routes/api.php
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Route::apiResource('roles', RoleController::class);
+    // Route::apiResource('permissions', PermissionController::class);
+    Route::post('users/{id}/roles', [UserRoleController::class, 'assign']);
+});
+
+Route::get('permissions', [PermissionController::class, 'index']);
+Route::post('permissions', [PermissionController::class, 'store']);
+Route::put('permissions/{id}', [PermissionController::class, 'update']);
+Route::delete('permissions/{id}', [PermissionController::class, 'destroy']);
+
+Route::get('roles', [RoleController::class, 'index']);
+Route::post('roles', [RoleController::class, 'store']);
+Route::put('roles/{id}', [RoleController::class, 'update']);
+Route::delete('roles/{id}', [RoleController::class, 'destroy']);
+
+Route::get('roles-permissions', [RoleController::class, 'permissions']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::put('/roles/{role}/permissions', [UserRoleController::class, 'updateRolePermissions']);
+    Route::get('/users', [UserRoleController::class, 'getUsers']); // list users with roles
+    Route::put('/users/{user}/roles', [UserRoleController::class, 'assignRoles']); // assign roles
+});
+
+
 //Auth
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -214,7 +243,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [FundManagementController::class, 'update']);
         Route::delete('/{id}', [FundManagementController::class, 'destroy']);
     });
-    
+
     Route::group(['prefix' => 'accounts-transaction-currencies'], function () {
         Route::get('/', [FundManagementController::class, 'getTransactionCurrency']);
         Route::post('/', [FundManagementController::class, 'storeTransactionCurrency']);
@@ -299,7 +328,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::group(['prefix' => 'org-membership-renewal-cycles'], function () {
-         Route::get('/', [OrgMembershipRenewalCycleController::class, 'index']);
+        Route::get('/', [OrgMembershipRenewalCycleController::class, 'index']);
         Route::post('/', [OrgMembershipRenewalCycleController::class, 'store']);
         Route::get('/{id}', [OrgMembershipRenewalCycleController::class, 'show']);
         Route::put('/{id}', [OrgMembershipRenewalCycleController::class, 'update']);
@@ -307,7 +336,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::group(['prefix' => 'org-membership-renewal-prices'], function () {
-         Route::get('/', [OrgMembershipRenewalPriceController::class, 'index']);
+        Route::get('/', [OrgMembershipRenewalPriceController::class, 'index']);
         Route::post('/', [OrgMembershipRenewalPriceController::class, 'store']);
         Route::get('/{id}', [OrgMembershipRenewalPriceController::class, 'show']);
         Route::put('/{id}', [OrgMembershipRenewalPriceController::class, 'update']);
@@ -315,7 +344,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::group(['prefix' => 'org-membership-renewals'], function () {
-         Route::get('/', [OrgMembershipRenewalController::class, 'index']);
+        Route::get('/', [OrgMembershipRenewalController::class, 'index']);
         Route::post('/', [OrgMembershipRenewalController::class, 'store']);
         Route::get('/{id}', [OrgMembershipRenewalController::class, 'show']);
         Route::put('/{id}', [OrgMembershipRenewalController::class, 'update']);

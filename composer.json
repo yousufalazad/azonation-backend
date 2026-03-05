@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.9",
+        "spatie/laravel-permission": "^6.24",
         "stripe/stripe-php": "^17.0"
     },
     "require-dev": {

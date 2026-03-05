@@ -28,11 +28,11 @@ use App\Models\Currency;
 use App\Models\ReferralCode;
 use App\Models\Referral;
 use App\Models\ReferralReward;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
     protected $fillable = [
         'azon_id',
         'first_name',
@@ -69,6 +69,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // public function getNameAttribute()
+    // {
+    //     if ($this->type === 'organization') {
+    //         return $this->org_name;
+    //     }
+    //     return trim($this->first_name . ' ' . $this->last_name);
+    // }
 
 
     public function individualProfileImage(): HasOne
@@ -163,6 +171,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(Currency::class, 'currency_id', 'id')->where('is_active', true);
     }
+
+    
 
     // User's own referral code
     public function referralCode()
