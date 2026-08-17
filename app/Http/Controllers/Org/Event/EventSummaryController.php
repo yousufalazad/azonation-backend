@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\Event;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
 use App\Models\EventSummary;
 use App\Models\EventSummaryFile;
@@ -14,6 +15,13 @@ use Carbon\Carbon;
 
 class EventSummaryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:event-summary.read')->only(['index', 'show']);
+        $this->middleware('permission:event-summary.create')->only(['create', 'store']);
+        $this->middleware('permission:event-summary.update')->only(['edit', 'update']);
+        $this->middleware('permission:event-summary.delete')->only(['destroy']);
+    }
     public function index()
     {
         $eventSummaries = EventSummary::all();

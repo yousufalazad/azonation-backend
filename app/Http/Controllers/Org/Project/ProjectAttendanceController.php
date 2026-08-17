@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Org\Project;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use App\Models\ProjectAttendance;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -9,6 +11,13 @@ use Illuminate\Support\Facades\Log;
 
 class ProjectAttendanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:project-attendance.read')->only(['index', 'show']);
+        $this->middleware('permission:project-attendance.create')->only(['create', 'store']);
+        $this->middleware('permission:project-attendance.update')->only(['edit', 'update']);
+        $this->middleware('permission:project-attendance.delete')->only(['destroy']);
+    }
     public function index()
     {
         $projectAttendance = ProjectAttendance::select('project_attendances.*', 'users.first_name as user_first_name', 'users.last_name as user_last_name', 'attendance_types.name as attendance_types_name')

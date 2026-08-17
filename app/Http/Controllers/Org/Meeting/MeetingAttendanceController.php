@@ -1,15 +1,24 @@
 <?php
 namespace App\Http\Controllers\Org\Meeting;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
-use App\Models\User;
 use App\Models\MeetingAttendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MeetingAttendanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:meeting-attendance.read')->only(['index', 'show']);
+        $this->middleware('permission:meeting-attendance.create')->only(['create', 'store', 'bulkStore']);
+        $this->middleware('permission:meeting-attendance.update')->only(['edit', 'update']);
+        $this->middleware('permission:meeting-attendance.delete')->only(['destroy']);
+    }
     public function index()
     {
         $meetingAttendance = MeetingAttendance::select('meeting_attendances.*', 'users.first_name as user_first_name', 'users.last_name as user_last_name', 'attendance_types.name as attendance_types_name')
@@ -19,6 +28,65 @@ class MeetingAttendanceController extends Controller
         return response()->json(['status' => true, 'data' => $meetingAttendance], 200);
     }
     public function create() {}
+    /**
+     * Bulk insert or update meeting attendance
+     */
+    public function bulkStore(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            '*.meeting_id'           => 'required|exists:meetings,id',
+            '*.user_id'              => 'required|exists:users,id',
+            '*.attendance_type_id'   => 'required|exists:attendance_types,id',
+            '*.time'                 => 'nullable',
+            '*.note'                 => 'nullable|string',
+            '*.is_active'            => 'required|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Validation error',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($request->all() as $row) {
+                MeetingAttendance::updateOrCreate(
+                    [
+                        'meeting_id' => $row['meeting_id'],
+                        'user_id'    => $row['user_id'],
+                    ],
+                    [
+                        'attendance_type_id' => $row['attendance_type_id'],
+                        'time'               => $row['time'],
+                        'note'               => $row['note'] ?? null,
+                        'is_active'          => $row['is_active'],
+                        'updated_by'         => Auth::id(),
+                        'created_by'         => Auth::id(),
+                    ]
+                );
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Attendance saved successfully',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Failed to save attendance',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

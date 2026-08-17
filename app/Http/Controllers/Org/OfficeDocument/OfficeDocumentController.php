@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\OfficeDocument;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
 use App\Models\OfficeDocument;
 use App\Models\OfficeDocumentFile;
@@ -13,6 +14,13 @@ use Carbon\Carbon;
 
 class OfficeDocumentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:document.read')->only(['index', 'show']);
+        $this->middleware('permission:document.create')->only(['create', 'store']);
+        $this->middleware('permission:document.update')->only(['edit', 'update']);
+        $this->middleware('permission:document.delete')->only(['destroy']);
+    }
     public function index()
     {
         try {

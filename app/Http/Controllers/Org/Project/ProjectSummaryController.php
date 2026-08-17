@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Org\Project;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use App\Models\ProjectSummary;
 use App\Models\ProjectSummaryFile;
 use App\Models\ProjectSummaryImage;
@@ -13,6 +15,13 @@ use Carbon\Carbon;
 
 class ProjectSummaryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:project-summary.read')->only(['index', 'show']);
+        $this->middleware('permission:project-summary.create')->only(['create', 'store']);
+        $this->middleware('permission:project-summary.update')->only(['edit', 'update']);
+        $this->middleware('permission:project-summary.delete')->only(['destroy']);
+    }
     public function index()
     {
         $projectSummaries = ProjectSummary::all();

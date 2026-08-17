@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Org\Asset;
 
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
 use App\Models\Asset;
 use App\Models\AssetFile;
@@ -19,6 +20,13 @@ use Carbon\Carbon;
 
 class AssetController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:asset.read')->only(['index', 'show']);
+        $this->middleware('permission:asset.create')->only(['create', 'store']);
+        $this->middleware('permission:asset.update')->only(['edit', 'update']);
+        $this->middleware('permission:asset.delete')->only(['destroy']);
+    }
     public function index(Request $request)
     {
         $user_id = $request->user()->id;

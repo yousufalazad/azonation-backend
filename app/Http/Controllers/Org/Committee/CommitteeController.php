@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers\Org\Committee;
 
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
 use App\Models\Committee;
 use Illuminate\Http\Request;
 
 class CommitteeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:committee.read')->only(['index', 'show']);
+        $this->middleware('permission:committee.create')->only(['create', 'store']);
+        $this->middleware('permission:committee.update')->only(['edit', 'update']);
+        $this->middleware('permission:committee.delete')->only(['destroy']);
+    }
     public function index(Request $request)
     {
         $userId = $request->user()->id;

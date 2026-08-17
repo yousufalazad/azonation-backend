@@ -1,19 +1,29 @@
 <?php
+
 namespace App\Http\Controllers\Org\Meeting;
-use App\Http\Controllers\Controller;
+
+// use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Routing\Controller;
 use App\Models\Meeting;
 use App\Models\MeetingFile;
 use App\Models\MeetingImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+// class MeetingController extends BaseController
 class MeetingController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:meeting.read')->only(['index', 'show', 'orgNextMeeting']);
+        $this->middleware('permission:meeting.create')->only(['store']);
+        $this->middleware('permission:meeting.update')->only(['update']);
+        $this->middleware('permission:meeting.delete')->only(['destroy']);
+    }
+
     public function index(Request $request)
     {
         $user_id = Auth::id();
@@ -28,7 +38,7 @@ class MeetingController extends Controller
     public function orgNextMeeting(Request $request)
     {
         $user_id = Auth::id();
-    
+
         // Ensuring we're comparing against today in the same timezone
         $nextMeeting = Meeting::where('user_id', $user_id)
             ->whereDate('date', '>=', Carbon::today()->toDateString()) // Ensure to use date only
@@ -72,7 +82,7 @@ class MeetingController extends Controller
             'participants' => 'nullable',
             'participants.*' => 'string|max:255',
             'description' => 'nullable|string',
-            'address' => 'nullable|string',
+            'venue' => 'nullable|string',
             'agenda' => 'nullable|string',
             'requirements' => 'nullable|string',
             'note' => 'nullable|string',
@@ -94,7 +104,7 @@ class MeetingController extends Controller
         $input['user_id'] = $request->user()->id;
         $input['created_by'] = $request->user()->id;
         $meeting = Meeting::create($input);
-        
+
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $document) {
                 $documentPath = $document->storeAs(
@@ -183,7 +193,7 @@ class MeetingController extends Controller
             'participants' => 'nullable',
             'participants.*' => 'string|max:255',
             'description' => 'nullable|string',
-            'address' => 'nullable|string',
+            'venue' => 'nullable|string',
             'agenda' => 'nullable|string',
             'requirements' => 'nullable|string',
             'note' => 'nullable|string',

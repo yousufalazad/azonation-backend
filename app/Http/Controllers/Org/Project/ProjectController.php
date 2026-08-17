@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Org\Project;
 
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use App\Models\Project;
 use App\Models\ProjectImage;
 use App\Models\ProjectFile;
@@ -15,6 +17,13 @@ use Carbon\Carbon;
 
 class ProjectController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:project.read')->only(['index', 'show']);
+        $this->middleware('permission:project.create')->only(['create', 'store']);
+        $this->middleware('permission:project.update')->only(['edit', 'update']);
+        $this->middleware('permission:project.delete')->only(['destroy']);
+    }
     public function getProject($projectId)
     {
         $project = Project::with(['images', 'documents'])

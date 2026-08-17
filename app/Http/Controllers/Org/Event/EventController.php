@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Org\Event;
 
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
 use App\Models\Event;
 use App\Models\EventFile;
@@ -17,6 +18,13 @@ use Carbon\Carbon;
 
 class EventController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:event.read')->only(['index', 'getEvent']);
+        $this->middleware('permission:event.create')->only(['store']);
+        $this->middleware('permission:event.update')->only(['update']);
+        $this->middleware('permission:event.delete')->only(['destroy']);
+    }
     public function index(Request $request)
     {
         $user_id = $request->user()->id;

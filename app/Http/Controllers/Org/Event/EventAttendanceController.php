@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\Event;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
 use App\Models\EventAttendance;
 use App\Models\User;
@@ -11,6 +12,13 @@ use Illuminate\Support\Facades\Auth;
 
 class EventAttendanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:event-attendance.read')->only(['index', 'show']);
+        $this->middleware('permission:event-attendance.create')->only(['create', 'store']);
+        $this->middleware('permission:event-attendance.update')->only(['edit', 'update']);
+        $this->middleware('permission:event-attendance.delete')->only(['destroy']);
+    }
     public function index()
     {
         $eventAttendance = EventAttendance::select('event_attendances.*', 'users.name as user_name', 'attendance_types.name as attendance_types_name')

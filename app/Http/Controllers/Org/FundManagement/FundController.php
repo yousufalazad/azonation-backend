@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\FundManagement;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
 use App\Models\Fund;
 use Illuminate\Http\Request;
@@ -10,6 +11,13 @@ use Illuminate\Support\Facades\Auth;
 
 class FundController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:fund.read')->only(['index', 'show']);
+        $this->middleware('permission:fund.create')->only(['create', 'store']);
+        $this->middleware('permission:fund.update')->only(['edit', 'update']);
+        $this->middleware('permission:fund.delete')->only(['destroy']);
+    }
     public function index()
     {
         $userId = Auth::id();

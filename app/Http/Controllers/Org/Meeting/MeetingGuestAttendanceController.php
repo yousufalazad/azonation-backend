@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Org\Meeting;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use App\Models\MeetingGuestAttendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -8,6 +10,13 @@ use Illuminate\Support\Facades\Log;
 
 class MeetingGuestAttendanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:meeting-guest-attendance.read')->only(['index', 'show']);
+        $this->middleware('permission:meeting-guest-attendance.create')->only(['create', 'store']);
+        $this->middleware('permission:meeting-guest-attendance.update')->only(['edit', 'update']);
+        $this->middleware('permission:meeting-guest-attendance.delete')->only(['destroy']);
+    }
     public function index()
     {
         $meetingAttendance = MeetingGuestAttendance::select('meeting_guest_attendances.*', 'attendance_types.name as attendance_types_name')

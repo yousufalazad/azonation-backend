@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Org\FundManagement;
 
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
 use App\Models\FundManagement;
 use App\Models\AccountsTransactionCurrency;
@@ -16,6 +17,13 @@ use Carbon\Carbon;
 
 class FundManagementController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:fund-management.read')->only(['index', 'show']);
+        $this->middleware('permission:fund-management.create')->only(['create', 'store']);
+        $this->middleware('permission:fund-management.update')->only(['edit', 'update']);
+        $this->middleware('permission:fund-management.delete')->only(['destroy']);
+    }
     public function index()
     {
         try {

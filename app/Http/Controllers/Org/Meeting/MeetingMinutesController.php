@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Org\Meeting;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use App\Models\MeetingMinutes;
 use App\Models\MeetingMinuteFile;
 use App\Models\MeetingMinuteImage;
@@ -13,6 +15,13 @@ use Carbon\Carbon;
 
 class MeetingMinutesController extends Controller
 {
+        public function __construct()
+        {
+            $this->middleware('permission:meeting-minute.read')->only(['index', 'show']);
+            $this->middleware('permission:meeting-minute.create')->only(['create', 'store']);
+            $this->middleware('permission:meeting-minute.update')->only(['edit', 'update']);
+            $this->middleware('permission:meeting-minute.delete')->only(['destroy']);
+        }
     public function index()
     {
         $meetingAttendance = MeetingMinutes::get();

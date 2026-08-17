@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\Committee;
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 
 use App\Models\CommitteeMember;
 use Illuminate\Http\Request;
@@ -9,6 +10,13 @@ use Illuminate\Support\Facades\Log;
 
 class CommitteeMemberController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:committee-member.read')->only(['index', 'show']);
+        $this->middleware('permission:committee-member.create')->only(['create', 'store']);
+        $this->middleware('permission:committee-member.update')->only(['edit', 'update']);
+        $this->middleware('permission:committee-member.delete')->only(['destroy']);
+    }
     public function index($id)
     {
         $committeeMember = CommitteeMember::where('committee_id', $id)
