@@ -111,6 +111,16 @@ Route::get('/test', function () {
 use App\Http\Controllers\Role\RoleController;
 use App\Http\Controllers\Role\PermissionController;
 use App\Http\Controllers\Role\UserRoleController;
+use App\Http\Controllers\Role\OrgRoleTitleController;
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/org-role-titles', [OrgRoleTitleController::class, 'index']);
+    Route::post('/org-role-titles', [OrgRoleTitleController::class, 'store']);
+    Route::get('/org-role-titles/{id}', [OrgRoleTitleController::class, 'show']);
+    Route::put('/org-role-titles/{id}', [OrgRoleTitleController::class, 'update']);
+    Route::delete('/org-role-titles/{id}', [OrgRoleTitleController::class, 'destroy']);
+
+});
 // routes/api.php
 Route::middleware(['auth:sanctum'])->group(function () {
     // Route::apiResource('roles', RoleController::class);

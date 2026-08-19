@@ -20,157 +20,116 @@ use App\Mail\OrgUserRegisteredMail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 
-use Spatie\Permission\Models\Role;
-use App\Models\OrgMemberRoleTitle;
-use App\Models\OrgRoleTitle;
 
-
-use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
-
-    // 🔐 LOGIN
-    public function login(Request $request)
+    public function registerX(Request $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-            'remember_token' => 'sometimes|boolean',
+        $request->validate([
+            'first_name' => 'nullable|string|max:50',
+            'last_name' => 'nullable|string|max:50',
+            'org_name' => 'nullable|string|max:100',
+            'email' => 'required|string|email|max:100|unique:users',
+            'country_id' => 'required|numeric|max:999',
+            'type' => 'required|string|max:12|in:individual,organisation',
+            'password' => 'required|string|min:8',
+            'referral' => 'nullable|string|max:100',
+            'referral_source' => 'nullable|string|max:50',
+        ]);
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'org_name' => $request->org_name,
+            'email' => $request->email,
+            'type' => $request->type,
+            'registration_completed' => true,
+            'password' => Hash::make($request->password),
         ]);
 
-        $email = strtolower($validated['email']);
-        $user = User::where('email', $email)->first();
-
-        if (!$user) {
-            return $this->error('Invalid credentials.');
+        if ($request->country_id) {
+            $user->userCountry()->create([
+                'user_id' => $user->id,
+                'country_id' => $request->country_id,
+                'is_active' => 1,
+            ]);
         }
 
-        if (is_null($user->password)) {
-            return $this->error(
-                'This account uses Google sign-in. Continue with Google, or set a password first.'
-            );
+        $management_package_id = ManagementPackage::value('id'); // gets first id directly or null
+        if ($request->type == 'organisation') {
+            $user->managementSubscription()->create([
+                'user_id' => $user->user_id,
+                'management_package_id' => $management_package_id,
+                'start_date' => now(),
+                'subscription_status' => 'active',
+                'is_active' => 1,
+                'created_at' => now(),
+            ]);
+
+            $storage_package_id = StoragePackage::value('id'); // gets first id directly or null
+            $user->storageSubscription()->create([
+                'user_id' => $user->user_id,
+                'storage_package_id' => $storage_package_id,
+                'start_date' => now(),
+                'subscription_status' => 'active',
+                'is_active' => 1,
+                'created_at' => now(),
+            ]);
+            $user->accountFund()->create([
+                'user_id' => $user->user_id,
+                'name' => 'General Fund',
+                'is_active' => 1,
+            ]);
+
+            $refCode = null;
+            $referrerId = null;
+
+            // Check if referral code exists
+            if ($request->referral) {
+                $refCode = ReferralCode::where('code', $request->referral)->where('status', 'active')->first();
+                if ($refCode && $refCode->user_id !== $user->id) {
+                    $referrerId = $refCode->user_id;
+                    $refCode->increment('times_used');
+                }
+            }
+
+            // Save referral record regardless of referral code validity
+            Referral::create([
+                'referral_code_id' => $refCode?->id,
+                'referrer_id' => $referrerId,
+                'referred_user_id' => $user->id,
+                'email' => $user->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'signup_completed' => true,
+                'reward_given' => false,
+                'referral_source' => $request->referral_source ?? null,
+            ]);
         }
 
-        $remember = (bool) ($validated['remember_token'] ?? false);
-
-        if (!Auth::attempt(['email' => $email, 'password' => $validated['password']], $remember)) {
-            return $this->error('Invalid credentials.');
+        // Send email to user based on type
+        switch ($user->type) {
+            case 'individual':
+                Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
+                break;
+            case 'organisation':
+                Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
+                break;
+            case 'superadmin':
+                Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
+                break;
         }
 
-        $user = $request->user();
 
-        if (isset($user->registration_completed) && !$user->registration_completed) {
-            Auth::logout();
-            return $this->error('Please complete your profile first.');
-        }
-
-        $token = $user->createToken('Personal Access Token')->plainTextToken;
-
-
-        // 🔥 NEW: org-wise roles + permissions
-        $orgAccess = $this->getOrgAccess($user);
-
-        return $this->success(
-            message: 'Successfully logged in',
-            data: [
-                'id'            => $user->id,
-                'first_name'    => $user->first_name ?: null,
-                'last_name'     => $user->last_name ?: null,
-                'org_name'      => $user->org_name ?: null,
-                'country_name'  => $user->userCountry ? $user->userCountry->country->name : null,
-                'email'         => $user->email,
-                'type'          => $user->type,
-                'azon_id'       => $user->azon_id,
-                'username'      => $user->username,
-                'created_at'    => $user->created_at,
-                'updated_at'    => $user->updated_at,
-                'accessToken'   => $token,
-                'token_type'    => 'Bearer',
-
-                // ❌ OLD remove (global roles/permissions)
-                // 'roles' => $user->roles->pluck('name'),
-                // 'permissions' => $permissions,
-
-                // ✅ NEW org ভিত্তিক data
-                'org_access'    => $orgAccess,
-            ]
-        );
-    }
-
-    // 🔥 STEP 1: permission merge (multi role → single list)
-    private function getPermissionsByOrg($userId, $orgId)
-    {
-        return DB::table('model_has_roles')
-            ->join('role_has_permissions', 'model_has_roles.role_id', '=', 'role_has_permissions.role_id')
-            ->join('permissions', 'permissions.id', '=', 'role_has_permissions.permission_id')
-            ->where('model_has_roles.model_id', $userId)
-            ->where('model_has_roles.org_type_user_id', $orgId)
-            ->pluck('permissions.name')
-            ->unique() // duplicate remove
-            ->values();
-    }
-    public function switchOrg(Request $request)
-    {
-        $user = $request->user();
-        $orgId = $request->header('X-Org-Id');
-
-        $orgAccess = $this->getOrgAccess($user);
-
-        $org = collect($orgAccess)->firstWhere('org_type_user_id', $orgId);
-
-        if (!$org) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid organization'
-            ], 403);
-        }
-
+        // $this->sendEmail($user);
         return response()->json([
             'status' => true,
-            'data' => $org
+            'message' => 'Registration successful',
+            'data' => $user
         ]);
     }
-    // 🔥 STEP 2: org-wise roles + permissions   private
-    public function getOrgAccess($user)
-    {
-        // all org list
-        $orgs = DB::table('model_has_roles')
-            ->where('model_id', $user->id)
-            ->select('org_type_user_id')
-            ->distinct()
-            ->get();
 
-        $data = [];
-
-        foreach ($orgs as $org) {
-
-            // roles
-            $roles = DB::table('roles')
-                ->join('model_has_roles', 'roles.id', '=', 'model_has_roles.role_id')
-                ->where('model_has_roles.model_id', $user->id)
-                ->where('model_has_roles.org_type_user_id', $org->org_type_user_id)
-                ->pluck('roles.name')
-                ->unique()
-                ->values();
-
-            // permissions (merged from all roles)
-            $permissions = $this->getPermissionsByOrg(
-                $user->id,
-                $org->org_type_user_id
-            );
-
-            $data[] = [
-                'org_type_user_id' => $org->org_type_user_id,
-                'roles' => $roles,
-                'permissions' => $permissions
-            ];
-        }
-
-        return $data;
-    }
-
-    public function X_register(Request $request)
+     public function register(Request $request)
     {
         $request->validate([
             'first_name' => 'nullable|string|max:50',
@@ -280,296 +239,65 @@ class AuthController extends Controller
             'data' => $user
         ]);
     }
-    public function register(Request $request)
+
+    public function login(Request $request)
     {
-        $request->validate([
-            'first_name' => 'nullable|string|max:50',
-            'last_name' => 'nullable|string|max:50',
-            'org_name' => 'nullable|string|max:100',
-            'email' => 'required|string|email|max:100|unique:users',
-            'country_id' => 'required|numeric|max:999',
-            'type' => 'required|string|max:12|in:individual,organisation',
-            'password' => 'required|string|min:8',
-            'referral' => 'nullable|string|max:100',
-            'referral_source' => 'nullable|string|max:50',
-        ]);
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'org_name' => $request->org_name,
-            'email' => $request->email,
-            'type' => $request->type,
-            'registration_completed' => true,
-            'password' => Hash::make($request->password),
+        $validated = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+            'remember_token' => 'required|boolean',
         ]);
 
-        // $user->userLanguage()->create([
-        //     'user_id' => $user->id,
-        //     'language_id' => 1, // Default language_id set to 1
-        //     'is_active' => 1,
-        // ]);
+        // 1) Find the user first so we can handle OAuth-only accounts nicely
+        $user = User::where('email', $validated['email'])->first();
 
-        if ($request->country_id) {
-            $user->userCountry()->create([
-                'user_id' => $user->id,
-                'country_id' => $request->country_id,
-                'is_active' => 1,
-            ]);
+        if (!$user) {
+            return $this->error('Invalid credentials.');
         }
 
-        $management_package_id = ManagementPackage::value('id'); // gets first id directly or null
-        if ($request->type == 'organisation') {
-
-            $isNewUser = true;
-
-            $this->assignUserRoles(
-                $user->id,
-                ['admin'],
-                $user->id,
-                'admin',
-                $isNewUser
-            );
-
-            $user->managementSubscription()->create([
-                'user_id' => $user->user_id,
-                'management_package_id' => $management_package_id,
-                'start_date' => now(),
-                'subscription_status' => 'active',
-                'is_active' => 1,
-                'created_at' => now(),
-            ]);
-
-            $storage_package_id = StoragePackage::value('id'); // gets first id directly or null
-            $user->storageSubscription()->create([
-                'user_id' => $user->user_id,
-                'storage_package_id' => $storage_package_id,
-                'start_date' => now(),
-                'subscription_status' => 'active',
-                'is_active' => 1,
-                'created_at' => now(),
-            ]);
-            $user->fund()->create([
-                'user_id' => $user->user_id,
-                'name' => 'General Fund',
-                'is_active' => 1,
-            ]);
-
-            $refCode = null;
-            $referrerId = null;
-
-            // Check if referral code exists
-            if ($request->referral) {
-                $refCode = ReferralCode::where('code', $request->referral)->where('status', 'active')->first();
-                if ($refCode && $refCode->user_id !== $user->id) {
-                    $referrerId = $refCode->user_id;
-                    $refCode->increment('times_used');
-                }
-            }
-
-            // Save referral record regardless of referral code validity
-            Referral::create([
-                'referral_code_id' => $refCode?->id,
-                'referrer_id' => $referrerId,
-                'referred_user_id' => $user->id,
-                'email' => $user->email,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'signup_completed' => true,
-                'reward_given' => false,
-                'referral_source' => $request->referral_source ?? null,
-            ]);
-        }
-
-        // Send email to user based on type
-        switch ($user->type) {
-            case 'individual':
-                Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
-                break;
-            case 'organisation':
-                Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
-                break;
-            case 'superadmin':
-                Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
-                break;
-        }
-
-
-        // $this->sendEmail($user);
-        return response()->json([
-            'status' => true,
-            'message' => 'Registration successful',
-            'data' => $user
-        ]);
-    }
-
-    private function assignUserRoles(
-        $userId,
-        array $roles,
-        $orgTypeUserId,
-        $orgRoleTitle = null,
-        $isNewUser = false
-    ) {
-        // DB::beginTransaction();
-
-        // try {
-        $user = User::findOrFail($userId);
-                // Subscription wise role permission create hobe, dynamically
-        // ✅ IMPORTANT: roles are now org-based
-        $roleModels = Role::whereIn('name', $roles)
-            // ->where('org_type_user_id', $orgTypeUserId)
-            ->where('org_type_user_id', 10)
-            ->where('guard_name', 'web')
-            ->get();
-
-        // Existing user cleanup only
-        // if (!$isNewUser) {
-
-        //     $existingRoleIds = DB::table('model_has_roles')
-        //         ->where('model_type', User::class)
-        //         ->where('model_id', $user->id)
-        //         ->pluck('role_id')
-        //         ->toArray();
-
-        //     $newRoleIds = $roleModels->pluck('id')->toArray();
-
-        //     $toDelete = array_diff($existingRoleIds, $newRoleIds);
-
-        //     if (!empty($toDelete)) {
-        //         DB::table('model_has_roles')
-        //             ->whereIn('role_id', $toDelete)
-        //             ->where('model_type', User::class)
-        //             ->where('model_id', $user->id)
-        //             ->delete();
-        //     }
-        // }
-
-        // Insert roles
-        foreach ($roleModels as $role) {
-            DB::table('model_has_roles')->updateOrInsert(
-                [
-                    'role_id' => $role->id,
-                    'model_type' => User::class,
-                    'model_id' => $user->id,
-                ],
-                [
-                    'org_type_user_id' => $orgTypeUserId
-                ]
-            );
-        }
-        // table org_role_titles insert/update
-        if ($orgRoleTitle) {
-            $orgRoleTitleData = OrgRoleTitle::updateOrCreate(
-                [
-                    'org_type_user_id' => $orgTypeUserId,
-                    'name' => $orgRoleTitle,
-                ],
-
-            );
-        }
-        // Org role title (IMPORTANT: should be org-based unique)
-        if ($orgRoleTitleData) {
-            OrgMemberRoleTitle::updateOrCreate(
-                [
-                    'org_type_user_id' => $orgTypeUserId,
-                    'individual_type_user_id' => $userId,
-                ],
-                [
-                    'org_role_title_id' => $orgRoleTitleData['id'],
-                ]
+        // 2) If the account has no local password, guide them to Google or to set a password
+        if (is_null($user->password)) {
+            return $this->error(
+                'This account uses Google sign-in. Continue with Google, or set a password from your profile first.'
             );
         }
 
-        //     DB::commit();
-
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     throw $e;
-        // }
-    }
-    public function assignRoles(Request $request, $userId)
-    {
-        // dd($request->all());exit;
-        $request->validate([
-            'roles' => 'nullable|array',
-            'org_type_user_id' => 'required|integer',
-            'org_role_title_id' => 'nullable|integer'
-        ]);
-
-        DB::beginTransaction();
-
-        try {
-            $user = User::findOrFail($userId);
-
-            $roles = collect($request->roles ?? [])
-                ->map(fn($r) => trim($r))
-                ->toArray();
-
-            $roleModels = Role::whereIn('name', $roles)
-                ->where('guard_name', 'web')
-                ->get();
-
-            // Sync roles manually with org_type_user_id
-            $existingRoleIds = DB::table('model_has_roles')
-                ->where('model_type', User::class)
-                ->where('model_id', $user->id)
-                ->pluck('role_id')
-                ->toArray();
-
-            $newRoleIds = $roleModels->pluck('id')->toArray();
-
-            // Remove old roles not in new
-            $toDelete = array_diff($existingRoleIds, $newRoleIds);
-            if ($toDelete) {
-                DB::table('model_has_roles')
-                    ->whereIn('role_id', $toDelete)
-                    ->where('model_type', User::class)
-                    ->where('model_id', $user->id)
-                    ->delete();
-            }
-
-            // Insert/update new roles with org_type_user_id
-            foreach ($roleModels as $role) {
-                DB::table('model_has_roles')->updateOrInsert(
-                    [
-                        'role_id' => $role->id,
-                        'model_type' => User::class,
-                        'model_id' => $user->id,
-                    ],
-                    [
-                        'org_type_user_id' => $request->org_type_user_id
-                    ]
-                );
-            }
-
-            // Save org member title
-            if ($request->org_role_title_id) {
-                OrgMemberRoleTitle::updateOrCreate(
-                    [
-                        'org_type_user_id' => $request->org_type_user_id,
-                        'individual_type_user_id' => $userId,
-                    ],
-                    [
-                        'org_role_title_id' => $request->org_role_title_id
-                    ]
-                );
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Roles assigned successfully',
-                'roles' => $roleModels->pluck('name')
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage()
-            ], 500);
+        // 3) Attempt normal email/password login
+        $remember = (bool) $validated['remember_token'];
+        if (!Auth::attempt([
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+        ], $remember)) {
+            return $this->error('Invalid credentials.');
         }
+
+        // Refresh the authenticated user instance
+        $user = $request->user();
+
+        // (Optional) If you use a registration gate, block incomplete profiles
+        if (isset($user->registration_completed) && !$user->registration_completed) {
+            Auth::logout();
+            return $this->error('Please complete your profile via Google sign-in before logging in.');
+        }
+
+        // 4) Issue token and return payload (kept same shape as before)
+        $token = $user->createToken('Personal Access Token')->plainTextToken;
+
+        return $this->success(message: 'Successfully logged in', data: [
+            'id'            => $user->id,
+            'first_name'    => $user->first_name ?: null,
+            'last_name'     => $user->last_name ?: null,
+            'org_name'      => $user->org_name ?: null,
+            'country_name'  => $user->userCountry ? $user->userCountry->country->name : null,
+            'email'         => $user->email,
+            'type'          => $user->type,
+            'azon_id'       => $user->azon_id,
+            'username'      => $user->username,
+            'created_at'    => $user->created_at,
+            'updated_at'    => $user->updated_at,
+            'accessToken'   => $token,
+            'token_type'    => 'Bearer',
+        ]);
     }
 
     public function me(Request $request)
