@@ -286,7 +286,6 @@ class AuthController extends Controller
             'first_name' => 'nullable|string|max:50',
             'last_name' => 'nullable|string|max:50',
             'org_name' => 'nullable|string|max:100',
-            'subscription_id' => 'nullable',
             'email' => 'required|string|email|max:100|unique:users',
             'country_id' => 'required|numeric|max:999',
             'type' => 'required|string|max:12|in:individual,organisation',
@@ -318,15 +317,14 @@ class AuthController extends Controller
             ]);
         }
 
-        $management_package_id = ManagementPackage::value('id');
-        // $management_package_id = $request->subscription_id ?? ManagementPackage::value('id'); // Use provided subscription_id or default to first id
+        $management_package_id = ManagementPackage::value('id'); // gets first id directly or null
         if ($request->type == 'organisation') {
 
             $isNewUser = true;
 
             $this->assignUserRoles(
                 $user->id,
-                ['free_trial_org'],
+                ['admin'],
                 $user->id,
                 'admin',
                 $isNewUser
@@ -415,10 +413,11 @@ class AuthController extends Controller
 
         // try {
         $user = User::findOrFail($userId);
-
+                // Subscription wise role permission create hobe, dynamically
         // ✅ IMPORTANT: roles are now org-based
         $roleModels = Role::whereIn('name', $roles)
             // ->where('org_type_user_id', $orgTypeUserId)
+            ->where('org_type_user_id', 10)
             ->where('guard_name', 'web')
             ->get();
 

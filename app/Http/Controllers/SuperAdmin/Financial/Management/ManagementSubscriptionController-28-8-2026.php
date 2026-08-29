@@ -65,32 +65,6 @@ class ManagementSubscriptionController extends Controller
             ], 500);
         }
     }
-    public function managementPackagePrices() {
-        try {
-            $userId = Auth::id();
-            $user = User::with(['userCountry.country.countryRegion.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
-            $region = $user->userCountry->country->countryRegion->region;
-
-            $managementPackagePrices = ManagementPricing::where('region_id', $region->id)->get();
-                // ->pluck('price_rate');
-            if ($managementPackagePrices->isNotEmpty()) {
-                return response()->json([
-                    'package_prices' => $managementPackagePrices,
-                    'status' => true,
-                    'message' => 'Package prices fetched successfully'
-                ], 200);
-            } else {
-                return response()->json([
-                    'error' => 'Price rate not found for the user\'s region and package',
-                ], 404);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'An error occurred while fetching the daily price rate',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
 
     public function currency() {
         try {

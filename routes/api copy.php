@@ -97,7 +97,6 @@ use App\Http\Controllers\SuperAdmin\Financial\Management\EverydayMemberCountAndB
 use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementAndStorageBillingController;
 use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementPricingController;
 use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementSubscriptionController;
-use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementPackageController;
 use App\Http\Controllers\SuperAdmin\Financial\Storage\EverydayStorageBillingController;
 
 
@@ -108,14 +107,13 @@ Route::get('/test', function () {
     return response()->json(['status' => 'Laravel is running']);
 });
 
+
 use App\Http\Controllers\Role\RoleController;
 use App\Http\Controllers\Role\PermissionController;
 use App\Http\Controllers\Role\UserRoleController;
-
 use App\Http\Controllers\Role\OrgRoleTitleController;
 
 Route::middleware('auth:sanctum')->group(function () {
-
     Route::get('/org-role-titles', [OrgRoleTitleController::class, 'index']);
     Route::post('/org-role-titles', [OrgRoleTitleController::class, 'store']);
     Route::get('/org-role-titles/{id}', [OrgRoleTitleController::class, 'show']);
@@ -123,41 +121,38 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/org-role-titles/{id}', [OrgRoleTitleController::class, 'destroy']);
 
 });
-
 // routes/api.php
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Route::apiResource('roles', RoleController::class);
+    // Route::apiResource('permissions', PermissionController::class);
+    Route::post('users/{id}/roles', [UserRoleController::class, 'assign']);
+});
 
+Route::get('permissions', [PermissionController::class, 'index']);
+Route::post('permissions', [PermissionController::class, 'store']);
+Route::put('permissions/{id}', [PermissionController::class, 'update']);
+Route::delete('permissions/{id}', [PermissionController::class, 'destroy']);
 
-Route::get('permissions', [PermissionController::class,'index']);
-Route::post('permissions', [PermissionController::class,'store']);
-Route::put('permissions/{id}', [PermissionController::class,'update']);
-Route::delete('permissions/{id}', [PermissionController::class,'destroy']);
+Route::get('roles', [RoleController::class, 'index']);
+Route::post('roles', [RoleController::class, 'store']);
+Route::put('roles/{id}', [RoleController::class, 'update']);
+Route::delete('roles/{id}', [RoleController::class, 'destroy']);
 
-Route::get('roles', [RoleController::class,'index']);
-Route::post('roles', [RoleController::class,'store']);
-Route::put('roles/{id}', [RoleController::class,'update']);
-Route::delete('roles/{id}', [RoleController::class,'destroy']);
-
-Route::get('roles-permissions', [RoleController::class,'permissions']);
-
-Route::middleware('auth:sanctum')->group(function(){
+Route::get('roles-permissions', [RoleController::class, 'permissions']);
+Route::middleware('auth:sanctum')->group(function () {
     Route::put('/roles/{role}/permissions', [UserRoleController::class, 'updateRolePermissions']);
     Route::get('/users', [UserRoleController::class, 'getUsers']); // list users with roles
-    Route::get('/org-members-users/{orgId}', [UserRoleController::class, 'getOrgMemberList']); // list org members
     Route::put('/users/{user}/roles', [UserRoleController::class, 'assignRoles']); // assign roles
 });
-// Route::middleware(['auth:sanctum'])->group(function () {
-//     Route::post('users/{id}/roles', [UserRoleController::class, 'assign']);
-// });
-    // Route::post('users/{id}/roles', [UserRoleController::class, 'assign']);
+
 
 //Auth
+Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
-Route::post('register', [AuthController::class, 'register']);
 
 Route::post('/oauth/google/complete', [SocialAuthController::class, 'completeProfile'])->middleware('auth:sanctum');
 Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
-Route::get('/org/switch', [AuthController::class, 'switchOrg'])->middleware('auth:sanctum');
 
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode']);
 Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode']);
@@ -258,7 +253,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [FundManagementController::class, 'update']);
         Route::delete('/{id}', [FundManagementController::class, 'destroy']);
     });
-    
+
     Route::group(['prefix' => 'accounts-transaction-currencies'], function () {
         Route::get('/', [FundManagementController::class, 'getTransactionCurrency']);
         Route::post('/', [FundManagementController::class, 'storeTransactionCurrency']);
@@ -343,7 +338,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::group(['prefix' => 'org-membership-renewal-cycles'], function () {
-         Route::get('/', [OrgMembershipRenewalCycleController::class, 'index']);
+        Route::get('/', [OrgMembershipRenewalCycleController::class, 'index']);
         Route::post('/', [OrgMembershipRenewalCycleController::class, 'store']);
         Route::get('/{id}', [OrgMembershipRenewalCycleController::class, 'show']);
         Route::put('/{id}', [OrgMembershipRenewalCycleController::class, 'update']);
@@ -351,7 +346,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::group(['prefix' => 'org-membership-renewal-prices'], function () {
-         Route::get('/', [OrgMembershipRenewalPriceController::class, 'index']);
+        Route::get('/', [OrgMembershipRenewalPriceController::class, 'index']);
         Route::post('/', [OrgMembershipRenewalPriceController::class, 'store']);
         Route::get('/{id}', [OrgMembershipRenewalPriceController::class, 'show']);
         Route::put('/{id}', [OrgMembershipRenewalPriceController::class, 'update']);
@@ -359,7 +354,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::group(['prefix' => 'org-membership-renewals'], function () {
-         Route::get('/', [OrgMembershipRenewalController::class, 'index']);
+        Route::get('/', [OrgMembershipRenewalController::class, 'index']);
         Route::post('/', [OrgMembershipRenewalController::class, 'store']);
         Route::get('/{id}', [OrgMembershipRenewalController::class, 'show']);
         Route::put('/{id}', [OrgMembershipRenewalController::class, 'update']);
@@ -448,7 +443,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [MeetingAttendanceController::class, 'index']);
         Route::get('/{id}', [MeetingAttendanceController::class, 'show']);
         Route::post('/', [MeetingAttendanceController::class, 'store']);
-        Route::post('/bulk', [MeetingAttendanceController::class, 'bulkStore']);
         Route::put('/{id}', [MeetingAttendanceController::class, 'update']);
         Route::delete('/{id}', [MeetingAttendanceController::class, 'destroy']);
     });
@@ -537,21 +531,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('asset-lifecycle-setups', [AssetLifecycleStatusController::class, 'index']);
 
-    Route::group(['prefix' => 'management-packages'], function () {
-        Route::get('/', [ManagementPackageController::class, 'index']);
-        Route::post('/', [ManagementPackageController::class, 'store']);
-        Route::get('/{id}', [ManagementPackageController::class, 'show']);
-        Route::put('/{id}', [ManagementPackageController::class, 'update']);
-        Route::delete('/{id}', [ManagementPackageController::class, 'destroy']);
-    });
-
     Route::group(['prefix' => 'management-subscriptions'], function () {
         Route::get('/', [ManagementSubscriptionController::class, 'index']);
         Route::post('/', [ManagementSubscriptionController::class, 'store']);
         Route::put('{id}', [ManagementSubscriptionController::class, 'update']);
         Route::delete('{id}', [ManagementSubscriptionController::class, 'destroy']);
         Route::get('/daily-price-rate', [ManagementSubscriptionController::class, 'managementPriceRate']);
-        Route::get('/management-package-prices', [ManagementSubscriptionController::class, 'managementPackagePrices']);
         Route::get('/currencies', [ManagementSubscriptionController::class, 'currency']);
     });
 
