@@ -751,6 +751,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::group(['prefix' => 'country-regions'], function () {
         Route::get('/', [CountryRegionController::class, 'index']);
+        Route::get('/country/{country_id}', [CountryRegionController::class, 'countryWiseRegionWithCurrency']);
         Route::get('/{id}', [CountryRegionController::class, 'show']);
         Route::post('/', [CountryRegionController::class, 'store']);
         Route::put('/{id}', [CountryRegionController::class, 'update']);

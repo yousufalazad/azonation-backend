@@ -17,43 +17,6 @@ class CountryRegionController extends Controller
             ->get();
         return response()->json(['status' => true, 'data' => $usersCountry], 200);
     }
-    // Get regions and their currencies based on country_id
-    public function countryWiseRegionWithCurrency($country_id)
-    {
-        try {
-            $regionsWithCurrency = CountryRegion::select(
-                'country_regions.region_id as region_id',
-                'regions.name as region_name',
-                'region_currencies.currency_id as currency_id',
-                'currencies.currency_name',
-                'currencies.currency_code',
-                'currencies.currency_symbol',
-                'currencies.unit_name'
-            )
-            ->leftJoin('regions', 'country_regions.region_id', '=', 'regions.id')
-            ->leftJoin('region_currencies', function ($join) {
-                $join->on('country_regions.region_id', '=', 'region_currencies.region_id')
-                     ->where('region_currencies.is_active', true);
-            })
-            ->leftJoin('currencies', 'region_currencies.currency_id', '=', 'currencies.id')
-
-            ->where('country_regions.country_id', $country_id)
-            ->where('country_regions.is_active', true)
-            ->get();
-            return response()->json([
-                'status' => true,
-                'data' => $regionsWithCurrency,
-                'message' => 'Regions and currencies fetched successfully'
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Error fetching regions and currencies: ' . $e->getMessage());
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to fetch regions and currencies',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
     public function create() {}
     public function store(Request $request)
     {
