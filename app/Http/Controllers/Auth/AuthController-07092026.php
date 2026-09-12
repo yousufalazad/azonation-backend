@@ -318,20 +318,15 @@ class AuthController extends Controller
             ]);
         }
 
-        // $management_package_id = ManagementPackage::where('slug', 'free')->value('id');
-
+        $management_package_id = ManagementPackage::value('id');
+        // $management_package_id = $request->subscription_id ?? ManagementPackage::value('id'); // Use provided subscription_id or default to first id
         if ($request->type == 'organisation') {
-            $managementPackage = ManagementPackage::where('slug', 'free_trial_org')
-                ->select('id', 'slug')
-                ->first();
 
-            $management_package_id = $managementPackage?->id;
-            $management_package_slug = $managementPackage?->slug;
             $isNewUser = true;
 
             $this->assignUserRoles(
                 $user->id,
-                [$management_package_slug],
+                ['free_trial_org'],
                 $user->id,
                 'admin',
                 $isNewUser

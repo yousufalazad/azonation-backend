@@ -13,10 +13,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
-use Spatie\Permission\Models\Role;
-use App\Models\OrgMemberRoleTitle;
-use App\Models\OrgRoleTitle;
-
 
 class ManagementSubscriptionController extends Controller
 {
@@ -35,6 +31,7 @@ class ManagementSubscriptionController extends Controller
                 'data' => $managementSubscriptions,
                 'message' => 'Subscriptions fetched successfully'
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
@@ -74,6 +71,7 @@ class ManagementSubscriptionController extends Controller
                     'error' => 'Price rate not found for the user\'s region and package',
                 ], 404);
             }
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
@@ -111,6 +109,7 @@ class ManagementSubscriptionController extends Controller
                     'error' => 'Price rate not found for the user\'s region and package',
                 ], 404);
             }
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
@@ -142,6 +141,7 @@ class ManagementSubscriptionController extends Controller
                     'error' => 'Currency not found for the user\'s region',
                 ], 404);
             }
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the currency',
@@ -237,7 +237,9 @@ class ManagementSubscriptionController extends Controller
                 |--------------------------------------------------------------------------
                 | 3. Get OLD Package Price
                 |--------------------------------------------------------------------------
+                |
                 | Get user's current region and old package price.
+                |
                 */
                 $oldPriceRate = null;
 
@@ -326,13 +328,17 @@ class ManagementSubscriptionController extends Controller
                         ?->currency
                         ?->code;
                 }
-                $currencyCode = 'USD';
+                $currencyCode = 'BDT';
 
 
                 /*
                 |--------------------------------------------------------------------------
                 | 7. Insert OLD + NEW Data into Record Table
-                |-------------------------------------------------------------------------
+                |--------------------------------------------------------------------------
+                |
+                | IMPORTANT:
+                | This happens BEFORE updating ManagementSubscription.
+                |
                 */
                 $subscriptionRecord = ManagementSubscriptionRecord::create([
                     /*
@@ -397,43 +403,53 @@ class ManagementSubscriptionController extends Controller
                 | 8. Update Current Management Subscription
                 |--------------------------------------------------------------------------
                 */
-                $subscription->user_id =  $validated['user_id'];
-                $subscription->management_package_id = $validated['management_package_id'];
+                $subscription->user_id = $validated['user_id'];
+
+                $subscription->management_package_id =
+                    $validated['management_package_id'];
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Start Date
+                |--------------------------------------------------------------------------
+                */
                 if (!empty($validated['start_date'])) {
+
                     $subscription->start_date = $validated['start_date'];
                 }
-                $subscription->is_active = $validated['is_active'] ?? 1;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Active Status
+                |--------------------------------------------------------------------------
+                */
+                $subscription->is_active =
+                    $validated['is_active'] ?? 1;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Subscription Status
+                |--------------------------------------------------------------------------
+                */
                 $subscription->subscription_status = 'active';
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save Subscription
+                |--------------------------------------------------------------------------
+                */
                 $subscription->save();
 
-                $user_id = $validated['user_id'];
-                $updatedOrgAccess = null;
 
-                if ($user_id) {
-                    // get management_subscriptions for $user_id and subscription_status = active and is_active = 1 join with management_packages and get the package name and price rate
-                    $managementSubscription = ManagementSubscription::where('management_subscriptions.user_id', $user_id)
-                        ->where('management_subscriptions.subscription_status', 'active')
-                        ->where('management_subscriptions.is_active', 1)
-                        ->join('management_packages', 'management_subscriptions.management_package_id', '=', 'management_packages.id')
-                        ->select('management_subscriptions.*', 'management_packages.name as subscription_package_name', 'management_packages.slug as subscription_package_slug')
-                        ->first();
-
-                    if ($managementSubscription) {
-                        $this->assignUserRoles($user_id, $managementSubscription->subscription_package_slug, $user_id, 'admin', false);
-                        
-                        $orgOwner = User::find($user_id);
-                        if ($orgOwner) {
-                            $authController = new \App\Http\Controllers\Auth\AuthController();
-                            $fullOrgAccess = $authController->getOrgAccess($orgOwner);
-
-                            // an organisation admin's own org_type_user_id is their own user id
-                            // (see AuthController::register -> assignUserRoles($user->id, ..., $user->id, 'admin', true))
-                            $updatedOrgAccess = collect($fullOrgAccess)
-                                ->firstWhere('org_type_user_id', $user_id);
-                        }
-                    }
-                }
-
+                /*
+                |--------------------------------------------------------------------------
+                | Return Success
+                |--------------------------------------------------------------------------
+                */
                 return [
                     'success' => true,
                     'response' => response()->json([
@@ -441,7 +457,6 @@ class ManagementSubscriptionController extends Controller
                         'message' => 'Subscription updated successfully.',
                         'data' => $subscription,
                         'record' => $subscriptionRecord,
-                        'org_access' => $updatedOrgAccess, // ADDED: fresh roles/permissions for this org
                     ], 200)
                 ];
             });
@@ -453,6 +468,8 @@ class ManagementSubscriptionController extends Controller
             |--------------------------------------------------------------------------
             */
             return $result['response'];
+
+
         } catch (\Illuminate\Validation\ValidationException $e) {
 
             return response()->json([
@@ -460,6 +477,8 @@ class ManagementSubscriptionController extends Controller
                 'message' => 'Validation failed.',
                 'errors' => $e->errors(),
             ], 422);
+
+
         } catch (\Exception $e) {
 
             return response()->json([
@@ -467,151 +486,6 @@ class ManagementSubscriptionController extends Controller
                 'message' => 'An error occurred. Please try again.',
                 'error' => $e->getMessage(),
             ], 500);
-        }
-    }
-
-    private function X_assignUserRoles($userId, array $roles, $orgTypeUserId, $orgRoleTitle = null, $isNewUser = false)
-    {
-        DB::beginTransaction();
-
-        try {
-            $user = User::findOrFail($userId);
-
-            // IMPORTANT: roles are now org-based
-            $roleModels = Role::whereIn('name', $roles)
-                ->where('guard_name', 'web')
-                ->get();
-
-            // Existing user cleanup only
-            if (!$isNewUser) {
-
-                $existingRoleIds = DB::table('model_has_roles')
-                    ->where('model_type', User::class)
-                    ->where('model_id', $user->id)
-                    ->pluck('role_id')
-                    ->toArray();
-
-                $newRoleIds = $roleModels->pluck('id')->toArray();
-
-                $toDelete = array_diff($existingRoleIds, $newRoleIds);
-
-                if (!empty($toDelete)) {
-                    DB::table('model_has_roles')
-                        ->whereIn('role_id', $toDelete)
-                        ->where('model_type', User::class)
-                        ->where('model_id', $user->id)
-                        ->delete();
-                }
-            }
-
-            // Insert roles
-            foreach ($roleModels as $role) {
-                DB::table('model_has_roles')->updateOrInsert(
-                    [
-                        'role_id' => $role->id,
-                        'model_type' => User::class,
-                        'model_id' => $user->id,
-                    ],
-                    [
-                        'org_type_user_id' => $orgTypeUserId
-                    ]
-                );
-            }
-            // table org_role_titles insert/update
-            if ($orgRoleTitle) {
-                $orgRoleTitleData = OrgRoleTitle::updateOrCreate(
-                    [
-                        'org_type_user_id' => $orgTypeUserId,
-                        'name' => $orgRoleTitle,
-                    ],
-
-                );
-            }
-            // Org role title (IMPORTANT: should be org-based unique)
-            if ($orgRoleTitleData) {
-                OrgMemberRoleTitle::updateOrCreate(
-                    [
-                        'org_type_user_id' => $orgTypeUserId,
-                        'individual_type_user_id' => $userId,
-                    ],
-                    [
-                        'org_role_title_id' => $orgRoleTitleData['id'],
-                    ]
-                );
-            }
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
-
-
-    private function assignUserRoles($userId, $roles, $orgTypeUserId, $orgRoleTitle = null, $isNewUser = false)
-    {
-        DB::beginTransaction();
-
-        try {
-            $user = User::findOrFail($userId);
-
-            $role = Role::where('name', $roles)
-                ->where('guard_name', 'web')
-                ->first();
-
-            if (!$role) {
-                throw new \Exception('Role not found.');
-            }
-
-            $existingRole = DB::table('model_has_roles')
-                ->where('model_type', User::class)
-                ->where('model_id', $user->id)
-                ->where('org_type_user_id', $orgTypeUserId)
-                ->first();
-
-            if ($existingRole) {
-                DB::table('model_has_roles')
-                    ->where('model_type', User::class)
-                    ->where('model_id', $user->id)
-                    ->where('org_type_user_id', $orgTypeUserId)
-                    ->update([
-                        'role_id' => $role->id,
-                    ]);
-            } else {
-                DB::table('model_has_roles')->insert([
-                    'role_id' => $role->id,
-                    'model_type' => User::class,
-                    'model_id' => $user->id,
-                    'org_type_user_id' => $orgTypeUserId,
-                ]);
-            }
-
-            $orgRoleTitleData = null;
-
-            if ($orgRoleTitle) {
-                $orgRoleTitleData = OrgRoleTitle::updateOrCreate(
-                    [
-                        'org_type_user_id' => $orgTypeUserId,
-                        'name' => $orgRoleTitle,
-                    ]
-                );
-            }
-
-            if ($orgRoleTitleData) {
-                OrgMemberRoleTitle::updateOrCreate(
-                    [
-                        'org_type_user_id' => $orgTypeUserId,
-                        'individual_type_user_id' => $userId,
-                    ],
-                    [
-                        'org_role_title_id' => $orgRoleTitleData->id,
-                    ]
-                );
-            }
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
         }
     }
 

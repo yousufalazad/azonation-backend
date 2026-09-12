@@ -16,12 +16,20 @@ use Carbon\Carbon;
 // class MeetingController extends BaseController
 class MeetingController extends Controller
 {
+    // public function __construct()
+    // {
+    //     $this->middleware('permission:meeting.read')->only(['index', 'show', 'orgNextMeeting']);
+    //     $this->middleware('permission:meeting.create')->only(['store']);
+    //     $this->middleware('permission:meeting.update')->only(['update']);
+    //     $this->middleware('permission:meeting.delete')->only(['destroy']);
+    // }
+
     public function __construct()
     {
-        $this->middleware('permission:meeting.read')->only(['index', 'show', 'orgNextMeeting']);
-        $this->middleware('permission:meeting.create')->only(['store']);
-        $this->middleware('permission:meeting.update')->only(['update']);
-        $this->middleware('permission:meeting.delete')->only(['destroy']);
+        $this->middleware('org.permission:meeting.read')->only(['index', 'show', 'orgNextMeeting']);
+        $this->middleware('org.permission:meeting.create')->only(['store']);
+        $this->middleware('org.permission:meeting.update')->only(['update']);
+        $this->middleware('org.permission:meeting.delete')->only(['destroy']);
     }
 
     public function index(Request $request)
@@ -101,7 +109,7 @@ class MeetingController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
         }
         $input = $request->all();
-        $input['user_id'] = $request->user()->id;
+        $input['user_id'] = $request->input('user_id')??$request->user()?->id;
         $input['created_by'] = $request->user()->id;
         $meeting = Meeting::create($input);
 

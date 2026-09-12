@@ -28,17 +28,11 @@ use App\Models\Currency;
 use App\Models\ReferralCode;
 use App\Models\Referral;
 use App\Models\ReferralReward;
-use App\Models\OrgMember;
-
 use Spatie\Permission\Traits\HasRoles;
-use Spatie\Permission\Models\Role;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
-
-    protected $guard_name = 'web';
-
     protected $fillable = [
         'azon_id',
         'first_name',
@@ -68,51 +62,6 @@ class User extends Authenticatable
     ];
 
 
-    public function X_rolesByOrg($orgId)
-    {
-        return $this->belongsToMany(
-            Role::class,
-            'model_has_roles',
-            'model_id',
-            'role_id'
-        )
-            ->wherePivot('model_type', self::class)
-            ->wherePivot('org_type_user_id', $orgId);
-    }
-    public function rolesByOrg($orgId)
-    {
-        return $this->roles()
-            ->wherePivot('org_type_user_id', $orgId);
-    }
-    public function X_hasOrgPermission($permission, $orgId)
-    {
-        $orgMember = \App\Models\OrgMember::with('role.permissions')
-            ->where('individual_type_user_id', $this->id)
-            ->where('org_type_user_id', $orgId)
-            ->first();
-
-        if (!$orgMember || !$orgMember->role) return false;
-
-        return $orgMember->role->permissions
-            ->pluck('name')
-            ->contains($permission);
-    }
-
-public function hasOrgPermission($permission, $orgId)
-{
-    $orgMember = OrgMember::with('role.permissions')
-        ->where('individual_type_user_id', $this->id)
-        ->where('org_type_user_id', $orgId)
-        ->first();
-
-    if (!$orgMember || !$orgMember->role) {
-        return false;
-    }
-
-    return $orgMember->role->permissions
-        ->pluck('name')
-        ->contains($permission);
-}
     protected function casts(): array
     {
         return [
@@ -121,10 +70,14 @@ public function hasOrgPermission($permission, $orgId)
         ];
     }
 
-    public function orgMembers()
-    {
-        return $this->hasMany(\App\Models\OrgMember::class, 'individual_type_user_id');
-    }
+    // public function getNameAttribute()
+    // {
+    //     if ($this->type === 'organization') {
+    //         return $this->org_name;
+    //     }
+    //     return trim($this->first_name . ' ' . $this->last_name);
+    // }
+
 
     public function individualProfileImage(): HasOne
     {
@@ -219,6 +172,8 @@ public function hasOrgPermission($permission, $orgId)
         return $this->hasOne(Currency::class, 'currency_id', 'id')->where('is_active', true);
     }
 
+    
+
     // User's own referral code
     public function referralCode()
     {
@@ -259,6 +214,8 @@ public function hasOrgPermission($permission, $orgId)
             }
         });
     }
+
+
 
     public function down()
     {

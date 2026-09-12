@@ -1,10 +1,7 @@
 <?php
-
 namespace App\Http\Controllers\Org\Project;
-
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
-
 use App\Models\Project;
 use App\Models\ProjectImage;
 use App\Models\ProjectFile;
@@ -15,14 +12,15 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+
 class ProjectController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:project.read')->only(['index', 'show']);
-        $this->middleware('permission:project.create')->only(['create', 'store']);
-        $this->middleware('permission:project.update')->only(['edit', 'update']);
-        $this->middleware('permission:project.delete')->only(['destroy']);
+        $this->middleware('org.permission:project.read')->only(['index', 'show']);
+        $this->middleware('org.permission:project.create')->only(['create', 'store']);
+        $this->middleware('org.permission:project.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:project.delete')->only(['destroy']);
     }
     public function getProject($projectId)
     {
@@ -83,7 +81,7 @@ class ProjectController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
         }
         $input = $request->all();
-        $input['user_id'] = $request->user()->id;
+        $input['user_id'] = $request->input('user_id')??$request->user()?->id;
         // $input['created_by'] = $request->user()->id;
         $project = Project::create($input);
 
