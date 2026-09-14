@@ -17,10 +17,10 @@ class EventSummaryController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:event-summary.read')->only(['index', 'show']);
-        $this->middleware('permission:event-summary.create')->only(['create', 'store']);
-        $this->middleware('permission:event-summary.update')->only(['edit', 'update']);
-        $this->middleware('permission:event-summary.delete')->only(['destroy']);
+        $this->middleware('org.permission:event-summary.read')->only(['index', 'show']);
+        $this->middleware('org.permission:event-summary.create')->only(['create', 'store']);
+        $this->middleware('org.permission:event-summary.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:event-summary.delete')->only(['destroy']);
     }
     public function index()
     {

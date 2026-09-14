@@ -3,7 +3,6 @@
 // app/Http/Controllers/Api/UserRoleController.php
 namespace App\Http\Controllers\Role;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;

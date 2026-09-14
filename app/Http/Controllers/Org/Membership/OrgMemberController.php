@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Org\Membership;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controllr;
+use Illuminate\Routing\Controller;
+
 use App\Mail\AddMemberSuccessMail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\OrgMember;
@@ -22,6 +24,15 @@ use Illuminate\Support\Carbon;
 class OrgMemberController extends Controller
 {
     use Notifiable;
+
+    public function __construct()
+    {
+        $this->middleware('org.permission:member.read')->only(['index', 'show']);
+        $this->middleware('org.permission:member.create')->only(['create', 'store']);
+        $this->middleware('org.permission:member.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:member.delete')->only(['destroy']);
+    }
+
     public function getOrgAllMemberName(Request $request)
     {
         $userId = Auth::id();

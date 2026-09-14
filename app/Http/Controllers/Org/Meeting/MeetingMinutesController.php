@@ -17,10 +17,10 @@ class MeetingMinutesController extends Controller
 {
         public function __construct()
         {
-            $this->middleware('permission:meeting-minute.read')->only(['index', 'show']);
-            $this->middleware('permission:meeting-minute.create')->only(['create', 'store']);
-            $this->middleware('permission:meeting-minute.update')->only(['edit', 'update']);
-            $this->middleware('permission:meeting-minute.delete')->only(['destroy']);
+            $this->middleware('org.permission:meeting-minute.read')->only(['index', 'show']);
+            $this->middleware('org.permission:meeting-minute.create')->only(['create', 'store']);
+            $this->middleware('org.permission:meeting-minute.update')->only(['edit', 'update']);
+            $this->middleware('org.permission:meeting-minute.delete')->only(['destroy']);
         }
     public function index()
     {

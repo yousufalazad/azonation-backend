@@ -16,10 +16,10 @@ class OfficeDocumentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:document.read')->only(['index', 'show']);
-        $this->middleware('permission:document.create')->only(['create', 'store']);
-        $this->middleware('permission:document.update')->only(['edit', 'update']);
-        $this->middleware('permission:document.delete')->only(['destroy']);
+        $this->middleware('org.permission:document.read')->only(['index', 'show']);
+        $this->middleware('org.permission:document.create')->only(['create', 'store']);
+        $this->middleware('org.permission:document.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:document.delete')->only(['destroy']);
     }
     public function index()
     {

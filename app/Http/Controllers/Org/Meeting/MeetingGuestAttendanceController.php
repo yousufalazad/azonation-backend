@@ -12,10 +12,10 @@ class MeetingGuestAttendanceController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:meeting-guest-attendance.read')->only(['index', 'show']);
-        $this->middleware('permission:meeting-guest-attendance.create')->only(['create', 'store']);
-        $this->middleware('permission:meeting-guest-attendance.update')->only(['edit', 'update']);
-        $this->middleware('permission:meeting-guest-attendance.delete')->only(['destroy']);
+        $this->middleware('org.permission:meeting-guest-attendance.read')->only(['index', 'show']);
+        $this->middleware('org.permission:meeting-guest-attendance.create')->only(['create', 'store']);
+        $this->middleware('org.permission:meeting-guest-attendance.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:meeting-guest-attendance.delete')->only(['destroy']);
     }
     public function index()
     {

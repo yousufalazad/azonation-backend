@@ -1,8 +1,7 @@
 <?php
-
 namespace App\Http\Controllers\Org\Membership;
-
-use App\Http\Controllers\Controller;
+// use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use App\Models\UnlinkMemberImage;
 use App\Models\UnlinkMember;
 use Illuminate\Http\Request;
@@ -13,6 +12,13 @@ use Illuminate\Support\Facades\Auth;
 
 class UnlinkMemberController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('org.permission:unlink-member.read')->only(['index', 'show']);
+        $this->middleware('org.permission:unlink-member.create')->only(['create', 'store']);
+        $this->middleware('org.permission:unlink-member.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:unlink-member.delete')->only(['destroy']);
+    }
     public function index(Request $request)
     {
         Log::info('Inside index');

@@ -17,10 +17,10 @@ class ProjectSummaryController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:project-summary.read')->only(['index', 'show']);
-        $this->middleware('permission:project-summary.create')->only(['create', 'store']);
-        $this->middleware('permission:project-summary.update')->only(['edit', 'update']);
-        $this->middleware('permission:project-summary.delete')->only(['destroy']);
+        $this->middleware('org.permission:project-summary.read')->only(['index', 'show']);
+        $this->middleware('org.permission:project-summary.create')->only(['create', 'store']);
+        $this->middleware('org.permission:project-summary.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:project-summary.delete')->only(['destroy']);
     }
     public function index()
     {

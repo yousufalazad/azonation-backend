@@ -22,10 +22,10 @@ class AssetController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:asset.read')->only(['index', 'show']);
-        $this->middleware('permission:asset.create')->only(['create', 'store']);
-        $this->middleware('permission:asset.update')->only(['edit', 'update']);
-        $this->middleware('permission:asset.delete')->only(['destroy']);
+        $this->middleware('org.permission:asset.read')->only(['index', 'show']);
+        $this->middleware('org.permission:asset.create')->only(['create', 'store']);
+        $this->middleware('org.permission:asset.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:asset.delete')->only(['destroy']);
     }
     public function index(Request $request)
     {

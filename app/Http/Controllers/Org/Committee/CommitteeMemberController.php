@@ -12,10 +12,10 @@ class CommitteeMemberController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:committee-member.read')->only(['index', 'show']);
-        $this->middleware('permission:committee-member.create')->only(['create', 'store']);
-        $this->middleware('permission:committee-member.update')->only(['edit', 'update']);
-        $this->middleware('permission:committee-member.delete')->only(['destroy']);
+        $this->middleware('org.permission:committee-member.read')->only(['index', 'show']);
+        $this->middleware('org.permission:committee-member.create')->only(['create', 'store']);
+        $this->middleware('org.permission:committee-member.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:committee-member.delete')->only(['destroy']);
     }
     public function index($id)
     {

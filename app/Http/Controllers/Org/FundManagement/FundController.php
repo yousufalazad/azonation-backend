@@ -13,10 +13,10 @@ class FundController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:fund.read')->only(['index', 'show']);
-        $this->middleware('permission:fund.create')->only(['create', 'store']);
-        $this->middleware('permission:fund.update')->only(['edit', 'update']);
-        $this->middleware('permission:fund.delete')->only(['destroy']);
+        $this->middleware('org.permission:fund.read')->only(['index', 'show']);
+        $this->middleware('org.permission:fund.create')->only(['create', 'store']);
+        $this->middleware('org.permission:fund.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:fund.delete')->only(['destroy']);
     }
     public function index()
     {
