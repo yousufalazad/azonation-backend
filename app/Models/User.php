@@ -68,7 +68,7 @@ class User extends Authenticatable
     ];
 
 
-    public function X_rolesByOrg($orgId)
+    public function rolesByOrg($orgId)
     {
         return $this->belongsToMany(
             Role::class,
@@ -77,9 +77,10 @@ class User extends Authenticatable
             'role_id'
         )
             ->wherePivot('model_type', self::class)
-            ->wherePivot('org_type_user_id', $orgId);
+            ->wherePivot('org_type_user_id', $orgId)
+            ->where('roles.guard_name', 'web');
     }
-    public function rolesByOrg($orgId)
+    public function X_rolesByOrg($orgId)
     {
         return $this->roles()
             ->wherePivot('org_type_user_id', $orgId);
