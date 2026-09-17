@@ -213,7 +213,7 @@ class SocialAuthController extends Controller
                 ]
             );
 
-            $user->accountFund()->firstOrCreate(
+            $user->fund()->firstOrCreate(
                 ['user_id' => $user->id, 'name' => 'General Fund'],
                 ['is_active' => 1]
             );
