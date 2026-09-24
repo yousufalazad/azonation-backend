@@ -151,11 +151,11 @@ Route::middleware('auth:sanctum')->group(function(){
     // Route::post('users/{id}/roles', [UserRoleController::class, 'assign']);
 
 //Auth
-Route::post('login', [AuthController::class, 'login']);
+Route::post('login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
 Route::post('register', [AuthController::class, 'register']);
 
-Route::post('/oauth/google/complete', [SocialAuthController::class, 'completeProfile'])->middleware('auth:sanctum');
+Route::post('/oauth/google/complete', [SocialAuthController::class, 'completeProfile'])->middleware('throttle:10,1');
 Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 Route::get('/org/switch', [AuthController::class, 'switchOrg'])->middleware('auth:sanctum');
 

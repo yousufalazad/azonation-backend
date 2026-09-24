@@ -24,13 +24,10 @@ use Spatie\Permission\Models\Role;
 use App\Models\OrgMemberRoleTitle;
 use App\Models\OrgRoleTitle;
 
-
 use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
-
-    // 🔐 LOGIN
     public function login(Request $request)
     {
         $validated = $request->validate([
@@ -52,53 +49,52 @@ class AuthController extends Controller
             );
         }
 
-        $remember = (bool) ($validated['remember_token'] ?? false);
+        // Default true → loged in until user logout (remember me)  --- false → session only 
+        $remember = (bool) ($validated['remember_token'] ?? true);
 
-        if (!Auth::attempt(['email' => $email, 'password' => $validated['password']], $remember)) {
+        if (!Auth::guard('web')->attempt(['email' => $email, 'password' => $validated['password']], $remember)) {
             return $this->error('Invalid credentials.');
         }
 
-        $user = $request->user();
+        $user = Auth::guard('web')->user();
 
-        if (isset($user->registration_completed) && !$user->registration_completed) {
-            Auth::logout();
+        if (!$user->registration_completed) {
+            Auth::guard('web')->logout();
             return $this->error('Please complete your profile first.');
         }
 
-        $token = $user->createToken('Personal Access Token')->plainTextToken;
+        // Session fixation attack prevention: regenerate session ID after login
+        $request->session()->regenerate();
 
-
-        // 🔥 NEW: org-wise roles + permissions
-        $orgAccess = $this->getOrgAccess($user);
-
-        return $this->success(
-            message: 'Successfully logged in',
-            data: [
-                'id'            => $user->id,
-                'first_name'    => $user->first_name ?: null,
-                'last_name'     => $user->last_name ?: null,
-                'org_name'      => $user->org_name ?: null,
-                'country_name'  => $user->userCountry ? $user->userCountry->country->name : null,
-                'email'         => $user->email,
-                'type'          => $user->type,
-                'azon_id'       => $user->azon_id,
-                'username'      => $user->username,
-                'created_at'    => $user->created_at,
-                'updated_at'    => $user->updated_at,
-                'accessToken'   => $token,
-                'token_type'    => 'Bearer',
-
-                // ❌ OLD remove (global roles/permissions)
-                // 'roles' => $user->roles->pluck('name'),
-                // 'permissions' => $permissions,
-
-                // ✅ NEW org ভিত্তিক data
-                'org_access'    => $orgAccess,
-            ]
-        );
+        // Token will not be issued for SPA login, because SPA uses session + CSRF for auth. Token is only for API usage.
+        return $this->success('Successfully logged in', $this->userPayload($user));
     }
 
-    // 🔥 STEP 1: permission merge (multi role → single list)
+    // login() and me() both use this to return user data consistently
+    private function userPayload(User $user): array
+    {
+        return [
+            'id'           => $user->id,
+            'first_name'   => $user->first_name ?: null,
+            'last_name'    => $user->last_name ?: null,
+            'org_name'     => $user->org_name ?: null,
+            'country_name' => $user->userCountry?->country?->name,
+            'email'        => $user->email,
+            'type'         => $user->type,
+            'azon_id'      => $user->azon_id,
+            'username'     => $user->username,
+            'created_at'   => $user->created_at,
+            'updated_at'   => $user->updated_at,
+            'org_access'   => $this->getOrgAccess($user),
+        ];
+    }
+
+    public function me(Request $request)
+    {
+        return $this->success('OK', $this->userPayload($request->user()));
+    }
+
+    // permission merge (multi role → single list)
     private function getPermissionsByOrg($userId, $orgId)
     {
         return DB::table('model_has_roles')
@@ -131,7 +127,7 @@ class AuthController extends Controller
             'data' => $org
         ]);
     }
-    // 🔥 STEP 2: org-wise roles + permissions   private
+    // org-wise roles + permissions   private
     public function getOrgAccess($user)
     {
         // all org list
@@ -170,116 +166,6 @@ class AuthController extends Controller
         return $data;
     }
 
-    public function X_register(Request $request)
-    {
-        $request->validate([
-            'first_name' => 'nullable|string|max:50',
-            'last_name' => 'nullable|string|max:50',
-            'org_name' => 'nullable|string|max:100',
-            'email' => 'required|string|email|max:100|unique:users',
-            'country_id' => 'required|numeric|max:999',
-            'type' => 'required|string|max:12|in:individual,organisation',
-            'password' => 'required|string|min:8',
-            'referral' => 'nullable|string|max:100',
-            'referral_source' => 'nullable|string|max:50',
-        ]);
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'org_name' => $request->org_name,
-            'email' => $request->email,
-            'type' => $request->type,
-            'registration_completed' => true,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $user->userLanguage()->create([
-            'user_id' => $user->id,
-            'language_id' => 1, // Default language_id set to 1
-            'is_active' => 1,
-        ]);
-
-        if ($request->country_id) {
-            $user->userCountry()->create([
-                'user_id' => $user->id,
-                'country_id' => $request->country_id,
-                'is_active' => 1,
-            ]);
-        }
-
-        $management_package_id = ManagementPackage::value('id'); // gets first id directly or null
-        if ($request->type == 'organisation') {
-            $user->managementSubscription()->create([
-                'user_id' => $user->user_id,
-                'management_package_id' => $management_package_id,
-                'start_date' => now(),
-                'subscription_status' => 'active',
-                'is_active' => 1,
-                'created_at' => now(),
-            ]);
-
-            $storage_package_id = StoragePackage::value('id'); // gets first id directly or null
-            $user->storageSubscription()->create([
-                'user_id' => $user->user_id,
-                'storage_package_id' => $storage_package_id,
-                'start_date' => now(),
-                'subscription_status' => 'active',
-                'is_active' => 1,
-                'created_at' => now(),
-            ]);
-            $user->fund()->create([
-                'user_id' => $user->user_id,
-                'name' => 'General Fund',
-                'is_active' => 1,
-            ]);
-
-            $refCode = null;
-            $referrerId = null;
-
-            // Check if referral code exists
-            if ($request->referral) {
-                $refCode = ReferralCode::where('code', $request->referral)->where('status', 'active')->first();
-                if ($refCode && $refCode->user_id !== $user->id) {
-                    $referrerId = $refCode->user_id;
-                    $refCode->increment('times_used');
-                }
-            }
-
-            // Save referral record regardless of referral code validity
-            Referral::create([
-                'referral_code_id' => $refCode?->id,
-                'referrer_id' => $referrerId,
-                'referred_user_id' => $user->id,
-                'email' => $user->email,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'signup_completed' => true,
-                'reward_given' => false,
-                'referral_source' => $request->referral_source ?? null,
-            ]);
-        }
-
-        // Send email to user based on type
-        switch ($user->type) {
-            case 'individual':
-                Mail::to($user->email)->queue(new IndividualUserRegisteredMail($user));
-                break;
-            case 'organisation':
-                Mail::to($user->email)->queue(new OrgUserRegisteredMail($user));
-                break;
-            case 'superadmin':
-                Mail::to($user->email)->queue(new SuperAdminUserRegisteredMail($user));
-                break;
-        }
-
-
-        // $this->sendEmail($user);
-        return response()->json([
-            'status' => true,
-            'message' => 'Registration successful',
-            'data' => $user
-        ]);
-    }
     public function register(Request $request)
     {
         $request->validate([
@@ -338,7 +224,7 @@ class AuthController extends Controller
             );
 
             $user->managementSubscription()->create([
-                'user_id' => $user->user_id,
+                'user_id' => $user->id,
                 'management_package_id' => $management_package_id,
                 'start_date' => now(),
                 'subscription_status' => 'active',
@@ -348,7 +234,7 @@ class AuthController extends Controller
 
             $storage_package_id = StoragePackage::value('id'); // gets first id directly or null
             $user->storageSubscription()->create([
-                'user_id' => $user->user_id,
+                'user_id' => $user->id,
                 'storage_package_id' => $storage_package_id,
                 'start_date' => now(),
                 'subscription_status' => 'active',
@@ -356,7 +242,7 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
             $user->fund()->create([
-                'user_id' => $user->user_id,
+                'user_id' => $user->id,
                 'name' => 'General Fund',
                 'is_active' => 1,
             ]);
@@ -426,28 +312,6 @@ class AuthController extends Controller
             // ->where('org_type_user_id', $orgTypeUserId)
             ->where('guard_name', 'web')
             ->get();
-
-        // Existing user cleanup only
-        // if (!$isNewUser) {
-
-        //     $existingRoleIds = DB::table('model_has_roles')
-        //         ->where('model_type', User::class)
-        //         ->where('model_id', $user->id)
-        //         ->pluck('role_id')
-        //         ->toArray();
-
-        //     $newRoleIds = $roleModels->pluck('id')->toArray();
-
-        //     $toDelete = array_diff($existingRoleIds, $newRoleIds);
-
-        //     if (!empty($toDelete)) {
-        //         DB::table('model_has_roles')
-        //             ->whereIn('role_id', $toDelete)
-        //             ->where('model_type', User::class)
-        //             ->where('model_id', $user->id)
-        //             ->delete();
-        //     }
-        // }
 
         // Insert roles
         foreach ($roleModels as $role) {
@@ -578,23 +442,6 @@ class AuthController extends Controller
         }
     }
 
-    public function me(Request $request)
-    {
-        $user = $request->user();
-        return $this->success('OK', [
-            'id' => $user->id,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'org_name' => $user->org_name,
-            'country_name' => $user->userCountry?->country?->name,
-            'email' => $user->email,
-            'type' => $user->type,
-            'azon_id' => $user->azon_id,
-            'username' => $user->username,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-        ]);
-    }
 
     // public function sendEmail($user)
     // {
@@ -657,6 +504,7 @@ class AuthController extends Controller
 
     public function firstLastNameUpdate(Request $request, $userId)
     {
+        abort_unless((int) $request->user()->id === (int) $userId, 403, 'You can only update your own account.');
         $validated = $request->validate([
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
@@ -687,6 +535,7 @@ class AuthController extends Controller
 
     public function lastNameUpdate(Request $request, $userId)
     {
+        abort_unless((int) $request->user()->id === (int) $userId, 403, 'You can only update your own account.');
         $validated = $request->validate([
             'last_name' => 'required|string|max:100',
         ]);
@@ -715,6 +564,7 @@ class AuthController extends Controller
 
     public function nameUpdate(Request $request, $userId)
     {
+        abort_unless((int) $request->user()->id === (int) $userId, 403, 'You can only update your own account.');
         $validated = $request->validate([
             'org_name' => 'required|string|max:100',
         ]);
@@ -743,6 +593,7 @@ class AuthController extends Controller
 
     public function usernameUpdate(Request $request, $userId)
     {
+        abort_unless((int) $request->user()->id === (int) $userId, 403, 'You can only update your own account.');
         $request->validate([
             'username' => 'required|string|max:30|unique:users,username,' . $userId,
         ]);
@@ -758,8 +609,9 @@ class AuthController extends Controller
 
     public function userEmailUpdate(Request $request, $userId)
     {
+        abort_unless((int) $request->user()->id === (int) $userId, 403, 'You can only update your own account.');
         $request->validate([
-            'email' => 'required|string|max:100',
+            'email' => 'required|string|email|max:100|unique:users,email,' . $userId,
         ]);
         $user = User::where('id', $userId)->first();
         $user->email = $request->email;
@@ -773,6 +625,7 @@ class AuthController extends Controller
 
     public function updatePassword(Request $request, $userId)
     {
+        abort_unless((int) $request->user()->id === (int) $userId, 403, 'You can only update your own password.');
         try {
             $user = User::findOrFail($userId);
 
@@ -832,6 +685,8 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+
 
     public function logout(Request $request)
     {

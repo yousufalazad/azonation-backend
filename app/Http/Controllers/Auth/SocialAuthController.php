@@ -13,9 +13,18 @@ use App\Models\ReferralCode;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Two\InvalidStateException;
 use GuzzleHttp\Exception\ClientException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
+use App\Models\OrgMemberRoleTitle;
+use App\Models\OrgRoleTitle;
+use App\Services\OrgAccessService;
+
 
 class SocialAuthController extends Controller
 {
+
+    public function __construct(private OrgAccessService $orgAccess) {}
 
     public function redirectToGoogle(Request $request)
     {
@@ -65,7 +74,6 @@ class SocialAuthController extends Controller
             // If you ever hit InvalidState in privacy-restricted browsers, add ->stateless() on both sides.
             $googleUser = Socialite::driver('google')
                 ->user();
-
         } catch (InvalidStateException $e) {
             Log::warning('Google OAuth invalid state', ['ex' => $e->getMessage()]);
             return $this->oauthAbort('invalid_state', 'Your session expired. Please try again.', $request);
@@ -77,7 +85,7 @@ class SocialAuthController extends Controller
             return $this->oauthAbort('server_error', 'Unexpected error during Google sign-in.', $request);
         }
 
-        
+
         // If you're truly API-only/no sessions, use ->user()
         //$googleUser = Socialite::driver('google')->user();
 
@@ -130,25 +138,35 @@ class SocialAuthController extends Controller
             || ($user->type === 'organisation' && !$user->org_name)
             || !$user->userCountry()->exists();
 
+                    
+        $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
         if ($needsCompletion) {
-            // Create a short-lived token to call /api/oauth/google/complete
-            $tempToken = $user->createToken('oauth-complete', ['oauth:complete'])->plainTextToken;
+            // Token not in the URL, remember in session which user is completing profile
+            $request->session()->regenerate();
+            $request->session()->put('oauth_pending_user_id', $user->id);
 
-            // Frontend route should read these query params and render a completion form
-            $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
-            return redirect()->away($frontendUrl . '/oauth/complete?token=' . urlencode($tempToken) . '&email=' . urlencode($user->email));
+            return redirect()->away($frontendUrl . '/oauth/complete?email=' . urlencode($user->email));
         }
 
-        // 5) All good → issue normal login token and bounce to app
-        $accessToken = $user->createToken('Personal Access Token')->plainTextToken;
-        $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
-        return redirect()->away($frontendUrl . '/oauth/signed-in?accessToken=' . urlencode($accessToken));
+        // Session login + remember me
+        Auth::guard('web')->login($user, true);
+        $request->session()->regenerate();
+
+        return redirect()->away($frontendUrl . '/oauth/signed-in');
     }
 
     public function completeProfile(Request $request)
     {
-        // Auth via the short-lived token we issued in the callback
-        $user = $request->user(); // Sanctum will bind user by Bearer token
+        // Google callback, pending user kept in session
+        $pendingId = $request->session()->get('oauth_pending_user_id');
+        $user = $pendingId ? User::find($pendingId) : null;
+
+        if (!$user) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Your session expired. Please sign in with Google again.',
+            ], 401);
+        }
 
         $validated = $request->validate([
             'type'        => 'required|string|in:individual,organisation',
@@ -158,7 +176,7 @@ class SocialAuthController extends Controller
             'last_name'   => 'nullable|string|max:50',
             // organisation:
             'org_name'    => 'nullable|string|max:100',
-            // optional
+            // referral
             'referral'        => 'nullable|string|max:100',
             'referral_source' => 'nullable|string|max:50',
         ]);
@@ -191,7 +209,25 @@ class SocialAuthController extends Controller
 
         // Your existing “organisation bootstrap” logic:
         if ($user->type === 'organisation') {
-            $management_package_id = ManagementPackage::value('id');
+
+            $managementPackage = ManagementPackage::where('slug', 'free_trial_org')
+                ->select('id', 'slug')
+                ->first();
+
+            $management_package_id = $managementPackage?->id;
+            $management_package_slug = $managementPackage?->slug;
+            $isNewUser = true;
+
+
+            $this->orgAccess->assignUserRoles(
+                $user->id,
+                [$management_package_slug],
+                $user->id,
+                'admin',
+                $isNewUser
+            );
+
+
             $user->managementSubscription()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -202,11 +238,14 @@ class SocialAuthController extends Controller
                 ]
             );
 
-            $storage_package_id = StoragePackage::value('id');
+            $storagePackage = StoragePackage::where('slug', 'free_trial_storage')
+                ->select('id', 'slug')
+                ->first();
+
             $user->storageSubscription()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'storage_package_id' => $storage_package_id,
+                    'storage_package_id' => $storagePackage?->id,
                     'start_date' => now(),
                     'subscription_status' => 'active',
                     'is_active' => 1,
@@ -243,29 +282,30 @@ class SocialAuthController extends Controller
             ]);
         }
 
-        $user->registration_completed = true;
+                $user->registration_completed = true;
         $user->save();
 
-        // Issue your normal app token and return payload like your login()
-        $accessToken = $user->createToken('Personal Access Token')->plainTextToken;
+        // Clear the pending session and log in the user
+        $request->session()->forget('oauth_pending_user_id');
+        Auth::guard('web')->login($user, true);
+        $request->session()->regenerate();
 
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'Profile completed',
-            'data' => [
-                'id' => $user->id,
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'org_name' => $user->org_name,
-                'country_name' => $user->userCountry?->country?->name,
-                'email' => $user->email,
-                'type' => $user->type,
-                'azon_id' => $user->azon_id,
-                'username' => $user->username,
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-                'accessToken' => $accessToken,
-                'token_type' => 'Bearer',
+            'data'    => [
+                'id'           => $user->id,
+                'first_name'   => $user->first_name,
+                'last_name'    => $user->last_name,
+                'org_name'     => $user->org_name,
+                'country_name' => $user->fresh()->userCountry?->country?->name,
+                'email'        => $user->email,
+                'type'         => $user->type,
+                'azon_id'      => $user->azon_id,
+                'username'     => $user->username,
+                'created_at'   => $user->created_at,
+                'updated_at'   => $user->updated_at,
+                'org_access'   => $this->orgAccess->getOrgAccess($user),
             ],
         ]);
     }
@@ -275,8 +315,8 @@ class SocialAuthController extends Controller
         $frontend = config('app.frontend_url', 'http://localhost:5173');
         // Take user back to login with a friendly message you can display
         $url = $frontend . '/?oauth=google&status=error'
-             . '&reason=' . urlencode($reason)
-             . '&message=' . urlencode($message);
+            . '&reason=' . urlencode($reason)
+            . '&message=' . urlencode($message);
 
         return redirect()->away($url);
     }

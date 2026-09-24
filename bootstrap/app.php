@@ -13,18 +13,18 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
+        // Sanctum SPA cookie auth (session + CSRF for frontend requests)
+        $middleware->statefulApi();
+
         $middleware->alias([
             // ✅ Spatie
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-
-            // 🔥 YOUR NEW MIDDLEWARE (ADD THIS)
             'org.permission' => \App\Http\Middleware\OrgPermission::class,
         ]);
     })
 
     ->withExceptions(function (Exceptions $exceptions) {
-        //
     })->create();
     
