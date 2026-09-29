@@ -3,168 +3,120 @@
 namespace App\Http\Controllers\Org\YearPlan;
 
 use App\Http\Concerns\ResolvesCurrentOrg;
+use App\Http\Concerns\StoresAttachments;
 use App\Http\Controllers\Controller;
-
 use App\Models\YearPlan;
 use App\Models\YearPlanFile;
 use App\Models\YearPlanImage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
+/**
+ * Plans for a year (or a few): goals, activities, budget and where the plan stands.
+ */
 class YearPlanController extends Controller
 {
-    use ResolvesCurrentOrg;
+    use ResolvesCurrentOrg, StoresAttachments;
+
+    private const FILES = ['image' => YearPlanImage::class, 'file' => YearPlanFile::class];
+    private const STATUSES = ['draft', 'approved', 'completed', 'archived'];
 
     public function index()
     {
-        try {
-            $yearPlans = YearPlan::where('user_id', Auth::id())
-                ->orderBy('id', 'desc')
-                ->get();
-
-            return response()->json([
-                'status' => true,
-                'data' => $yearPlans,
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to retrieve records.',
-                'error' => \App\Support\ErrorDetail::for($e),
-            ], 500);
-        }
+        // The current organisation's plans (not the signed-in person's own id)
+        $plans = $this->owned(YearPlan::class)
+            ->select('year_plans.*', 'privacy_setups.name as privacy_name')
+            ->leftJoin('privacy_setups', 'year_plans.privacy_setup_id', '=', 'privacy_setups.id')
+            ->orderBy('year_plans.start_year', 'desc')
+            ->orderBy('year_plans.id', 'desc')
+            ->get();
+        return response()->json(['status' => true, 'data' => $plans], 200);
     }
-    public function store(Request $request)
-    {
-        // The organisation always comes from the session, never from the form
-        $request->merge(['user_id' => $this->orgIdOrFail()]);
 
-        $validatedData = $request->validate([
-            'title' => 'required|string',
-            'user_id' => 'nullable|exists:users,id',
-            'start_year' => 'nullable|string|max:4',
-            'end_year' => 'nullable|string|max:4',
-            'goals' => 'nullable|string',
-            'activities' => 'nullable|string',
-            'budget' => 'nullable|numeric|min:0',
-            'start_date' => 'nullable|date|before_or_equal:end_date',
-            'end_date' => 'nullable|date',
-            'privacy_setup_id' => 'nullable|integer|in:1,2,3',
-            'published' => 'nullable|boolean',
-            'status' => 'nullable|string|in:draft,approved,completed,archived',
-        ]);
-        DB::beginTransaction();
-        try {
-            $yearPlan = YearPlan::create($validatedData);
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/year-plan/file',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-                    YearPlanFile::create([
-                        'year_plan_id' => $yearPlan->id,
-                        'file_path' => $documentPath,
-                        'file_name' => $document->getClientOriginalName(),
-                        'mime_type' => $document->getClientMimeType(),
-                        'file_size' => $document->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/year-plan/image',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-                    YearPlanImage::create([
-                        'year_plan_id' => $yearPlan->id,
-                        'file_path' => $imagePath,
-                        'file_name' => $image->getClientOriginalName(),
-                        'mime_type' => $image->getClientMimeType(),
-                        'file_size' => $image->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            DB::commit();
-            return response()->json([
-                'status' => true,
-                'message' => 'Asset created successfully.',
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
-        }
-    }
     public function show($id)
     {
-        $yearPlan =  $this->owned(YearPlan::class)->where('id', $id)
-            ->with(['images', 'documents'])
+        $plan = $this->owned(YearPlan::class)
+            ->select('year_plans.*', 'privacy_setups.name as privacy_name')
+            ->leftJoin('privacy_setups', 'year_plans.privacy_setup_id', '=', 'privacy_setups.id')
+            ->where('year_plans.id', $id)
             ->first();
-        if (!$yearPlan) {
-            return response()->json(['status' => false, 'message' => 'Strategic Plan not found'], 404);
+        if (!$plan) {
+            return response()->json(['status' => false, 'message' => 'Year plan not found'], 404);
         }
-        $yearPlan->images = $yearPlan->images->map(function ($image) {
-            $image->image_url = $image->file_path
-                ? url(Storage::url($image->file_path))
-                : null;
-            return $image;
-        });
-        $yearPlan->documents = $yearPlan->documents->map(function ($document) {
-            $document->document_url = $document->file_path
-                ? url(Storage::url($document->file_path))
-                : null;
-            return $document;
-        });
-        return response()->json(['status' => true, 'data' => $yearPlan], 200);
+        return response()->json(['status' => true, 'data' => $this->withAttachmentUrls($plan)], 200);
     }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), $this->rules());
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
+        }
+        $plan = new YearPlan($this->values($request));
+        $plan->user_id = $this->orgIdOrFail(); // always the current organisation
+        $plan->save();
+        $this->saveAttachments($request, $plan, self::FILES, 'year_plan_id', 'org/year-plan');
+        return response()->json(['status' => true, 'message' => 'Year plan created successfully.', 'data' => $plan], 201);
+    }
+
     public function update(Request $request, $id)
     {
-        // The organisation always comes from the session, never from the form
-        $request->merge(['user_id' => $this->orgIdOrFail()]);
-
-        $validatedData = $request->validate([
-            'title' => 'nullable|string',
-            'start_year' => 'nullable|string|max:4',
-            'end_year' => 'nullable|string|max:4',
-            'goals' => 'nullable|string',
-            'activities' => 'nullable|string',
-            'budget' => 'nullable|numeric|min:0',
-            'start_date' => 'nullable|date|before_or_equal:end_date',
-            'end_date' => 'nullable|date',
-            'privacy_setup_id' => 'nullable|integer|in:1,2,3',
-            'published' => 'nullable|boolean',
-            'status' => 'nullable|string|in:draft,approved,completed,archived',
-        ]);
-        try {
-            $yearPlan = $this->owned(YearPlan::class)->findOrFail($id);
-            $yearPlan->update($validatedData);
-            return response()->json(['status' => true, 'message' => 'Year plan updated successfully!', 'data' => $yearPlan], 200);
-        } catch (\Exception $e) {
-            Log::error('Year Plan Update Error: ' . $e->getMessage());
-            return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
+        $validator = Validator::make($request->all(), $this->rules());
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
         }
+        $plan = $this->owned(YearPlan::class)->find($id);
+        if (!$plan) {
+            return response()->json(['status' => false, 'message' => 'Year plan not found'], 404);
+        }
+        $plan->update($this->values($request));
+        // Files added while editing are saved too (they were ignored before)
+        $this->saveAttachments($request, $plan, self::FILES, 'year_plan_id', 'org/year-plan');
+        return response()->json(['status' => true, 'message' => 'Year plan updated successfully!', 'data' => $plan], 200);
     }
+
     public function destroy($id)
     {
-        try {
-            $yearPlan = $this->owned(YearPlan::class)->findOrFail($id);
-            $yearPlan->delete();
-            return response()->json(['status' => true, 'message' => 'Year plan deleted successfully!'], 200);
-        } catch (\Exception $e) {
-            Log::error('Year Plan Delete Error: ' . $e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Year plan not found or cannot be deleted.'], 404);
+        $plan = $this->owned(YearPlan::class)->find($id);
+        if (!$plan) {
+            return response()->json(['status' => false, 'message' => 'Year plan not found'], 404);
         }
+        $this->deleteAttachments($plan);
+        $plan->delete();
+        return response()->json(['status' => true, 'message' => 'Year plan deleted successfully!'], 200);
+    }
+
+    private function rules(): array
+    {
+        return [
+            'title' => 'required|string|max:200',
+            'start_year' => 'nullable|integer|digits:4|min:1901|max:2155',
+            'end_year' => 'nullable|integer|digits:4|min:1901|max:2155|gte:start_year',
+            'goals' => 'nullable|string|max:60000',
+            'activities' => 'nullable|string|max:60000',
+            'budget' => 'nullable|numeric|min:0|max:9999999999999',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
+            'published' => 'nullable|boolean',
+            'status' => 'nullable|in:' . implode(',', self::STATUSES),
+        ] + $this->attachmentRules();
+    }
+
+    private function values(Request $request): array
+    {
+        return [
+            'title' => $request->title,
+            'start_year' => $request->start_year,
+            'end_year' => $request->end_year,
+            'goals' => $request->goals,
+            'activities' => $request->activities,
+            'budget' => $request->budget,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'privacy_setup_id' => $request->privacy_setup_id,
+            'published' => $request->boolean('published'),
+            'status' => $request->input('status') ?: 'draft',
+        ];
     }
 }
