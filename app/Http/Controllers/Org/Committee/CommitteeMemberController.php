@@ -3,14 +3,15 @@ namespace App\Http\Controllers\Org\Committee;
 
 use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Models\Committee;
-// use App\Http\Controllers\Controller;
-use Illuminate\Routing\Controller;
-
 use App\Models\CommitteeMember;
+use App\Models\OrgMember;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
 
+/**
+ * Who serves on a committee, in which role (President, Secretary...) and for how long.
+ */
 class CommitteeMemberController extends Controller
 {
     use ResolvesCurrentOrg;
@@ -22,132 +23,113 @@ class CommitteeMemberController extends Controller
         $this->middleware('org.permission:committee-member.update')->only(['edit', 'update']);
         $this->middleware('org.permission:committee-member.delete')->only(['destroy']);
     }
+
+    // Members of one committee. An empty committee is an empty list, not an error.
     public function index($id)
     {
-        $committeeMember = $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->where('committee_id', $id)
+        $this->ensureOwnedParent(Committee::class, $id);
+        $members = CommitteeMember::query()
+            ->where('committee_members.committee_id', $id)
             ->leftJoin('users', 'committee_members.user_id', '=', 'users.id')
             ->leftJoin('designations', 'committee_members.designation_id', '=', 'designations.id')
-            ->select('committee_members.*', 'users.first_name',  'users.last_name', 'designations.name as designation_name')
+            ->select('committee_members.*', 'users.first_name', 'users.last_name', 'designations.name as designation_name')
+            ->orderBy('committee_members.designation_id')
             ->get();
-        if ($committeeMember->isEmpty()) {
-            return response()->json(['status' => false, 'message' => 'No committee members found'], 404);
+        return response()->json(['status' => true, 'data' => $members], 200);
+    }
+
+    public function create() {}
+
+    public function store(Request $request)
+    {
+        $this->ensureOwnedParent(Committee::class, $request->input('committee_id'));
+
+        $validator = Validator::make($request->all(), $this->rules());
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
+        }
+        if ($error = $this->memberError($request->user_id)) {
+            return $error;
+        }
+        $committeeMember = CommitteeMember::create($this->values($request));
+        return response()->json(['status' => true, 'data' => $committeeMember, 'message' => 'Committee member added.'], 201);
+    }
+
+    public function show($id)
+    {
+        $committeeMember = $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->find($id);
+        if (!$committeeMember) {
+            return response()->json(['status' => false, 'message' => 'Committee member not found'], 404);
         }
         return response()->json(['status' => true, 'data' => $committeeMember], 200);
     }
-    public function create() {}
-    public function store(Request $request)
-    {
-        // The committee must belong to this organisation
-        $this->ensureOwnedParent(Committee::class, $request->input('committee_id'));
 
-        // dd($request->all());exit;
-        $validator = Validator::make($request->all(), [
-            'committee_id' => 'required',
-            'user_id' => 'required',
-            'designation_id' => 'required',
-            'start_date' => 'nullable',
-            'end_date' => 'nullable',
-            'note' => 'nullable',
-            'is_active' => 'nullable',
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-        try {
-            $committeeMember = new CommitteeMember();
-            $committeeMember->committee_id = $request->committee_id;
-            $committeeMember->user_id = $request->user_id;
-            $committeeMember->designation_id = $request->designation_id;
-            $committeeMember->start_date = $request->start_date;
-            $committeeMember->end_date = $request->end_date;
-            $committeeMember->note = $request->note;
-            $committeeMember->is_active = $request->is_active;           
-            $committeeMember->save();
-            return response()->json([
-                'status' => true,
-                'data' => $committeeMember,
-                'message' => 'Meeting Minutes created successfully.'
-            ], 201);
-        } catch (\Exception $e) {
-            Log::error('Error creating Meeting Minutes: ' . $e->getMessage());
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.'
-            ], 500);
-        }
-    }
-    public function show($id)
-    {
-        $meetingMinute =  $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->select('meeting_minutes.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
-            ->leftJoin('privacy_setups', 'meeting_minutes.privacy_setup_id', '=', 'privacy_setups.id')
-            ->where('meeting_minutes.id', $id)->first();
-        if (!$meetingMinute) {
-            return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
-        }
-        return response()->json(['status' => true, 'data' => $meetingMinute], 200);
-    }
-    public function edit(CommitteeMember $committeeMember) {}
+    public function edit($id) {}
+
     public function update(Request $request, $id)
     {
-        // The committee must belong to this organisation
         if ($request->has('committee_id')) $this->ensureOwnedParent(Committee::class, $request->input('committee_id'));
 
-        $validator = Validator::make($request->all(), [
-            'committee_id' => 'required|integer',
-            'user_id' => 'required|integer',
-            'designation_id' => 'required|integer',
-            'start_date' => 'nullable',
-            'end_date' => 'nullable',
-            'note' => 'nullable',
-            'is_active' => 'required',
-        ]);
+        $validator = Validator::make($request->all(), $this->rules());
         if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
         }
-        try {
-            $committeeMember = $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->findOrFail($id);
-            $committeeMember->committee_id = $request->committee_id;
-            $committeeMember->user_id = $request->user_id;
-            $committeeMember->designation_id = $request->designation_id;
-            $committeeMember->start_date = $request->start_date;
-            $committeeMember->end_date = $request->end_date;
-            $committeeMember->note = $request->note;
-            $committeeMember->is_active = $request->is_active;
-            $committeeMember->save();
-            return response()->json([
-                'status' => true,
-                'data' => $committeeMember,
-                'message' => 'Meeting Minutes updated successfully.'
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Error updating Meeting Minutes: ' . $e->getMessage());
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.'
-            ], 500);
+        $committeeMember = $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->find($id);
+        if (!$committeeMember) {
+            return response()->json(['status' => false, 'message' => 'Committee member not found'], 404);
         }
+        if ($error = $this->memberError($request->user_id)) {
+            return $error;
+        }
+        $committeeMember->update($this->values($request));
+        return response()->json(['status' => true, 'data' => $committeeMember, 'message' => 'Committee member updated.'], 200);
     }
+
     public function destroy($id)
     {
-        try {
-            $committeeMember = $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->findOrFail($id);
-            $committeeMember->delete();
-            return response()->json([
-                'status' => true,
-                'message' => 'Meeting Minutes deleted successfully.'
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Error deleting Meeting Minutes: ' . $e->getMessage());
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.'
-            ], 500);
+        $committeeMember = $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->find($id);
+        if (!$committeeMember) {
+            return response()->json(['status' => false, 'message' => 'Committee member not found'], 404);
         }
+        $committeeMember->delete();
+        return response()->json(['status' => true, 'message' => 'Committee member removed.'], 200);
+    }
+
+    private function rules(): array
+    {
+        return [
+            'committee_id' => 'required|integer|exists:committees,id',
+            'user_id' => 'required|integer|exists:users,id',
+            'designation_id' => 'required|integer|exists:designations,id',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'note' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
+        ];
+    }
+
+    private function values(Request $request): array
+    {
+        return [
+            'committee_id' => $request->committee_id,
+            'user_id' => $request->user_id,
+            'designation_id' => $request->designation_id,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'note' => $request->note,
+            'is_active' => $request->has('is_active') ? $request->boolean('is_active') : true,
+        ];
+    }
+
+    // Only people who are members of this organisation can serve on its committees
+    private function memberError($userId)
+    {
+        $isMember = OrgMember::where('org_type_user_id', $this->orgIdOrFail())
+            ->where('individual_type_user_id', $userId)
+            ->exists();
+        return $isMember ? null : response()->json([
+            'status' => false,
+            'message' => 'This person is not a member of your organisation.',
+        ], 422);
     }
 }
