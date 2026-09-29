@@ -708,7 +708,7 @@ class AuthController extends Controller
             // Explicitly forget cookies that can keep you logged in
             $cookiesToForget = [
                 config('session.cookie', 'laravel_session'),
-                Auth::getRecallerName(), // remember_web_xxx
+                Auth::guard('web')->getRecallerName(), // remember_web_xxx (the sanctum guard has no recaller)
                 'XSRF-TOKEN',            // optional, nice to reset
             ];
 
