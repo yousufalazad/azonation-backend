@@ -98,7 +98,7 @@ class EverydayMemberCountAndBillingController extends Controller
     public function getUserManagementDailyPriceRate($userId)
     {
         try {
-            $userId = Auth::id();
+            // Use the organisation passed in: the daily job runs with nobody signed in
             $user = User::with(['userCountry.country.countryRegion.region', 'managementSubscription.managementPackage'])->findOrFail($userId);
             $region = $user->userCountry->country->countryRegion->region;
             $managementPackage = $user->managementSubscription->managementPackage;
@@ -135,6 +135,11 @@ class EverydayMemberCountAndBillingController extends Controller
                 $date = today();
                 $getUserManagementDailyPriceRateResponse = $this->getUserManagementDailyPriceRate($userId);
                 $getUserManagementDailyPriceRateData = $getUserManagementDailyPriceRateResponse->getData(true);
+                // One organisation without a price (no country/package) must not stop everyone else's bill
+                if (!isset($getUserManagementDailyPriceRateData['daily_price_rate'])) {
+                    Log::warning('Everyday Management bill skipped: no daily price rate for user ' . $userId);
+                    return null;
+                }
                 Log::info('User management daily price rate fetched successfully.');
                 $orgMembers = DB::table('org_members')
                     ->where('org_type_user_id', $userId)
@@ -189,9 +194,16 @@ class EverydayMemberCountAndBillingController extends Controller
             $monthlyTotalMemberCount = EverydayMemberCountAndBilling::where('user_id', $userId)
                 ->whereBetween('date', [$startOfSubMonth, $endOfSubMonth])
                 ->get();
+            // Who counts towards today's bill (same rule as the daily bill job), for the month estimate
+            $billableMembers = DB::table('org_members')->where('org_type_user_id', $userId)->where('is_active', true)->count()
+                + DB::table('org_independent_members')->where('user_id', $userId)->where('is_active', true)->count();
+            $rate = $this->getUserManagementDailyPriceRate($userId)->getData(true)['daily_price_rate'] ?? null;
+
             return response()->json([
                 'status' => true,
                 'data' => $monthlyTotalMemberCount,
+                'billable_members' => $billableMembers,
+                'daily_price_rate' => $rate,
                 'message' => 'Monthly total member count fetched successfully',
             ], 200);
         } catch (\Exception $e) {

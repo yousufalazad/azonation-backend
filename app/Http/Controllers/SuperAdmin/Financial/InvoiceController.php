@@ -18,7 +18,12 @@ class InvoiceController extends Controller
     {
         try {
             $user_id = $request->user()->id;
-            $invoices = Invoice::where('user_id', $user_id)->get();
+            // Organisations see only invoices that have been sent to them, without internal notes
+            $invoices = Invoice::where('user_id', $user_id)
+                ->where('is_published', 1)
+                ->orderByDesc('issue_date')->orderByDesc('id')
+                ->get()
+                ->makeHidden(['admin_note']);
             return response()->json([
                 'status' => true,
                 'data' => $invoices,
@@ -120,7 +125,7 @@ class InvoiceController extends Controller
             'order.orderItems',
         ])
             // Organisations may only open their own invoices; Super Admins any
-            ->when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))
+            ->when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner)->where('is_published', 1))
             ->find($invoiceId);
 
         if (!$invoice) {
@@ -135,7 +140,7 @@ class InvoiceController extends Controller
             'billing_phone' => $invoice->order->billing_phone ?? null,
             'billing_email' => $invoice->order->billing_email ?? null,
             'total_tax' => $invoice->order->total_tax ?? null,
-            'invoice' => $invoice
+            'invoice' => auth()->user()?->type === 'superadmin' ? $invoice : $invoice->makeHidden(['admin_note'])
         ];
 
         return response()->json(['status' => true, 'data' => $data], 200);
@@ -154,7 +159,7 @@ class InvoiceController extends Controller
             'order.orderItems',
         ])
             // Organisations may only open their own invoices; Super Admins any
-            ->when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))
+            ->when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner)->where('is_published', 1))
             ->find($invoiceId);
 
         if (!$invoice) {
@@ -174,7 +179,7 @@ class InvoiceController extends Controller
             'org_email' => $invoice->user->email,
             'dialing_code' => $invoice->user->phoneNumber->dialingCode->dialing_code ?? null,
             'org_phone_number' => $invoice->user->phoneNumber->phone_number ?? null,
-            'invoice' => $invoice
+            'invoice' => auth()->user()?->type === 'superadmin' ? $invoice : $invoice->makeHidden(['admin_note'])
         ];
 
         return response()->json(['status' => true, 'data' => $data], 200);

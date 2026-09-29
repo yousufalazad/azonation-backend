@@ -12,7 +12,13 @@ class ReceiptController extends Controller
     {
         try {
             // Organisations see only their own receipts; Super Admins see all
-            $receipts = Receipt::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->get();
+            $isSuper = auth()->user()?->type === 'superadmin';
+            $receipts = Receipt::when(($isSuper ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner)->where('is_published', 1))
+                ->orderByDesc('payment_date')->orderByDesc('id')
+                ->get();
+            if (!$isSuper) {
+                $receipts->makeHidden(['admin_note']);
+            }
             return response()->json([
                 'status' => true,
                 'data' => $receipts,
@@ -71,7 +77,11 @@ class ReceiptController extends Controller
     public function show($id)
     {
         try {
-            $receipt = Receipt::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->findOrFail($id);
+            $isSuper = auth()->user()?->type === 'superadmin';
+            $receipt = Receipt::when(($isSuper ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner)->where('is_published', 1))->findOrFail($id);
+            if (!$isSuper) {
+                $receipt->makeHidden(['admin_note']);
+            }
             return response()->json([
                 'status' => true,
                 'message' => 'Receipt retrieved successfully.',
@@ -102,7 +112,11 @@ class ReceiptController extends Controller
             'is_published' => 'boolean',
         ]);
         try {
-            $receipt = Receipt::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->findOrFail($id);
+            $isSuper = auth()->user()?->type === 'superadmin';
+            $receipt = Receipt::when(($isSuper ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner)->where('is_published', 1))->findOrFail($id);
+            if (!$isSuper) {
+                $receipt->makeHidden(['admin_note']);
+            }
             $receipt->update([
                 'receipt_code' => $validated['receipt_code'],
                 'invoice_id' => $validated['invoice_id'],
@@ -132,7 +146,11 @@ class ReceiptController extends Controller
     public function destroy($id)
     {
         try {
-            $receipt = Receipt::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->findOrFail($id);
+            $isSuper = auth()->user()?->type === 'superadmin';
+            $receipt = Receipt::when(($isSuper ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner)->where('is_published', 1))->findOrFail($id);
+            if (!$isSuper) {
+                $receipt->makeHidden(['admin_note']);
+            }
             $receipt->delete();
             return response()->json([
                 'status' => true,

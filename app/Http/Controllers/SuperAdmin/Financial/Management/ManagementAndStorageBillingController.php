@@ -18,7 +18,10 @@ class ManagementAndStorageBillingController extends Controller
     {
         try {
             $userId = Auth::id();
-            $orgAllBill = ManagementAndStorageBilling::where('user_id', $userId)->get();
+            $orgAllBill = ManagementAndStorageBilling::where('user_id', $userId)
+                ->orderByDesc('period_start')->orderByDesc('id')
+                ->get()
+                ->makeHidden(['admin_note']);
             return response()->json([
                 'status' => true,
                 'data' => $orgAllBill,
@@ -186,7 +189,10 @@ class ManagementAndStorageBillingController extends Controller
     {
         $billing = ManagementAndStorageBilling::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->find($billingId);
         if (!$billing) {
-            return response()->json(['status' => false, 'message' => 'Project not found'], 404);
+            return response()->json(['status' => false, 'message' => 'Bill not found'], 404);
+        }
+        if (auth()->user()?->type !== 'superadmin') {
+            $billing->makeHidden(['admin_note']);
         }
         return response()->json(['status' => true, 'data' => $billing], 200);
     }
