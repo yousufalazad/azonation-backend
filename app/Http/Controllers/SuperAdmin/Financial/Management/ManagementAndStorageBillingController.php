@@ -34,7 +34,8 @@ class ManagementAndStorageBillingController extends Controller
     public function index(Request $request)
     {
         try {
-            $billingList = ManagementAndStorageBilling::all();
+            // Organisations see only their own bills; Super Admins see all
+            $billingList = ManagementAndStorageBilling::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->get();
             return response()->json([
                 'status' => true,
                 'data' => $billingList,
@@ -183,7 +184,7 @@ class ManagementAndStorageBillingController extends Controller
     }
     public function show($billingId)
     {
-        $billing = ManagementAndStorageBilling::find($billingId);
+        $billing = ManagementAndStorageBilling::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->find($billingId);
         if (!$billing) {
             return response()->json(['status' => false, 'message' => 'Project not found'], 404);
         }

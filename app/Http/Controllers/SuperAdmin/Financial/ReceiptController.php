@@ -11,7 +11,8 @@ class ReceiptController extends Controller
     public function orgIndex()
     {
         try {
-            $receipts = Receipt::all();
+            // Organisations see only their own receipts; Super Admins see all
+            $receipts = Receipt::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->get();
             return response()->json([
                 'status' => true,
                 'data' => $receipts,
@@ -70,7 +71,7 @@ class ReceiptController extends Controller
     public function show($id)
     {
         try {
-            $receipt = Receipt::findOrFail($id);
+            $receipt = Receipt::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->findOrFail($id);
             return response()->json([
                 'status' => true,
                 'message' => 'Receipt retrieved successfully.',
@@ -101,7 +102,7 @@ class ReceiptController extends Controller
             'is_published' => 'boolean',
         ]);
         try {
-            $receipt = Receipt::findOrFail($id);
+            $receipt = Receipt::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->findOrFail($id);
             $receipt->update([
                 'receipt_code' => $validated['receipt_code'],
                 'invoice_id' => $validated['invoice_id'],
@@ -131,7 +132,7 @@ class ReceiptController extends Controller
     public function destroy($id)
     {
         try {
-            $receipt = Receipt::findOrFail($id);
+            $receipt = Receipt::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->findOrFail($id);
             $receipt->delete();
             return response()->json([
                 'status' => true,

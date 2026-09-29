@@ -118,7 +118,10 @@ class InvoiceController extends Controller
             'order',
             'order.orderDetail',
             'order.orderItems',
-        ])->find($invoiceId);
+        ])
+            // Organisations may only open their own invoices; Super Admins any
+            ->when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))
+            ->find($invoiceId);
 
         if (!$invoice) {
             return response()->json(['status' => false, 'message' => 'Invoice not found'], 404);
@@ -149,7 +152,10 @@ class InvoiceController extends Controller
             'order',
             'order.orderDetail',
             'order.orderItems',
-        ])->find($invoiceId);
+        ])
+            // Organisations may only open their own invoices; Super Admins any
+            ->when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))
+            ->find($invoiceId);
 
         if (!$invoice) {
             return response()->json(['status' => false, 'message' => 'Invoice not found'], 404);

@@ -544,11 +544,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::group(['prefix' => 'invoices'], function () {
         Route::get('/', [InvoiceController::class, 'index']);
+        Route::get('/all', [InvoiceController::class, 'indexForSuperadmin']); // before {id}, or "all" is read as an id
         Route::get('{id}', [InvoiceController::class, 'show']);
         Route::post('/', [InvoiceController::class, 'store']);
         Route::put('{id}', [InvoiceController::class, 'update']);
         Route::delete('{id}', [InvoiceController::class, 'destroy']);
-        Route::get('/all', [InvoiceController::class, 'indexForSuperadmin']);
     });
 
     Route::group(['prefix' => 'receipts'], function () {
@@ -822,3 +822,61 @@ Route::middleware('auth:sanctum')->group(function () {
     //     Route::post('/webhook', [StripeController::class, 'stripeHandleWebhook']);
     // });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Super Admin guard (secure by default)
+|--------------------------------------------------------------------------
+| Controllers in SuperAdmin\ and Ecommerce\ manage platform-wide data
+| (countries, currencies, packages, prices, billing, shop). Every route to
+| them is Super Admin only, except:
+|  - $sharedReads: lists and records organisations also need (lookups, and
+|    their own invoices/bills/receipts, which the controllers limit to the
+|    owner)
+|  - $orgWrites: changes organisations make to their own records
+| New routes to these controllers are protected automatically.
+*/
+$sharedReads = [
+        'SuperAdmin\Financial\InvoiceController@index',
+        'SuperAdmin\Financial\InvoiceController@show',
+        'SuperAdmin\Financial\Management\EverydayMemberCountAndBillingController@currentMonthBillCalculation',
+        'SuperAdmin\Financial\Management\EverydayMemberCountAndBillingController@subMonthBillCalculation',
+        'SuperAdmin\Financial\Management\ManagementAndStorageBillingController@index',
+        'SuperAdmin\Financial\Management\ManagementAndStorageBillingController@orgAllBill',
+        'SuperAdmin\Financial\Management\ManagementAndStorageBillingController@show',
+        'SuperAdmin\Financial\Management\ManagementPackageController@index',
+        'SuperAdmin\Financial\Management\ManagementPackageController@show',
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@currency',
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@index',
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@managementPackagePrices',
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@managementPriceRate',
+        'SuperAdmin\Financial\ReceiptController@orgIndex',
+        'SuperAdmin\Settings\AttendanceTypeController@index',
+        'SuperAdmin\Settings\ConductTypeController@index',
+        'SuperAdmin\Settings\CountryController@index',
+        'SuperAdmin\Settings\CountryRegionController@countryWiseRegionWithCurrency',
+        'SuperAdmin\Settings\CountryRegionController@index',
+        'SuperAdmin\Settings\CountryRegionController@show',
+        'SuperAdmin\Settings\CurrencyController@index',
+        'SuperAdmin\Settings\DesignationController@index',
+        'SuperAdmin\Settings\DialingCodeController@index',
+        'SuperAdmin\Settings\LanguageController@index',
+        'SuperAdmin\Settings\MembershipRenewalCycleController@index',
+        'SuperAdmin\Settings\MembershipTypeController@index',
+        'SuperAdmin\Settings\PrivacySetupController@index',
+        'SuperAdmin\Financial\ReceiptController@show',
+];
+$orgWrites = [
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@update',
+];
+foreach (Route::getRoutes()->getRoutes() as $route) {
+    $action = str_replace('App\\Http\\Controllers\\', '', $route->getActionName());
+    if (!str_starts_with($action, 'SuperAdmin\\') && !str_starts_with($action, 'Ecommerce\\')) {
+        continue;
+    }
+    $isRead = in_array('GET', $route->methods(), true);
+    $allowed = $isRead ? in_array($action, $sharedReads, true) : in_array($action, $orgWrites, true);
+    if (!$allowed) {
+        $route->middleware('superadmin');
+    }
+}
