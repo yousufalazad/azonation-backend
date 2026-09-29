@@ -24,11 +24,13 @@ class MeetingAttendanceController extends Controller
         $this->middleware('org.permission:meeting-attendance.update')->only(['edit', 'update']);
         $this->middleware('org.permission:meeting-attendance.delete')->only(['destroy']);
     }
-    public function index()
+    public function index(Request $request)
     {
         $meetingAttendance = $this->ownedVia(MeetingAttendance::class, 'meeting_id', Meeting::class)->select('meeting_attendances.*', 'users.first_name as user_first_name', 'users.last_name as user_last_name', 'attendance_types.name as attendance_types_name')
             ->leftJoin('users', 'meeting_attendances.user_id', '=', 'users.id')
             ->leftJoin('attendance_types', 'meeting_attendances.attendance_type_id', '=', 'attendance_types.id')
+            // ?meeting_id=5 returns one meeting's attendance only
+            ->when($request->query('meeting_id'), fn ($q, $meetingId) => $q->where('meeting_attendances.meeting_id', $meetingId))
             ->get();
         return response()->json(['status' => true, 'data' => $meetingAttendance], 200);
     }
@@ -55,6 +57,11 @@ class MeetingAttendanceController extends Controller
             ], 422);
         }
 
+        // Every meeting in the list must belong to this organisation
+        foreach (collect($request->all())->pluck('meeting_id')->unique() as $meetingId) {
+            $this->ensureOwnedParent(Meeting::class, $meetingId);
+        }
+
         DB::beginTransaction();
 
         try {
@@ -66,7 +73,7 @@ class MeetingAttendanceController extends Controller
                     ],
                     [
                         'attendance_type_id' => $row['attendance_type_id'],
-                        'time'               => $row['time'],
+                        'time'               => $row['time'] ?? null,
                         'note'               => $row['note'] ?? null,
                         'is_active'          => $row['is_active'],
                         'updated_by'         => Auth::id(),
