@@ -13,8 +13,9 @@ class OfficeDocument extends Model
     protected $fillable = [
         'title',
         'description',
-        // 'document',
-        'privacy_setup_id'
+        'date',
+        'privacy_setup_id',
+        'is_active',
     ];
 
     protected $hidden = [

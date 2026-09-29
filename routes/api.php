@@ -296,6 +296,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [OfficeDocumentController::class, 'show']);
         Route::post('/', [OfficeDocumentController::class, 'store']);
         Route::put('/{id}', [OfficeDocumentController::class, 'update']);
+        // File uploads must be POST (PHP does not read files sent with PUT)
+        Route::post('/{id}', [OfficeDocumentController::class, 'update']);
+        Route::delete('/{id}/files/{fileId}', [OfficeDocumentController::class, 'destroyFile']);
         Route::delete('/{id}', [OfficeDocumentController::class, 'destroy']);
     });
 
