@@ -8,6 +8,7 @@ use App\Http\Controllers\Common\PhoneNumberController;
 use App\Http\Controllers\Common\NotificationController;
 use App\Http\Controllers\Common\ReferralController;
 use App\Http\Controllers\Common\SupportRequestController;
+use App\Http\Controllers\Individual\MemberActivityController;
 use App\Http\Controllers\SuperAdmin\Support\SupportRequestController as SuperAdminSupportRequestController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Common\UserLanguageController;
@@ -611,17 +612,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/connected-org-list', [IndividualController::class, 'getOrganisationByIndividualId']);
 
     Route::middleware('auth:sanctum')->get('/individual/dashboard-summary', [IndividualController::class, 'summary']);
-    Route::middleware('auth:sanctum')->get('/individual/meetings', [IndividualController::class, 'meetings']);
-    Route::middleware('auth:sanctum')->get('/individual/past_meetings', [IndividualController::class, 'past_meetings']);
-    Route::middleware('auth:sanctum')->get('/individual/events', [IndividualController::class, 'past_events']);
-    Route::middleware('auth:sanctum')->get('/individual/past_events', [IndividualController::class, 'events']);
-    Route::middleware('auth:sanctum')->get('/individual/committees', [IndividualController::class, 'committees']);
-    Route::middleware('auth:sanctum')->get('/individual/past_committees', [IndividualController::class, 'past_committees']);
-    Route::middleware('auth:sanctum')->get('/individual/projects', [IndividualController::class, 'projects']);
-    Route::middleware('auth:sanctum')->get('/individual/past_projects', [IndividualController::class, 'past_projects']);
-    Route::middleware('auth:sanctum')->get('/individual/assets', [IndividualController::class, 'assets']);
-    Route::middleware('auth:sanctum')->get('/individual/past_assets', [IndividualController::class, 'past_assets']);
-    Route::middleware('auth:sanctum')->get('/individual/attendance', [IndividualController::class, 'attendance']);
+    // What members see of their organisations (current memberships only); ?when=past for history
+    Route::group(['prefix' => 'individual', 'middleware' => 'auth:sanctum'], function () {
+        Route::get('/meetings', [MemberActivityController::class, 'meetings']);
+        Route::get('/meetings/{id}', [MemberActivityController::class, 'meeting']);
+        Route::get('/events', [MemberActivityController::class, 'events']);
+        Route::get('/events/{id}', [MemberActivityController::class, 'event']);
+        Route::get('/projects', [MemberActivityController::class, 'projects']);
+        Route::get('/projects/{id}', [MemberActivityController::class, 'project']);
+        Route::get('/committees', [MemberActivityController::class, 'committees']);
+        Route::get('/assets', [MemberActivityController::class, 'assets']);
+        Route::get('/attendance', [MemberActivityController::class, 'attendance']);
+    });
 
     // ----------------------- Superadmin --------------------
     Route::get('/super_admin_profile_image/{userId}', [SuperAdminController::class, 'getSuperAdminProfileImage']);
