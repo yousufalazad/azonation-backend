@@ -61,7 +61,7 @@ class FundController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], status: 422);
         }
-        $fund = Fund::find($id);
+        $fund = Fund::where('user_id', Auth::id())->find($id); // only this organisation's funds
         if (!$fund) {
             return response()->json(['status' => false, 'message' => 'Fund not found.'], status: 404);
         }
@@ -73,7 +73,7 @@ class FundController extends Controller
     }
     public function destroy($id)
     {
-        $fund = Fund::find($id);
+        $fund = Fund::where('user_id', Auth::id())->find($id); // only this organisation's funds
         if (!$fund) {
             return response()->json(['status' => false, 'message' => 'Fund not found.'], 404);
         }

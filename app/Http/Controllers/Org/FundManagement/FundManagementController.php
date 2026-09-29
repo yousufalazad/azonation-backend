@@ -14,6 +14,7 @@ use App\Models\FundManagementFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
@@ -68,7 +69,7 @@ class FundManagementController extends Controller
         $userId = Auth::id();
         $validatedData = $request->validate([
             // 'user_id' => 'required|exists:users,id',
-            'fund_id' => 'required|exists:funds,id',
+            'fund_id' => ['required', Rule::exists('funds', 'id')->where('user_id', Auth::id())], // only this organisation's funds
             'date' => 'required|date',
             'transaction_title' => 'required|string|max:100',
             'type' => 'required|in:income,expense',
@@ -140,7 +141,7 @@ class FundManagementController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'fund_id' => 'required|exists:funds,id',
+            'fund_id' => ['required', Rule::exists('funds', 'id')->where('user_id', Auth::id())], // only this organisation's funds
             'date' => 'required|date',
             'transaction_title' => 'required|string|max:100',
             'type' => 'required|in:income,expense',
@@ -150,7 +151,7 @@ class FundManagementController extends Controller
         ]);
         try {
             $validatedData['user_id'] = Auth::id(); // Ensure user_id is set to the authenticated user
-            $transaction = FundManagement::where('id', $id)->first();
+            $transaction = FundManagement::where('id', $id)->where('user_id', Auth::id())->first();
             if (!$transaction) {
                 return response()->json([
                     'status' => false,
@@ -210,7 +211,7 @@ class FundManagementController extends Controller
     public function destroy($id)
     {
         try {
-            $transaction = FundManagement::where('id', $id)->first();
+            $transaction = FundManagement::where('id', $id)->where('user_id', Auth::id())->first();
             if (!$transaction) {
                 return response()->json([
                     'status' => false,
@@ -303,7 +304,7 @@ class FundManagementController extends Controller
                 'currency_id' => 'required|exists:currencies,id',
                 'is_active' => 'boolean'
             ]);
-            $fundTransactionCurrency = FundTransactionCurrency::where('id', $id)->first();
+            $fundTransactionCurrency = FundTransactionCurrency::where('id', $id)->where('user_id', Auth::id())->first();
             if (!$fundTransactionCurrency) {
                 return response()->json([
                     'status' => false,
