@@ -63,6 +63,12 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        // Secrets: never send these to the browser (password reset / account verification)
+        'verification_token',
+        'reset_code',
+        'reset_code_expires_at',
+        'oauth_refresh_token', // Google token: gives access to the person's Google account
+        'google_id',
         'created_at',
         'updated_at',
     ];
