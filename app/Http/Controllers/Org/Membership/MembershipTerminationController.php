@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Org\Membership;
 
 use App\Http\Controllers\Controller;
+use App\Http\Concerns\ResolvesCurrentOrg;
 
 use App\Models\MembershipTermination;
 use Illuminate\Http\Request;
@@ -14,11 +15,14 @@ use Exception;
 
 class MembershipTerminationController extends Controller
 {
+    use ResolvesCurrentOrg;
 
     public function getOrgTerminatedMembers(Request $request)
     {
-        $userId = Auth::id();
-        $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
+        $userId = $this->currentOrgId($request);
+        if (!$userId) {
+            return $this->noOrgResponse();
+        }
 
         // $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
         $getOrgAllMembers = MembershipTermination::with(['individual'])
@@ -40,10 +44,15 @@ class MembershipTerminationController extends Controller
     }
 
     // Get all membership terminations
-    public function index()
+    public function index(Request $request)
     {
+        $orgId = $this->currentOrgId($request);
+        if (!$orgId) {
+            return $this->noOrgResponse();
+        }
         try {
-            $terminations = MembershipTermination::all();
+            // Only this organisation's terminations (used to return every organisation's)
+            $terminations = MembershipTermination::where('org_type_user_id', $orgId)->get();
             return response()->json([
                 'status' => true,
                 'message' => 'Membership terminations retrieved successfully.',
@@ -61,7 +70,12 @@ class MembershipTerminationController extends Controller
     // Store a new membership termination
     public function store(Request $request)
     {
-        $userId = Auth::id();
+        $orgId = $this->currentOrgId($request);
+        if (!$orgId) {
+            return $this->noOrgResponse();
+        }
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $orgId]);
 
         $validator = Validator::make($request->all(), [
             'org_type_user_id' => 'required|integer',
@@ -90,7 +104,12 @@ class MembershipTerminationController extends Controller
         }
 
         try {
-            $data = $request->all();
+            $data = $validator->validated();
+            $data['org_type_user_id'] = $orgId;
+            $data['existing_membership_id'] = $request->existing_membership_id;
+            $data['membership_type_before_termination'] = $request->membership_type_before_termination;
+            $data['joined_at'] = $request->joined_at;
+            unset($data['file_path']);
             if ($request->hasFile('file_path')) {
                 $document = $request->file('file_path');
                 $filePath = $document->storeAs(
@@ -127,10 +146,14 @@ class MembershipTerminationController extends Controller
 
 
     // Show a single membership termination
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        $orgId = $this->currentOrgId($request);
+        if (!$orgId) {
+            return $this->noOrgResponse();
+        }
         try {
-            $termination = MembershipTermination::findOrFail($id);
+            $termination = MembershipTermination::where('org_type_user_id', $orgId)->findOrFail($id);
             return response()->json([
                 'status' => true,
                 'message' => 'Membership termination retrieved successfully.',
@@ -157,7 +180,7 @@ class MembershipTerminationController extends Controller
             'terminated_at' => 'required|date',
             'processed_at' => 'nullable|date',
             'membership_termination_reason_id' => 'required|integer',
-            'org_administrator_id ' => 'required|integer',
+            'org_administrator_id' => 'required|integer',
             'rejoin_eligible' => 'required|boolean',
             'file_path' => 'nullable|string|max:255',
             'membership_duration_days' => 'nullable|integer',
@@ -173,9 +196,15 @@ class MembershipTerminationController extends Controller
             ], 422);
         }
 
+        $orgId = $this->currentOrgId($request);
+        if (!$orgId) {
+            return $this->noOrgResponse();
+        }
         try {
-            $termination = MembershipTermination::findOrFail($id);
-            $termination->update($request->all());
+            $termination = MembershipTermination::where('org_type_user_id', $orgId)->findOrFail($id);
+            $data = $validator->validated();
+            $data['org_type_user_id'] = $orgId; // cannot be moved to another organisation
+            $termination->update($data);
             return response()->json([
                 'status' => true,
                 'message' => 'Membership termination updated successfully.',
@@ -191,10 +220,14 @@ class MembershipTerminationController extends Controller
     }
 
     // Delete a membership termination
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        $orgId = $this->currentOrgId($request);
+        if (!$orgId) {
+            return $this->noOrgResponse();
+        }
         try {
-            $termination = MembershipTermination::findOrFail($id);
+            $termination = MembershipTermination::where('org_type_user_id', $orgId)->findOrFail($id);
             $termination->delete();
             return response()->json([
                 'status' => true,

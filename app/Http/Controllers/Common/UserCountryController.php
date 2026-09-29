@@ -8,12 +8,17 @@ use App\Models\User;
 use App\Models\UserCountry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class UserCountryController extends Controller
 {
     public function getUser()
     {
+        // Every account on the platform: Super Admin only
+        if (Auth::user()?->type !== 'superadmin') {
+            return response()->json(['status' => false, 'message' => 'Not allowed.'], 403);
+        }
         $users = User::all();
         return response()->json(['status' => true, 'data' => $users], 200);
     }

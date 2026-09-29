@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Org\Event;
 use Illuminate\Routing\Controller;
 
 use App\Models\EventSummary;
+use App\Models\Event;
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Models\EventSummaryFile;
 use App\Models\EventSummaryImage;
 use Illuminate\Http\Request;
@@ -15,6 +17,8 @@ use Carbon\Carbon;
 
 class EventSummaryController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:event-summary.read')->only(['index', 'show']);
@@ -22,9 +26,14 @@ class EventSummaryController extends Controller
         $this->middleware('org.permission:event-summary.update')->only(['edit', 'update']);
         $this->middleware('org.permission:event-summary.delete')->only(['destroy']);
     }
-    public function index()
+    public function index(Request $request)
     {
-        $eventSummaries = EventSummary::all();
+        $orgId = $this->currentOrgId($request);
+        if (!$orgId) {
+            return $this->noOrgResponse();
+        }
+        // Only summaries of this organisation's events (used to return every organisation's)
+        $eventSummaries = EventSummary::whereIn('event_id', Event::where('user_id', $orgId)->select('id'))->get();
         return response()->json(['status' => true, 'data' => $eventSummaries], 200);
     }
     public function show($id)

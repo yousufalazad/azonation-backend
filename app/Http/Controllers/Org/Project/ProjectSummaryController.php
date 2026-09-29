@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Org\Project;
 use Illuminate\Routing\Controller;
 
 use App\Models\ProjectSummary;
+use App\Models\Project;
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Models\ProjectSummaryFile;
 use App\Models\ProjectSummaryImage;
 use Illuminate\Http\Request;
@@ -15,6 +17,8 @@ use Carbon\Carbon;
 
 class ProjectSummaryController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:project-summary.read')->only(['index', 'show']);
@@ -22,9 +26,14 @@ class ProjectSummaryController extends Controller
         $this->middleware('org.permission:project-summary.update')->only(['edit', 'update']);
         $this->middleware('org.permission:project-summary.delete')->only(['destroy']);
     }
-    public function index()
+    public function index(Request $request)
     {
-        $projectSummaries = ProjectSummary::all();
+        $orgId = $this->currentOrgId($request);
+        if (!$orgId) {
+            return $this->noOrgResponse();
+        }
+        // Only summaries of this organisation's projects (used to return every organisation's)
+        $projectSummaries = ProjectSummary::whereIn('project_id', Project::where('user_id', $orgId)->select('id'))->get();
         return response()->json(['status' => true, 'data' => $projectSummaries], 200);
     }
     public function show($id)
