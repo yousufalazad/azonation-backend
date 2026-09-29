@@ -47,9 +47,12 @@ class OrgProfileController extends Controller
     public function updateLogo(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            // No SVG: it can carry scripts. 5 MB is plenty for a logo.
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
-        $userId = $this->accountId();
+        // Only the organisation account itself changes its logo, not people working for it
+        abort_unless(Auth::user()?->type === 'organisation', 403, 'Only the organisation account can change its logo.');
+        $userId = (int) Auth::id();
         $user = User::find($userId);
         if (!$user) {
             return response()->json(['status' => false, 'message' => 'Organization not found'], 404);

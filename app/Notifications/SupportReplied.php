@@ -22,8 +22,11 @@ class SupportReplied extends Notification
             'title' => 'Azonation support replied',
             'message' => "We have answered your request: {$this->supportRequest->subject}",
             'support_request_id' => $this->supportRequest->id,
-            // Only organisation pages have the support screen for now
-            'url' => $notifiable->type === 'organisation' ? "/org-dashboard/support/{$this->supportRequest->id}" : null,
+            'url' => match ($notifiable->type) {
+                'organisation' => "/org-dashboard/support/{$this->supportRequest->id}",
+                'individual' => "/individual-dashboard/support/{$this->supportRequest->id}",
+                default => null,
+            },
         ];
     }
 }

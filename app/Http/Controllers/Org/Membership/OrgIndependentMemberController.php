@@ -65,7 +65,7 @@ class OrgIndependentMemberController extends Controller
             'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
             'is_active' => 'nullable|boolean',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         $validatedData['user_id'] = $request->user()->id;
@@ -139,7 +139,7 @@ class OrgIndependentMemberController extends Controller
             'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
             'is_active' => 'nullable|boolean',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
         if ($request->hasFile('image_path')) {
             if ($independentMember->image_path) {

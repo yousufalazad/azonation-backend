@@ -23,108 +23,114 @@ use Illuminate\Support\Facades\Auth;
 
 class IndividualController extends Controller
 {
+    /**
+     * The member's home page: for each organisation they currently belong to,
+     * what is coming up (meetings, events, projects), their committees and the
+     * assets they hold. A few queries in total, whatever the number of organisations.
+     */
     public function summary()
     {
         $userId = Auth::id();
+        $today = Carbon::today()->toDateString();
 
-        // Get connected organisations
-        $connectedOrgs = OrgMember::with(['membershipType:id,name'])
-            ->where('individual_type_user_id', $userId)
-            ->leftJoin('users as connectedorg', 'org_members.org_type_user_id', '=', 'connectedorg.id')
-            ->select('org_members.*', 'connectedorg.org_name')
-            ->get();
+        $memberships = $this->memberships($userId)->where('is_active', true)->values();
+        $orgIds = $memberships->pluck('org_id');
 
-        $hasConnection = $connectedOrgs->isNotEmpty();
+        $meetings = Meeting::whereIn('user_id', $orgIds)->where('is_active', 1)->whereDate('date', '>=', $today)
+            ->orderBy('date')->orderBy('start_time')
+            ->get(['id', 'user_id', 'name', 'date', 'start_time', 'venue', 'meeting_mode'])
+            ->groupBy('user_id');
+        $events = Event::whereIn('user_id', $orgIds)->whereDate('date', '>=', $today)
+            ->orderBy('date')->orderBy('time')
+            ->get(['id', 'user_id', 'title', 'date', 'time', 'venue_name'])
+            ->groupBy('user_id');
+        $projects = Project::whereIn('user_id', $orgIds)
+            ->where(fn ($q) => $q->whereNull('end_date')->orWhereDate('end_date', '>=', $today))
+            ->orderBy('start_date')
+            ->get(['id', 'user_id', 'title', 'start_date', 'end_date'])
+            ->groupBy('user_id');
 
-        // Group committee memberships by organisation
-        $committeesByOrg = CommitteeMember::with('committee:id,name,user_id,start_date')
-            ->where('user_id', $userId)
-            ->get()
-            ->groupBy(fn($item) => optional($item->committee)->user_id);
+        $committees = CommitteeMember::query()
+            ->join('committees', 'committees.id', '=', 'committee_members.committee_id')
+            ->leftJoin('designations', 'designations.id', '=', 'committee_members.designation_id')
+            ->where('committee_members.user_id', $userId)
+            ->where('committee_members.is_active', 1)
+            ->where(fn ($q) => $q->whereNull('committee_members.end_date')->orWhereDate('committee_members.end_date', '>=', $today))
+            ->whereIn('committees.user_id', $orgIds)
+            ->get(['committees.id', 'committees.user_id', 'committees.name', 'designations.name as designation'])
+            ->groupBy('user_id');
 
-        // Get all active asset assignments for the user
-        // $assignmentLogs = AssetAssignmentLog::with(['asset:id,name,quantity,user_id', 'lifecycle:id,name as lifecyclestaus'])
-        //     ->where('responsible_user_id', $userId)
-        //     ->where('is_active', true)
-        //     ->get()
-        //     ->groupBy(fn($log) => optional($log->asset)->user_id); // Group by organisation ID
-
-        $assignmentLogs = AssetAssignmentLog::with([
-            'asset:id,name,quantity,user_id',
-            'lifecycle:id,name'                  // eager load lifecycle status
-        ])
+        $assets = AssetAssignmentLog::with(['asset:id,name,quantity,user_id', 'lifecycle:id,name'])
             ->where('responsible_user_id', $userId)
             ->where('is_active', true)
             ->get()
-            ->groupBy(fn($log) => optional($log->asset)->user_id); // group by org ID
+            ->groupBy(fn ($log) => optional($log->asset)->user_id);
 
-        $orgWiseData = [];
-
-        foreach ($connectedOrgs as $org) {
-            $orgId = $org->org_type_user_id;
-
-            // Fetch next 2 meetings
-            $nextMeetings = Meeting::where('user_id', $orgId)
-                ->where('date', '>=', now())
-                ->orderBy('date')
-                ->limit(2)
-                ->get();
-
-            // Fetch next 2 events
-            $upcomingEvents = Event::where('user_id', $orgId)
-                ->where('date', '>=', now())
-                ->orderBy('date')
-                ->limit(2)
-                ->get();
-
-            // Fetch next 2 projects
-            $upcomingProjects = Project::where('user_id', $orgId)
-                ->where('start_date', '>=', now())
-                ->orderBy('start_date')
-                ->limit(2)
-                ->get();
-
-            // Committees
-            $committees = $committeesByOrg[$orgId] ?? collect();
-
-            // Responsible Assets
-            $responsibleAssets = $assignmentLogs[$orgId] ?? collect();
-            $assetsFormatted = $responsibleAssets->map(function ($log) {
-                return [
-                    'asset_id' => $log->asset_id,
+        $organisations = $memberships->map(function ($m) use ($meetings, $events, $projects, $committees, $assets) {
+            $orgId = $m['org_id'];
+            return $m + [
+                'next_meetings' => ($meetings[$orgId] ?? collect())->take(3)->values(),
+                'upcoming_events' => ($events[$orgId] ?? collect())->take(3)->values(),
+                'projects' => ($projects[$orgId] ?? collect())->take(3)->values(),
+                'committees' => ($committees[$orgId] ?? collect())->map->only(['id', 'name', 'designation'])->values(),
+                'assets' => ($assets[$orgId] ?? collect())->map(fn ($log) => [
+                    'id' => $log->asset_id,
                     'name' => optional($log->asset)->name,
                     'quantity' => optional($log->asset)->quantity,
-                    'assignment_start_date' => $log->assignment_start_date,
-                    'asset_lifecycle_status_id' => $log->asset_lifecycle_statuses_id,
-                    'asset_lifecycle_status_name' => optional($log->lifecycle)->name, // Include lifecycle status name
-                ];
-            })->values();
-
-            $orgWiseData[] = [
-                'org_id' => $orgId,
-                'org_name' => $org->org_name,
-                'next_meetings' => $nextMeetings,
-                'upcoming_events' => $upcomingEvents,
-                'upcoming_projects' => $upcomingProjects,
-                'committees' => $committees->map(function ($member) {
-                    return [
-                        'id' => optional($member->committee)->id,
-                        'name' => optional($member->committee)->name,
-                        'start_date' => optional($member->committee)->start_date,
-                        'designation_id' => $member->designation_id,
-                    ];
-                })->values(),
-                'responsible_assets' => $assetsFormatted,
+                    'since' => $log->assignment_start_date,
+                    'condition' => optional($log->lifecycle)->name,
+                ])->values(),
             ];
-        }
+        })->values();
 
         return response()->json([
             'status' => true,
             'data' => [
-                'has_connection' => $hasConnection,
-                'connected_organisations' => $connectedOrgs,
-                'organisations_summary' => $orgWiseData,
+                'azon_id' => Auth::user()->azon_id,
+                'organisations' => $organisations,
             ],
+        ]);
+    }
+
+    // Every organisation the member belongs or belonged to, with their membership details
+    public function getOrganisationByIndividualId()
+    {
+        return response()->json([
+            'status' => true,
+            'data' => $this->memberships(Auth::id())->values(),
+        ]);
+    }
+
+    private function memberships(int $userId)
+    {
+        $rows = OrgMember::query()
+            ->where('org_members.individual_type_user_id', $userId)
+            ->join('users as org', 'org.id', '=', 'org_members.org_type_user_id')
+            ->leftJoin('membership_types', 'membership_types.id', '=', 'org_members.membership_type_id')
+            ->leftJoin('membership_statuses', 'membership_statuses.id', '=', 'org_members.membership_status_id')
+            ->orderByDesc('org_members.is_active')
+            ->orderBy('org.org_name')
+            ->get([
+                'org_members.org_type_user_id as org_id',
+                'org.org_name',
+                'org_members.existing_membership_id as membership_id',
+                'org_members.membership_start_date',
+                'org_members.is_active',
+                'membership_types.name as membership_type',
+                'membership_statuses.name as membership_status',
+            ]);
+
+        $logos = ProfileImage::whereIn('user_id', $rows->pluck('org_id'))->orderBy('id')->pluck('image_path', 'user_id');
+
+        return $rows->map(fn ($r) => [
+            'org_id' => (int) $r->org_id,
+            'org_name' => $r->org_name,
+            'logo_url' => isset($logos[$r->org_id]) ? url(Storage::url($logos[$r->org_id])) : null,
+            'membership_id' => $r->membership_id,
+            'membership_type' => $r->membership_type,
+            'membership_status' => $r->membership_status,
+            'member_since' => $r->membership_start_date ? Carbon::parse($r->membership_start_date)->toDateString() : null,
+            'is_active' => (bool) $r->is_active,
         ]);
     }
 
@@ -484,7 +490,8 @@ class IndividualController extends Controller
     public function updateProfileImage(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            // No SVG: it can carry scripts
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
         $userId = $request->user()->id;
         $user = User::find($userId);
@@ -520,24 +527,6 @@ class IndividualController extends Controller
         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
     }
 
-    public function getOrganisationByIndividualId()
-    {
-        // $organisations = OrgMember::where('individual_id', $individualId)
-        //     ->with('connectedorg')
-        //     ->get();
-        $userId = Auth::id();
-
-        // Get connected organisations
-        $organisations = OrgMember::with(['membershipType:id,name'])
-            ->where('individual_type_user_id', $userId)
-            ->leftJoin('users as connectedorg', 'org_members.org_type_user_id', '=', 'connectedorg.id')
-            ->select('org_members.*', 'connectedorg.org_name')
-            ->get();
-        return response()->json([
-            'status' => true,
-            'data' => $organisations,
-        ]);
-    }
     public function index() {}
     public function create() {}
     public function store(Request $request) {}
