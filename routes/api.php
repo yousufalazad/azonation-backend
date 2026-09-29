@@ -371,6 +371,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::group(['prefix' => 'org-membership-renewals'], function () {
          Route::get('/', [OrgMembershipRenewalController::class, 'index']);
+        Route::get('/overview', [OrgMembershipRenewalController::class, 'overview']);
         Route::post('/', [OrgMembershipRenewalController::class, 'store']);
         Route::get('/{id}', [OrgMembershipRenewalController::class, 'show']);
         Route::put('/{id}', [OrgMembershipRenewalController::class, 'update']);

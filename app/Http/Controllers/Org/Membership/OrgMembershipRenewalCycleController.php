@@ -3,169 +3,109 @@
 namespace App\Http\Controllers\Org\Membership;
 
 use App\Http\Concerns\ResolvesCurrentOrg;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use App\Models\OrgMembershipRenewalCycle;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use App\Models\OrgMembershipRenewalPrice;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
+/**
+ * The renewal periods an organisation offers (e.g. yearly, every two years),
+ * and when they fall due: on each member's joining date, or on one fixed date.
+ */
 class OrgMembershipRenewalCycleController extends Controller
 {
     use ResolvesCurrentOrg;
 
+    public function __construct()
+    {
+        $this->middleware('org.permission:org-membership-renewal-cycle.read')->only(['index', 'show']);
+        $this->middleware('org.permission:org-membership-renewal-cycle.create')->only(['store']);
+        $this->middleware('org.permission:org-membership-renewal-cycle.update')->only(['update']);
+        $this->middleware('org.permission:org-membership-renewal-cycle.delete')->only(['destroy']);
+    }
+
     public function index()
     {
-        $userId = Auth::id();
-        $cycles = OrgMembershipRenewalCycle::where('org_type_user_id', $userId)
-            ->with(['memberRenewalCycle'])
-            ->orderBy('created_at', 'desc')
+        $cycles = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')
+            ->with('memberRenewalCycle:id,name,duration_in_months')
+            ->orderBy('created_at')
             ->get();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal cycles retrieved successfully.',
-            'data' => $cycles
-        ]);
+        return response()->json(['status' => true, 'data' => $cycles]);
     }
 
     public function store(Request $request)
     {
-        // The organisation always comes from the session, never from the form
-        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+        $orgId = $this->orgIdOrFail();
+        $data = $this->validated($request);
 
-        $validator = Validator::make($request->all(), [
-            'member_renewal_cycle_id' => 'required|exists:membership_renewal_cycles,id',
-            'alignment' => 'nullable|string',
-            'anchor_month' => 'nullable|integer',
-            'anchor_day' => 'nullable|integer',
-            'anchor_weekday' => 'nullable|string',
-            'use_last_day_of_month' => 'boolean',
-            'timezone' => 'nullable|string',
-            'proration_policy' => 'nullable|string',
-            'grace_days' => 'nullable|integer',
-            'is_active' => 'boolean',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.',
-                'errors' => $validator->errors()
-            ], 422);
+        $exists = OrgMembershipRenewalCycle::where('org_type_user_id', $orgId)
+            ->where('member_renewal_cycle_id', $data['member_renewal_cycle_id'])->exists();
+        if ($exists) {
+            return response()->json(['status' => false, 'message' => 'You already offer this renewal period.'], 422);
         }
 
-        $request['org_type_user_id'] = Auth::id();
+        $cycle = OrgMembershipRenewalCycle::create($data + ['org_type_user_id' => $orgId]);
 
-        $cycle = OrgMembershipRenewalCycle::create($request->only([
-            'org_type_user_id',
-            'member_renewal_cycle_id',
-            'alignment',
-            'anchor_month',
-            'anchor_day',
-            'anchor_weekday',
-            'use_last_day_of_month',
-            'timezone',
-            'proration_policy',
-            'grace_days',
-            'is_active'
-        ]));
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal cycle created successfully.',
-            'data' => $cycle
-        ]);
+        return response()->json(['status' => true, 'data' => $cycle->load('memberRenewalCycle:id,name,duration_in_months')]);
     }
 
     public function show($id)
     {
-        $cycle = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')->with('memberRenewalCycle')->find($id);
+        $cycle = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')->with('memberRenewalCycle')->findOrFail($id);
 
-        if (!$cycle) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Organisation membership renewal cycle not found.'
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal cycle retrieved successfully.',
-            'data' => $cycle
-        ]);
+        return response()->json(['status' => true, 'data' => $cycle]);
     }
 
     public function update(Request $request, $id)
     {
-        // The organisation always comes from the session, never from the form
-        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+        $cycle = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')->findOrFail($id);
+        $data = $this->validated($request);
 
-        $cycle = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')->find($id);
-
-        if (!$cycle) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Organisation membership renewal cycle not found.'
-            ], 404);
+        $clash = OrgMembershipRenewalCycle::where('org_type_user_id', $cycle->org_type_user_id)
+            ->where('member_renewal_cycle_id', $data['member_renewal_cycle_id'])
+            ->where('id', '!=', $cycle->id)->exists();
+        if ($clash) {
+            return response()->json(['status' => false, 'message' => 'You already offer this renewal period.'], 422);
         }
 
-        $validator = Validator::make($request->all(), [
-            'member_renewal_cycle_id' => 'required|exists:membership_renewal_cycles,id',
-            'alignment' => 'nullable|string',
-            'anchor_month' => 'nullable|integer',
-            'anchor_day' => 'nullable|integer',
-            'anchor_weekday' => 'nullable|string',
-            'use_last_day_of_month' => 'boolean',
-            'timezone' => 'nullable|string',
-            'proration_policy' => 'nullable|string',
-            'grace_days' => 'nullable|integer',
-            'is_active' => 'boolean',
-        ]);
+        $cycle->update($data);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $cycle->update($request->only([
-            'member_renewal_cycle_id',
-            'alignment',
-            'anchor_month',
-            'anchor_day',
-            'anchor_weekday',
-            'use_last_day_of_month',
-            'timezone',
-            'proration_policy',
-            'grace_days',
-            'is_active'
-        ]));
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal cycle updated successfully.',
-            'data' => $cycle
-        ]);
+        return response()->json(['status' => true, 'data' => $cycle->load('memberRenewalCycle:id,name,duration_in_months')]);
     }
 
     public function destroy($id)
     {
-        $cycle = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')->find($id);
+        $cycle = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')->findOrFail($id);
 
-        if (!$cycle) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Organisation membership renewal cycle not found.'
-            ], 404);
+        if (OrgMembershipRenewalPrice::where('org_mem_renewal_cycle_id', $cycle->id)->exists()) {
+            return response()->json(['status' => false, 'message' => 'Remove the fees for this renewal period first.'], 422);
         }
-
         $cycle->delete();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal cycle deleted successfully.'
+        return response()->json(['status' => true]);
+    }
+
+    private function validated(Request $request): array
+    {
+        $data = $request->validate([
+            'member_renewal_cycle_id' => 'required|exists:membership_renewal_cycles,id',
+            'alignment' => ['required', Rule::in(['member_anniversary', 'calendar', 'org_fiscal'])],
+            'anchor_month' => 'nullable|integer|between:1,12|required_unless:alignment,member_anniversary',
+            'anchor_day' => 'nullable|integer|between:1,31|required_unless:alignment,member_anniversary',
+            'grace_days' => 'nullable|integer|between:0,365',
+            'is_active' => 'nullable|boolean',
         ]);
+
+        // A fixed date only matters when everyone renews on the same date
+        if ($data['alignment'] === 'member_anniversary') {
+            $data['anchor_month'] = null;
+            $data['anchor_day'] = null;
+        }
+        $data['grace_days'] = $data['grace_days'] ?? 0;
+        $data['is_active'] = $data['is_active'] ?? true;
+
+        return $data;
     }
 }
