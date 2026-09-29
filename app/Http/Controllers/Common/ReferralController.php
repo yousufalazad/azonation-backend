@@ -23,7 +23,7 @@ class ReferralController extends Controller
             'total_rewards' => ReferralReward::where('user_id', $user->id)->sum('amount') ?? 0,
             // Only the name of who joined; not their email, phone or other details
             'successful_referrals' => $user->referralsMade()
-                ->with('referredUser:id,name')
+                ->with('referredUser:id,type,first_name,last_name,org_name')
                 ->where('signup_completed', true)
                 ->latest()
                 ->get()

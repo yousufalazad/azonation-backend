@@ -7,6 +7,8 @@ use App\Http\Controllers\Common\AddressController;
 use App\Http\Controllers\Common\PhoneNumberController;
 use App\Http\Controllers\Common\NotificationController;
 use App\Http\Controllers\Common\ReferralController;
+use App\Http\Controllers\Common\SupportRequestController;
+use App\Http\Controllers\SuperAdmin\Support\SupportRequestController as SuperAdminSupportRequestController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Common\UserLanguageController;
 use App\Http\Controllers\Common\NotificationNameController;
@@ -158,6 +160,9 @@ Route::post('login', [AuthController::class, 'login'])->middleware('throttle:5,1
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
 Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
 
+// Public Contact us form
+Route::post('/contact', [SupportRequestController::class, 'contact'])->middleware('throttle:5,1');
+
 Route::post('/oauth/google/complete', [SocialAuthController::class, 'completeProfile'])->middleware('throttle:10,1');
 Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 Route::get('/org/switch', [AuthController::class, 'switchOrg'])->middleware('auth:sanctum');
@@ -226,6 +231,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/referrals', [ReferralController::class, 'index']);
     Route::get('/referrals/stats', [ReferralController::class, 'stats']);
+    // Help requests: each person sees only their own
+    Route::group(['prefix' => 'support-requests'], function () {
+        Route::get('/', [SupportRequestController::class, 'index']);
+        Route::post('/', [SupportRequestController::class, 'store'])->middleware('throttle:10,1');
+        Route::get('{id}', [SupportRequestController::class, 'show']);
+        Route::post('{id}/messages', [SupportRequestController::class, 'reply'])->middleware('throttle:20,1');
+        Route::post('{id}/close', [SupportRequestController::class, 'close']);
+    });
+    // Super Admin inbox (the guard at the end of this file makes it Super Admin only)
+    Route::group(['prefix' => 'superadmin/support-requests'], function () {
+        Route::get('/', [SuperAdminSupportRequestController::class, 'index']);
+        Route::get('{id}', [SuperAdminSupportRequestController::class, 'show']);
+        Route::post('{id}/messages', [SuperAdminSupportRequestController::class, 'reply']);
+        Route::put('{id}/status', [SuperAdminSupportRequestController::class, 'updateStatus']);
+    });
 
 
     //Org finance related api
@@ -397,7 +417,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [UnlinkMemberController::class, 'destroy']);
     });
     Route::group(['prefix' => 'org-administrators'], function () {
-        Route::post('/org-administrators/check', [OrgAdministratorController::class, 'checkAdministratorExists']);
+        Route::post('/check', [OrgAdministratorController::class, 'checkAdministratorExists']);
         Route::get('/primary', [OrgAdministratorController::class, 'getPrimaryAdministrator']);
         Route::get('/', [OrgAdministratorController::class, 'index']);
         Route::post('/', [OrgAdministratorController::class, 'store']);
