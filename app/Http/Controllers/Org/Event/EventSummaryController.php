@@ -38,7 +38,7 @@ class EventSummaryController extends Controller
     }
     public function show($id)
     {
-        $eventSummary =  EventSummary::select('event_summaries.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
+        $eventSummary =  $this->ownedVia(EventSummary::class, 'event_id', Event::class)->select('event_summaries.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
             ->leftJoin('privacy_setups', 'event_summaries.privacy_setup_id', '=', 'privacy_setups.id')
             ->with(['images', 'documents'])
             ->where('event_summaries.id', $id)->first();
@@ -61,6 +61,9 @@ class EventSummaryController extends Controller
     }
     public function store(Request $request)
     {
+        // The event must belong to this organisation
+        $this->ensureOwnedParent(Event::class, $request->input('event_id'));
+
        
         $validator = Validator::make($request->all(), [
             // 'event_id' => 'required|integer',
@@ -154,6 +157,9 @@ class EventSummaryController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The event must belong to this organisation
+        if ($request->has('event_id')) $this->ensureOwnedParent(Event::class, $request->input('event_id'));
+
         $validator = Validator::make($request->all(), [
             // 'event_id' => 'required|integer',
             // 'total_member_attendance' => 'required|integer',
@@ -177,7 +183,7 @@ class EventSummaryController extends Controller
             ], 422);
         }
         try {
-            $eventSummary = EventSummary::findOrFail($id);
+            $eventSummary = $this->ownedVia(EventSummary::class, 'event_id', Event::class)->findOrFail($id);
             
             $eventSummary->event_id  = $request->event_id;
             $eventSummary->total_member_attendance = $request->total_member_attendance;
@@ -246,7 +252,7 @@ class EventSummaryController extends Controller
     }
     public function destroy($id)
     {
-        $eventSummary = EventSummary::findOrFail($id);
+        $eventSummary = $this->ownedVia(EventSummary::class, 'event_id', Event::class)->findOrFail($id);
         $eventSummary->delete();
         return response()->json(['status' => true, 'message' => 'Meeting Attendance deleted successfully.'], 200);
     }

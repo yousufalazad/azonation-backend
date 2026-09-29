@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 use App\Models\Founder;
 use App\Models\FounderProfileImage;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Log;
 
 class FounderController extends Controller
 {
+    use ResolvesCurrentOrg;
+
 
     public function X_index(Request $request)
     {
@@ -96,6 +99,9 @@ class FounderController extends Controller
     }
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validated = $request->validate([
             // 'user_id' => 'exists:users,id',
             'founder_user_id' => 'nullable',
@@ -151,6 +157,9 @@ class FounderController extends Controller
     public function edit(Founder $founder) {}
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $request->validate([
             'full_name' => 'string|max:50',
             'designation' => 'nullable|string|max:50',
@@ -162,7 +171,7 @@ class FounderController extends Controller
             'note' => 'nullable|string|max:500',
         ]);
         try {
-            $founder = Founder::findOrFail($id);
+            $founder = $this->owned(Founder::class)->findOrFail($id);
             $founder->full_name = $request->input('full_name');
             $founder->designation = $request->input('designation');
             $founder->is_active = $request->input('is_active');
@@ -205,7 +214,7 @@ class FounderController extends Controller
     public function destroy($id)
     {
         try {
-            $founder = Founder::findOrFail($id);
+            $founder = $this->owned(Founder::class)->findOrFail($id);
             $founder->delete();
             return response()->json([
                 'status' => true,

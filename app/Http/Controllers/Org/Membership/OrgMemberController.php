@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\Membership;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controllr;
 use Illuminate\Routing\Controller;
 
@@ -23,6 +24,8 @@ use Illuminate\Support\Carbon;
 
 class OrgMemberController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     use Notifiable;
 
     public function __construct()
@@ -269,6 +272,9 @@ class OrgMemberController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
         $validated = $request->validate([
             'org_type_user_id' => 'required|exists:users,id',
             'individual_type_user_id' => 'required|exists:users,id',
@@ -301,7 +307,7 @@ class OrgMemberController extends Controller
     {
         $userId = Auth::id();
 
-        $member = OrgMember::with(['individual.phoneNumber', 'membershipStatus', 'membershipType', 'memberProfileImage'])
+        $member = $this->owned(OrgMember::class, 'org_type_user_id')->with(['individual.phoneNumber', 'membershipStatus', 'membershipType', 'memberProfileImage'])
             ->where('org_type_user_id', $userId)
             ->where('id', $id)
             ->first();
@@ -328,8 +334,11 @@ class OrgMemberController extends Controller
 
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
         try {
-            $member = OrgMember::findOrFail($id);
+            $member = $this->owned(OrgMember::class, 'org_type_user_id')->findOrFail($id);
 
             /** ------------------------------
              *  STORE PREVIOUS VALUES
@@ -500,7 +509,7 @@ class OrgMemberController extends Controller
     public function destroy($id)
     {
         try {
-            $member = OrgMember::findOrFail($id);
+            $member = $this->owned(OrgMember::class, 'org_type_user_id')->findOrFail($id);
             $member->delete();
             return response()->json([
                 'status' => true,

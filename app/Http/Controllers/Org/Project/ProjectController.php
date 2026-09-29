@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\Project;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 use App\Models\Project;
@@ -15,6 +17,8 @@ use Carbon\Carbon;
 
 class ProjectController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:project.read')->only(['index', 'show']);
@@ -24,7 +28,7 @@ class ProjectController extends Controller
     }
     public function getProject($projectId)
     {
-        $project = Project::with(['images', 'documents'])
+        $project = $this->owned(Project::class)->with(['images', 'documents'])
             ->where('id', $projectId)
             ->first();
         if (!$project) {
@@ -59,6 +63,9 @@ class ProjectController extends Controller
     public function create() {}
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'short_description' => 'nullable|string',
@@ -127,7 +134,7 @@ class ProjectController extends Controller
 
     public function show($projectId)
     {
-        $project = Project::with(['images', 'documents'])
+        $project = $this->owned(Project::class)->with(['images', 'documents'])
             ->where('id', $projectId)
             ->first();
         if (!$project) {
@@ -151,6 +158,9 @@ class ProjectController extends Controller
     public function edit(Project $project) {}
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'short_description' => 'nullable|string',
@@ -171,7 +181,7 @@ class ProjectController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
         }
 
-        $project = Project::find($id);
+        $project = $this->owned(Project::class)->find($id);
         if (!$project) {
             return response()->json([ 'status' => false, 'message' => 'Project not found' ], 404);
         }
@@ -291,7 +301,7 @@ class ProjectController extends Controller
     }
     public function destroy($id)
     {
-        $project = Project::find($id);
+        $project = $this->owned(Project::class)->find($id);
         if (!$project) {
             return response()->json(['status' => false, 'message' => 'Project not found'], 404);
         }

@@ -38,7 +38,7 @@ class ProjectSummaryController extends Controller
     }
     public function show($id)
     {
-        $projectSummary =  ProjectSummary::select('project_summaries.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
+        $projectSummary =  $this->ownedVia(ProjectSummary::class, 'project_id', Project::class)->select('project_summaries.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
             ->leftJoin('privacy_setups', 'project_summaries.privacy_setup_id', '=', 'privacy_setups.id')
             ->with(['images', 'documents'])
             ->where('project_summaries.id', $id)->first();
@@ -63,6 +63,9 @@ class ProjectSummaryController extends Controller
     public function create() {}
     public function store(Request $request)
     {
+        // The project must belong to this organisation
+        $this->ensureOwnedParent(Project::class, $request->input('project_id'));
+
         $validator = Validator::make($request->all(), [
             'project_id' => 'required|integer',
             'total_member_participation' => 'nullable|integer',
@@ -186,6 +189,9 @@ class ProjectSummaryController extends Controller
     public function edit(ProjectSummary $projectSummary) {}
     public function update(Request $request, $id)
     {
+        // The project must belong to this organisation
+        if ($request->has('project_id')) $this->ensureOwnedParent(Project::class, $request->input('project_id'));
+
         $validator = Validator::make($request->all(), [
             'project_id' => 'required|integer',
             'total_member_participation' => 'nullable|integer',
@@ -220,7 +226,7 @@ class ProjectSummaryController extends Controller
             ], 422);
         }
         try {
-            $projectSummary = ProjectSummary::findOrFail($id);
+            $projectSummary = $this->ownedVia(ProjectSummary::class, 'project_id', Project::class)->findOrFail($id);
             $projectSummary->project_id = $request->project_id;
             $projectSummary->total_member_participation = $request->total_member_participation;
             $projectSummary->total_guest_participation = $request->total_guest_participation;
@@ -292,7 +298,7 @@ class ProjectSummaryController extends Controller
     }
     public function destroy($id)
     {
-        $projectSummary = ProjectSummary::findOrFail($id);
+        $projectSummary = $this->ownedVia(ProjectSummary::class, 'project_id', Project::class)->findOrFail($id);
         $projectSummary->delete();
         return response()->json(['status' => true, 'message' => 'Meeting Attendance deleted successfully.'], 200);
     }

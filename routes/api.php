@@ -869,8 +869,19 @@ $sharedReads = [
 $orgWrites = [
         'SuperAdmin\Financial\Management\ManagementSubscriptionController@update',
 ];
+// Platform-wide lookup lists that live under Org\: anyone signed in may read, only Super Admins change
+$platformLookups = [
+        'Org\\Membership\\MembershipStatusController',
+        'Org\\Membership\\MembershipTerminationReasonController',
+];
 foreach (Route::getRoutes()->getRoutes() as $route) {
     $action = str_replace('App\\Http\\Controllers\\', '', $route->getActionName());
+    if (in_array(explode('@', $action)[0], $platformLookups, true)) {
+        if (!in_array('GET', $route->methods(), true)) {
+            $route->middleware('superadmin');
+        }
+        continue;
+    }
     if (!str_starts_with($action, 'SuperAdmin\\') && !str_starts_with($action, 'Ecommerce\\')) {
         continue;
     }

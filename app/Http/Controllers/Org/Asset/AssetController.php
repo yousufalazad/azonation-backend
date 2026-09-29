@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\Asset;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 
@@ -20,6 +21,8 @@ use Carbon\Carbon;
 
 class AssetController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:asset.read')->only(['index', 'show']);
@@ -95,6 +98,7 @@ class AssetController extends Controller
             ->leftJoin('users as u', 'aal.responsible_user_id', '=', 'u.id')
             ->leftJoin('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
             ->where('a.id', '=', $assetId)
+            ->where('a.user_id', $this->orgIdOrFail()) // only this organisation's assets
             ->first();
         if (!$asset) {
             return response()->json(['status' => false, 'message' => 'Asset not found'], 404);
@@ -120,7 +124,7 @@ class AssetController extends Controller
     }
     public function show($id)
     {
-        $asset = Asset::with(['assignmentLogs', 'documents', 'images'])->find($id);
+        $asset = $this->owned(Asset::class)->with(['assignmentLogs', 'documents', 'images'])->find($id);
         if (!$asset) {
             return response()->json(['message' => 'Asset not found.'], 404);
         }
@@ -141,6 +145,9 @@ class AssetController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
@@ -221,6 +228,9 @@ class AssetController extends Controller
 
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
@@ -242,7 +252,7 @@ class AssetController extends Controller
         ]);
         DB::beginTransaction();
         try {
-            $asset = Asset::findOrFail($id);
+            $asset = $this->owned(Asset::class)->findOrFail($id);
             // dd(vars: $validated);exit;
             $asset->update($validated);
             $assetAssignmentLog = AssetAssignmentLog::where('asset_id', $asset->id)->first();
@@ -316,7 +326,7 @@ class AssetController extends Controller
     {
         DB::beginTransaction();
         try {
-            $asset = Asset::findOrFail($id);
+            $asset = $this->owned(Asset::class)->findOrFail($id);
             AssetAssignmentLog::where('asset_id', $asset->id)->delete();
             $asset->delete();
             DB::commit();

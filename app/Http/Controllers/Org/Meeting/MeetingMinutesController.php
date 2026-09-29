@@ -1,5 +1,8 @@
 <?php
 namespace App\Http\Controllers\Org\Meeting;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
+use App\Models\Meeting;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 
@@ -15,6 +18,8 @@ use Carbon\Carbon;
 
 class MeetingMinutesController extends Controller
 {
+    use ResolvesCurrentOrg;
+
         public function __construct()
         {
             $this->middleware('org.permission:meeting-minute.read')->only(['index', 'show']);
@@ -24,13 +29,13 @@ class MeetingMinutesController extends Controller
         }
     public function index()
     {
-        $meetingAttendance = MeetingMinutes::get();
+        $meetingAttendance = $this->ownedVia(MeetingMinutes::class, 'meeting_id', Meeting::class)->get();
         return response()->json(['status' => true, 'data' => $meetingAttendance], 200);
     }
     public function create() {}
     public function show($id)
     {
-        $meetingMinute =  MeetingMinutes::select('meeting_minutes.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
+        $meetingMinute =  $this->ownedVia(MeetingMinutes::class, 'meeting_id', Meeting::class)->select('meeting_minutes.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
             ->leftJoin('privacy_setups', 'meeting_minutes.privacy_setup_id', '=', 'privacy_setups.id')
             ->with(['images', 'documents'])
             ->where('meeting_minutes.id', $id)->first();
@@ -55,6 +60,9 @@ class MeetingMinutesController extends Controller
     }
     public function store(Request $request)
     {
+        // The meeting must belong to this organisation
+        $this->ensureOwnedParent(Meeting::class, $request->input('meeting_id'));
+
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required|integer|exists:meetings,id',
         ]);
@@ -128,6 +136,9 @@ class MeetingMinutesController extends Controller
     public function edit(MeetingMinutes $meetingMinutes) {}
     public function update(Request $request, $id)
     {
+        // The meeting must belong to this organisation
+        if ($request->has('meeting_id')) $this->ensureOwnedParent(Meeting::class, $request->input('meeting_id'));
+
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required|integer|exists:meetings,id',
             // 'prepared_by' => 'required|integer|exists:users,id',
@@ -143,7 +154,7 @@ class MeetingMinutesController extends Controller
             ], 422);
         }
         try {
-            $meetingMinutes = MeetingMinutes::findOrFail($id);
+            $meetingMinutes = $this->ownedVia(MeetingMinutes::class, 'meeting_id', Meeting::class)->findOrFail($id);
             // if ($request->hasFile('file_attachments')) {
             //     if ($meetingMinutes->file_attachments && Storage::exists('public/' . $meetingMinutes->file_attachments)) {
             //         Storage::delete('public/' . $meetingMinutes->file_attachments);
@@ -263,7 +274,7 @@ class MeetingMinutesController extends Controller
     public function destroy($id)
     {
         try {
-            $meetingMinutes = MeetingMinutes::findOrFail($id);
+            $meetingMinutes = $this->ownedVia(MeetingMinutes::class, 'meeting_id', Meeting::class)->findOrFail($id);
             if ($meetingMinutes->file_attachments && Storage::exists('public/' . $meetingMinutes->file_attachments)) {
                 Storage::delete('public/' . $meetingMinutes->file_attachments);
             }

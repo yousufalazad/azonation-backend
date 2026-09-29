@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\Membership;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,8 @@ use App\Models\OrgMembershipRenewalPrice;
 
 class OrgMembershipRenewalPriceController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function index()
     {
         $userId = Auth::id();
@@ -28,6 +31,9 @@ class OrgMembershipRenewalPriceController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'org_membership_type_id' => 'required|exists:org_membership_types,id',
             'org_mem_renewal_cycle_id' => 'nullable|exists:org_membership_renewal_cycles,id',
@@ -76,7 +82,7 @@ class OrgMembershipRenewalPriceController extends Controller
 
     public function show($id)
     {
-        $price = OrgMembershipRenewalPrice::with(['orgMembershipType', 'orgMembershipRenewalCycle', 'memberRenewalCycle'])
+        $price = $this->owned(OrgMembershipRenewalPrice::class, 'org_type_user_id')->with(['orgMembershipType', 'orgMembershipRenewalCycle', 'memberRenewalCycle'])
             ->find($id);
 
         if (!$price) {
@@ -95,7 +101,10 @@ class OrgMembershipRenewalPriceController extends Controller
 
     public function update(Request $request, $id)
     {
-        $price = OrgMembershipRenewalPrice::find($id);
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
+        $price = $this->owned(OrgMembershipRenewalPrice::class, 'org_type_user_id')->find($id);
 
         if (!$price) {
             return response()->json([
@@ -149,7 +158,7 @@ class OrgMembershipRenewalPriceController extends Controller
 
     public function destroy($id)
     {
-        $price = OrgMembershipRenewalPrice::find($id);
+        $price = $this->owned(OrgMembershipRenewalPrice::class, 'org_type_user_id')->find($id);
 
         if (!$price) {
             return response()->json([

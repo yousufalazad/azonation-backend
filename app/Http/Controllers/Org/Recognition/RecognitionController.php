@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\Recognition;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
@@ -17,6 +18,8 @@ use Carbon\Carbon;
 
 class RecognitionController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function index()
     {
         try {
@@ -38,7 +41,7 @@ class RecognitionController extends Controller
     }
     public function show($id)
     {
-        $recognition =  Recognition::where('id', $id)
+        $recognition =  $this->owned(Recognition::class)->where('id', $id)
             ->first();
         if (!$recognition) {
             return response()->json(['status' => false, 'message' => 'Recognition not found'], 404);
@@ -59,6 +62,9 @@ class RecognitionController extends Controller
     }
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         // dd($request->all());exit;
         $request->validate([
             'title' => 'required|string|max:255',
@@ -128,6 +134,9 @@ class RecognitionController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable',
@@ -136,7 +145,7 @@ class RecognitionController extends Controller
             'is_active' => 'required|integer',
         ]);
         try {
-            $recognition = Recognition::where('id', $id)->first();
+            $recognition = $this->owned(Recognition::class)->where('id', $id)->first();
             if (!$recognition) {
                 return response()->json([
                     'status' => false,
@@ -202,7 +211,7 @@ class RecognitionController extends Controller
     public function destroy($id)
     {
         try {
-            $recognition = Recognition::where('id', $id)->first();
+            $recognition = $this->owned(Recognition::class)->where('id', $id)->first();
             if (!$recognition) {
                 return response()->json([
                     'status' => false,

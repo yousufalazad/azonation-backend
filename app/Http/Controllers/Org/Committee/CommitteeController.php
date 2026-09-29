@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\Committee;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 use App\Models\Committee;
@@ -8,6 +9,8 @@ use Illuminate\Http\Request;
 
 class CommitteeController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:committee.read')->only(['index', 'show']);
@@ -29,6 +32,9 @@ class CommitteeController extends Controller
     public function create() {}
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $request->validate([
             'name' => 'required|string',
         ]);
@@ -45,7 +51,7 @@ class CommitteeController extends Controller
     }
     public function show($committeeId)
     {
-        $committee = Committee::find($committeeId);
+        $committee = $this->owned(Committee::class)->find($committeeId);
         if (!$committee) {
             return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
         }
@@ -54,6 +60,9 @@ class CommitteeController extends Controller
     public function edit(Committee $committee) {}
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validatedData = $request->validate([
             'name' => 'required|string',
             'short_description' => 'nullable|string',
@@ -62,7 +71,7 @@ class CommitteeController extends Controller
             'note' => 'nullable|string',
             'is_active' => 'nullable|boolean',
         ]);
-        $committee = Committee::where('id', $id)->first();
+        $committee = $this->owned(Committee::class)->where('id', $id)->first();
         if (!$committee) {
             return response()->json(['message' => 'Committee not found'], 404);
         }
@@ -79,7 +88,7 @@ class CommitteeController extends Controller
     public function destroy($id)
     {
         try {
-            $committee = Committee::findOrFail($id);
+            $committee = $this->owned(Committee::class)->findOrFail($id);
             $committee->delete();
             return response()->json([
                 'status' => true,

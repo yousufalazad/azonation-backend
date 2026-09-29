@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\SuccessStory;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 
 use App\Models\SuccessStory;
@@ -17,6 +18,8 @@ use Carbon\Carbon;
 
 class SuccessStoryController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function index()
     {
         try {
@@ -41,7 +44,7 @@ class SuccessStoryController extends Controller
     }
     public function show($id)
     {
-        $successStory =  SuccessStory::select('success_stories.*', 'privacy_setups.name as privacy_name')
+        $successStory =  $this->owned(SuccessStory::class)->select('success_stories.*', 'privacy_setups.name as privacy_name')
             ->leftJoin('privacy_setups', 'success_stories.privacy_setup_id', '=', 'privacy_setups.id')
             ->where('success_stories.id', $id)
             ->with(['images', 'documents'])
@@ -65,6 +68,9 @@ class SuccessStoryController extends Controller
     }
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
 
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
@@ -130,6 +136,9 @@ class SuccessStoryController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'story' => 'nullable',
@@ -137,7 +146,7 @@ class SuccessStoryController extends Controller
             'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
         ]);
         try {
-            $story = SuccessStory::find($id);
+            $story = $this->owned(SuccessStory::class)->find($id);
             if (!$story) {
                 return response()->json([
                     'status' => false,
@@ -199,7 +208,7 @@ class SuccessStoryController extends Controller
     public function destroy($id)
     {
         try {
-            $story = SuccessStory::find($id);
+            $story = $this->owned(SuccessStory::class)->find($id);
             if (!$story) {
                 return response()->json([
                     'status' => false,

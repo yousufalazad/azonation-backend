@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\FundManagement;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 
@@ -11,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 
 class FundController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:fund.read')->only(['index', 'show']);
@@ -31,6 +35,9 @@ class FundController extends Controller
     }
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'is_active' => 'nullable|boolean|in:0,1',
@@ -53,6 +60,9 @@ class FundController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         // dd($request->all());exit;
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -61,7 +71,7 @@ class FundController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], status: 422);
         }
-        $fund = Fund::where('user_id', Auth::id())->find($id); // only this organisation's funds
+        $fund = $this->owned(Fund::class)->find($id); // only this organisation's funds
         if (!$fund) {
             return response()->json(['status' => false, 'message' => 'Fund not found.'], status: 404);
         }
@@ -73,7 +83,7 @@ class FundController extends Controller
     }
     public function destroy($id)
     {
-        $fund = Fund::where('user_id', Auth::id())->find($id); // only this organisation's funds
+        $fund = $this->owned(Fund::class)->find($id); // only this organisation's funds
         if (!$fund) {
             return response()->json(['status' => false, 'message' => 'Fund not found.'], 404);
         }

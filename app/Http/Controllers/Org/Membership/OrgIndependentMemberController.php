@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\Membership;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 use App\Models\IndependentMemberImage;
 use App\Models\OrgIndependentMember;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 
 class OrgIndependentMemberController extends Controller
 {
+    use ResolvesCurrentOrg;
+
 
     public function index(Request $request)
     {
@@ -49,6 +52,9 @@ class OrgIndependentMemberController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         // dd(request()->all()); exit;
 
         $validatedData = $request->validate([
@@ -95,7 +101,7 @@ class OrgIndependentMemberController extends Controller
     }
     public function show($id)
     {
-        $independentMember = OrgIndependentMember::with('image')->find($id);
+        $independentMember = $this->owned(OrgIndependentMember::class)->with('image')->find($id);
 
         if (!$independentMember) {
             return response()->json(['status' => false, 'message' => 'Independent Member not found.'], 404);
@@ -117,7 +123,10 @@ class OrgIndependentMemberController extends Controller
 
     public function update(Request $request, $id)
     {
-        $independentMember = OrgIndependentMember::find($id);
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
+        $independentMember = $this->owned(OrgIndependentMember::class)->find($id);
         if (!$independentMember) {
             return response()->json(['status' => false, 'message' => 'independentMember not found.'], 404);
         }
@@ -150,7 +159,7 @@ class OrgIndependentMemberController extends Controller
     }
     public function destroy($id)
     {
-        $independentMember = OrgIndependentMember::find($id);
+        $independentMember = $this->owned(OrgIndependentMember::class)->find($id);
         if (!$independentMember) {
             return response()->json(['status' => false, 'message' => 'independentMember not found.'], 404);
         }

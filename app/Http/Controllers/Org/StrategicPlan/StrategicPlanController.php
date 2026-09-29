@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\StrategicPlan;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 
 use App\Models\StrategicPlan;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Auth;
 
 class StrategicPlanController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function index()
     {
         try {
@@ -41,7 +44,7 @@ class StrategicPlanController extends Controller
 
     public function show($id)
     {
-        $strategicPlan =  StrategicPlan::select('strategic_plans.*', 'privacy_setups.name as privacy_name')
+        $strategicPlan =  $this->owned(StrategicPlan::class)->select('strategic_plans.*', 'privacy_setups.name as privacy_name')
             ->leftJoin('privacy_setups', 'strategic_plans.privacy_setup_id', '=', 'privacy_setups.id')
             ->where('strategic_plans.id', $id)
             ->first();
@@ -64,6 +67,9 @@ class StrategicPlanController extends Controller
     }
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'plan' => 'nullable|string|max:5000',
@@ -138,6 +144,9 @@ class StrategicPlanController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         // dd($request->all());exit;
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
@@ -154,7 +163,7 @@ class StrategicPlanController extends Controller
             ], 400);
         }
         try {
-            $strategicPlan = StrategicPlan::findOrFail($id);
+            $strategicPlan = $this->owned(StrategicPlan::class)->findOrFail($id);
             $strategicPlan->update([
                 'user_id' => $request->user()->id,
                 'title' => $request->title,
@@ -215,7 +224,7 @@ class StrategicPlanController extends Controller
     public function destroy($id)
     {
         try {
-            $strategicPlan = StrategicPlan::findOrFail($id);
+            $strategicPlan = $this->owned(StrategicPlan::class)->findOrFail($id);
             $strategicPlan->delete();
             return response()->json([
                 'status' => true,

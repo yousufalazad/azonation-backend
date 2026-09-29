@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\History;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 
 use App\Models\History;
@@ -17,6 +18,8 @@ use Carbon\Carbon;
 
 class HistoryController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function index()
     {
         try {
@@ -40,7 +43,7 @@ class HistoryController extends Controller
     }
     public function show($id)
     {
-        $history = History::select('histories.*', 'privacy_setups.name as privacy_name')
+        $history = $this->owned(History::class)->select('histories.*', 'privacy_setups.name as privacy_name')
             ->leftJoin('privacy_setups', 'histories.privacy_setup_id', '=', 'privacy_setups.id')
             ->where('histories.id', $id)
             ->with(['images', 'documents'])
@@ -66,6 +69,9 @@ class HistoryController extends Controller
     }
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'history' => 'nullable|string|max:20000',
@@ -125,6 +131,9 @@ class HistoryController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'history' => 'nullable|string|max:20000',
@@ -132,7 +141,7 @@ class HistoryController extends Controller
             'is_active' => 'required|integer',
         ]);
         try {
-            $history = History::findOrFail($id);
+            $history = $this->owned(History::class)->findOrFail($id);
             $history->update([
                 'title' => $validatedData['title'],
                 'history' => $validatedData['history'],
@@ -191,7 +200,7 @@ class HistoryController extends Controller
     public function destroy($id)
     {
         try {
-            $history = History::findOrFail($id);
+            $history = $this->owned(History::class)->findOrFail($id);
             if ($history->image) {
                 Storage::delete('public/' . $history->image);
             }

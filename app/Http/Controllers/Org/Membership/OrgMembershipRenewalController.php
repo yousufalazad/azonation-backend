@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\Membership;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,8 @@ use App\Models\OrgMembershipRenewal;
 
 class OrgMembershipRenewalController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function index()
     {
         $userId = Auth::id();
@@ -27,6 +30,9 @@ class OrgMembershipRenewalController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'individual_type_user_id' => 'nullable|integer',
             'membership_renewal_cycle_id' => 'required|exists:membership_renewal_cycles,id',
@@ -87,7 +93,7 @@ class OrgMembershipRenewalController extends Controller
 
     public function show($id)
     {
-        $renewal = OrgMembershipRenewal::find($id);
+        $renewal = $this->owned(OrgMembershipRenewal::class, 'org_type_user_id')->find($id);
 
         if (!$renewal) {
             return response()->json([
@@ -105,7 +111,10 @@ class OrgMembershipRenewalController extends Controller
 
     public function update(Request $request, $id)
     {
-        $renewal = OrgMembershipRenewal::find($id);
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
+        $renewal = $this->owned(OrgMembershipRenewal::class, 'org_type_user_id')->find($id);
 
         if (!$renewal) {
             return response()->json([
@@ -172,7 +181,7 @@ class OrgMembershipRenewalController extends Controller
 
     public function destroy($id)
     {
-        $renewal = OrgMembershipRenewal::find($id);
+        $renewal = $this->owned(OrgMembershipRenewal::class, 'org_type_user_id')->find($id);
 
         if (!$renewal) {
             return response()->json([

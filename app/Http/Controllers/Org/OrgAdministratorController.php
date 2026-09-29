@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 use App\Models\OrgAdministrator;
 use Illuminate\Http\Request;
@@ -13,6 +14,8 @@ use App\Models\User;
 
 class OrgAdministratorController extends Controller
 {
+    use ResolvesCurrentOrg;
+
 
     public function index(Request $request)
     {
@@ -123,7 +126,7 @@ class OrgAdministratorController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        $admin = OrgAdministrator::findOrFail($id);
+        $admin = $this->owned(OrgAdministrator::class, 'org_type_user_id')->findOrFail($id);
 
         if (!empty($validated['end_date'])) {
             $startDate = $validated['start_date'] ?? $admin->start_date;
@@ -167,7 +170,7 @@ class OrgAdministratorController extends Controller
 
     public function destroy($id)
     {
-        $admin = OrgAdministrator::findOrFail($id);
+        $admin = $this->owned(OrgAdministrator::class, 'org_type_user_id')->findOrFail($id);
         $admin->delete();
 
         return response()->json(['message' => 'Administrator deleted successfully.']);

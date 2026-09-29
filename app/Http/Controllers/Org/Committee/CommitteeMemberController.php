@@ -1,5 +1,8 @@
 <?php
 namespace App\Http\Controllers\Org\Committee;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
+use App\Models\Committee;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 
@@ -10,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class CommitteeMemberController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:committee-member.read')->only(['index', 'show']);
@@ -19,7 +24,7 @@ class CommitteeMemberController extends Controller
     }
     public function index($id)
     {
-        $committeeMember = CommitteeMember::where('committee_id', $id)
+        $committeeMember = $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->where('committee_id', $id)
             ->leftJoin('users', 'committee_members.user_id', '=', 'users.id')
             ->leftJoin('designations', 'committee_members.designation_id', '=', 'designations.id')
             ->select('committee_members.*', 'users.first_name',  'users.last_name', 'designations.name as designation_name')
@@ -32,6 +37,9 @@ class CommitteeMemberController extends Controller
     public function create() {}
     public function store(Request $request)
     {
+        // The committee must belong to this organisation
+        $this->ensureOwnedParent(Committee::class, $request->input('committee_id'));
+
         // dd($request->all());exit;
         $validator = Validator::make($request->all(), [
             'committee_id' => 'required',
@@ -73,7 +81,7 @@ class CommitteeMemberController extends Controller
     }
     public function show($id)
     {
-        $meetingMinute =  CommitteeMember::select('meeting_minutes.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
+        $meetingMinute =  $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->select('meeting_minutes.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
             ->leftJoin('privacy_setups', 'meeting_minutes.privacy_setup_id', '=', 'privacy_setups.id')
             ->where('meeting_minutes.id', $id)->first();
         if (!$meetingMinute) {
@@ -84,6 +92,9 @@ class CommitteeMemberController extends Controller
     public function edit(CommitteeMember $committeeMember) {}
     public function update(Request $request, $id)
     {
+        // The committee must belong to this organisation
+        if ($request->has('committee_id')) $this->ensureOwnedParent(Committee::class, $request->input('committee_id'));
+
         $validator = Validator::make($request->all(), [
             'committee_id' => 'required|integer',
             'user_id' => 'required|integer',
@@ -100,7 +111,7 @@ class CommitteeMemberController extends Controller
             ], 422);
         }
         try {
-            $committeeMember = CommitteeMember::findOrFail($id);
+            $committeeMember = $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->findOrFail($id);
             $committeeMember->committee_id = $request->committee_id;
             $committeeMember->user_id = $request->user_id;
             $committeeMember->designation_id = $request->designation_id;
@@ -125,7 +136,7 @@ class CommitteeMemberController extends Controller
     public function destroy($id)
     {
         try {
-            $committeeMember = CommitteeMember::findOrFail($id);
+            $committeeMember = $this->ownedVia(CommitteeMember::class, 'committee_id', Committee::class)->findOrFail($id);
             $committeeMember->delete();
             return response()->json([
                 'status' => true,

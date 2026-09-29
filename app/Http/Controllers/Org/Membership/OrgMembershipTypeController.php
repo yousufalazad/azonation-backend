@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\Membership;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 
 use App\Models\OrgMembershipType;
@@ -10,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 
 class OrgMembershipTypeController extends Controller
 {
+    use ResolvesCurrentOrg;
+
    
     public function index()
     {
@@ -27,6 +31,9 @@ class OrgMembershipTypeController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'membership_type_id' => 'required|exists:membership_types,id',
             'starts_on' => 'nullable|date',
@@ -67,7 +74,7 @@ class OrgMembershipTypeController extends Controller
     
     public function show($id)
     {
-        $orgMembershipType = OrgMembershipType::with( 'membershipType')->find($id);
+        $orgMembershipType = $this->owned(OrgMembershipType::class, 'org_type_user_id')->with( 'membershipType')->find($id);
 
         if (!$orgMembershipType) {
             return response()->json([
@@ -85,7 +92,10 @@ class OrgMembershipTypeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $orgMembershipType = OrgMembershipType::find($id);
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
+        $orgMembershipType = $this->owned(OrgMembershipType::class, 'org_type_user_id')->find($id);
 
         if (!$orgMembershipType) {
             return response()->json([
@@ -132,7 +142,7 @@ class OrgMembershipTypeController extends Controller
    
     public function destroy($id)
     {
-        $orgMembershipType = OrgMembershipType::find($id);
+        $orgMembershipType = $this->owned(OrgMembershipType::class, 'org_type_user_id')->find($id);
 
         if (!$orgMembershipType) {
             return response()->json([

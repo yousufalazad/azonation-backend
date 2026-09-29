@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\Membership;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\OrgMembershipRenewalCycle;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Validator;
 
 class OrgMembershipRenewalCycleController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function index()
     {
         $userId = Auth::id();
@@ -27,6 +30,9 @@ class OrgMembershipRenewalCycleController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'member_renewal_cycle_id' => 'required|exists:membership_renewal_cycles,id',
             'alignment' => 'nullable|string',
@@ -73,7 +79,7 @@ class OrgMembershipRenewalCycleController extends Controller
 
     public function show($id)
     {
-        $cycle = OrgMembershipRenewalCycle::with('memberRenewalCycle')->find($id);
+        $cycle = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')->with('memberRenewalCycle')->find($id);
 
         if (!$cycle) {
             return response()->json([
@@ -91,7 +97,10 @@ class OrgMembershipRenewalCycleController extends Controller
 
     public function update(Request $request, $id)
     {
-        $cycle = OrgMembershipRenewalCycle::find($id);
+        // The organisation always comes from the session, never from the form
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
+
+        $cycle = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')->find($id);
 
         if (!$cycle) {
             return response()->json([
@@ -143,7 +152,7 @@ class OrgMembershipRenewalCycleController extends Controller
 
     public function destroy($id)
     {
-        $cycle = OrgMembershipRenewalCycle::find($id);
+        $cycle = $this->owned(OrgMembershipRenewalCycle::class, 'org_type_user_id')->find($id);
 
         if (!$cycle) {
             return response()->json([

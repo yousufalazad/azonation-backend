@@ -9,7 +9,8 @@ class FamilyMemberController extends Controller
 {
     public function index()
     {
-        $familyMembers = FamilyMember::with(['user', 'member'])->latest()->get();
+        // Only the signed-in person's own family members (used to list everyone's)
+        $familyMembers = FamilyMember::with(['user', 'member'])->where('user_id', request()->user()->id)->latest()->get();
         return response()->json(['status' => true, 'data' => $familyMembers]);
 
     }
@@ -39,12 +40,20 @@ class FamilyMemberController extends Controller
         ], 201);
     }
 
-    public function show(FamilyMember $familyMember)
+    // The route passes {id}; look the record up among the signed-in person's own
+    private function ownFamilyMember($id): FamilyMember
     {
-        return response()->json($familyMember->load(['user', 'member']));
+        return FamilyMember::where('user_id', request()->user()->id)->findOrFail($id);
     }
-    public function update(Request $request, FamilyMember $familyMember)
+
+    public function show($id)
     {
+        return response()->json($this->ownFamilyMember($id)->load(['user', 'member']));
+    }
+    public function update(Request $request, $id)
+    {
+        $familyMember = $this->ownFamilyMember($id);
+
         $validatedData = $request->validate([
             // 'member_id' => 'required',
             'name' => 'required|string|max:255',
@@ -61,15 +70,16 @@ class FamilyMemberController extends Controller
         $familyMember->update($validatedData);
 
         return response()->json([
+            'status' => true,
             'message' => 'Family member updated successfully.',
             'data' => $familyMember
         ]);
     }
 
-    public function destroy(FamilyMember $familyMember)
+    public function destroy($id)
     {
-        $familyMember->delete();
+        $this->ownFamilyMember($id)->delete();
 
-        return response()->json(['message' => 'Family member deleted successfully.']);
+        return response()->json(['status' => true, 'message' => 'Family member deleted successfully.']);
     }
 }

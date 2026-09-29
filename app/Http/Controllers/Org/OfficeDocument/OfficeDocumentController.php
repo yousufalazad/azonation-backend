@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\OfficeDocument;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 
@@ -14,6 +16,8 @@ use Carbon\Carbon;
 
 class OfficeDocumentController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:document.read')->only(['index', 'show']);
@@ -40,7 +44,7 @@ class OfficeDocumentController extends Controller
     }
     public function show($documentId)
     {
-        $document = OfficeDocument::with(['images', 'documents'])->find($documentId);
+        $document = $this->owned(OfficeDocument::class)->with(['images', 'documents'])->find($documentId);
         if (!$document) {
             return response()->json(['status' => false, 'message' => 'Office document not found'], 404);
         }
@@ -60,6 +64,9 @@ class OfficeDocumentController extends Controller
     }
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         // dd($request->all());exit;
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
@@ -132,6 +139,9 @@ class OfficeDocumentController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:20000',
@@ -143,7 +153,7 @@ class OfficeDocumentController extends Controller
         $user_id = $request->user()->id;
         DB::beginTransaction();
         try {
-            $officeDocument = OfficeDocument::findOrFail($id);
+            $officeDocument = $this->owned(OfficeDocument::class)->findOrFail($id);
             $officeDocument->title = $validatedData['title'];
             $officeDocument->description = $validatedData['description'];
             $officeDocument->privacy_setup_id = $validatedData['privacy_setup_id'];
@@ -203,7 +213,7 @@ class OfficeDocumentController extends Controller
     public function destroy($id)
     {
         try {
-            $officeDocument = OfficeDocument::findOrFail($id);
+            $officeDocument = $this->owned(OfficeDocument::class)->findOrFail($id);
             if ($officeDocument->document) {
                 Storage::delete('public/' . $officeDocument->document);
             }

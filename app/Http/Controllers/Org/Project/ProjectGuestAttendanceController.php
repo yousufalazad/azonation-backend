@@ -1,5 +1,8 @@
 <?php
 namespace App\Http\Controllers\Org\Project;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
+use App\Models\Project;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 
@@ -10,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class ProjectGuestAttendanceController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:project-guest-attendance.read')->only(['index', 'show']);
@@ -19,7 +24,7 @@ class ProjectGuestAttendanceController extends Controller
     }
     public function index()
     {
-        $projectAttendance = ProjectGuestAttendance::select('project_guest_attendances.*', 'attendance_types.name as attendance_types_name')
+        $projectAttendance = $this->ownedVia(ProjectGuestAttendance::class, 'project_id', Project::class)->select('project_guest_attendances.*', 'attendance_types.name as attendance_types_name')
             ->leftJoin('attendance_types', 'project_guest_attendances.attendance_type_id', '=', 'attendance_types.id')
             ->get();
         return response()->json(['status' => true, 'data' => $projectAttendance], 200);
@@ -27,6 +32,9 @@ class ProjectGuestAttendanceController extends Controller
     public function create() {}
     public function store(Request $request)
     {
+        // The project must belong to this organisation
+        $this->ensureOwnedParent(Project::class, $request->input('project_id'));
+
         $validator = Validator::make($request->all(), [
             'project_id' => 'required',
             'guest_name' => 'required',
@@ -62,6 +70,9 @@ class ProjectGuestAttendanceController extends Controller
     public function edit(ProjectGuestAttendance $guestProjectAttendance) {}
     public function update(Request $request, $id)
     {
+        // The project must belong to this organisation
+        if ($request->has('project_id')) $this->ensureOwnedParent(Project::class, $request->input('project_id'));
+
         $validator = Validator::make($request->all(), [
             'project_id' => 'required',
             'guest_name' => 'required',
@@ -75,7 +86,7 @@ class ProjectGuestAttendanceController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
-        $projectAttendance = ProjectGuestAttendance::find($id);
+        $projectAttendance = $this->ownedVia(ProjectGuestAttendance::class, 'project_id', Project::class)->find($id);
         if (!$projectAttendance) {
             return response()->json(['status' => false, 'message' => 'project Attendance not found.'], 404);
         }
@@ -93,7 +104,7 @@ class ProjectGuestAttendanceController extends Controller
     }
     public function destroy($id)
     {
-        $projectAttendance = ProjectGuestAttendance::find($id);
+        $projectAttendance = $this->ownedVia(ProjectGuestAttendance::class, 'project_id', Project::class)->find($id);
         if (!$projectAttendance) {
             return response()->json(['status' => false, 'message' => 'project Attendance member not found.'], 404);
         }

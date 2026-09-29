@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\Event;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 use App\Models\Event;
@@ -15,6 +17,8 @@ use Carbon\Carbon;
 
 class EventController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:event.read')->only(['index', 'getEvent']);
@@ -30,7 +34,7 @@ class EventController extends Controller
     }
     public function getEvent($eventId)
     {
-        $event = Event::find($eventId);
+        $event = $this->owned(Event::class)->find($eventId);
         if (!$event) {
             return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
         }
@@ -50,6 +54,9 @@ class EventController extends Controller
     }
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
         ]);
@@ -97,6 +104,9 @@ class EventController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         // dd($request->all());exit;
         // Validation
         $validator = Validator::make($request->all(), [
@@ -119,7 +129,7 @@ class EventController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
         }
 
-        $event = Event::find($id);
+        $event = $this->owned(Event::class)->find($id);
         if (!$event) {
             return response()->json(['status' => false, 'message' => 'Event not found.'], 404);
         }
@@ -223,7 +233,7 @@ class EventController extends Controller
     }
     public function destroy($id)
     {
-        $event = Event::find($id);
+        $event = $this->owned(Event::class)->find($id);
         if (!$event) {
             return response()->json(['status' => false, 'message' => 'Event not found.'], 404);
         }

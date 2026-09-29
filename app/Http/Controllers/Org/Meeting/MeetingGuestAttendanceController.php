@@ -1,5 +1,8 @@
 <?php
 namespace App\Http\Controllers\Org\Meeting;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
+use App\Models\Meeting;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 
@@ -10,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class MeetingGuestAttendanceController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:meeting-guest-attendance.read')->only(['index', 'show']);
@@ -19,7 +24,7 @@ class MeetingGuestAttendanceController extends Controller
     }
     public function index()
     {
-        $meetingAttendance = MeetingGuestAttendance::select('meeting_guest_attendances.*', 'attendance_types.name as attendance_types_name')
+        $meetingAttendance = $this->ownedVia(MeetingGuestAttendance::class, 'meeting_id', Meeting::class)->select('meeting_guest_attendances.*', 'attendance_types.name as attendance_types_name')
             ->leftJoin('attendance_types', 'meeting_guest_attendances.attendance_type_id', '=', 'attendance_types.id')
             ->get();
         return response()->json(['status' => true, 'data' => $meetingAttendance], 200);
@@ -27,6 +32,9 @@ class MeetingGuestAttendanceController extends Controller
     public function create() {}
     public function store(Request $request)
     {
+        // The meeting must belong to this organisation
+        $this->ensureOwnedParent(Meeting::class, $request->input('meeting_id'));
+
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
             'guest_name' => 'required',
@@ -62,6 +70,9 @@ class MeetingGuestAttendanceController extends Controller
     public function edit(MeetingGuestAttendance $guestMeetingAttendance) {}
     public function update(Request $request, $id)
     {
+        // The meeting must belong to this organisation
+        if ($request->has('meeting_id')) $this->ensureOwnedParent(Meeting::class, $request->input('meeting_id'));
+
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
             'guest_name' => 'required',
@@ -75,7 +86,7 @@ class MeetingGuestAttendanceController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
-        $meetingAttendances = MeetingGuestAttendance::find($id);
+        $meetingAttendances = $this->ownedVia(MeetingGuestAttendance::class, 'meeting_id', Meeting::class)->find($id);
         if (!$meetingAttendances) {
             return response()->json(['status' => false, 'message' => 'Meeting Attendance not found.'], 404);
         }
@@ -93,7 +104,7 @@ class MeetingGuestAttendanceController extends Controller
     }
     public function destroy($id)
     {
-        $meetingAttendance = MeetingGuestAttendance::find($id);
+        $meetingAttendance = $this->ownedVia(MeetingGuestAttendance::class, 'meeting_id', Meeting::class)->find($id);
         if (!$meetingAttendance) {
             return response()->json(['status' => false, 'message' => 'Meeting Attendance member not found.'], 404);
         }

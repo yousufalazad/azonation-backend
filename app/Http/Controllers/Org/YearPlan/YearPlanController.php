@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\YearPlan;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 
 use App\Models\YearPlan;
@@ -17,6 +18,8 @@ use Carbon\Carbon;
 
 class YearPlanController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function index()
     {
         try {
@@ -38,6 +41,9 @@ class YearPlanController extends Controller
     }
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validatedData = $request->validate([
             'title' => 'required|string',
             'user_id' => 'nullable|exists:users,id',
@@ -103,7 +109,7 @@ class YearPlanController extends Controller
     }
     public function show($id)
     {
-        $yearPlan =  YearPlan::where('id', $id)
+        $yearPlan =  $this->owned(YearPlan::class)->where('id', $id)
             ->with(['images', 'documents'])
             ->first();
         if (!$yearPlan) {
@@ -125,6 +131,9 @@ class YearPlanController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validatedData = $request->validate([
             'title' => 'nullable|string',
             'start_year' => 'nullable|string|max:4',
@@ -139,7 +148,7 @@ class YearPlanController extends Controller
             'status' => 'nullable|string|in:draft,approved,completed,archived',
         ]);
         try {
-            $yearPlan = YearPlan::findOrFail($id);
+            $yearPlan = $this->owned(YearPlan::class)->findOrFail($id);
             $yearPlan->update($validatedData);
             return response()->json(['status' => true, 'message' => 'Year plan updated successfully!', 'data' => $yearPlan], 200);
         } catch (\Exception $e) {
@@ -150,7 +159,7 @@ class YearPlanController extends Controller
     public function destroy($id)
     {
         try {
-            $yearPlan = YearPlan::findOrFail($id);
+            $yearPlan = $this->owned(YearPlan::class)->findOrFail($id);
             $yearPlan->delete();
             return response()->json(['status' => true, 'message' => 'Year plan deleted successfully!'], 200);
         } catch (\Exception $e) {
