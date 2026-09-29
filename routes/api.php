@@ -566,6 +566,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::group(['prefix' => 'reports'], function () {
         Route::get('/membership-growth', [OrgReportController::class, 'getMembershipGrowthReport']);
+        Route::get('/summary', [OrgReportController::class, 'summary']);
     });
     Route::get('/reports', [OrgReportController::class, 'getIncomeReport']);
     Route::get('/org-expense-reports', [OrgReportController::class, 'getExpenseReport']);
