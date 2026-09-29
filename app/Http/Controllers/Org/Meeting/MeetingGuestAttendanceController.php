@@ -22,10 +22,12 @@ class MeetingGuestAttendanceController extends Controller
         $this->middleware('org.permission:meeting-guest-attendance.update')->only(['edit', 'update']);
         $this->middleware('org.permission:meeting-guest-attendance.delete')->only(['destroy']);
     }
-    public function index()
+    public function index(Request $request)
     {
         $meetingAttendance = $this->ownedVia(MeetingGuestAttendance::class, 'meeting_id', Meeting::class)->select('meeting_guest_attendances.*', 'attendance_types.name as attendance_types_name')
             ->leftJoin('attendance_types', 'meeting_guest_attendances.attendance_type_id', '=', 'attendance_types.id')
+            // ?meeting_id=5 returns one meeting's guests only
+            ->when($request->query('meeting_id'), fn ($q, $meetingId) => $q->where('meeting_guest_attendances.meeting_id', $meetingId))
             ->get();
         return response()->json(['status' => true, 'data' => $meetingAttendance], 200);
     }
@@ -37,9 +39,9 @@ class MeetingGuestAttendanceController extends Controller
 
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
-            'guest_name' => 'required',
+            'guest_name' => 'required|string|max:255',
             'about_guest' => 'nullable',
-            'attendance_type_id' => 'nullable',
+            'attendance_type_id' => 'required|exists:attendance_types,id',
             'date' => 'nullable',
             'time' => 'nullable',
             'note' => 'nullable',
@@ -75,9 +77,9 @@ class MeetingGuestAttendanceController extends Controller
 
         $validator = Validator::make($request->all(), [
             'meeting_id' => 'required',
-            'guest_name' => 'required',
+            'guest_name' => 'required|string|max:255',
             'about_guest' => 'nullable',
-            'attendance_type_id' => 'nullable',
+            'attendance_type_id' => 'required|exists:attendance_types,id',
             'date' => 'nullable',
             'time' => 'nullable',
             'note' => 'nullable',
