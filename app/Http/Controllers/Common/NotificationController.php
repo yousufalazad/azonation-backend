@@ -27,7 +27,8 @@ class NotificationController extends Controller
     }
     public function markAllAsRead($userId=null)
     {
-        $userId = $userId ?? Auth::id();
+        // People can only mark their own notifications (the route also accepts a user id)
+        $userId = (Auth::user()?->type === 'superadmin' && $userId) ? $userId : Auth::id();
         $user = User::find($userId);
         $user->unreadNotifications->markAsRead();
         return response()->json([
@@ -37,7 +38,8 @@ class NotificationController extends Controller
     }
     public function markAsRead($notificationId, $userId=null)
     {
-        $userId = $userId ?? Auth::id();
+        // People can only mark their own notifications (the route also accepts a user id)
+        $userId = (Auth::user()?->type === 'superadmin' && $userId) ? $userId : Auth::id();
         $user = User::find($userId);
         $notification = $user->unreadNotifications()->find($notificationId);
         if ($notification) {

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Common;
 
+use App\Http\Concerns\OwnsPersonalRecords;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\UserLanguage;
@@ -15,6 +17,8 @@ use Carbon\Carbon;
 
 class UserLanguageController extends Controller
 {
+    use OwnsPersonalRecords;
+
 
     // getUserLanguage
     public function getUserLanguage(Request $request)
@@ -50,6 +54,8 @@ class UserLanguageController extends Controller
      */
     public function store(Request $request)
     {
+        // Whose record: always the signed-in person (Super Admins may name a user)
+        $request->merge(['user_id' => $this->personalOwnerId($request)]);
         $validator = Validator::make($request->all(), [
             'language_id' => 'required',
             'user_id' => 'required',
@@ -92,6 +98,8 @@ class UserLanguageController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Whose record: always the signed-in person (Super Admins may name a user)
+        $request->merge(['user_id' => $this->personalOwnerId($request)]);
         $validator = Validator::make($request->all(), [
             'language_id' => 'required',
             'user_id' => 'required',
@@ -100,7 +108,7 @@ class UserLanguageController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
-        $userLanguage = UserLanguage::find($id);
+        $userLanguage = $this->mine(UserLanguage::class)->find($id);
         if (!$userLanguage) {
             return response()->json(['status' => false, 'message' => 'User Language not found.'], 404);
         }

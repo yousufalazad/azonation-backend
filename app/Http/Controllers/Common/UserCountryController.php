@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Common;
 
+use App\Http\Concerns\OwnsPersonalRecords;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\User;
@@ -13,6 +15,8 @@ use Illuminate\Support\Facades\Log;
 
 class UserCountryController extends Controller
 {
+    use OwnsPersonalRecords;
+
     public function getUser()
     {
         // Every account on the platform: Super Admin only
@@ -33,6 +37,8 @@ class UserCountryController extends Controller
     public function create() {}
     public function store(Request $request)
     {
+        // Whose record: always the signed-in person (Super Admins may name a user)
+        $request->merge(['user_id' => $this->personalOwnerId($request)]);
         $validator = Validator::make($request->all(), [
             'country_id' => 'required',
             'user_id' => 'required',
@@ -58,6 +64,8 @@ class UserCountryController extends Controller
     public function edit(UserCountry $userCountry) {}
     public function update(Request $request, $id)
     {
+        // Whose record: always the signed-in person (Super Admins may name a user)
+        $request->merge(['user_id' => $this->personalOwnerId($request)]);
         $validator = Validator::make($request->all(), [
             'country_id' => 'required',
             'user_id' => 'required',
@@ -66,7 +74,7 @@ class UserCountryController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
-        $dialingCode = UserCountry::find($id);
+        $dialingCode = $this->mine(UserCountry::class)->find($id);
         if (!$dialingCode) {
             return response()->json(['status' => false, 'message' => 'User Country not found.'], 404);
         }
@@ -79,7 +87,7 @@ class UserCountryController extends Controller
     }
     public function destroy($id)
     {
-        $dialingCode = UserCountry::find($id);
+        $dialingCode = $this->mine(UserCountry::class)->find($id);
         if (!$dialingCode) {
             return response()->json(['status' => false, 'message' => 'User Country not found.'], 404);
         }

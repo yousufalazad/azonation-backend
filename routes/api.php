@@ -873,6 +873,7 @@ $orgWrites = [
 $platformLookups = [
         'Org\\Membership\\MembershipStatusController',
         'Org\\Membership\\MembershipTerminationReasonController',
+        'Common\\NotificationNameController',
 ];
 foreach (Route::getRoutes()->getRoutes() as $route) {
     $action = str_replace('App\\Http\\Controllers\\', '', $route->getActionName());
