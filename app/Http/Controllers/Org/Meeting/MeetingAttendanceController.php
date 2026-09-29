@@ -75,7 +75,8 @@ class MeetingAttendanceController extends Controller
                         'attendance_type_id' => $row['attendance_type_id'],
                         'time'               => $row['time'] ?? null,
                         'note'               => $row['note'] ?? null,
-                        'is_active'          => $row['is_active'],
+                        // enum('0','1') column: a bare 1/true would pick the first value, '0'
+                        'is_active'          => filter_var($row['is_active'], FILTER_VALIDATE_BOOLEAN) ? '1' : '0',
                         'updated_by'         => Auth::id(),
                         'created_by'         => Auth::id(),
                     ]
