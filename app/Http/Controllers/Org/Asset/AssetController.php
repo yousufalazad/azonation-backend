@@ -1,342 +1,253 @@
 <?php
-
 namespace App\Http\Controllers\Org\Asset;
 
 use App\Http\Concerns\ResolvesCurrentOrg;
-// use App\Http\Controllers\Controller;
+use App\Http\Concerns\StoresAttachments;
 use Illuminate\Routing\Controller;
-
 use App\Models\Asset;
+use App\Models\AssetAssignmentLog;
 use App\Models\AssetFile;
 use App\Models\AssetImage;
-use App\Models\AssetAssignmentLog;
-use App\Models\AssetLifecycleStatus;
+use App\Models\OrgMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
+/**
+ * Things the organisation owns or looks after (equipment, furniture, land, donated goods...).
+ * Who holds an asset and its condition are kept as a history in asset_assignment_logs:
+ * the active log is the current holder; handing over closes it and starts a new one.
+ */
 class AssetController extends Controller
 {
-    use ResolvesCurrentOrg;
+    use ResolvesCurrentOrg, StoresAttachments;
+
+    private const FILES = ['image' => AssetImage::class, 'file' => AssetFile::class];
+    private const FIELDS = [
+        'name', 'description', 'start_date', 'end_date', 'quantity', 'value_amount', 'inkind_value', 'privacy_setup_id',
+    ];
 
     public function __construct()
     {
-        $this->middleware('org.permission:asset.read')->only(['index', 'show']);
+        $this->middleware('org.permission:asset.read')->only(['index', 'show', 'getAssetDetails']);
         $this->middleware('org.permission:asset.create')->only(['create', 'store']);
-        $this->middleware('org.permission:asset.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:asset.update')->only(['edit', 'update', 'handover']);
         $this->middleware('org.permission:asset.delete')->only(['destroy']);
     }
-    public function index(Request $request)
+
+    // The current organisation's assets, each with its current holder and condition
+    public function index()
     {
-        $user_id = $request->user()->id;
-        $assets = DB::table('assets as a')
+        $current = $this->currentLogs();
+        $assets = $this->owned(Asset::class)
             ->select(
-                'a.id',
-                'a.user_id',
-                'a.name',
-                'a.description',
-                'a.start_date',
-                'a.end_date',
-                'a.is_long_term',
-                'a.quantity',
-                'a.value_amount',
-                'a.inkind_value',
-                'a.is_tangible',
-                'ps.name as privacy_setup_name',
-                'a.is_active',
+                'assets.*',
+                'privacy_setups.name as privacy_setup_name',
+                'cur.responsible_user_id',
+                'cur.assignment_start_date',
+                'cur.asset_lifecycle_statuses_id',
                 'u.first_name as responsible_user_first_name',
                 'u.last_name as responsible_user_last_name',
-                'aal.assignment_start_date',
-                'aal.assignment_end_date',
-                'als.name as asset_lifecycle_statuses_name',
-                'aal.note'
+                'als.name as asset_lifecycle_statuses_name'
             )
-            ->leftJoin('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
-            ->leftJoin('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
-            ->leftJoin('users as u', 'aal.responsible_user_id', '=', 'u.id')
-            ->leftJoin('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
-            ->where('a.user_id', $user_id)
+            ->leftJoin('privacy_setups', 'assets.privacy_setup_id', '=', 'privacy_setups.id')
+            ->leftJoinSub($current, 'cur', 'cur.asset_id', '=', 'assets.id')
+            ->leftJoin('users as u', 'cur.responsible_user_id', '=', 'u.id')
+            ->leftJoin('asset_lifecycle_statuses as als', 'cur.asset_lifecycle_statuses_id', '=', 'als.id')
+            ->orderBy('assets.name')
             ->get();
-
         return response()->json(['status' => true, 'data' => $assets], 200);
     }
 
-
+    // One asset with its current holder, full history and attachments
     public function getAssetDetails($assetId)
     {
-        $asset = DB::table('assets as a')
-            ->select(
-                'a.id as id',
-                'a.user_id as user_id',
-                'a.name as name',
-                'a.description as description',
-                'a.start_date as start_date',
-                'a.end_date as end_date',
-                'a.is_long_term as is_long_term',
-                'a.quantity as quantity',
-                'a.value_amount as value_amount',
-                'a.inkind_value as inkind_value',
-                'a.is_tangible as is_tangible',
-                'a.privacy_setup_id as privacy_setup_id',
-                'ps.name as privacy_setup_name',
-                'a.is_active as is_active',
-                'u.first_name as responsible_user_first_name',
-                'u.last_name as responsible_user_last_name',
-                'aal.responsible_user_id as responsible_user_id',
-                'aal.asset_lifecycle_statuses_id as asset_lifecycle_statuses_id',
-                'aal.assignment_start_date as assignment_start_date',
-                'aal.assignment_end_date as assignment_end_date',
-                'als.name as asset_lifecycle_statuses_name',
-                'aal.note as note'
-            )
-            ->leftJoin('asset_assignment_logs as aal', 'a.id', '=', 'aal.asset_id')
-            ->leftJoin('privacy_setups as ps', 'a.privacy_setup_id', '=', 'ps.id')
-            ->leftJoin('users as u', 'aal.responsible_user_id', '=', 'u.id')
-            ->leftJoin('asset_lifecycle_statuses as als', 'aal.asset_lifecycle_statuses_id', '=', 'als.id')
-            ->where('a.id', '=', $assetId)
-            ->where('a.user_id', $this->orgIdOrFail()) // only this organisation's assets
+        $asset = $this->owned(Asset::class)
+            ->select('assets.*', 'privacy_setups.name as privacy_setup_name')
+            ->leftJoin('privacy_setups', 'assets.privacy_setup_id', '=', 'privacy_setups.id')
+            ->where('assets.id', $assetId)
             ->first();
         if (!$asset) {
             return response()->json(['status' => false, 'message' => 'Asset not found'], 404);
         }
-        $documents = AssetFile::where('asset_id', $assetId)->get();
-        $images = AssetImage::where('asset_id', $assetId)->get();
-        $images = $images->map(function ($image) {
-            $image->image_url = $image->file_path
-                ? url(Storage::url($image->file_path))
-                : null;
-            return $image;
-        });
-        $documents = $documents->map(function ($document) {
-            $document->document_url = $document->file_path
-                ? url(Storage::url($document->file_path))
-                : null;
-            return $document;
-        });
-        $assetDetails = (array) $asset;
-        $assetDetails['documents'] = $documents;
-        $assetDetails['images'] = $images;
-        return response()->json(['status' => true, 'data' => $assetDetails], 200);
+        $history = AssetAssignmentLog::query()
+            ->where('asset_id', $asset->id)
+            ->leftJoin('users as u', 'asset_assignment_logs.responsible_user_id', '=', 'u.id')
+            ->leftJoin('asset_lifecycle_statuses as als', 'asset_assignment_logs.asset_lifecycle_statuses_id', '=', 'als.id')
+            ->select(
+                'asset_assignment_logs.*',
+                'u.first_name as responsible_user_first_name',
+                'u.last_name as responsible_user_last_name',
+                'als.name as asset_lifecycle_statuses_name'
+            )
+            ->orderByDesc('asset_assignment_logs.is_active')
+            ->orderByDesc('asset_assignment_logs.assignment_start_date')
+            ->orderByDesc('asset_assignment_logs.id')
+            ->get();
+
+        $data = $this->withAttachmentUrls($asset)->toArray();
+        $data['history'] = $history;
+        $data['current'] = $history->firstWhere('is_active', 1) ?? $history->first();
+        return response()->json(['status' => true, 'data' => $data], 200);
     }
+
     public function show($id)
     {
-        $asset = $this->owned(Asset::class)->with(['assignmentLogs', 'documents', 'images'])->find($id);
-        if (!$asset) {
-            return response()->json(['message' => 'Asset not found.'], 404);
-        }
-        $asset->images = $asset->images->map(function ($image) {
-            $image->image_url = $image->file_path
-                ? url(Storage::url($image->file_path))
-                : null;
-            return $image;
-        });
-        $asset->documents = $asset->documents->map(function ($document) {
-            $document->document_url = $document->file_path
-                ? url(Storage::url($document->file_path))
-                : null;
-            return $document;
-        });
-        return response()->json($asset);
+        return $this->getAssetDetails($id);
     }
 
     public function store(Request $request)
     {
-        // The organisation always comes from the session, never from the form
-        $request->merge(['user_id' => $this->orgIdOrFail()]);
-
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'is_long_term' => 'nullable|boolean',
-            'quantity' => 'nullable|integer',
-            'value_amount' => 'nullable|numeric',
-            'inkind_value' => 'nullable|numeric',
-            'is_tangible' => 'nullable|boolean',
-            'privacy_setup_id' => 'nullable|integer',
-            'is_active' => 'nullable|boolean',
-            'responsible_user_id' => 'nullable|integer',
-            'assignment_start_date' => 'nullable|date',
-            'assignment_end_date' => 'nullable|date',
-            'asset_lifecycle_statuses_id' => 'nullable|integer',
-            'note' => 'nullable|string',
-        ]);
+        $validator = Validator::make($request->all(), $this->rules() + $this->handoverRules());
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
+        }
+        if ($error = $this->holderError($request->responsible_user_id)) {
+            return $error;
+        }
         DB::beginTransaction();
         try {
-            $asset = Asset::create($validated);
-            AssetAssignmentLog::create([
-                'asset_id' => $asset->id,
-                'responsible_user_id' => $validated['responsible_user_id'],
-                'assignment_start_date' => $validated['assignment_start_date'],
-                'assignment_end_date' => $validated['assignment_end_date'],
-                'asset_lifecycle_statuses_id' => $validated['asset_lifecycle_statuses_id'],
-                'note' => $validated['note'],
-                'is_active' => $validated['is_active']
-            ]);
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/asset/file',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-                    AssetFile::create([
-                        'asset_id' => $asset->id,
-                        'file_path' => $documentPath,
-                        'file_name' => $document->getClientOriginalName(),
-                        'mime_type' => $document->getClientMimeType(),
-                        'file_size' => $document->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
+            $asset = new Asset($this->values($request));
+            $asset->user_id = $this->orgIdOrFail(); // always the current organisation
+            $asset->save();
+            // The first holder / condition, if given
+            if ($request->filled('responsible_user_id') || $request->filled('asset_lifecycle_statuses_id')) {
+                $this->startLog($asset, $request);
             }
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/asset/image',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-                    AssetImage::create([
-                        'asset_id' => $asset->id,
-                        'file_path' => $imagePath,
-                        'file_name' => $image->getClientOriginalName(),
-                        'mime_type' => $image->getClientMimeType(),
-                        'file_size' => $image->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
+            $this->saveAttachments($request, $asset, self::FILES, 'asset_id', 'org/asset');
             DB::commit();
-            return response()->json([
-                'status' => true,
-                'message' => 'Asset created successfully.',
-            ], 200);
+            return response()->json(['status' => true, 'message' => 'Asset created successfully.', 'data' => $asset], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error creating asset: ' . $e->getMessage());
             return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
         }
     }
 
     public function update(Request $request, $id)
     {
-        // The organisation always comes from the session, never from the form
-        $request->merge(['user_id' => $this->orgIdOrFail()]);
-
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'is_long_term' => 'nullable|boolean',
-            'quantity' => 'nullable|integer',
-            'value_amount' => 'nullable|numeric',
-            'inkind_value' => 'nullable|numeric',
-            'is_tangible' => 'nullable|boolean',
-            'privacy_setup_id' => 'nullable|integer',
-            'is_active' => 'nullable|boolean',
-            'responsible_user_id' => 'nullable|integer',
-            'assignment_start_date' => 'nullable|date',
-            'assignment_end_date' => 'nullable|date',
-            'asset_lifecycle_statuses_id' => 'nullable|integer',
-            'note' => 'nullable|string',
-        ]);
-        DB::beginTransaction();
-        try {
-            $asset = $this->owned(Asset::class)->findOrFail($id);
-            // dd(vars: $validated);exit;
-            $asset->update($validated);
-            $assetAssignmentLog = AssetAssignmentLog::where('asset_id', $asset->id)->first();
-            if ($assetAssignmentLog) {
-                $assetAssignmentLog->update([
-                    'responsible_user_id' => $validated['responsible_user_id'],
-                    'assignment_start_date' => $validated['assignment_start_date'],
-                    'assignment_end_date' => $validated['assignment_end_date'],
-                    'asset_lifecycle_statuses_id' => $validated['asset_lifecycle_statuses_id'],
-                    'note' => $validated['note'],
-                    'is_active' => $validated['is_active']
-                ]);
-            } else {
-                AssetAssignmentLog::create([
-                    'asset_id' => $asset->id,
-                    'responsible_user_id' => $validated['responsible_user_id'],
-                    'assignment_start_date' => $validated['assignment_start_date'],
-                    'assignment_end_date' => $validated['assignment_end_date'],
-                    'asset_lifecycle_statuses_id' => $validated['asset_lifecycle_statuses_id'],
-                    'note' => $validated['note'],
-                    'is_active' => $validated['is_active']
-                ]);
-            }
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/asset/file',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-                    AssetFile::create([
-                        'asset_id' => $asset->id,
-                        'file_path' => $documentPath,
-                        'file_name' => $document->getClientOriginalName(),
-                        'mime_type' => $document->getClientMimeType(),
-                        'file_size' => $document->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/asset/image',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-                    AssetImage::create([
-                        'asset_id' => $asset->id,
-                        'file_path' => $imagePath,
-                        'file_name' => $image->getClientOriginalName(),
-                        'mime_type' => $image->getClientMimeType(),
-                        'file_size' => $image->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            DB::commit();
-            return response()->json([
-                'status' => true,
-                'message' => 'Asset updated successfully.',
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
+        $validator = Validator::make($request->all(), $this->rules());
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
         }
+        $asset = $this->owned(Asset::class)->find($id);
+        if (!$asset) {
+            return response()->json(['status' => false, 'message' => 'Asset not found'], 404);
+        }
+        $asset->update($this->values($request));
+        $this->saveAttachments($request, $asset, self::FILES, 'asset_id', 'org/asset');
+        return response()->json(['status' => true, 'message' => 'Asset updated successfully.', 'data' => $asset], 200);
     }
+
+    /**
+     * Give the asset to someone (or back to the organisation) and/or record its condition.
+     * The current record is closed on the handover date and a new one starts.
+     */
+    public function handover(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), $this->handoverRules());
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
+        }
+        $asset = $this->owned(Asset::class)->find($id);
+        if (!$asset) {
+            return response()->json(['status' => false, 'message' => 'Asset not found'], 404);
+        }
+        if ($error = $this->holderError($request->responsible_user_id)) {
+            return $error;
+        }
+        DB::transaction(function () use ($asset, $request) {
+            $date = $request->assignment_start_date ?: now()->toDateString();
+            AssetAssignmentLog::where('asset_id', $asset->id)->where('is_active', 1)
+                ->update(['is_active' => 0, 'assignment_end_date' => $date]);
+            $this->startLog($asset, $request);
+        });
+        return response()->json(['status' => true, 'message' => 'Handover saved.'], 201);
+    }
+
     public function destroy($id)
     {
-        DB::beginTransaction();
-        try {
-            $asset = $this->owned(Asset::class)->findOrFail($id);
-            AssetAssignmentLog::where('asset_id', $asset->id)->delete();
-            $asset->delete();
-            DB::commit();
-            return response()->json([
-                'status' => true,
-                'message' => 'Asset deleted successfully.',
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
+        $asset = $this->owned(Asset::class)->find($id);
+        if (!$asset) {
+            return response()->json(['status' => false, 'message' => 'Asset not found'], 404);
         }
+        DB::transaction(function () use ($asset) {
+            AssetAssignmentLog::where('asset_id', $asset->id)->delete();
+            $this->deleteAttachments($asset);
+            $asset->delete();
+        });
+        return response()->json(['status' => true, 'message' => 'Asset deleted successfully.'], 200);
+    }
+
+    // Latest active holder record per asset (or the latest record if none is active)
+    private function currentLogs()
+    {
+        return DB::table('asset_assignment_logs as l')
+            ->select('l.asset_id', 'l.responsible_user_id', 'l.assignment_start_date', 'l.asset_lifecycle_statuses_id')
+            ->whereRaw('l.id = (select l2.id from asset_assignment_logs l2 where l2.asset_id = l.asset_id order by l2.is_active desc, l2.id desc limit 1)');
+    }
+
+    private function startLog(Asset $asset, Request $request): void
+    {
+        AssetAssignmentLog::create([
+            'asset_id' => $asset->id,
+            'responsible_user_id' => $request->responsible_user_id ?: null,
+            'assignment_start_date' => $request->assignment_start_date ?: now()->toDateString(),
+            'assignment_end_date' => null,
+            'asset_lifecycle_statuses_id' => $request->asset_lifecycle_statuses_id ?: null,
+            'note' => $request->note,
+            'is_active' => 1,
+        ]);
+    }
+
+    private function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:255',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'is_long_term' => 'nullable|boolean',
+            'quantity' => 'nullable|integer|min:0|max:1000000',
+            'value_amount' => 'nullable|numeric|min:0|max:9999999999999',
+            'inkind_value' => 'nullable|numeric|min:0|max:9999999999999',
+            'is_tangible' => 'nullable|boolean',
+            'privacy_setup_id' => 'nullable|exists:privacy_setups,id',
+            'is_active' => 'nullable|boolean',
+        ] + $this->attachmentRules();
+    }
+
+    private function handoverRules(): array
+    {
+        return [
+            'responsible_user_id' => 'nullable|integer|exists:users,id',
+            'assignment_start_date' => 'nullable|date',
+            'asset_lifecycle_statuses_id' => 'nullable|exists:asset_lifecycle_statuses,id',
+            'note' => 'nullable|string|max:255',
+        ];
+    }
+
+    private function values(Request $request): array
+    {
+        $values = collect(self::FIELDS)->mapWithKeys(fn ($f) => [$f => $request->input($f)])->all();
+        $values['quantity'] = (int) ($request->input('quantity') ?: 1);
+        $values['is_long_term'] = $request->boolean('is_long_term');
+        $values['is_tangible'] = $request->has('is_tangible') ? $request->boolean('is_tangible') : true;
+        $values['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
+        return $values;
+    }
+
+    // Only members of this organisation can hold its assets (empty = kept by the organisation)
+    private function holderError($userId)
+    {
+        if (!$userId) return null;
+        $isMember = OrgMember::where('org_type_user_id', $this->orgIdOrFail())
+            ->where('individual_type_user_id', $userId)
+            ->exists();
+        return $isMember ? null : response()->json([
+            'status' => false,
+            'message' => 'This person is not a member of your organisation.',
+        ], 422);
     }
 }

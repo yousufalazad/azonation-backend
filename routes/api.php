@@ -516,6 +516,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [AssetController::class, 'index']);
         Route::post('/', [AssetController::class, 'store']);
         Route::post('/{id}', [AssetController::class, 'update']);
+        Route::post('/{id}/handover', [AssetController::class, 'handover']);
         Route::delete('/{id}', [AssetController::class, 'destroy']);
     });
     Route::group(['prefix' => 'privacy-setups'], function () {
