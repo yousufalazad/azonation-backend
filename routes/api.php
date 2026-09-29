@@ -102,9 +102,6 @@ use App\Http\Controllers\SuperAdmin\Financial\Storage\EverydayStorageBillingCont
 use App\Http\Controllers\SuperAdmin\PaymentGateway\StripeController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
-Route::get('/test', function () {
-    return response()->json(['status' => 'Laravel is running']);
-});
 
 use App\Http\Controllers\Role\RoleController;
 use App\Http\Controllers\Role\PermissionController;
@@ -125,20 +122,27 @@ Route::middleware('auth:sanctum')->group(function () {
 // routes/api.php
 
 
-Route::get('permissions', [PermissionController::class,'index']);
-Route::post('permissions', [PermissionController::class,'store']);
-Route::put('permissions/{id}', [PermissionController::class,'update']);
-Route::delete('permissions/{id}', [PermissionController::class,'destroy']);
+// Roles and permissions are shared by every organisation:
+// anyone signed in may read them, only Super Admins may change them.
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('permissions', [PermissionController::class, 'index']);
+    Route::get('roles', [RoleController::class, 'index']);
+    Route::get('roles-permissions', [RoleController::class, 'permissions']);
+});
 
-Route::get('roles', [RoleController::class,'index']);
-Route::post('roles', [RoleController::class,'store']);
-Route::put('roles/{id}', [RoleController::class,'update']);
-Route::delete('roles/{id}', [RoleController::class,'destroy']);
+Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
+    Route::post('permissions', [PermissionController::class, 'store']);
+    Route::put('permissions/{id}', [PermissionController::class, 'update']);
+    Route::delete('permissions/{id}', [PermissionController::class, 'destroy']);
 
-Route::get('roles-permissions', [RoleController::class,'permissions']);
+    Route::post('roles', [RoleController::class, 'store']);
+    Route::put('roles/{id}', [RoleController::class, 'update']);
+    Route::delete('roles/{id}', [RoleController::class, 'destroy']);
+
+    Route::put('/roles/{role}/permissions', [UserRoleController::class, 'updateRolePermissions']);
+});
 
 Route::middleware('auth:sanctum')->group(function(){
-    Route::put('/roles/{role}/permissions', [UserRoleController::class, 'updateRolePermissions']);
     Route::get('/users', [UserRoleController::class, 'getUsers']); // list users with roles
     Route::get('/org-members-users/{orgId}', [UserRoleController::class, 'getOrgMemberList']); // list org members
     Route::put('/users/{user}/roles', [UserRoleController::class, 'assignRoles']); // assign roles
@@ -151,23 +155,25 @@ Route::middleware('auth:sanctum')->group(function(){
 //Auth
 Route::post('login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
-Route::post('register', [AuthController::class, 'register']);
+Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
 
 Route::post('/oauth/google/complete', [SocialAuthController::class, 'completeProfile'])->middleware('throttle:10,1');
 Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 Route::get('/org/switch', [AuthController::class, 'switchOrg'])->middleware('auth:sanctum');
 
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode']);
-Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode']);
-Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode'])->middleware('throttle:5,1');
+Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode'])->middleware('throttle:10,1');
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->middleware('throttle:10,1');
 
 
-// ----------------------- Need to separate only index outside auth --------------------
+// Countries: the list is public (sign-up needs it), changes are Super Admin only
 Route::group(['prefix' => 'countries'], function () {
     Route::get('/', [CountryController::class, 'index']);
-    Route::post('/', [CountryController::class, 'store']);
-    Route::put('{id}', [CountryController::class, 'update']);
-    Route::delete('{id}', [CountryController::class, 'destroy']);
+    Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
+        Route::post('/', [CountryController::class, 'store']);
+        Route::put('{id}', [CountryController::class, 'update']);
+        Route::delete('{id}', [CountryController::class, 'destroy']);
+    });
 });
 
 Route::middleware('auth:sanctum')->group(function () {
