@@ -1,108 +1,29 @@
 <?php
 namespace App\Http\Controllers\Org\Project;
 
+use App\Http\Concerns\ManagesAttendance;
 use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Models\Project;
-// use App\Http\Controllers\Controller;
+use App\Models\ProjectAttendance;
 use Illuminate\Routing\Controller;
 
-use App\Models\ProjectAttendance;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-
+/**
+ * Members' attendance at a project: status (Present, Late, Absent...) and how they
+ * attended (In Person, Online...). The logic is shared in ManagesAttendance.
+ */
 class ProjectAttendanceController extends Controller
 {
-    use ResolvesCurrentOrg;
+    use ResolvesCurrentOrg, ManagesAttendance;
 
     public function __construct()
     {
         $this->middleware('org.permission:project-attendance.read')->only(['index', 'show']);
-        $this->middleware('org.permission:project-attendance.create')->only(['create', 'store']);
+        $this->middleware('org.permission:project-attendance.create')->only(['create', 'store', 'bulkStore']);
         $this->middleware('org.permission:project-attendance.update')->only(['edit', 'update']);
         $this->middleware('org.permission:project-attendance.delete')->only(['destroy']);
     }
-    public function index()
-    {
-        $projectAttendance = $this->ownedVia(ProjectAttendance::class, 'project_id', Project::class)->select('project_attendances.*', 'users.first_name as user_first_name', 'users.last_name as user_last_name', 'attendance_types.name as attendance_types_name')
-            ->leftJoin('users', 'project_attendances.user_id', '=', 'users.id')
-            ->leftJoin('attendance_types', 'project_attendances.attendance_type_id', '=', 'attendance_types.id')
-            ->get();
-        return response()->json(['status' => true, 'data' => $projectAttendance], 200);
-    }
-    public function create() {}
-    public function store(Request $request)
-    {
-        // The project must belong to this organisation
-        $this->ensureOwnedParent(Project::class, $request->input('project_id'));
 
-        $validator = Validator::make($request->all(), [
-            'project_id' => 'required',
-            'user_id' => 'nullable',
-            'attendance_type_id' => 'nullable',
-            'time' => 'nullable',
-            'note' => 'nullable',
-            'is_active' => 'nullable',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-        try {
-            Log::info('Meeting Attendance data: ', ['attendance_type_id' => $request->attendance_type_id, 'user_id' => $request->user_id]);
-            $projectAttendances = ProjectAttendance::create([
-                'project_id' => $request->project_id,
-                'user_id' => $request->user_id,
-                'attendance_type_id' => $request->attendance_type_id,
-                'time' => $request->time,
-                'note' => $request->note,
-                'is_active' => $request->is_active,
-            ]);
-            return response()->json(['status' => true, 'data' => $projectAttendances, 'message' => 'Meeting Attendance created successfully.'], 201);
-        } catch (\Exception $e) {
-            Log::error('Error creating Country: ' . $e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Failed to create Meeting Attendance.'], 500);
-        }
-    }
-    public function show(ProjectAttendance $projectAttendance) {}
-    public function edit(ProjectAttendance $projectAttendance) {}
-    public function update(Request $request, $id)
-    {
-        // The project must belong to this organisation
-        if ($request->has('project_id')) $this->ensureOwnedParent(Project::class, $request->input('project_id'));
-
-        $validator = Validator::make($request->all(), [
-            'project_id' => 'required',
-            'user_id' => 'nullable',
-            'attendance_type_id' => 'nullable',
-            'time' => 'nullable',
-            'note' => 'nullable',
-            'is_active' => 'nullable',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-        $projectAttendances = $this->ownedVia(ProjectAttendance::class, 'project_id', Project::class)->find($id);
-        if (!$projectAttendances) {
-            return response()->json(['status' => false, 'message' => 'Meeting Attendance not found.'], 404);
-        }
-        $projectAttendances->update([
-            'project_id' => $request->project_id,
-            'user_id' => $request->user_id,
-            'attendance_type_id' => $request->attendance_type_id,
-            'time' => $request->time,
-            'note' => $request->note,
-            'is_active' => $request->is_active,
-        ]);
-        return response()->json(['status' => true, 'data' => $projectAttendances, 'message' => 'Meeting Attendance updated successfully.'], 200);
-    }
-    public function destroy($id)
-    {
-        $projectAttendance = $this->ownedVia(ProjectAttendance::class, 'project_id', Project::class)->find($id);
-        if (!$projectAttendance) {
-            return response()->json(['status' => false, 'message' => 'Meeting Attendance member not found.'], 404);
-        }
-        $projectAttendance->delete();
-        return response()->json(['status' => true, 'message' => 'Meeting Attendance deleted successfully.'], 200);
-    }
+    protected function attendanceModel(): string { return ProjectAttendance::class; }
+    protected function parentModel(): string { return Project::class; }
+    protected function parentKey(): string { return 'project_id'; }
 }

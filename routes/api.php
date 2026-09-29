@@ -480,13 +480,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProjectController::class, 'index']);
         Route::get('/{projectId}', [ProjectController::class, 'show']);
         Route::post('/', [ProjectController::class, 'store']);
-        Route::post('/{userId}', [ProjectController::class, 'update']);
+        Route::post('/{id}', [ProjectController::class, 'update']);
         Route::delete('/{id}', [ProjectController::class, 'destroy']);
     });
     Route::group(['prefix' => 'project-attendances'], function () {
         Route::get('/', [ProjectAttendanceController::class, 'index']);
         Route::get('/{id}', [ProjectAttendanceController::class, 'show']);
         Route::post('/', [ProjectAttendanceController::class, 'store']);
+        Route::post('/bulk', [ProjectAttendanceController::class, 'bulkStore']);
         Route::put('/{id}', [ProjectAttendanceController::class, 'update']);
         Route::delete('/{id}', [ProjectAttendanceController::class, 'destroy']);
     });

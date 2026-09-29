@@ -1,19 +1,18 @@
 <?php
 namespace App\Http\Controllers\Org\Project;
 
+use App\Http\Concerns\ManagesGuestAttendance;
 use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Models\Project;
-// use App\Http\Controllers\Controller;
+use App\Models\ProjectGuestAttendance;
 use Illuminate\Routing\Controller;
 
-use App\Models\ProjectGuestAttendance;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-
+/**
+ * Guests (people who are not members) at a project. The logic is shared in ManagesGuestAttendance.
+ */
 class ProjectGuestAttendanceController extends Controller
 {
-    use ResolvesCurrentOrg;
+    use ResolvesCurrentOrg, ManagesGuestAttendance;
 
     public function __construct()
     {
@@ -22,93 +21,8 @@ class ProjectGuestAttendanceController extends Controller
         $this->middleware('org.permission:project-guest-attendance.update')->only(['edit', 'update']);
         $this->middleware('org.permission:project-guest-attendance.delete')->only(['destroy']);
     }
-    public function index()
-    {
-        $projectAttendance = $this->ownedVia(ProjectGuestAttendance::class, 'project_id', Project::class)->select('project_guest_attendances.*', 'attendance_types.name as attendance_types_name')
-            ->leftJoin('attendance_types', 'project_guest_attendances.attendance_type_id', '=', 'attendance_types.id')
-            ->get();
-        return response()->json(['status' => true, 'data' => $projectAttendance], 200);
-    }
-    public function create() {}
-    public function store(Request $request)
-    {
-        // The project must belong to this organisation
-        $this->ensureOwnedParent(Project::class, $request->input('project_id'));
 
-        $validator = Validator::make($request->all(), [
-            'project_id' => 'required',
-            'guest_name' => 'required',
-            'about_guest' => 'nullable',
-            'attendance_type_id' => 'nullable',
-            'date' => 'nullable',
-            'time' => 'nullable',
-            'note' => 'nullable',
-            'is_active' => 'nullable',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-        try {
-            Log::info('project Attendance data: ', ['attendance_type_id' => $request->attendance_type_id, 'user_id' => $request->user_id]);
-            $projectAttendance = ProjectGuestAttendance::create([
-                'project_id' => $request->project_id,
-                'guest_name' => $request->guest_name,
-                'about_guest' => $request->about_guest,
-                'attendance_type_id' => $request->attendance_type_id,
-                'date' => $request->date,
-                'time' => $request->time,
-                'note' => $request->note,
-                'is_active' => $request->is_active,
-            ]);
-            return response()->json(['status' => true, 'data' => $projectAttendance, 'message' => 'project Attendance created successfully.'], 201);
-        } catch (\Exception $e) {
-            Log::error('Error creating Country: ' . $e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Failed to create project Attendance.'], 500);
-        }
-    }
-    public function show(ProjectGuestAttendance $guestProjectAttendance) {}
-    public function edit(ProjectGuestAttendance $guestProjectAttendance) {}
-    public function update(Request $request, $id)
-    {
-        // The project must belong to this organisation
-        if ($request->has('project_id')) $this->ensureOwnedParent(Project::class, $request->input('project_id'));
-
-        $validator = Validator::make($request->all(), [
-            'project_id' => 'required',
-            'guest_name' => 'required',
-            'about_guest' => 'nullable',
-            'attendance_type_id' => 'nullable',
-            'date' => 'nullable',
-            'time' => 'nullable',
-            'note' => 'nullable',
-            'is_active' => 'nullable',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-        $projectAttendance = $this->ownedVia(ProjectGuestAttendance::class, 'project_id', Project::class)->find($id);
-        if (!$projectAttendance) {
-            return response()->json(['status' => false, 'message' => 'project Attendance not found.'], 404);
-        }
-        $projectAttendance->update([
-            'project_id' => $request->project_id,
-            'guest_name' => $request->guest_name,
-            'about_guest' => $request->about_guest,
-            'attendance_type_id' => $request->attendance_type_id,
-            'date' => $request->date,
-            'time' => $request->time,
-            'note' => $request->note,
-            'is_active' => $request->is_active,
-        ]);
-        return response()->json(['status' => true, 'data' => $projectAttendance, 'message' => 'project Attendance updated successfully.'], 200);
-    }
-    public function destroy($id)
-    {
-        $projectAttendance = $this->ownedVia(ProjectGuestAttendance::class, 'project_id', Project::class)->find($id);
-        if (!$projectAttendance) {
-            return response()->json(['status' => false, 'message' => 'project Attendance member not found.'], 404);
-        }
-        $projectAttendance->delete();
-        return response()->json(['status' => true, 'message' => 'project Attendance deleted successfully.'], 200);
-    }
+    protected function guestModel(): string { return ProjectGuestAttendance::class; }
+    protected function parentModel(): string { return Project::class; }
+    protected function parentKey(): string { return 'project_id'; }
 }
