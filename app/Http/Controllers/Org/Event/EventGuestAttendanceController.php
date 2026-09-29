@@ -1,19 +1,18 @@
 <?php
 namespace App\Http\Controllers\Org\Event;
 
+use App\Http\Concerns\ManagesGuestAttendance;
 use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Models\Event;
-// use App\Http\Controllers\Controller;
+use App\Models\EventGuestAttendance;
 use Illuminate\Routing\Controller;
 
-use App\Models\EventGuestAttendance;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-
+/**
+ * Guests (people who are not members) at a event. The logic is shared in ManagesGuestAttendance.
+ */
 class EventGuestAttendanceController extends Controller
 {
-    use ResolvesCurrentOrg;
+    use ResolvesCurrentOrg, ManagesGuestAttendance;
 
     public function __construct()
     {
@@ -22,93 +21,8 @@ class EventGuestAttendanceController extends Controller
         $this->middleware('org.permission:event-guest-attendance.update')->only(['edit', 'update']);
         $this->middleware('org.permission:event-guest-attendance.delete')->only(['destroy']);
     }
-    public function index()
-    {
-        $eventAttendance = $this->ownedVia(EventGuestAttendance::class, 'event_id', Event::class)->select('event_guest_attendances.*', 'attendance_types.name as attendance_types_name')
-            ->leftJoin('attendance_types', 'event_guest_attendances.attendance_type_id', '=', 'attendance_types.id')
-            ->get();
-        return response()->json(['status' => true, 'data' => $eventAttendance], 200);
-    }
-    public function create() {}
-    public function store(Request $request)
-    {
-        // The event must belong to this organisation
-        $this->ensureOwnedParent(Event::class, $request->input('event_id'));
 
-        $validator = Validator::make($request->all(), [
-            'event_id' => 'required',
-            'guest_name' => 'required',
-            'about_guest' => 'nullable',
-            'attendance_type_id' => 'nullable',
-            'date' => 'nullable',
-            'time' => 'nullable',
-            'note' => 'nullable',
-            'is_active' => 'nullable',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-        try {
-            Log::info('Event Attendance data: ', ['attendance_type_id' => $request->attendance_type_id, 'user_id' => $request->user_id]);
-            $eventAttendance = EventGuestAttendance::create([
-                'event_id' => $request->event_id,
-                'guest_name' => $request->guest_name,
-                'about_guest' => $request->about_guest,
-                'attendance_type_id' => $request->attendance_type_id,
-                'date' => $request->date,
-                'time' => $request->time,
-                'note' => $request->note,
-                'is_active' => $request->is_active,
-            ]);
-            return response()->json(['status' => true, 'data' => $eventAttendance, 'message' => 'Event Attendance created successfully.'], 201);
-        } catch (\Exception $e) {
-            Log::error('Error creating Country: ' . $e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Failed to create Event Attendance.'], 500);
-        }
-    }
-    public function show(EventGuestAttendance $guesteventAttendance) {}
-    public function edit(EventGuestAttendance $guesteventAttendance) {}
-    public function update(Request $request, $id)
-    {
-        // The event must belong to this organisation
-        if ($request->has('event_id')) $this->ensureOwnedParent(Event::class, $request->input('event_id'));
-
-        $validator = Validator::make($request->all(), [
-            'event_id' => 'required',
-            'guest_name' => 'required',
-            'about_guest' => 'nullable',
-            'attendance_type_id' => 'nullable',
-            'date' => 'nullable',
-            'time' => 'nullable',
-            'note' => 'nullable',
-            'is_active' => 'nullable',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-        $eventAttendance = $this->ownedVia(EventGuestAttendance::class, 'event_id', Event::class)->find($id);
-        if (!$eventAttendance) {
-            return response()->json(['status' => false, 'message' => 'Event Attendance not found.'], 404);
-        }
-        $eventAttendance->update([
-            'event_id' => $request->event_id,
-            'guest_name' => $request->guest_name,
-            'about_guest' => $request->about_guest,
-            'attendance_type_id' => $request->attendance_type_id,
-            'date' => $request->date,
-            'time' => $request->time,
-            'note' => $request->note,
-            'is_active' => $request->is_active,
-        ]);
-        return response()->json(['status' => true, 'data' => $eventAttendance, 'message' => 'Event Attendance updated successfully.'], 200);
-    }
-    public function destroy($id)
-    {
-        $eventAttendance = $this->ownedVia(EventGuestAttendance::class, 'event_id', Event::class)->find($id);
-        if (!$eventAttendance) {
-            return response()->json(['status' => false, 'message' => 'Event Attendance member not found.'], 404);
-        }
-        $eventAttendance->delete();
-        return response()->json(['status' => true, 'message' => 'Event Attendance deleted successfully.'], 200);
-    }
+    protected function guestModel(): string { return EventGuestAttendance::class; }
+    protected function parentModel(): string { return Event::class; }
+    protected function parentKey(): string { return 'event_id'; }
 }

@@ -458,6 +458,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [EventAttendanceController::class, 'index']);
         Route::get('/{id}', [EventAttendanceController::class, 'show']);
         Route::post('/', [EventAttendanceController::class, 'store']);
+        Route::post('/bulk', [EventAttendanceController::class, 'bulkStore']);
         Route::put('/{id}', [EventAttendanceController::class, 'update']);
         Route::delete('/{id}', [EventAttendanceController::class, 'destroy']);
     });

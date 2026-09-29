@@ -13,6 +13,7 @@ class EventGuestAttendance extends Model
         'guest_name', 
         'about_guest', 
         'attendance_type_id', 
+        'attendance_status_id',
         'date', 
         'time',
         'note', 
