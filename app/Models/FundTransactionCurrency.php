@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-
-class AccountsTransactionCurrency extends Model
+class FundTransactionCurrency extends Model
 {
-    use HasFactory;
+     use HasFactory;
     protected $fillable = ['user_id', 'currency_id', 'is_active'];
 
 

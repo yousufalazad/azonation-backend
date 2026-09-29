@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('accounts_transaction_currencies', function (Blueprint $table) {
+        Schema::create('fund_transaction_currencies', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('user_id')
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('currency_id')
                 ->constrained('currencies')
                 ->cascadeOnDelete()
-                ->comment('Foreign key referencing the currencies table, used for the organisation accounts transaction (not for billing)'); // The currency used for the organisation accounts transaction (not for billing)
+                ->comment('Foreign key referencing the currencies table, used for the organisation fund transaction (not for billing)'); // The currency used for the organisation accounts transaction (not for billing)
 
             $table->boolean(column: 'is_active')->default(value: true); // Indicates whether the transaction currency is active or not
             $table->timestamps();
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('accounts_transaction_currencies');
+        Schema::dropIfExists('fund_transaction_currencies');
     }
 };

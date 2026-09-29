@@ -90,9 +90,8 @@ class AddressController extends Controller
                     ->where('user_id', $userId)
                     ->firstOrFail();
             } else {
-                // ✅ CREATE
-                $address = new Address();
-                $address->user_id = $userId;
+                // ✅ CREATE (one address per user: reuse existing instead of creating a duplicate)
+                $address = Address::firstOrNew(['user_id' => $userId]);
             }
 
             $address->fill([

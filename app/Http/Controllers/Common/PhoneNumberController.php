@@ -30,8 +30,10 @@ class PhoneNumberController extends Controller
         ]);
     }
 
-    public function show($userId)
+    public function show($id)
     {
+        // Always the logged-in user's own record; the URL id is ignored so no one can read another user's phone
+        $userId = Auth::id();
         $PhoneNumber = PhoneNumber::where('phone_numbers.user_id', $userId)
             ->leftJoin('dialing_codes', 'phone_numbers.dialing_code_id', '=', 'dialing_codes.id')
             ->select(
@@ -70,8 +72,8 @@ class PhoneNumberController extends Controller
         try {
             $userId = Auth::id();
 
-            $phoneNumber = new PhoneNumber();
-            $phoneNumber->user_id = $userId;
+            // One phone record per user: reuse the existing one instead of creating a duplicate
+            $phoneNumber = PhoneNumber::firstOrNew(['user_id' => $userId]);
             $phoneNumber->fill($validatedData);
             $phoneNumber->save();
 

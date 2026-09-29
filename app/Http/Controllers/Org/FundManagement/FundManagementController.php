@@ -7,6 +7,8 @@ use Illuminate\Routing\Controller;
 
 use App\Models\FundManagement;
 use App\Models\AccountsTransactionCurrency;
+use App\Models\FundTransactionCurrency;
+
 use App\Models\FundManagementImage;
 use App\Models\FundManagementFile;
 use Illuminate\Http\Request;
@@ -237,13 +239,13 @@ class FundManagementController extends Controller
     {
         try {
             $user_id = Auth::id();
-            $accountsTransactionCurrency = AccountsTransactionCurrency::where('user_id', $user_id)
+            $fundTransactionCurrency = FundTransactionCurrency::where('user_id', $user_id)
                 ->with(['currency'])
                 ->first();
 
             return response()->json([
                 'status' => true,
-                'data' => $accountsTransactionCurrency
+                'data' => $fundTransactionCurrency
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error fetching transaction currency: ' . $e->getMessage());
@@ -265,7 +267,7 @@ class FundManagementController extends Controller
             ]);
 
             // ✅ Optional: check if already exists to avoid duplicate insert
-            $exists = AccountsTransactionCurrency::where('user_id', $user_id)->exists();
+            $exists = FundTransactionCurrency::where('user_id', $user_id)->exists();
 
             if ($exists) {
                 return response()->json([
@@ -276,12 +278,12 @@ class FundManagementController extends Controller
 
             $validatedData['user_id'] = $user_id;
 
-            $accountsTransactionCurrency = AccountsTransactionCurrency::create($validatedData);
+            $fundTransactionCurrency = FundTransactionCurrency::create($validatedData);
 
             return response()->json([
                 'status' => true,
                 'message' => 'Transaction currency created successfully',
-                'data' => $accountsTransactionCurrency
+                'data' => $fundTransactionCurrency
             ], 201);
         } catch (\Exception $e) {
             Log::error('Error creating transaction currency: ' . $e->getMessage());
@@ -301,18 +303,18 @@ class FundManagementController extends Controller
                 'currency_id' => 'required|exists:currencies,id',
                 'is_active' => 'boolean'
             ]);
-            $accountsTransactionCurrency = AccountsTransactionCurrency::where('id', $id)->first();
-            if (!$accountsTransactionCurrency) {
+            $fundTransactionCurrency = FundTransactionCurrency::where('id', $id)->first();
+            if (!$fundTransactionCurrency) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Transaction currency not found.'
                 ], 404);
             }
-            $accountsTransactionCurrency->update($validatedData);
+            $fundTransactionCurrency->update($validatedData);
             return response()->json([
                 'status' => true,
                 'message' => 'Transaction currency updated successfully',
-                'data' => $accountsTransactionCurrency
+                'data' => $fundTransactionCurrency
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error updating transaction currency: ' . $e->getMessage());

@@ -24,12 +24,11 @@ class OrgProfileController extends Controller
             'data' => $data
         ], $status);
     }
-
     public function getLogo()
     {
         $userId = Auth::id();
         $logo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
-        $imageUrl = $logo ? Storage::url($logo->image_path) : null;
+        $imageUrl = $logo ? url(Storage::url($logo->image_path)) : null;
         return response()->json([
             'status' => true,
             'data' => ['image' => $imageUrl]
@@ -71,7 +70,7 @@ class OrgProfileController extends Controller
             $orgLogo->file_size = $fileSize;
             $orgLogo->save();
         }
-        $imageUrl = Storage::url($path);
+        $imageUrl = url(Storage::url($path));
         return response()->json(['status' => true, 'data' => ['image' => $imageUrl]]);
     }
 

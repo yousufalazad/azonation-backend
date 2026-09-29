@@ -25,8 +25,9 @@ class NotificationController extends Controller
             ], 404);
         }
     }
-    public function markAllAsRead($userId)
+    public function markAllAsRead($userId=null)
     {
+        $userId = $userId ?? Auth::id();
         $user = User::find($userId);
         $user->unreadNotifications->markAsRead();
         return response()->json([
@@ -34,8 +35,9 @@ class NotificationController extends Controller
             'message' => 'Notifications marked as read successfully',
         ]);
     }
-    public function markAsRead($userId, $notificationId)
+    public function markAsRead($notificationId, $userId=null)
     {
+        $userId = $userId ?? Auth::id();
         $user = User::find($userId);
         $notification = $user->unreadNotifications()->find($notificationId);
         if ($notification) {

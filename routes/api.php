@@ -30,8 +30,6 @@ use App\Http\Controllers\Ecommerce\Product\ProductController;
 use App\Http\Controllers\Ecommerce\Order\OrderItemController;
 use App\Http\Controllers\Ecommerce\Order\OrderController;
 use App\Http\Controllers\Ecommerce\Order\OrderDetailController;
-use App\Http\Controllers\Org\Accounts\AccountsController;
-use App\Http\Controllers\Org\Accounts\AccountsFundController;
 use App\Http\Controllers\Org\FundManagement\FundManagementController;
 use App\Http\Controllers\Org\FundManagement\FundController;
 use App\Http\Controllers\Org\Asset\AssetController;
@@ -228,23 +226,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/sub-month-bill-calculation', [EverydayMemberCountAndBillingController::class, 'subMonthBillCalculation']);
         Route::get('/current-month-bill-calculation', [EverydayMemberCountAndBillingController::class, 'currentMonthBillCalculation']);
     });
-    // Route::group(['prefix' => 'transactions'], function () {
-    //     Route::get('/', [AccountsController::class, 'index']);
-    //     Route::post('/', [AccountsController::class, 'store']);
-    //     Route::put('/{id}', [AccountsController::class, 'update']);
-    //     Route::delete('/{id}', [AccountsController::class, 'destroy']);
-    // });
-    // Route::group(['prefix' => 'funds'], function () {
-    //     Route::get('/', [AccountsFundController::class, 'index']);
-    //     Route::post('/', [AccountsFundController::class, 'store']);
-    //     Route::put('/{id}', [AccountsFundController::class, 'update']);
-    //     Route::delete('/{id}', [AccountsFundController::class, 'destroy']);
-    // });
-    // Route::group(['prefix' => 'accounts-transaction-currencies'], function () {
-    //     Route::get('/', [AccountsController::class, 'getAccountsTransactionCurrency']);
-    //     Route::post('/', [AccountsController::class, 'storeAccountsTransactionCurrency']);
-    //     Route::put('/{id}', [AccountsController::class, 'updateAccountsTransactionCurrency']);
-    // });
 
     Route::group(['prefix' => 'funds'], function () {
         Route::get('/', [FundController::class, 'index']);
@@ -259,7 +240,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [FundManagementController::class, 'destroy']);
     });
     
-    Route::group(['prefix' => 'accounts-transaction-currencies'], function () {
+    Route::group(['prefix' => 'fund-transaction-currencies'], function () {
         Route::get('/', [FundManagementController::class, 'getTransactionCurrency']);
         Route::post('/', [FundManagementController::class, 'storeTransactionCurrency']);
         Route::put('/{id}', [FundManagementController::class, 'updateTransactionCurrency']);
