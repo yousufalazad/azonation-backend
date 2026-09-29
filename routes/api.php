@@ -76,6 +76,7 @@ use App\Http\Controllers\SuperAdmin\Financial\ReceiptController;
 // Superadmin
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\Settings\AttendanceTypeController;
+use App\Http\Controllers\SuperAdmin\Settings\AttendanceStatusController;
 use App\Http\Controllers\SuperAdmin\Settings\ConductTypeController;
 use App\Http\Controllers\SuperAdmin\Settings\CountryController;
 use App\Http\Controllers\SuperAdmin\Settings\CountryRegionController;
@@ -662,6 +663,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [AttendanceTypeController::class, 'update']);
         Route::delete('/{id}', [AttendanceTypeController::class, 'destroy']);
     });
+    Route::group(['prefix' => 'attendance-statuses'], function () {
+        Route::get('/', [AttendanceStatusController::class, 'index']);
+        Route::post('/', [AttendanceStatusController::class, 'store']);
+        Route::put('/{id}', [AttendanceStatusController::class, 'update']);
+        Route::delete('/{id}', [AttendanceStatusController::class, 'destroy']);
+    });
     Route::group(['prefix' => 'membership-types'], function () {
         Route::get('/', [MembershipTypeController::class, 'index']);
         Route::post('/', [MembershipTypeController::class, 'store']);
@@ -851,6 +858,7 @@ $sharedReads = [
         'SuperAdmin\Financial\Management\ManagementSubscriptionController@managementPackagePrices',
         'SuperAdmin\Financial\Management\ManagementSubscriptionController@managementPriceRate',
         'SuperAdmin\Financial\ReceiptController@orgIndex',
+        'SuperAdmin\Settings\AttendanceStatusController@index',
         'SuperAdmin\Settings\AttendanceTypeController@index',
         'SuperAdmin\Settings\ConductTypeController@index',
         'SuperAdmin\Settings\CountryController@index',
