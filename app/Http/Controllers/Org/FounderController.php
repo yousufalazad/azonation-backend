@@ -207,7 +207,7 @@ class FounderController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to update founder designation.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }

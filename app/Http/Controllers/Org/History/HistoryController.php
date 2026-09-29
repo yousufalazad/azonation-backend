@@ -37,7 +37,7 @@ class HistoryController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to retrieve records.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -193,7 +193,7 @@ class HistoryController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to update record.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -216,7 +216,7 @@ class HistoryController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to delete record.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

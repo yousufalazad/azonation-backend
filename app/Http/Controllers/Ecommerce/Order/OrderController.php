@@ -219,7 +219,7 @@ class OrderController extends Controller
             return response()->json([
                 'status'  => false,
                 'message' => 'Error creating order.',
-                'error'   => $e->getMessage()
+                'error'   => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -236,7 +236,7 @@ class OrderController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Error retrieving order details.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -372,7 +372,7 @@ class OrderController extends Controller
             return response()->json([
                 'status'  => false,
                 'message' => 'Error updating order.',
-                'error'   => $e->getMessage()
+                'error'   => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -384,7 +384,7 @@ class OrderController extends Controller
             $order->delete();
             return response()->json(['status' => true, 'message' => 'Order and associated items deleted successfully.'], 200);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => 'Error deleting order.', 'error' => $e->getMessage()], 500);
+            return response()->json(['status' => false, 'message' => 'Error deleting order.', 'error' => \App\Support\ErrorDetail::for($e)], 500);
         }
     }
 }

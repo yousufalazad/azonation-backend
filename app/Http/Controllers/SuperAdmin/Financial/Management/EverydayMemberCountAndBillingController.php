@@ -27,7 +27,7 @@ class EverydayMemberCountAndBillingController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to retrieve records.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -61,7 +61,7 @@ class EverydayMemberCountAndBillingController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to retrieve record.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -120,7 +120,7 @@ class EverydayMemberCountAndBillingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
-                'message' => $e->getMessage(),
+                'message' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -174,7 +174,7 @@ class EverydayMemberCountAndBillingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -197,7 +197,7 @@ class EverydayMemberCountAndBillingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -220,7 +220,7 @@ class EverydayMemberCountAndBillingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

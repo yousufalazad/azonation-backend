@@ -39,7 +39,7 @@ class ManagementSubscriptionController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Error fetching subscriptions',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -77,7 +77,7 @@ class ManagementSubscriptionController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
-                'message' => $e->getMessage(),
+                'message' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -114,7 +114,7 @@ class ManagementSubscriptionController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
-                'message' => $e->getMessage(),
+                'message' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -145,7 +145,7 @@ class ManagementSubscriptionController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the currency',
-                'message' => $e->getMessage(),
+                'message' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -471,7 +471,7 @@ class ManagementSubscriptionController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

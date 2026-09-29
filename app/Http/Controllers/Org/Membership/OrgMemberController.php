@@ -500,7 +500,7 @@ class OrgMemberController extends Controller
             return response()->json([
                 'status'  => false,
                 'message' => 'An error occurred. Please try again.',
-                'error'   => $e->getMessage()
+                'error'   => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -519,7 +519,7 @@ class OrgMemberController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to delete member.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }

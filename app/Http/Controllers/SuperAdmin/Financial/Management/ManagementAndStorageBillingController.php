@@ -69,7 +69,7 @@ class ManagementAndStorageBillingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while retrieving the user currency.',
-                'details' => $e->getMessage(),
+                'details' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -140,7 +140,7 @@ class ManagementAndStorageBillingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

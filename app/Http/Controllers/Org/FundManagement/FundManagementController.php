@@ -134,7 +134,7 @@ class FundManagementController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while creating the transaction. Please try again.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -292,7 +292,7 @@ class FundManagementController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while creating the transaction currency.',
-                'error' => $e->getMessage() // optional for debugging
+                'error' => \App\Support\ErrorDetail::for($e) // optional for debugging
             ], 500);
         }
     }

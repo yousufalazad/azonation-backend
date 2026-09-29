@@ -41,7 +41,7 @@ class OrgReportController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Error fetching report data',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -76,7 +76,7 @@ class OrgReportController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Error fetching report data',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -124,7 +124,7 @@ class OrgReportController extends Controller
         return response()->json([
             'status' => false,
             'message' => 'Something went wrong.',
-            'error' => $th->getMessage(),
+            'error' => \App\Support\ErrorDetail::for($th),
         ], 500);
     }
 }

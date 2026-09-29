@@ -437,7 +437,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -528,7 +528,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while updating the name',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -557,7 +557,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while updating the last_name',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -586,7 +586,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while updating the name',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -681,7 +681,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'An error occurred while updating the password: ' . $e->getMessage(),
+                'message' => 'An error occurred while updating the password: ' . \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -724,7 +724,7 @@ class AuthController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'message' => 'Logout failed',
-                'error'   => $e->getMessage(),
+                'error'   => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

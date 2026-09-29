@@ -87,7 +87,7 @@ class MeetingAttendanceController extends Controller
             return response()->json([
                 'status'  => false,
                 'message' => 'Failed to save attendance',
-                'error'   => $e->getMessage(),
+                'error'   => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

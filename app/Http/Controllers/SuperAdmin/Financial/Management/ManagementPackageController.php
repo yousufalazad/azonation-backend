@@ -21,7 +21,7 @@ class ManagementPackageController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Error fetching management packages',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }

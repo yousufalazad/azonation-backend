@@ -62,7 +62,7 @@ class MembershipTerminationController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -139,7 +139,7 @@ class MembershipTerminationController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -163,7 +163,7 @@ class MembershipTerminationController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 404);
         }
     }
@@ -214,7 +214,7 @@ class MembershipTerminationController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -237,7 +237,7 @@ class MembershipTerminationController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
