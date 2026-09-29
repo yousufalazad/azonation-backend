@@ -38,7 +38,7 @@ class OrgMemberController extends Controller
 
     public function getOrgAllMemberName(Request $request)
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $getOrgAllMemberName = OrgMember::with(['individual:id,first_name,last_name', 'membershipType',])
             ->where('org_type_user_id', $userId)
             ->where('is_active', '1')
@@ -51,7 +51,7 @@ class OrgMemberController extends Controller
 
     public function index(Request $request)
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
 
         $getOrgAllMembers = OrgMember::with(['individual.phoneNumber', 'membershipStatus', 'membershipType', 'memberProfileImage'])
@@ -74,7 +74,7 @@ class OrgMemberController extends Controller
 
     public function X_index(Request $request)
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
 
         $getOrgAllMembers = OrgMember::with(['individual.phoneNumber', 'membershipType', 'memberProfileImage'])
@@ -101,7 +101,7 @@ class OrgMemberController extends Controller
 
     public function getOrgFormerMembers(Request $request)
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $today = Carbon::today()->toDateString(); // get current date in YYYY-MM-DD format
 
         $getOrgAllMembers = OrgMember::with(['individual', 'membershipType', 'memberProfileImage'])
@@ -141,7 +141,7 @@ class OrgMemberController extends Controller
 
     public function totalOrgMemberCount(Request $request)
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $totalOrgMemberCount = OrgMember::where('org_type_user_id', $userId)->count();
         return response()->json([
             'status' => true,
@@ -151,7 +151,7 @@ class OrgMemberController extends Controller
 
     public function thisYearNewMemberCount(Request $request)
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $thisYearNewMemberCount = OrgMember::where('org_type_user_id', $userId)
             ->whereYear('created_at', date('Y'))
             ->count();
@@ -162,7 +162,7 @@ class OrgMemberController extends Controller
     }
     public function thisMonthNewMemberCount(Request $request)
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $thisMonthNewMemberCount = OrgMember::where('org_type_user_id', $userId)
             ->whereYear('created_at', date('Y'))
             ->whereMonth('created_at', date('m'))
@@ -312,7 +312,7 @@ class OrgMemberController extends Controller
     }
     public function show($id)
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
 
         $member = $this->owned(OrgMember::class, 'org_type_user_id')->with(['individual.phoneNumber', 'membershipStatus', 'membershipType', 'memberProfileImage'])
             ->where('org_type_user_id', $userId)

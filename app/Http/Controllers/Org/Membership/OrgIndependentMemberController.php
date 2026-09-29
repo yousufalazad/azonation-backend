@@ -21,7 +21,7 @@ class OrgIndependentMemberController extends Controller
     {
         Log::info('Inside index');
 
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
 
         $independentMembers = OrgIndependentMember::where('user_id', $userId)
             ->with('image') // assuming 'image' is a hasOne or belongsTo relationship
@@ -68,7 +68,7 @@ class OrgIndependentMemberController extends Controller
             'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        $validatedData['user_id'] = $request->user()->id;
+        $validatedData['user_id'] = $this->orgIdOrFail();
         $independentMember = OrgIndependentMember::create($validatedData);
 
         Log::info("independentMember updated");
@@ -153,7 +153,7 @@ class OrgIndependentMemberController extends Controller
             $path = $image->storeAs('org/independent_member/image', $newFileName, 'public');
             $validatedData['image_path'] = $path;
         }
-        $validatedData['user_id'] = $request->user()->id;
+        $validatedData['user_id'] = $this->orgIdOrFail();
         $independentMember->update($validatedData);
         return response()->json(['status' => true, 'message' => 'independentMember updated successfully.', 'data' => $independentMember]);
     }

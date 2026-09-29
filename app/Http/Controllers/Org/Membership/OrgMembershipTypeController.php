@@ -17,7 +17,7 @@ class OrgMembershipTypeController extends Controller
    
     public function index()
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $orgMembershipTypes = OrgMembershipType::where('org_type_user_id', $userId)->with('membershipType')
             ->orderBy('sort_order')
             ->get();
@@ -51,7 +51,7 @@ class OrgMembershipTypeController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-            $request['org_type_user_id'] = Auth::id();
+            $request['org_type_user_id'] = $this->orgIdOrFail();
 
         $orgMembershipType = OrgMembershipType::create($request->only([
             'org_type_user_id',

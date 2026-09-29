@@ -24,7 +24,7 @@ class FundController extends Controller
     }
     public function index()
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $funds = Fund::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -46,7 +46,7 @@ class FundController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
         }
         try {
-            $userId = Auth::id();
+            $userId = $this->orgIdOrFail();
             $fund = Fund::create([
                 'user_id' => $userId,
                 'name' => $request->name,

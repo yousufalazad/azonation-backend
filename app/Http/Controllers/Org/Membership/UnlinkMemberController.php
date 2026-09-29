@@ -27,7 +27,7 @@ class UnlinkMemberController extends Controller
     {
         Log::info('Inside index');
 
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
 
         $unlinkMembers = UnlinkMember::with(['image', 'membershipStatus', 'membershipType'])
             ->where('user_id', $userId)
@@ -74,7 +74,7 @@ class UnlinkMemberController extends Controller
             'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        $validatedData['user_id'] = $request->user()->id;
+        $validatedData['user_id'] = $this->orgIdOrFail();
         $unlinkMember = UnlinkMember::create($validatedData);
 
         Log::info("unlinkMember updated");
@@ -156,7 +156,7 @@ class UnlinkMemberController extends Controller
             'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        $validatedData['user_id'] = $request->user()->id;
+        $validatedData['user_id'] = $this->orgIdOrFail();
 
         // Handle new image upload
         if ($request->hasFile('image_path')) {

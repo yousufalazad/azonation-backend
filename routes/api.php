@@ -207,7 +207,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
     Route::post('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
     Route::get('/org-profile-data/{userId}', [OrgProfileController::class, 'index']);
-    Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update']);
+    Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update'])->middleware('org.owner');
     Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
     Route::get('/org-profile/logo', [OrgProfileController::class, 'getLogo']);
 
@@ -276,35 +276,35 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-    Route::group(['prefix' => 'histories'], function () {
+    Route::group(['prefix' => 'histories', 'middleware' => 'org.owner'], function () {
         Route::get('/', [HistoryController::class, 'index']);
         Route::get('/{id}', [HistoryController::class, 'show']);
         Route::post('/', [HistoryController::class, 'store']);
         Route::post('/{id}', [HistoryController::class, 'update']);
         Route::delete('/{id}', [HistoryController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'year-plans'], function () {
+    Route::group(['prefix' => 'year-plans', 'middleware' => 'org.owner'], function () {
         Route::get('/', [YearPlanController::class, 'index']);
         Route::get('/{id}', [YearPlanController::class, 'show']);
         Route::post('/', [YearPlanController::class, 'store']);
         Route::post('/{id}', [YearPlanController::class, 'update']);
         Route::delete('/{id}', [YearPlanController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'recognitions'], function () {
+    Route::group(['prefix' => 'recognitions', 'middleware' => 'org.owner'], function () {
         Route::get('/', [RecognitionController::class, 'index']);
         Route::get('/{id}', [RecognitionController::class, 'show']);
         Route::post('/', [RecognitionController::class, 'store']);
         Route::post('/{id}', [RecognitionController::class, 'update']);
         Route::delete('/{id}', [RecognitionController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'strategic-plans'], function () {
+    Route::group(['prefix' => 'strategic-plans', 'middleware' => 'org.owner'], function () {
         Route::get('/', [StrategicPlanController::class, 'index']);
         Route::get('/{id}', [StrategicPlanController::class, 'show']);
         Route::post('/', [StrategicPlanController::class, 'store']);
         Route::post('/{id}', [StrategicPlanController::class, 'update']);
         Route::delete('/{id}', [StrategicPlanController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'success-stories'], function () {
+    Route::group(['prefix' => 'success-stories', 'middleware' => 'org.owner'], function () {
         Route::get('/', [SuccessStoryController::class, 'index']);
         Route::get('/{id}', [SuccessStoryController::class, 'show']);
         Route::post('/', [SuccessStoryController::class, 'store']);
@@ -530,7 +530,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}', [ProjectSummaryController::class, 'update']);
         Route::delete('/{id}', [ProjectSummaryController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'founders'], function () {
+    Route::group(['prefix' => 'founders', 'middleware' => 'org.owner'], function () {
         Route::get('/', [FounderController::class, 'index']);
         Route::post('/', [FounderController::class, 'store']);
         Route::post('/{id}', [FounderController::class, 'update']);
@@ -591,12 +591,12 @@ Route::middleware('auth:sanctum')->group(function () {
     //     Route::get('/checkout-cancel', [StripeController::class, 'checkoutCancel']);
     // });
 
-    Route::group(['prefix' => 'reports'], function () {
+    Route::group(['prefix' => 'reports', 'middleware' => 'org.owner'], function () {
         Route::get('/membership-growth', [OrgReportController::class, 'getMembershipGrowthReport']);
         Route::get('/summary', [OrgReportController::class, 'summary']);
     });
-    Route::get('/reports', [OrgReportController::class, 'getIncomeReport']);
-    Route::get('/org-expense-reports', [OrgReportController::class, 'getExpenseReport']);
+    Route::get('/reports', [OrgReportController::class, 'getIncomeReport'])->middleware('org.owner');
+    Route::get('/org-expense-reports', [OrgReportController::class, 'getExpenseReport'])->middleware('org.owner');
 
 
 

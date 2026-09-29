@@ -158,6 +158,8 @@ class AuthController extends Controller
 
             $data[] = [
                 'org_type_user_id' => $org->org_type_user_id,
+                // Shown when a member manages the organisation
+                'org_name' => DB::table('users')->where('id', $org->org_type_user_id)->value('org_name'),
                 'roles' => $roles,
                 'permissions' => $permissions
             ];

@@ -37,7 +37,7 @@ class MeetingController extends Controller
 
     public function index(Request $request)
     {
-        $user_id = Auth::id();
+        $user_id = $this->orgIdOrFail();
         $meetings = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')
             ->leftJoin('conduct_types', 'meetings.conduct_type_id', '=', 'conduct_types.id')
             ->where('meetings.user_id', $user_id)
@@ -48,7 +48,7 @@ class MeetingController extends Controller
 
     public function orgNextMeeting(Request $request)
     {
-        $user_id = Auth::id();
+        $user_id = $this->orgIdOrFail();
 
         // Ensuring we're comparing against today in the same timezone
         $nextMeeting = Meeting::where('user_id', $user_id)
