@@ -28,7 +28,8 @@ class OfficeDocumentController extends Controller
     public function index()
     {
         try {
-            $officeRecords = OfficeDocument::with(['images', 'documents'])->get();
+            // Only this organisation's documents (used to return every organisation's)
+            $officeRecords = $this->owned(OfficeDocument::class)->with(['images', 'documents'])->get();
             return response()->json([
                 'status' => true,
                 'message' => 'Office documents fetched successfully!',

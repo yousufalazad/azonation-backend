@@ -37,6 +37,8 @@ class OrgAdministratorController extends Controller
 
     public function checkAdministratorExists(Request $request)
     {
+        // Only ever asks about the current organisation
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
         $validated = $request->validate([
             'org_type_user_id' => 'required|integer|exists:users,id',
             'individual_type_user_id' => 'required|integer|exists:users,id',

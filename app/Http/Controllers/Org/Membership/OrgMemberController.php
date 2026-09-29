@@ -205,7 +205,10 @@ class OrgMemberController extends Controller
 
     public function search(Request $request)
     {
-        $query = $request->input('query');
+        // A person directory search: needs at least 3 characters, returns at
+        // most 20 people and only what the screens show (no email or phone)
+        $request->validate(['query' => 'required|string|min:3|max:100']);
+        $query = trim($request->input('query'));
 
         $results = User::where('type', 'individual')
             ->where(function ($q) use ($query) {
@@ -221,24 +224,26 @@ class OrgMemberController extends Controller
             ->leftJoin('dialing_codes', 'dialing_codes.id', '=', 'phone_numbers.dialing_code_id')
             ->with('individualProfileImage')
             ->select(
-                'users.*',
-                'addresses.city',
-                'dialing_codes.dialing_code',
-                'phone_numbers.phone_number'
+                'users.id',
+                'users.azon_id',
+                'users.first_name',
+                'users.last_name',
+                'users.username',
+                'addresses.city'
             )
+            ->distinct()
+            ->limit(20)
             ->get();
 
         if ($results->isEmpty()) {
             return response()->json(['status' => false, 'message' => 'User not found'], 404);
         }
 
-        // Append full image URL to each user
+        // Append full image URL to each user, without the image record itself
         $results->each(function ($user) {
-            if ($user->individualProfileImage) {
-                $user->image_url = $user->individualProfileImage->image_path
-                    ? url(Storage::url($user->individualProfileImage->image_path))
-                    : null;
-            }
+            $path = $user->individualProfileImage?->image_path;
+            $user->image_url = $path ? url(Storage::url($path)) : null;
+            $user->unsetRelation('individualProfileImage');
         });
 
         return response()->json([
@@ -251,6 +256,8 @@ class OrgMemberController extends Controller
     // Check if the individual is already a member of the organization, used in create function on member folder
     public function checkMember(Request $request)
     {
+        // Only ever asks about the current organisation
+        $request->merge(['org_type_user_id' => $this->orgIdOrFail()]);
         $validated = $request->validate([
             'org_type_user_id' => 'required|exists:users,id',
             'individual_type_user_id' => 'required|exists:users,id',
