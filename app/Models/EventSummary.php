@@ -10,7 +10,7 @@ class EventSummary extends Model
     use HasFactory;
 
     protected $fillable = [
-        'org_event_id',
+        'event_id',
         'total_member_attendance',
         'total_guest_attendance',
         'summary',
