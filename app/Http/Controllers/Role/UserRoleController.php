@@ -1,79 +1,77 @@
 <?php
 
-// app/Http/Controllers/Api/UserRoleController.php
 namespace App\Http\Controllers\Role;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 use App\Models\OrgMemberRoleTitle;
 use Illuminate\Support\Facades\DB;
 use App\Models\OrgMember;
-use Illuminate\Support\Facades\Storage;
 
 class UserRoleController extends Controller
 {
-    // Get all users with roles
-    public function getUsers()
+    use ResolvesCurrentOrg;
+
+    private function isSuperAdmin(): bool
     {
-        // optional filter by org_type_user_id
-        $type = request()->query('type') ?? 'individual';
-        $query = User::with('roles');
-        if ($type) {
-            $query->where('type', $type);
+        return request()->user()?->type === 'superadmin';
+    }
+
+    /**
+     * The org a role change applies to: Super Admins may name any org,
+     * an organisation account only itself. Everyone else: null (refuse).
+     */
+    private function managedOrgId(Request $request): ?int
+    {
+        if ($this->isSuperAdmin()) {
+            return (int) $request->input('org_type_user_id') ?: null;
         }
-        $users = $query->get();
-        return response()->json($users);
+        $user = $request->user();
+        return $user?->type === 'organisation' ? (int) $user->id : null;
     }
 
-
-    public function X_getOrgMemberList($userId)
+    private function isActiveMember(int $orgId, int $userId): bool
     {
-        $members = User::with('roles')
-            ->join('org_members', 'users.id', '=', 'org_members.individual_type_user_id')
-            ->where('org_members.org_type_user_id', $userId)
-            // ->where('org_members.is_active', 1)
-            ->select('users.*')
-            ->get();
-
-        return response()->json($members);
+        return OrgMember::where('org_type_user_id', $orgId)
+            ->where('individual_type_user_id', $userId)
+            ->where('is_active', 1)
+            ->exists();
     }
 
-    public function XX_getOrgMemberList($userId)
+    // Users with roles. Super Admins see everyone; an organisation sees only
+    // itself (type=organisation) or its own members (type=individual).
+    public function getUsers(Request $request)
     {
-        $members = User::with('roles')
-            ->whereHas('orgMembers', function ($q) use ($userId) {
-                $q->where('org_type_user_id', $userId)
-                    ->where('is_active', 1);
-            })
-            ->select('id', 'first_name', 'last_name')
-            ->get();
-        return response()->json($members);
-    }
-    public function XXX_getOrgMemberList($orgId)
-    {
+        $type = $request->query('type') ?? 'individual';
+        $query = User::with('roles')->where('type', $type);
 
-        $user = User::find(4);
+        if (!$this->isSuperAdmin()) {
+            $orgId = $this->currentOrgId($request);
+            if (!$orgId) {
+                return response()->json([]);
+            }
+            if ($type === 'organisation') {
+                $query->where('id', $orgId);
+            } else {
+                $query->whereHas('orgMembers', fn ($q) => $q->where('org_type_user_id', $orgId));
+            }
+        }
 
-        dd(
-            $user->roles,
-            $user->getRoleNames(),
-            DB::table('model_has_roles')->where('model_id', 4)->get()
-        );
-        exit;
-        $members = User::with('roles:id,name')
-            ->whereHas('orgMembers', function ($q) use ($orgId) {
-                $q->where('org_type_user_id', $orgId)
-                    ->where('is_active', 1);
-            })
-            ->get(['id', 'first_name', 'last_name']);
-
-        return response()->json($members);
+        return response()->json($query->get());
     }
 
-    public function getOrgMemberList($orgId)
+    // Active members of an organisation with their roles in that organisation
+    public function getOrgMemberList(Request $request, $orgId)
     {
+        $orgId = (int) $orgId;
+        if (!$this->isSuperAdmin() && $orgId !== $this->currentOrgId($request)) {
+            return $this->noOrgResponse();
+        }
+
         $members = User::whereHas('orgMembers', function ($q) use ($orgId) {
             $q->where('org_type_user_id', $orgId)
                 ->where('is_active', 1);
@@ -86,7 +84,8 @@ class UserRoleController extends Controller
 
         return response()->json($members);
     }
-    // Update role permissions
+
+    // Update which permissions a role has (Super Admin only, see routes)
     public function updateRolePermissions(Request $request, $roleId)
     {
         $role = Role::findOrFail($roleId);
@@ -103,21 +102,40 @@ class UserRoleController extends Controller
         ]);
     }
 
-    // Assign roles to a user
+    // Assign roles to a user within one organisation
     public function assignRoles(Request $request, $userId)
     {
-        // dd($request->all());exit;
         $request->validate([
             'roles' => 'nullable|array',
+            'roles.*' => 'string',
             'org_type_user_id' => 'required|integer',
             'org_role_title_id' => 'nullable|integer'
         ]);
 
+        $orgId = $this->managedOrgId($request);
+        if (!$orgId) {
+            return $this->noOrgResponse();
+        }
+
+        $user = User::findOrFail($userId);
+
+        // An organisation can only give roles to its own members
+        if (!$this->isSuperAdmin() && !$this->isActiveMember($orgId, $user->id)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'This person is not a member of your organisation.',
+            ], 422);
+        }
+
+        // The title must be one of this organisation's titles
+        if ($request->org_role_title_id && !\App\Models\OrgRoleTitle::where('id', $request->org_role_title_id)
+            ->where('org_type_user_id', $orgId)->exists()) {
+            return response()->json(['status' => false, 'message' => 'Unknown role title.'], 422);
+        }
+
         DB::beginTransaction();
 
         try {
-            $user = User::findOrFail($userId);
-
             $roles = collect($request->roles ?? [])
                 ->map(fn($r) => trim($r))
                 ->toArray();
@@ -126,45 +144,32 @@ class UserRoleController extends Controller
                 ->where('guard_name', 'web')
                 ->get();
 
-            // Sync roles manually with org_type_user_id
-            $existingRoleIds = DB::table('model_has_roles')
-                ->where('model_type', User::class)
-                ->where('model_id', $user->id)
-                ->pluck('role_id')
-                ->toArray();
-
             $newRoleIds = $roleModels->pluck('id')->toArray();
 
-            // Remove old roles not in new
-            $toDelete = array_diff($existingRoleIds, $newRoleIds);
-            if ($toDelete) {
-                DB::table('model_has_roles')
-                    ->whereIn('role_id', $toDelete)
-                    ->where('model_type', User::class)
-                    ->where('model_id', $user->id)
-                    ->delete();
-            }
+            // Replace this user's roles in THIS organisation only
+            // (roles in other organisations are left untouched)
+            DB::table('model_has_roles')
+                ->where('model_type', User::class)
+                ->where('model_id', $user->id)
+                ->where('org_type_user_id', $orgId)
+                ->whereNotIn('role_id', $newRoleIds ?: [0])
+                ->delete();
 
-            // Insert/update new roles with org_type_user_id
             foreach ($roleModels as $role) {
-                DB::table('model_has_roles')->updateOrInsert(
-                    [
-                        'role_id' => $role->id,
-                        'model_type' => User::class,
-                        'model_id' => $user->id,
-                    ],
-                    [
-                        'org_type_user_id' => $request->org_type_user_id
-                    ]
-                );
+                DB::table('model_has_roles')->updateOrInsert([
+                    'role_id' => $role->id,
+                    'model_type' => User::class,
+                    'model_id' => $user->id,
+                    'org_type_user_id' => $orgId,
+                ]);
             }
 
             // Save org member title
             if ($request->org_role_title_id) {
                 OrgMemberRoleTitle::updateOrCreate(
                     [
-                        'org_type_user_id' => $request->org_type_user_id,
-                        'individual_type_user_id' => $userId,
+                        'org_type_user_id' => $orgId,
+                        'individual_type_user_id' => $user->id,
                     ],
                     [
                         'org_role_title_id' => $request->org_role_title_id
@@ -174,6 +179,9 @@ class UserRoleController extends Controller
 
             DB::commit();
 
+            // Permissions are cached by Spatie; make the change visible now
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Roles assigned successfully',
@@ -181,23 +189,12 @@ class UserRoleController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('assignRoles failed', ['exception' => $e]);
 
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage()
             ], 500);
         }
-    }
-    public function assign(Request $request, $userId)
-    {
-        $request->validate([
-            'roles' => 'array'
-        ]);
-
-        $user = User::findOrFail($userId);
-        $user->syncRoles($request->roles);
-
-        return response()->json(['message' => 'Roles assigned']);
     }
 }
