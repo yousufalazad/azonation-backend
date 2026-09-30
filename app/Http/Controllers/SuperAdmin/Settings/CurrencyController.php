@@ -18,11 +18,11 @@ class CurrencyController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'currency_code' => 'required|string|size:3|unique:currencies',
-            'symbol' => 'required|string|max:3',
-            'unit_name' => 'required|string|max:255',
-            'status' => 'boolean',
+            'currency_name' => 'required|string|max:255',
+            'currency_code' => 'required|string|size:3|unique:currencies,currency_code',
+            'currency_symbol' => 'required|string|max:5',
+            'unit_name' => 'nullable|string|max:255',
+            'is_active' => 'boolean',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -30,7 +30,7 @@ class CurrencyController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-        $currency = Currency::create($request->all());
+        $currency = Currency::create($validator->validated());
         return response()->json([
             'status' => true,
             'message' => 'Currency created successfully.',
@@ -41,11 +41,11 @@ class CurrencyController extends Controller
     {
         $currency = Currency::findOrFail($id);
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'currency_code' => 'required|string|size:3|unique:currencies,currency_code,' . $currency->id,
-            'symbol' => 'required|string|max:3',
-            'unit_name' => 'required|string|max:255',
-            'status' => 'boolean',
+            'currency_name' => 'required|string|max:255',
+            'currency_code' => 'required|string|size:3|unique:currencies,currency_code,' . $currency->id . '',
+            'currency_symbol' => 'required|string|max:5',
+            'unit_name' => 'nullable|string|max:255',
+            'is_active' => 'boolean',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -53,7 +53,7 @@ class CurrencyController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-        $currency->update($request->all());
+        $currency->update($validator->validated());
         return response()->json([
             'status' => true,
             'message' => 'Currency updated successfully.',

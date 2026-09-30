@@ -9,6 +9,7 @@ use App\Http\Controllers\Common\NotificationController;
 use App\Http\Controllers\Common\ReferralController;
 use App\Http\Controllers\Common\SupportRequestController;
 use App\Http\Controllers\Individual\MemberActivityController;
+use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use App\Http\Controllers\SuperAdmin\Support\SupportRequestController as SuperAdminSupportRequestController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Common\UserLanguageController;
@@ -240,6 +241,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('{id}/messages', [SupportRequestController::class, 'reply'])->middleware('throttle:20,1');
         Route::post('{id}/close', [SupportRequestController::class, 'close']);
     });
+    // Super Admin home page (Super Admin only, see the guard at the end of this file)
+    Route::get('superadmin/overview', [SuperAdminDashboardController::class, 'overview']);
     // Super Admin inbox (the guard at the end of this file makes it Super Admin only)
     Route::group(['prefix' => 'superadmin/support-requests'], function () {
         Route::get('/', [SuperAdminSupportRequestController::class, 'index']);
