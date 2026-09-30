@@ -10,6 +10,7 @@ use App\Http\Controllers\Common\ReferralController;
 use App\Http\Controllers\Common\SupportRequestController;
 use App\Http\Controllers\Individual\MemberActivityController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
+use App\Http\Controllers\SuperAdmin\Billing\BillingAdminController;
 use App\Http\Controllers\SuperAdmin\Support\SupportRequestController as SuperAdminSupportRequestController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Common\UserLanguageController;
@@ -243,6 +244,25 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     // Super Admin home page (Super Admin only, see the guard at the end of this file)
     Route::get('superadmin/overview', [SuperAdminDashboardController::class, 'overview']);
+    Route::group(['prefix' => 'superadmin/billing'], function () {
+        Route::get('/bills', [BillingAdminController::class, 'bills']);
+        Route::post('/bills/generate', [BillingAdminController::class, 'generateBills']);
+        Route::post('/bills/invoice-month', [BillingAdminController::class, 'invoiceMonth']);
+        Route::post('/bills/{id}/invoice', [BillingAdminController::class, 'invoiceBill']);
+        Route::get('/invoices', [BillingAdminController::class, 'invoices']);
+        Route::post('/invoices/publish-drafts', [BillingAdminController::class, 'publishDrafts']);
+        Route::get('/invoices/{id}', [BillingAdminController::class, 'invoice']);
+        Route::put('/invoices/{id}', [BillingAdminController::class, 'updateInvoice']);
+        Route::post('/invoices/{id}/publish', [BillingAdminController::class, 'publishInvoice']);
+        Route::post('/invoices/{id}/cancel', [BillingAdminController::class, 'cancelInvoice']);
+        Route::post('/invoices/{id}/payments', [BillingAdminController::class, 'recordPayment']);
+        Route::get('/payments', [BillingAdminController::class, 'payments']);
+        Route::get('/daily', [BillingAdminController::class, 'daily']);
+        Route::get('/plans', [BillingAdminController::class, 'plans']);
+        Route::put('/plans/{id}', [BillingAdminController::class, 'updatePlan']);
+        Route::put('/plans/{id}/price', [BillingAdminController::class, 'setPrice']);
+        Route::get('/subscriptions', [BillingAdminController::class, 'subscriptions']);
+    });
     // Super Admin inbox (the guard at the end of this file makes it Super Admin only)
     Route::group(['prefix' => 'superadmin/support-requests'], function () {
         Route::get('/', [SuperAdminSupportRequestController::class, 'index']);
