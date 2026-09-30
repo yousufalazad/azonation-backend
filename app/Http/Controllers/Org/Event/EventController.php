@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use App\Services\MemberFamilies;
 
 class EventController extends Controller
 {
@@ -19,7 +20,7 @@ class EventController extends Controller
     // Fields the form may send; the organisation and ids are set by the server
     private const FIELDS = [
         'title', 'name', 'short_description', 'description', 'date', 'time',
-        'venue_name', 'venue_address', 'requirements', 'note', 'status', 'conduct_type',
+        'venue_name', 'venue_address', 'requirements', 'note', 'status', 'conduct_type', 'family_welcome',
     ];
 
     public function __construct()
@@ -59,6 +60,8 @@ class EventController extends Controller
             $document->document_url = $document->file_path ? url(Storage::url($document->file_path)) : null;
             return $document;
         });
+        // Families welcome: an estimate from the families members chose to share (totals only, no names)
+        $event->family_estimate = $event->family_welcome ? MemberFamilies::estimate((int) $event->user_id) : null;
         return response()->json(['status' => true, 'data' => $event], 200);
     }
 
@@ -122,6 +125,7 @@ class EventController extends Controller
             'note' => 'nullable|string|max:255',
             'status' => 'nullable|in:0,1', // 0 = active, 1 = disabled
             'conduct_type' => 'nullable|exists:conduct_types,id',
+            'family_welcome' => 'nullable|boolean',
             'images.*' => 'file|mimes:jpg,jpeg,png,webp|max:5120',
             'documents.*' => 'file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
         ];
@@ -133,6 +137,7 @@ class EventController extends Controller
         // The table needs a title; the form asks for a name
         $values['title'] = $values['title'] ?: $values['name'];
         $values['status'] = (int) ($values['status'] ?? 0);
+        $values['family_welcome'] = $request->boolean('family_welcome');
         return $values;
     }
 

@@ -85,7 +85,7 @@ class MemberActivityController extends Controller
             ->whereDate('date', $past ? '<' : '>=', $today)
             ->orderBy('date', $past ? 'desc' : 'asc')->orderBy('time', $past ? 'desc' : 'asc')
             ->limit($past ? self::PAST_LIMIT : 500)
-            ->get(['id', 'user_id', 'title', 'date', 'time', 'venue_name', 'venue_address']);
+            ->get(['id', 'user_id', 'title', 'date', 'time', 'venue_name', 'venue_address', 'family_welcome']);
 
         $mine = $this->myAttendance('event_attendances', 'event_id', $rows->pluck('id'));
 
@@ -108,6 +108,9 @@ class MemberActivityController extends Controller
             'venue_name' => $e->venue_name,
             'venue_address' => $e->venue_address,
             'requirements' => $e->requirements,
+            'family_welcome' => (bool) $e->family_welcome,
+            // So the page can suggest sharing family numbers when families are welcome
+            'my_family_sharing' => \App\Models\MemberFamilyShare::where('user_id', Auth::id())->where('org_id', $e->user_id)->value('level') ?? 'none',
             'my_attendance' => $this->myAttendance('event_attendances', 'event_id', collect([$e->id]))[$e->id] ?? null,
         ], $orgs)]);
     }

@@ -21,7 +21,8 @@ class Event extends Model
         'requirements',
         'note',
         'status',
-        'conduct_type'
+        'conduct_type',
+        'family_welcome'
     ];
     protected $hidden = [
         'created_at',

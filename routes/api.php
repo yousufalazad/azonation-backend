@@ -60,7 +60,8 @@ use App\Http\Controllers\Org\Membership\OrgMembershipRenewalController;
 use App\Http\Controllers\Org\Membership\OrgMemberController;
 use App\Http\Controllers\Org\Membership\MembershipTerminationController;
 use App\Http\Controllers\Org\Membership\MembershipTerminationReasonController;
-use App\Http\Controllers\Org\Membership\FamilyMemberController;
+use App\Http\Controllers\Org\Membership\MemberFamilySummaryController;
+use App\Http\Controllers\Individual\MemberFamilyController;
 use App\Http\Controllers\Org\Membership\OrgIndependentMemberController;
 use App\Http\Controllers\Org\Membership\UnlinkMemberController;
 use App\Http\Controllers\Org\OfficeDocument\OfficeDocumentController;
@@ -431,13 +432,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
     Route::get('/total-org-member-count', [OrgMemberController::class, 'totalOrgMemberCount']);
 
-    Route::group(['prefix' => 'family-members'], function () {
-        Route::get('/', [FamilyMemberController::class, 'index']);
-        Route::post('/', [FamilyMemberController::class, 'store']);
-        Route::get('{id}', [FamilyMemberController::class, 'show']);
-        Route::put('{id}', [FamilyMemberController::class, 'update']);
-        Route::delete('{id}', [FamilyMemberController::class, 'destroy']);
-    });
+    // What current members chose to share about their families (no names unless they allowed it)
+    Route::get('/member-families', [MemberFamilySummaryController::class, 'index']);
 
 
     Route::group(['prefix' => 'independent-members'], function () {
@@ -659,6 +655,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/committees', [MemberActivityController::class, 'committees']);
         Route::get('/assets', [MemberActivityController::class, 'assets']);
         Route::get('/attendance', [MemberActivityController::class, 'attendance']);
+        // My family: the member's own list and who may see it
+        Route::get('/family', [MemberFamilyController::class, 'index']);
+        Route::post('/family', [MemberFamilyController::class, 'store']);
+        Route::put('/family/{id}', [MemberFamilyController::class, 'update']);
+        Route::delete('/family/{id}', [MemberFamilyController::class, 'destroy']);
+        Route::put('/family/sharing/{orgId}', [MemberFamilyController::class, 'share']);
     });
 
     // ----------------------- Superadmin --------------------
