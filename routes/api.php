@@ -8,6 +8,7 @@ use App\Http\Controllers\Common\PhoneNumberController;
 use App\Http\Controllers\Common\NotificationController;
 use App\Http\Controllers\Common\ReferralController;
 use App\Http\Controllers\Common\SupportRequestController;
+use App\Http\Controllers\Common\PublicPlanController;
 use App\Http\Controllers\Individual\MemberActivityController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use App\Http\Controllers\SuperAdmin\Billing\BillingAdminController;
@@ -163,6 +164,9 @@ Route::middleware('auth:sanctum')->group(function(){
 Route::post('login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
 Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+
+// Plans and prices for the public Pricing page
+Route::get('/public/plans', [PublicPlanController::class, 'index'])->middleware('throttle:60,1');
 
 // Public Contact us form
 Route::post('/contact', [SupportRequestController::class, 'contact'])->middleware('throttle:5,1');
