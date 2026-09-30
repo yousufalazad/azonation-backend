@@ -265,7 +265,9 @@ class BillingAdminController extends Controller
     {
         $rows = DB::table('users as u')
             ->where('u.type', 'organisation')->whereNull('u.deleted_at')
-            ->leftJoin('management_subscriptions as s', fn ($j) => $j->on('s.user_id', '=', 'u.id')->where('s.is_active', 1))
+            // The newest active subscription (a few organisations have more than one)
+            ->leftJoin('management_subscriptions as s', fn ($j) => $j->on('s.user_id', '=', 'u.id')->where('s.is_active', 1)
+                ->whereRaw('s.id = (select max(s2.id) from management_subscriptions s2 where s2.user_id = u.id and s2.is_active = 1)'))
             ->leftJoin('management_packages as p', 'p.id', '=', 's.management_package_id')
             ->orderBy('u.org_name')
             ->get(['u.id as org_id', 'u.org_name', 'u.email', 'u.created_at', 's.id as subscription_id', 's.start_date', 's.subscription_status',

@@ -11,6 +11,7 @@ use App\Http\Controllers\Common\SupportRequestController;
 use App\Http\Controllers\Individual\MemberActivityController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use App\Http\Controllers\SuperAdmin\Billing\BillingAdminController;
+use App\Http\Controllers\SuperAdmin\Access\RoleAdminController;
 use App\Http\Controllers\SuperAdmin\Support\SupportRequestController as SuperAdminSupportRequestController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Common\UserLanguageController;
@@ -244,6 +245,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     // Super Admin home page (Super Admin only, see the guard at the end of this file)
     Route::get('superadmin/overview', [SuperAdminDashboardController::class, 'overview']);
+    Route::group(['prefix' => 'superadmin/access'], function () {
+        Route::get('/', [RoleAdminController::class, 'index']);
+        Route::post('/roles', [RoleAdminController::class, 'store']);
+        Route::put('/roles/{id}', [RoleAdminController::class, 'update']);
+        Route::delete('/roles/{id}', [RoleAdminController::class, 'destroy']);
+        Route::post('/permissions', [RoleAdminController::class, 'storePermission']);
+        Route::delete('/permissions/{id}', [RoleAdminController::class, 'destroyPermission']);
+    });
     Route::group(['prefix' => 'superadmin/billing'], function () {
         Route::get('/bills', [BillingAdminController::class, 'bills']);
         Route::post('/bills/generate', [BillingAdminController::class, 'generateBills']);

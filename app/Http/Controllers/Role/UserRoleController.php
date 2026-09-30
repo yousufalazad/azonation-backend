@@ -72,13 +72,17 @@ class UserRoleController extends Controller
             return $this->noOrgResponse();
         }
 
+        // Each member's title in this organisation (e.g. Treasurer), shown next to their roles
+        $titles = OrgMemberRoleTitle::where('org_type_user_id', $orgId)->pluck('org_role_title_id', 'individual_type_user_id');
+
         $members = User::whereHas('orgMembers', function ($q) use ($orgId) {
             $q->where('org_type_user_id', $orgId)
                 ->where('is_active', 1);
         })
-            ->get(['id', 'first_name', 'last_name'])
-            ->map(function ($user) use ($orgId) {
+            ->get(['id', 'first_name', 'last_name', 'azon_id'])
+            ->map(function ($user) use ($orgId, $titles) {
                 $user->roles = $user->rolesByOrg($orgId)->get(['id', 'name']);
+                $user->org_role_title_id = $titles[$user->id] ?? null;
                 return $user;
             });
 
@@ -142,6 +146,8 @@ class UserRoleController extends Controller
 
             $roleModels = Role::whereIn('name', $roles)
                 ->where('guard_name', 'web')
+                // Plan roles are for organisation accounts, not members
+                ->when(!$this->isSuperAdmin(), fn ($q) => $q->whereNotIn('name', DB::table('management_packages')->pluck('slug')))
                 ->get();
 
             $newRoleIds = $roleModels->pluck('id')->toArray();
