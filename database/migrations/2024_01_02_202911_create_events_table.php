@@ -16,8 +16,8 @@ return new class extends Migration
                 ->onDelete('cascade'); // Cascade on delete to remove associated addresses when user is deleted
 
 
-            $table->string('title')->nullable();
-            $table->string('name');
+            $table->string('title');
+            $table->string('name')->nullable();
             $table->string('short_description')->nullable();
             $table->string('description')->nullable();
             $table->date('date')->nullable();

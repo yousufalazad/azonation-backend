@@ -36,6 +36,7 @@ return new class extends Migration
                 ->comment('Foreign key to the membership_types table');
 
             $table->date('membership_start_date')->nullable()->comment('Date when the individual joined the organization');
+            $table->date('membership_end_date')->nullable();
 
             // -------------------------------------------------------------------
             $table->foreignId('membership_status_id')

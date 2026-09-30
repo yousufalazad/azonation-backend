@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->integer('azon_id')->unique()->nullable()->comment('Unique ID from an external system');
-            $table->enum('type', ['individual', 'organisation', 'superadmin', 'guest'])->default('guest')->comment('Type of user account');
+            $table->enum('type', ['individual', 'organisation', 'superadmin', 'guest', 'pending'])->default('guest')->comment('Type of user account');
             $table->string('first_name', 30)->nullable()->comment('First name of the user');
             $table->string('last_name', 30)->nullable()->comment('Last name of the user');
             $table->string('org_name', 200)->nullable()->comment('Organisation name');
@@ -47,6 +47,7 @@ return new class extends Migration
             // Optional: provider columns if you plan to add more providers later
             $table->string('oauth_provider')->nullable(); // 'google'
             $table->string('oauth_refresh_token')->nullable();
+            $table->softDeletes();
 
             $table->timestamps();
         });

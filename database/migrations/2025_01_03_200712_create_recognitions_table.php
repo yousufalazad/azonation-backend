@@ -30,7 +30,7 @@ return new class extends Migration
                 ->constrained('privacy_setups')
                 ->onDelete('cascade'); // Cascade on delete to remove associated recognitions
 
-            $table->boolean('status')->default(1)->comment('yes = published, no = unpublished');
+            $table->boolean('is_active')->default(1)->comment('yes = published, no = unpublished');
 
             $table->timestamps(); // Created at and updated at timestamps
         });
