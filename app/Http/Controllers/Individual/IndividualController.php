@@ -15,6 +15,7 @@ use App\Models\EventAttendance;
 use App\Models\MeetingAttendance;
 use App\Models\ProjectAttendance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -121,6 +122,12 @@ class IndividualController extends Controller
             ]);
 
         $logos = ProfileImage::whereIn('user_id', $rows->pluck('org_id'))->orderBy('id')->pluck('image_path', 'user_id');
+        // Latest completed membership fee payment in each organisation: paid until when
+        $paidUntil = DB::table('org_membership_renewals')
+            ->where('individual_type_user_id', $userId)->where('status', 'completed')
+            ->whereIn('org_type_user_id', $rows->pluck('org_id'))
+            ->groupBy('org_type_user_id')
+            ->pluck(DB::raw('MAX(period_end)'), 'org_type_user_id');
 
         return $rows->map(fn ($r) => [
             'org_id' => (int) $r->org_id,
@@ -131,6 +138,7 @@ class IndividualController extends Controller
             'membership_status' => $r->membership_status,
             'member_since' => $r->membership_start_date ? Carbon::parse($r->membership_start_date)->toDateString() : null,
             'is_active' => (bool) $r->is_active,
+            'paid_until' => isset($paidUntil[$r->org_id]) ? Carbon::parse($paidUntil[$r->org_id])->toDateString() : null,
         ]);
     }
 
