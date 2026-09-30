@@ -215,6 +215,7 @@ class OrgMemberController extends Controller
                 $q->where('azon_id', 'like', "%{$query}%")
                     ->orWhere('first_name', 'like', "%{$query}%")
                     ->orWhere('last_name', 'like', "%{$query}%")
+                    ->orWhereRaw("CONCAT(COALESCE(users.first_name, ''), ' ', COALESCE(users.last_name, '')) LIKE ?", ["%{$query}%"])
                     ->orWhere('username', 'like', "%{$query}%")
                     ->orWhere('email', 'like', "%{$query}%")
                     ->orWhereRaw("CONCAT(dialing_codes.dialing_code, phone_numbers.phone_number) LIKE ?", ["%{$query}%"]);
@@ -245,6 +246,22 @@ class OrgMemberController extends Controller
             $user->image_url = $path ? url(Storage::url($path)) : null;
             $user->unsetRelation('individualProfileImage');
         });
+
+        // Where each person stands with the current organisation, so the page needs no extra checks:
+        // member | inactive | former | not_eligible (left and may not rejoin) | null
+        $orgId = $this->currentOrgId($request);
+        if ($orgId) {
+            $ids = $results->pluck('id');
+            $rows = DB::table('org_members')->where('org_type_user_id', $orgId)->whereIn('individual_type_user_id', $ids)
+                ->pluck('is_active', 'individual_type_user_id');
+            $left = DB::table('membership_terminations')->where('org_type_user_id', $orgId)->whereIn('individual_type_user_id', $ids)
+                ->orderBy('id')->get(['individual_type_user_id', 'rejoin_eligible'])->keyBy('individual_type_user_id');
+            $results->each(function ($user) use ($rows, $left) {
+                $user->member_state = isset($rows[$user->id])
+                    ? ((int) $rows[$user->id] === 1 ? 'member' : 'inactive')
+                    : (isset($left[$user->id]) ? ($left[$user->id]->rejoin_eligible !== null && (int) $left[$user->id]->rejoin_eligible === 0 ? 'not_eligible' : 'former') : null);
+            });
+        }
 
         return response()->json([
             'status' => true,
@@ -286,11 +303,31 @@ class OrgMemberController extends Controller
             'org_type_user_id' => 'required|exists:users,id',
             'individual_type_user_id' => 'required|exists:users,id',
         ]);
-        $orgMember = OrgMember::create([
-            'org_type_user_id' => $validated['org_type_user_id'],
-            'individual_type_user_id' => $validated['individual_type_user_id'],
-            'is_active' => true,
-        ]);
+        // Only people (not organisations) can be members, and nobody is added twice
+        abort_unless(User::where('id', $validated['individual_type_user_id'])->where('type', 'individual')->exists(), 422, 'Only a person can be added as a member.');
+        $existing = OrgMember::where('org_type_user_id', $validated['org_type_user_id'])
+            ->where('individual_type_user_id', $validated['individual_type_user_id'])->first();
+        if ($existing && $existing->is_active) {
+            return response()->json(['status' => false, 'message' => 'This person is already a member.'], 422);
+        }
+        $lastLeft = DB::table('membership_terminations')->where('org_type_user_id', $validated['org_type_user_id'])
+            ->where('individual_type_user_id', $validated['individual_type_user_id'])->orderByDesc('id')->first();
+        if ($lastLeft && $lastLeft->rejoin_eligible !== null && (int) $lastLeft->rejoin_eligible === 0) {
+            return response()->json(['status' => false, 'message' => 'This person left and was marked as not able to rejoin.'], 422);
+        }
+
+        // A membership that was switched off comes back; otherwise a new one starts today
+        if ($existing) {
+            $existing->update(['is_active' => true]);
+            $orgMember = $existing;
+        } else {
+            $orgMember = OrgMember::create([
+                'org_type_user_id' => $validated['org_type_user_id'],
+                'individual_type_user_id' => $validated['individual_type_user_id'],
+                'membership_start_date' => now()->toDateString(),
+                'is_active' => true,
+            ]);
+        }
         $individualUser = User::find($validated['individual_type_user_id']);
         $orgUser = User::find($validated['org_type_user_id']);
         $orgName = $orgUser ? $orgUser->org_name : 'The Organization';
