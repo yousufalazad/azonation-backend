@@ -39,7 +39,7 @@ class ManagementSubscriptionController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Error fetching subscriptions',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -77,7 +77,7 @@ class ManagementSubscriptionController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
-                'message' => $e->getMessage(),
+                'message' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -114,7 +114,7 @@ class ManagementSubscriptionController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
-                'message' => $e->getMessage(),
+                'message' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -145,7 +145,7 @@ class ManagementSubscriptionController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the currency',
-                'message' => $e->getMessage(),
+                'message' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -185,13 +185,19 @@ class ManagementSubscriptionController extends Controller
                 'is_active' => 'nullable|boolean',
             ]);
 
+            // Organisations can only change their own subscription; Super Admins any
+            $ownerOnly = $request->user()?->type === 'superadmin' ? null : $request->user()->id;
+            if ($ownerOnly) {
+                $validated['user_id'] = $ownerOnly;
+            }
+
 
             /*
             |--------------------------------------------------------------------------
             | Database Transaction
             |--------------------------------------------------------------------------
             */
-            $result = DB::transaction(function () use ($validated, $id) {
+            $result = DB::transaction(function () use ($validated, $id, $ownerOnly) {
 
                 /*
                 |--------------------------------------------------------------------------
@@ -200,7 +206,7 @@ class ManagementSubscriptionController extends Controller
                 */
                 $subscription = ManagementSubscription::with([
                     'managementPackage'
-                ])->find($id);
+                ])->when($ownerOnly, fn ($q) => $q->where('user_id', $ownerOnly))->find($id);
 
 
                 /*
@@ -465,7 +471,7 @@ class ManagementSubscriptionController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

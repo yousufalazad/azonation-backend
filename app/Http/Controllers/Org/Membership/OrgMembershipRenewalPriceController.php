@@ -2,167 +2,97 @@
 
 namespace App\Http\Controllers\Org\Membership;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Concerns\ResolvesCurrentOrg;
+use Illuminate\Routing\Controller;
+use App\Models\OrgMembershipRenewalCycle;
 use App\Models\OrgMembershipRenewalPrice;
+use App\Models\OrgMembershipType;
+use Illuminate\Http\Request;
 
+/**
+ * Renewal fees: how much a membership type costs for one renewal period.
+ * Amounts are stored in minor units (100 = 1.00).
+ */
 class OrgMembershipRenewalPriceController extends Controller
 {
+    use ResolvesCurrentOrg;
+
+    public function __construct()
+    {
+        $this->middleware('org.permission:org-membership-renewal-price.read')->only(['index', 'show']);
+        $this->middleware('org.permission:org-membership-renewal-price.create')->only(['store']);
+        $this->middleware('org.permission:org-membership-renewal-price.update')->only(['update']);
+        $this->middleware('org.permission:org-membership-renewal-price.delete')->only(['destroy']);
+    }
+
     public function index()
     {
-        $userId = Auth::id();
-
-        $prices = OrgMembershipRenewalPrice::where('org_type_user_id', $userId)
-            ->with(['orgMembershipType', 'orgMembershipRenewalCycle', 'memberRenewalCycle'])
+        $prices = $this->owned(OrgMembershipRenewalPrice::class, 'org_type_user_id')
+            ->with(['orgMembershipType.membershipType:id,name', 'orgMembershipRenewalCycle.memberRenewalCycle:id,name,duration_in_months'])
             ->orderBy('sort_order')
+            ->orderBy('id')
             ->get();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal prices retrieved successfully.',
-            'data' => $prices
-        ]);
+        return response()->json(['status' => true, 'data' => $prices]);
     }
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'org_membership_type_id' => 'required|exists:org_membership_types,id',
-            'org_mem_renewal_cycle_id' => 'nullable|exists:org_membership_renewal_cycles,id',
-            // 'member_renewal_cycle_id' => 'nullable|exists:membership_renewal_cycles,id',
-            'currency' => 'required|string|max:10',
-            'unit_amount_minor' => 'required|integer',
-            'is_recurring' => 'boolean',
-            'valid_from' => 'nullable|date',
-            'valid_to' => 'nullable|date|after_or_equal:valid_from',
-            'org_notes' => 'nullable|string',
-            'is_active' => 'boolean',
-            'sort_order' => 'integer',
-        ]);
+        $orgId = $this->orgIdOrFail();
+        $data = $this->validated($request);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        $price = OrgMembershipRenewalPrice::create($data + ['org_type_user_id' => $orgId]);
 
-        $request['org_type_user_id'] = Auth::id();
-
-        $price = OrgMembershipRenewalPrice::create($request->only([
-            'org_type_user_id',
-            'org_membership_type_id',
-            'org_mem_renewal_cycle_id',
-            // 'member_renewal_cycle_id',
-            'currency',
-            'unit_amount_minor',
-            'is_recurring',
-            'valid_from',
-            'valid_to',
-            'org_notes',
-            'is_active',
-            'sort_order',
-        ]));
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal price created successfully.',
-            'data' => $price
-        ]);
+        return response()->json(['status' => true, 'data' => $price]);
     }
 
     public function show($id)
     {
-        $price = OrgMembershipRenewalPrice::with(['orgMembershipType', 'orgMembershipRenewalCycle', 'memberRenewalCycle'])
-            ->find($id);
+        $price = $this->owned(OrgMembershipRenewalPrice::class, 'org_type_user_id')
+            ->with(['orgMembershipType.membershipType:id,name', 'orgMembershipRenewalCycle.memberRenewalCycle'])
+            ->findOrFail($id);
 
-        if (!$price) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Organisation membership renewal price not found.'
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal price retrieved successfully.',
-            'data' => $price
-        ]);
+        return response()->json(['status' => true, 'data' => $price]);
     }
 
     public function update(Request $request, $id)
     {
-        $price = OrgMembershipRenewalPrice::find($id);
+        $price = $this->owned(OrgMembershipRenewalPrice::class, 'org_type_user_id')->findOrFail($id);
+        $price->update($this->validated($request));
 
-        if (!$price) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Organisation membership renewal price not found.'
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'org_membership_type_id' => 'required|exists:org_membership_types,id',
-            'org_mem_renewal_cycle_id' => 'nullable|exists:org_membership_renewal_cycles,id',
-            // 'member_renewal_cycle_id' => 'nullable|exists:membership_renewal_cycles,id',
-            'currency' => 'required|string|max:10',
-            'unit_amount_minor' => 'required|integer',
-            'is_recurring' => 'boolean',
-            'valid_from' => 'nullable|date',
-            'valid_to' => 'nullable|date|after_or_equal:valid_from',
-            'org_notes' => 'nullable|string',
-            'is_active' => 'boolean',
-            'sort_order' => 'integer',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $price->update($request->only([
-            'org_membership_type_id',
-            'org_mem_renewal_cycle_id',
-            // 'member_renewal_cycle_id',
-            'currency',
-            'unit_amount_minor',
-            'is_recurring',
-            'valid_from',
-            'valid_to',
-            'org_notes',
-            'is_active',
-            'sort_order',
-        ]));
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal price updated successfully.',
-            'data' => $price
-        ]);
+        return response()->json(['status' => true, 'data' => $price]);
     }
 
     public function destroy($id)
     {
-        $price = OrgMembershipRenewalPrice::find($id);
+        $this->owned(OrgMembershipRenewalPrice::class, 'org_type_user_id')->findOrFail($id)->delete();
 
-        if (!$price) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Organisation membership renewal price not found.'
-            ], 404);
-        }
+        return response()->json(['status' => true]);
+    }
 
-        $price->delete();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Organisation membership renewal price deleted successfully.'
+    private function validated(Request $request): array
+    {
+        $data = $request->validate([
+            'org_membership_type_id' => 'required|integer',
+            'org_mem_renewal_cycle_id' => 'required|integer',
+            'currency' => 'required|string|size:3',
+            'unit_amount_minor' => 'required|integer|min:0',
+            'valid_from' => 'nullable|date',
+            'valid_to' => 'nullable|date|after_or_equal:valid_from',
+            'org_notes' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
+            'sort_order' => 'nullable|integer',
         ]);
+
+        // Both must be this organisation's own membership type and renewal period
+        $this->ensureOwnedParent(OrgMembershipType::class, $data['org_membership_type_id'], 'org_type_user_id');
+        $this->ensureOwnedParent(OrgMembershipRenewalCycle::class, $data['org_mem_renewal_cycle_id'], 'org_type_user_id');
+
+        $data['currency'] = strtoupper($data['currency']);
+        $data['is_active'] = $data['is_active'] ?? true;
+        $data['is_recurring'] = true;
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
+        return $data;
     }
 }

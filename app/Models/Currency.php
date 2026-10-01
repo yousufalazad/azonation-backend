@@ -9,11 +9,11 @@ class Currency extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name',
+        'currency_name',
         'currency_code',
-        'symbol',
+        'currency_symbol',
         'unit_name',
-        'status',
+        'is_active',
     ];
 
     protected $hidden=[

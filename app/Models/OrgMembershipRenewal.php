@@ -31,9 +31,10 @@ class OrgMembershipRenewal extends Model
     ];
 
     protected $casts = [
-        'period_start' => 'datetime',
-        'period_end' => 'datetime',
+        // Periods and payment days are whole dates (no time, no time zone shift)
+        'period_start' => 'date:Y-m-d',
+        'period_end' => 'date:Y-m-d',
         'last_attempt_at' => 'datetime',
-        'renewed_at' => 'datetime',
+        'renewed_at' => 'date:Y-m-d',
     ];
 }

@@ -18,6 +18,7 @@ return new class extends Migration
 
             $table->string('title', 255);
             $table->string('description', 255)->nullable();
+            $table->date('date')->nullable();
             $table->boolean('is_active')->default(true)->comment('1 = Active, 0 = Inactive');
 
             //Foreign key referencing the privacy setups table (privacy settings)

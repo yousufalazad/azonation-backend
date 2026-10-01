@@ -30,7 +30,7 @@ class ManagementPricingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while fetching the daily price rate',
-                'message' => $e->getMessage(),
+                'message' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

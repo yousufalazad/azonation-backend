@@ -1,233 +1,189 @@
 <?php
-namespace App\Http\Controllers\Org\OfficeDocument;
-// use App\Http\Controllers\Controller;
-use Illuminate\Routing\Controller;
 
+namespace App\Http\Controllers\Org\OfficeDocument;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
+use Illuminate\Routing\Controller;
 use App\Models\OfficeDocument;
 use App\Models\OfficeDocumentFile;
 use App\Models\OfficeDocumentImage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
+/**
+ * The organisation's documents: each entry has a title and one or more files
+ * (constitution, registration papers, letters, photos of certificates...).
+ */
 class OfficeDocumentController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:document.read')->only(['index', 'show']);
         $this->middleware('org.permission:document.create')->only(['create', 'store']);
-        $this->middleware('org.permission:document.update')->only(['edit', 'update']);
+        $this->middleware('org.permission:document.update')->only(['edit', 'update', 'destroyFile']);
         $this->middleware('org.permission:document.delete')->only(['destroy']);
     }
+
+    // The current organisation's documents with how many files each has
     public function index()
     {
-        try {
-            $officeRecords = OfficeDocument::with(['images', 'documents'])->get();
-            return response()->json([
-                'status' => true,
-                'message' => 'Office documents fetched successfully!',
-                'data' => $officeRecords
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        $documents = $this->owned(OfficeDocument::class)
+            ->select('office_documents.*', 'privacy_setups.name as privacy_setup_name')
+            ->leftJoin('privacy_setups', 'office_documents.privacy_setup_id', '=', 'privacy_setups.id')
+            ->withCount(['documents', 'images'])
+            ->orderByDesc('office_documents.date')
+            ->orderByDesc('office_documents.id')
+            ->get();
+        return response()->json(['status' => true, 'data' => $documents], 200);
     }
+
     public function show($documentId)
     {
-        $document = OfficeDocument::with(['images', 'documents'])->find($documentId);
+        $document = $this->owned(OfficeDocument::class)
+            ->select('office_documents.*', 'privacy_setups.name as privacy_setup_name')
+            ->leftJoin('privacy_setups', 'office_documents.privacy_setup_id', '=', 'privacy_setups.id')
+            ->with(['images', 'documents'])
+            ->where('office_documents.id', $documentId)
+            ->first();
         if (!$document) {
             return response()->json(['status' => false, 'message' => 'Office document not found'], 404);
         }
         $document->images = $document->images->map(function ($image) {
-            $image->image_url = $image->image_path
-                ? url(Storage::url($image->image_path))
-                : null;
+            $image->image_url = $image->image_path ? url(Storage::url($image->image_path)) : null;
             return $image;
         });
-        $document->documents = $document->documents->map(function ($document) {
-            $document->document_url = $document->file_path
-                ? url(Storage::url($document->file_path))
-                : null;
-            return $document;
+        $document->documents = $document->documents->map(function ($file) {
+            $file->document_url = $file->file_path ? url(Storage::url($file->file_path)) : null;
+            return $file;
         });
         return response()->json(['status' => true, 'data' => $document], 200);
     }
+
     public function store(Request $request)
     {
-        // dd($request->all());exit;
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:20000',
-            'privacy_setup_id' => 'nullable|integer',
-            'is_active' => 'nullable|integer',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:1000240',
-            'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:1000240',
-
-        ]);
-        $user_id = $request->user()->id;
-        DB::beginTransaction();
-        try {
-            $officeDocument = new OfficeDocument();
-            $officeDocument->title = $validatedData['title'];
-            $officeDocument->description = $validatedData['description'];
-            $officeDocument->privacy_setup_id = $validatedData['privacy_setup_id'];
-            $officeDocument->user_id = $user_id;
-            $officeDocument->is_active = $validatedData['is_active'];
-            $officeDocument->save();
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/office-document/file',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-                    OfficeDocumentFile::create([
-                        'office_document_id' => $officeDocument->id,
-                        'file_path' => $documentPath,
-                        'file_name' => $document->getClientOriginalName(),
-                        'mime_type' => $document->getClientMimeType(),
-                        'file_size' => $document->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/office-document/image',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-                    OfficeDocumentImage::create([
-                        'office_document_id' => $officeDocument->id,
-                        'image_path' => $imagePath,
-                        'file_name' => $image->getClientOriginalName(),
-                        'mime_type' => $image->getClientMimeType(),
-                        'file_size' => $image->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            DB::commit();
-            return response()->json([
-                'status' => true,
-                'message' => 'Organizational office document added successfully.',
-                'data' => $officeDocument
-            ], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.'
-            ], 500);
+        $validator = Validator::make($request->all(), $this->rules());
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
         }
+        $document = DB::transaction(function () use ($request) {
+            $document = new OfficeDocument($this->values($request));
+            $document->user_id = $this->orgIdOrFail(); // always the current organisation
+            $document->save();
+            $this->saveFiles($request, $document);
+            return $document;
+        });
+        return response()->json(['status' => true, 'message' => 'Document added successfully.', 'data' => $document], 201);
     }
+
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:20000',
-            'privacy_setup_id' => 'nullable|integer',
-            'is_active' => 'nullable|integer',
-            // 'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            // 'documents.*' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
-        ]);
-        $user_id = $request->user()->id;
-        DB::beginTransaction();
-        try {
-            $officeDocument = OfficeDocument::findOrFail($id);
-            $officeDocument->title = $validatedData['title'];
-            $officeDocument->description = $validatedData['description'];
-            $officeDocument->privacy_setup_id = $validatedData['privacy_setup_id'];
-            $officeDocument->is_active = $validatedData['is_active'];
-            $officeDocument->user_id = $user_id;
-            $officeDocument->save();
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/office-document/file',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-                    OfficeDocumentFile::create([
-                        'office_document_id' => $officeDocument->id,
-                        'file_path' => $documentPath,
-                        'file_name' => $document->getClientOriginalName(),
-                        'mime_type' => $document->getClientMimeType(),
-                        'file_size' => $document->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/office-document/image',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-                    OfficeDocumentImage::create([
-                        'office_document_id' => $officeDocument->id,
-                        'image_path' => $imagePath,
-                        'file_name' => $image->getClientOriginalName(),
-                        'mime_type' => $image->getClientMimeType(),
-                        'file_size' => $image->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            DB::commit();
-            return response()->json([
-                'status' => true,
-                'message' => 'Organizational office document updated successfully.',
-                'data' => $officeDocument
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.'
-            ], 500);
+        $validator = Validator::make($request->all(), $this->rules());
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
         }
+        $document = $this->owned(OfficeDocument::class)->find($id);
+        if (!$document) {
+            return response()->json(['status' => false, 'message' => 'Office document not found'], 404);
+        }
+        // The owner never changes (before, an admin saving a document made it theirs)
+        DB::transaction(function () use ($request, $document) {
+            $document->update($this->values($request));
+            $this->saveFiles($request, $document);
+        });
+        return response()->json(['status' => true, 'message' => 'Document updated successfully.', 'data' => $document], 200);
     }
+
+    // Remove one attached file: DELETE /office-documents/{id}/files/{fileId}?kind=image|document
+    public function destroyFile(Request $request, $id, $fileId)
+    {
+        $document = $this->owned(OfficeDocument::class)->find($id);
+        if (!$document) {
+            return response()->json(['status' => false, 'message' => 'Office document not found'], 404);
+        }
+        $isImage = $request->query('kind') === 'image';
+        $file = ($isImage ? $document->images() : $document->documents())->find($fileId);
+        if (!$file) {
+            return response()->json(['status' => false, 'message' => 'File not found'], 404);
+        }
+        Storage::disk('public')->delete($isImage ? $file->image_path : $file->file_path);
+        $file->delete();
+        return response()->json(['status' => true, 'message' => 'File removed.'], 200);
+    }
+
     public function destroy($id)
     {
-        try {
-            $officeDocument = OfficeDocument::findOrFail($id);
-            if ($officeDocument->document) {
-                Storage::delete('public/' . $officeDocument->document);
-            }
-            $allDocuments = OfficeDocumentFile::where('office_document_id', $id)->get();
-            foreach ($allDocuments as $singleDocument) {
-                Storage::delete('public/' . $singleDocument->file_path);
-                $singleDocument->delete();
-            }
-            $allImages = OfficeDocumentImage::where('office_document_id', $id)->get();
-            foreach ($allImages as $singleImage) {
-                Storage::delete('public/' . $singleImage->image_path);
-                $singleImage->delete();
-            }
-            $officeDocument->delete();
-            return response()->json([
-                'status' => true,
-                'message' => 'Organizational history deleted successfully.',
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to delete document.',
-                'error' => $e->getMessage(),
-            ], 500);
+        $document = $this->owned(OfficeDocument::class)->with(['images', 'documents'])->find($id);
+        if (!$document) {
+            return response()->json(['status' => false, 'message' => 'Office document not found'], 404);
+        }
+        $paths = $document->images->pluck('image_path')->merge($document->documents->pluck('file_path'))->filter();
+        DB::transaction(function () use ($document) {
+            $document->images()->delete();
+            $document->documents()->delete();
+            $document->delete();
+        });
+        foreach ($paths as $path) {
+            Storage::disk('public')->delete($path);
+        }
+        return response()->json(['status' => true, 'message' => 'Document deleted successfully.'], 200);
+    }
+
+    private function rules(): array
+    {
+        return [
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:255',
+            'date' => 'nullable|date',
+            'privacy_setup_id' => 'nullable|integer|exists:privacy_setups,id',
+            'is_active' => 'nullable|boolean',
+            'images.*' => 'file|mimes:jpg,jpeg,png,webp|max:10240',
+            'documents.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,csv|max:20480',
+        ];
+    }
+
+    private function values(Request $request): array
+    {
+        return [
+            'title' => $request->title,
+            'description' => $request->description,
+            'date' => $request->date,
+            // Required by the table: default to Private when nothing is chosen
+            'privacy_setup_id' => $request->privacy_setup_id
+                ?: (DB::table('privacy_setups')->where('name', 'Private')->value('id') ?? DB::table('privacy_setups')->orderBy('id')->value('id')),
+            'is_active' => $request->has('is_active') ? $request->boolean('is_active') : true,
+        ];
+    }
+
+    private function saveFiles(Request $request, OfficeDocument $document): void
+    {
+        foreach ((array) $request->file('documents', []) as $upload) {
+            $path = $upload->storeAs('org/office-document/file', Carbon::now()->format('YmdHis') . '_' . $upload->getClientOriginalName(), 'public');
+            OfficeDocumentFile::create([
+                'office_document_id' => $document->id,
+                'file_path' => $path,
+                'file_name' => $upload->getClientOriginalName(),
+                'mime_type' => $upload->getClientMimeType(),
+                'file_size' => $upload->getSize(),
+                'is_public' => true,
+                'is_active' => true,
+            ]);
+        }
+        foreach ((array) $request->file('images', []) as $upload) {
+            $path = $upload->storeAs('org/office-document/image', Carbon::now()->format('YmdHis') . '_' . $upload->getClientOriginalName(), 'public');
+            OfficeDocumentImage::create([
+                'office_document_id' => $document->id,
+                'image_path' => $path,
+                'file_name' => $upload->getClientOriginalName(),
+                'mime_type' => $upload->getClientMimeType(),
+                'file_size' => $upload->getSize(),
+                'is_public' => true,
+                'is_active' => true,
+            ]);
         }
     }
 }

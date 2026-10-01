@@ -50,7 +50,7 @@ return new class extends Migration
 
             // Additional optional fields for meeting details
             $table->text('description')->nullable()->comment('Description of the meeting');
-            $table->string('address')->nullable()->comment('Address of the meeting if in-person');
+            $table->string('venue')->nullable()->comment('Place of the meeting if in-person');
             $table->text('agenda')->nullable()->comment('Detailed agenda of the meeting');
             $table->text('requirements')->nullable()->comment('Special requirements for the meeting');
             $table->text('note')->nullable()->comment('Additional notes about the meeting');

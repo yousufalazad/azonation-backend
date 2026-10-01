@@ -27,12 +27,6 @@ class GenerateEverydayStorageBill extends Command
         return 0;
     }
 
-    public function schedule(Schedule $schedule): void
-    {
-        // $schedule->command(static::class)->daily();
-        $schedule->command('generate:everyday-storage-billing')->daily()->runInBackground();
-
-    }
     // You can adjust the frequency depending on your needs:
 	// •	->daily() — Runs daily.
 	// •	->weekly() — Runs weekly.

@@ -12,7 +12,7 @@ class ManagementPackage extends Model
         'name',
         'slug',
         'description',
-        'max_members',
+        'max_member',
         'storage_limit',
         'custom_branding',
         'api_access',

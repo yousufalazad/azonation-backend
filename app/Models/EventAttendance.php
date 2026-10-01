@@ -13,6 +13,7 @@ class EventAttendance extends Model
         'event_id',
         'user_id', 
         'attendance_type_id', 
+        'attendance_status_id',
         'time', 
         'note', 
         'is_active'

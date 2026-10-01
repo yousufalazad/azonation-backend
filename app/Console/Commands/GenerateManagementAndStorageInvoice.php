@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Billing\BillingService;
+use App\Models\ManagementAndStorageBilling;
+
 use Illuminate\Console\Command;
 use App\Http\Controllers\SuperAdmin\Financial\InvoiceController;
 use Illuminate\Console\Scheduling\Schedule;
@@ -14,19 +17,16 @@ class GenerateManagementAndStorageInvoice extends Command
     protected $description = 'Generate management and Storage invoice for all organizations';
 
     
-    public function handle()
+    // Draft invoices (with their order lines) for last month's bills; generate:management-and-storage-bill does this too
+    public function handle(BillingService $billing)
     {
-        $controller = new InvoiceController();
-        $controller->managementAndStorageInvoice(request()); // Pass an empty request if no parameters needed
+        ManagementAndStorageBilling::whereDate('period_start', now()->subMonth()->startOfMonth()->toDateString())->get()
+            ->each(fn ($bill) => $billing->draftInvoice($bill));
 
-        $this->info('Management and Storage invoice generated successfully by System.');
+        $this->info('Draft invoices made for the bills of last month.');
         return 0;
     }
 
-    public function schedule(Schedule $schedule): void
-    {
-        $schedule->command(static::class)->monthly();
-    }
     // You can adjust the frequency depending on your needs:
 	// •	->daily() — Runs daily.
 	// •	->weekly() — Runs weekly.

@@ -24,7 +24,7 @@ class EverydayStorageBillingController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to retrieve records.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -87,7 +87,7 @@ class EverydayStorageBillingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -121,7 +121,7 @@ class EverydayStorageBillingController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to retrieve record.',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

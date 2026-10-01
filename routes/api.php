@@ -7,6 +7,13 @@ use App\Http\Controllers\Common\AddressController;
 use App\Http\Controllers\Common\PhoneNumberController;
 use App\Http\Controllers\Common\NotificationController;
 use App\Http\Controllers\Common\ReferralController;
+use App\Http\Controllers\Common\SupportRequestController;
+use App\Http\Controllers\Common\PublicPlanController;
+use App\Http\Controllers\Individual\MemberActivityController;
+use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
+use App\Http\Controllers\SuperAdmin\Billing\BillingAdminController;
+use App\Http\Controllers\SuperAdmin\Access\RoleAdminController;
+use App\Http\Controllers\SuperAdmin\Support\SupportRequestController as SuperAdminSupportRequestController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Common\UserLanguageController;
 use App\Http\Controllers\Common\NotificationNameController;
@@ -53,7 +60,8 @@ use App\Http\Controllers\Org\Membership\OrgMembershipRenewalController;
 use App\Http\Controllers\Org\Membership\OrgMemberController;
 use App\Http\Controllers\Org\Membership\MembershipTerminationController;
 use App\Http\Controllers\Org\Membership\MembershipTerminationReasonController;
-use App\Http\Controllers\Org\Membership\FamilyMemberController;
+use App\Http\Controllers\Org\Membership\MemberFamilySummaryController;
+use App\Http\Controllers\Individual\MemberFamilyController;
 use App\Http\Controllers\Org\Membership\OrgIndependentMemberController;
 use App\Http\Controllers\Org\Membership\UnlinkMemberController;
 use App\Http\Controllers\Org\OfficeDocument\OfficeDocumentController;
@@ -76,6 +84,7 @@ use App\Http\Controllers\SuperAdmin\Financial\ReceiptController;
 // Superadmin
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\Settings\AttendanceTypeController;
+use App\Http\Controllers\SuperAdmin\Settings\AttendanceStatusController;
 use App\Http\Controllers\SuperAdmin\Settings\ConductTypeController;
 use App\Http\Controllers\SuperAdmin\Settings\CountryController;
 use App\Http\Controllers\SuperAdmin\Settings\CountryRegionController;
@@ -102,9 +111,6 @@ use App\Http\Controllers\SuperAdmin\Financial\Storage\EverydayStorageBillingCont
 use App\Http\Controllers\SuperAdmin\PaymentGateway\StripeController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
-Route::get('/test', function () {
-    return response()->json(['status' => 'Laravel is running']);
-});
 
 use App\Http\Controllers\Role\RoleController;
 use App\Http\Controllers\Role\PermissionController;
@@ -125,20 +131,27 @@ Route::middleware('auth:sanctum')->group(function () {
 // routes/api.php
 
 
-Route::get('permissions', [PermissionController::class,'index']);
-Route::post('permissions', [PermissionController::class,'store']);
-Route::put('permissions/{id}', [PermissionController::class,'update']);
-Route::delete('permissions/{id}', [PermissionController::class,'destroy']);
+// Roles and permissions are shared by every organisation:
+// anyone signed in may read them, only Super Admins may change them.
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('permissions', [PermissionController::class, 'index']);
+    Route::get('roles', [RoleController::class, 'index']);
+    Route::get('roles-permissions', [RoleController::class, 'permissions']);
+});
 
-Route::get('roles', [RoleController::class,'index']);
-Route::post('roles', [RoleController::class,'store']);
-Route::put('roles/{id}', [RoleController::class,'update']);
-Route::delete('roles/{id}', [RoleController::class,'destroy']);
+Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
+    Route::post('permissions', [PermissionController::class, 'store']);
+    Route::put('permissions/{id}', [PermissionController::class, 'update']);
+    Route::delete('permissions/{id}', [PermissionController::class, 'destroy']);
 
-Route::get('roles-permissions', [RoleController::class,'permissions']);
+    Route::post('roles', [RoleController::class, 'store']);
+    Route::put('roles/{id}', [RoleController::class, 'update']);
+    Route::delete('roles/{id}', [RoleController::class, 'destroy']);
+
+    Route::put('/roles/{role}/permissions', [UserRoleController::class, 'updateRolePermissions']);
+});
 
 Route::middleware('auth:sanctum')->group(function(){
-    Route::put('/roles/{role}/permissions', [UserRoleController::class, 'updateRolePermissions']);
     Route::get('/users', [UserRoleController::class, 'getUsers']); // list users with roles
     Route::get('/org-members-users/{orgId}', [UserRoleController::class, 'getOrgMemberList']); // list org members
     Route::put('/users/{user}/roles', [UserRoleController::class, 'assignRoles']); // assign roles
@@ -151,23 +164,31 @@ Route::middleware('auth:sanctum')->group(function(){
 //Auth
 Route::post('login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/verify-account/{uuid}', [AuthController::class, 'verify']);
-Route::post('register', [AuthController::class, 'register']);
+Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+
+// Plans and prices for the public Pricing page
+Route::get('/public/plans', [PublicPlanController::class, 'index'])->middleware('throttle:60,1');
+
+// Public Contact us form
+Route::post('/contact', [SupportRequestController::class, 'contact'])->middleware('throttle:5,1');
 
 Route::post('/oauth/google/complete', [SocialAuthController::class, 'completeProfile'])->middleware('throttle:10,1');
 Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 Route::get('/org/switch', [AuthController::class, 'switchOrg'])->middleware('auth:sanctum');
 
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode']);
-Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode']);
-Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetCode'])->middleware('throttle:5,1');
+Route::post('/verify-code', [ForgotPasswordController::class, 'verifyResetCode'])->middleware('throttle:10,1');
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->middleware('throttle:10,1');
 
 
-// ----------------------- Need to separate only index outside auth --------------------
+// Countries: the list is public (sign-up needs it), changes are Super Admin only
 Route::group(['prefix' => 'countries'], function () {
     Route::get('/', [CountryController::class, 'index']);
-    Route::post('/', [CountryController::class, 'store']);
-    Route::put('{id}', [CountryController::class, 'update']);
-    Route::delete('{id}', [CountryController::class, 'destroy']);
+    Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
+        Route::post('/', [CountryController::class, 'store']);
+        Route::put('{id}', [CountryController::class, 'update']);
+        Route::delete('{id}', [CountryController::class, 'destroy']);
+    });
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -194,7 +215,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notifications/mark-all-as-read/{userId}', [NotificationController::class, 'markAllAsRead']);
     Route::post('/notifications/mark-as-read/{userId}/{notificationId}', [NotificationController::class, 'markAsRead']);
     Route::get('/org-profile-data/{userId}', [OrgProfileController::class, 'index']);
-    Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update']);
+    Route::put('/org-profile-update/{userId}', [OrgProfileController::class, 'update'])->middleware('org.owner');
     Route::post('/org-profile/logo/{userId}', [OrgProfileController::class, 'updateLogo']);
     Route::get('/org-profile/logo', [OrgProfileController::class, 'getLogo']);
 
@@ -219,6 +240,50 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/referrals', [ReferralController::class, 'index']);
     Route::get('/referrals/stats', [ReferralController::class, 'stats']);
+    // Help requests: each person sees only their own
+    Route::group(['prefix' => 'support-requests'], function () {
+        Route::get('/', [SupportRequestController::class, 'index']);
+        Route::post('/', [SupportRequestController::class, 'store'])->middleware('throttle:10,1');
+        Route::get('{id}', [SupportRequestController::class, 'show']);
+        Route::post('{id}/messages', [SupportRequestController::class, 'reply'])->middleware('throttle:20,1');
+        Route::post('{id}/close', [SupportRequestController::class, 'close']);
+    });
+    // Super Admin home page (Super Admin only, see the guard at the end of this file)
+    Route::get('superadmin/overview', [SuperAdminDashboardController::class, 'overview']);
+    Route::group(['prefix' => 'superadmin/access'], function () {
+        Route::get('/', [RoleAdminController::class, 'index']);
+        Route::post('/roles', [RoleAdminController::class, 'store']);
+        Route::put('/roles/{id}', [RoleAdminController::class, 'update']);
+        Route::delete('/roles/{id}', [RoleAdminController::class, 'destroy']);
+        Route::post('/permissions', [RoleAdminController::class, 'storePermission']);
+        Route::delete('/permissions/{id}', [RoleAdminController::class, 'destroyPermission']);
+    });
+    Route::group(['prefix' => 'superadmin/billing'], function () {
+        Route::get('/bills', [BillingAdminController::class, 'bills']);
+        Route::post('/bills/generate', [BillingAdminController::class, 'generateBills']);
+        Route::post('/bills/invoice-month', [BillingAdminController::class, 'invoiceMonth']);
+        Route::post('/bills/{id}/invoice', [BillingAdminController::class, 'invoiceBill']);
+        Route::get('/invoices', [BillingAdminController::class, 'invoices']);
+        Route::post('/invoices/publish-drafts', [BillingAdminController::class, 'publishDrafts']);
+        Route::get('/invoices/{id}', [BillingAdminController::class, 'invoice']);
+        Route::put('/invoices/{id}', [BillingAdminController::class, 'updateInvoice']);
+        Route::post('/invoices/{id}/publish', [BillingAdminController::class, 'publishInvoice']);
+        Route::post('/invoices/{id}/cancel', [BillingAdminController::class, 'cancelInvoice']);
+        Route::post('/invoices/{id}/payments', [BillingAdminController::class, 'recordPayment']);
+        Route::get('/payments', [BillingAdminController::class, 'payments']);
+        Route::get('/daily', [BillingAdminController::class, 'daily']);
+        Route::get('/plans', [BillingAdminController::class, 'plans']);
+        Route::put('/plans/{id}', [BillingAdminController::class, 'updatePlan']);
+        Route::put('/plans/{id}/price', [BillingAdminController::class, 'setPrice']);
+        Route::get('/subscriptions', [BillingAdminController::class, 'subscriptions']);
+    });
+    // Super Admin inbox (the guard at the end of this file makes it Super Admin only)
+    Route::group(['prefix' => 'superadmin/support-requests'], function () {
+        Route::get('/', [SuperAdminSupportRequestController::class, 'index']);
+        Route::get('{id}', [SuperAdminSupportRequestController::class, 'show']);
+        Route::post('{id}/messages', [SuperAdminSupportRequestController::class, 'reply']);
+        Route::put('{id}/status', [SuperAdminSupportRequestController::class, 'updateStatus']);
+    });
 
 
     //Org finance related api
@@ -248,35 +313,35 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-    Route::group(['prefix' => 'histories'], function () {
+    Route::group(['prefix' => 'histories', 'middleware' => 'org.owner'], function () {
         Route::get('/', [HistoryController::class, 'index']);
         Route::get('/{id}', [HistoryController::class, 'show']);
         Route::post('/', [HistoryController::class, 'store']);
         Route::post('/{id}', [HistoryController::class, 'update']);
         Route::delete('/{id}', [HistoryController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'year-plans'], function () {
+    Route::group(['prefix' => 'year-plans', 'middleware' => 'org.owner'], function () {
         Route::get('/', [YearPlanController::class, 'index']);
         Route::get('/{id}', [YearPlanController::class, 'show']);
         Route::post('/', [YearPlanController::class, 'store']);
         Route::post('/{id}', [YearPlanController::class, 'update']);
         Route::delete('/{id}', [YearPlanController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'recognitions'], function () {
+    Route::group(['prefix' => 'recognitions', 'middleware' => 'org.owner'], function () {
         Route::get('/', [RecognitionController::class, 'index']);
         Route::get('/{id}', [RecognitionController::class, 'show']);
         Route::post('/', [RecognitionController::class, 'store']);
         Route::post('/{id}', [RecognitionController::class, 'update']);
         Route::delete('/{id}', [RecognitionController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'strategic-plans'], function () {
+    Route::group(['prefix' => 'strategic-plans', 'middleware' => 'org.owner'], function () {
         Route::get('/', [StrategicPlanController::class, 'index']);
         Route::get('/{id}', [StrategicPlanController::class, 'show']);
         Route::post('/', [StrategicPlanController::class, 'store']);
         Route::post('/{id}', [StrategicPlanController::class, 'update']);
         Route::delete('/{id}', [StrategicPlanController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'success-stories'], function () {
+    Route::group(['prefix' => 'success-stories', 'middleware' => 'org.owner'], function () {
         Route::get('/', [SuccessStoryController::class, 'index']);
         Route::get('/{id}', [SuccessStoryController::class, 'show']);
         Route::post('/', [SuccessStoryController::class, 'store']);
@@ -289,6 +354,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [OfficeDocumentController::class, 'show']);
         Route::post('/', [OfficeDocumentController::class, 'store']);
         Route::put('/{id}', [OfficeDocumentController::class, 'update']);
+        // File uploads must be POST (PHP does not read files sent with PUT)
+        Route::post('/{id}', [OfficeDocumentController::class, 'update']);
+        Route::delete('/{id}/files/{fileId}', [OfficeDocumentController::class, 'destroyFile']);
         Route::delete('/{id}', [OfficeDocumentController::class, 'destroy']);
     });
 
@@ -341,6 +409,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::group(['prefix' => 'org-membership-renewals'], function () {
          Route::get('/', [OrgMembershipRenewalController::class, 'index']);
+        Route::get('/overview', [OrgMembershipRenewalController::class, 'overview']);
         Route::post('/', [OrgMembershipRenewalController::class, 'store']);
         Route::get('/{id}', [OrgMembershipRenewalController::class, 'show']);
         Route::put('/{id}', [OrgMembershipRenewalController::class, 'update']);
@@ -363,13 +432,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/org-all-member-name', [OrgMemberController::class, 'getOrgAllMemberName']);
     Route::get('/total-org-member-count', [OrgMemberController::class, 'totalOrgMemberCount']);
 
-    Route::group(['prefix' => 'family-members'], function () {
-        Route::get('/', [FamilyMemberController::class, 'index']);
-        Route::post('/', [FamilyMemberController::class, 'store']);
-        Route::get('{id}', [FamilyMemberController::class, 'show']);
-        Route::put('{id}', [FamilyMemberController::class, 'update']);
-        Route::delete('{id}', [FamilyMemberController::class, 'destroy']);
-    });
+    // What current members chose to share about their families (no names unless they allowed it)
+    Route::get('/member-families', [MemberFamilySummaryController::class, 'index']);
 
 
     Route::group(['prefix' => 'independent-members'], function () {
@@ -387,7 +451,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [UnlinkMemberController::class, 'destroy']);
     });
     Route::group(['prefix' => 'org-administrators'], function () {
-        Route::post('/org-administrators/check', [OrgAdministratorController::class, 'checkAdministratorExists']);
+        Route::post('/check', [OrgAdministratorController::class, 'checkAdministratorExists']);
         Route::get('/primary', [OrgAdministratorController::class, 'getPrimaryAdministrator']);
         Route::get('/', [OrgAdministratorController::class, 'index']);
         Route::post('/', [OrgAdministratorController::class, 'store']);
@@ -451,6 +515,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [EventAttendanceController::class, 'index']);
         Route::get('/{id}', [EventAttendanceController::class, 'show']);
         Route::post('/', [EventAttendanceController::class, 'store']);
+        Route::post('/bulk', [EventAttendanceController::class, 'bulkStore']);
         Route::put('/{id}', [EventAttendanceController::class, 'update']);
         Route::delete('/{id}', [EventAttendanceController::class, 'destroy']);
     });
@@ -472,13 +537,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProjectController::class, 'index']);
         Route::get('/{projectId}', [ProjectController::class, 'show']);
         Route::post('/', [ProjectController::class, 'store']);
-        Route::post('/{userId}', [ProjectController::class, 'update']);
+        Route::post('/{id}', [ProjectController::class, 'update']);
         Route::delete('/{id}', [ProjectController::class, 'destroy']);
     });
     Route::group(['prefix' => 'project-attendances'], function () {
         Route::get('/', [ProjectAttendanceController::class, 'index']);
         Route::get('/{id}', [ProjectAttendanceController::class, 'show']);
         Route::post('/', [ProjectAttendanceController::class, 'store']);
+        Route::post('/bulk', [ProjectAttendanceController::class, 'bulkStore']);
         Route::put('/{id}', [ProjectAttendanceController::class, 'update']);
         Route::delete('/{id}', [ProjectAttendanceController::class, 'destroy']);
     });
@@ -496,7 +562,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}', [ProjectSummaryController::class, 'update']);
         Route::delete('/{id}', [ProjectSummaryController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'founders'], function () {
+    Route::group(['prefix' => 'founders', 'middleware' => 'org.owner'], function () {
         Route::get('/', [FounderController::class, 'index']);
         Route::post('/', [FounderController::class, 'store']);
         Route::post('/{id}', [FounderController::class, 'update']);
@@ -507,6 +573,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [AssetController::class, 'index']);
         Route::post('/', [AssetController::class, 'store']);
         Route::post('/{id}', [AssetController::class, 'update']);
+        Route::post('/{id}/handover', [AssetController::class, 'handover']);
         Route::delete('/{id}', [AssetController::class, 'destroy']);
     });
     Route::group(['prefix' => 'privacy-setups'], function () {
@@ -538,11 +605,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::group(['prefix' => 'invoices'], function () {
         Route::get('/', [InvoiceController::class, 'index']);
+        Route::get('/all', [InvoiceController::class, 'indexForSuperadmin']); // before {id}, or "all" is read as an id
         Route::get('{id}', [InvoiceController::class, 'show']);
         Route::post('/', [InvoiceController::class, 'store']);
         Route::put('{id}', [InvoiceController::class, 'update']);
         Route::delete('{id}', [InvoiceController::class, 'destroy']);
-        Route::get('/all', [InvoiceController::class, 'indexForSuperadmin']);
     });
 
     Route::group(['prefix' => 'receipts'], function () {
@@ -556,11 +623,12 @@ Route::middleware('auth:sanctum')->group(function () {
     //     Route::get('/checkout-cancel', [StripeController::class, 'checkoutCancel']);
     // });
 
-    Route::group(['prefix' => 'reports'], function () {
+    Route::group(['prefix' => 'reports', 'middleware' => 'org.owner'], function () {
         Route::get('/membership-growth', [OrgReportController::class, 'getMembershipGrowthReport']);
+        Route::get('/summary', [OrgReportController::class, 'summary']);
     });
-    Route::get('/reports', [OrgReportController::class, 'getIncomeReport']);
-    Route::get('/org-expense-reports', [OrgReportController::class, 'getExpenseReport']);
+    Route::get('/reports', [OrgReportController::class, 'getIncomeReport'])->middleware('org.owner');
+    Route::get('/org-expense-reports', [OrgReportController::class, 'getExpenseReport'])->middleware('org.owner');
 
 
 
@@ -576,17 +644,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/connected-org-list', [IndividualController::class, 'getOrganisationByIndividualId']);
 
     Route::middleware('auth:sanctum')->get('/individual/dashboard-summary', [IndividualController::class, 'summary']);
-    Route::middleware('auth:sanctum')->get('/individual/meetings', [IndividualController::class, 'meetings']);
-    Route::middleware('auth:sanctum')->get('/individual/past_meetings', [IndividualController::class, 'past_meetings']);
-    Route::middleware('auth:sanctum')->get('/individual/events', [IndividualController::class, 'past_events']);
-    Route::middleware('auth:sanctum')->get('/individual/past_events', [IndividualController::class, 'events']);
-    Route::middleware('auth:sanctum')->get('/individual/committees', [IndividualController::class, 'committees']);
-    Route::middleware('auth:sanctum')->get('/individual/past_committees', [IndividualController::class, 'past_committees']);
-    Route::middleware('auth:sanctum')->get('/individual/projects', [IndividualController::class, 'projects']);
-    Route::middleware('auth:sanctum')->get('/individual/past_projects', [IndividualController::class, 'past_projects']);
-    Route::middleware('auth:sanctum')->get('/individual/assets', [IndividualController::class, 'assets']);
-    Route::middleware('auth:sanctum')->get('/individual/past_assets', [IndividualController::class, 'past_assets']);
-    Route::middleware('auth:sanctum')->get('/individual/attendance', [IndividualController::class, 'attendance']);
+    // What members see of their organisations (current memberships only); ?when=past for history
+    Route::group(['prefix' => 'individual', 'middleware' => 'auth:sanctum'], function () {
+        Route::get('/meetings', [MemberActivityController::class, 'meetings']);
+        Route::get('/meetings/{id}', [MemberActivityController::class, 'meeting']);
+        Route::get('/events', [MemberActivityController::class, 'events']);
+        Route::get('/events/{id}', [MemberActivityController::class, 'event']);
+        Route::get('/projects', [MemberActivityController::class, 'projects']);
+        Route::get('/projects/{id}', [MemberActivityController::class, 'project']);
+        Route::get('/committees', [MemberActivityController::class, 'committees']);
+        Route::get('/assets', [MemberActivityController::class, 'assets']);
+        Route::get('/attendance', [MemberActivityController::class, 'attendance']);
+        // My family: the member's own list and who may see it
+        Route::get('/family', [MemberFamilyController::class, 'index']);
+        Route::post('/family', [MemberFamilyController::class, 'store']);
+        Route::put('/family/{id}', [MemberFamilyController::class, 'update']);
+        Route::delete('/family/{id}', [MemberFamilyController::class, 'destroy']);
+        Route::put('/family/sharing/{orgId}', [MemberFamilyController::class, 'share']);
+    });
 
     // ----------------------- Superadmin --------------------
     Route::get('/super_admin_profile_image/{userId}', [SuperAdminController::class, 'getSuperAdminProfileImage']);
@@ -655,6 +730,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [AttendanceTypeController::class, 'store']);
         Route::put('/{id}', [AttendanceTypeController::class, 'update']);
         Route::delete('/{id}', [AttendanceTypeController::class, 'destroy']);
+    });
+    Route::group(['prefix' => 'attendance-statuses'], function () {
+        Route::get('/', [AttendanceStatusController::class, 'index']);
+        Route::post('/', [AttendanceStatusController::class, 'store']);
+        Route::put('/{id}', [AttendanceStatusController::class, 'update']);
+        Route::delete('/{id}', [AttendanceStatusController::class, 'destroy']);
     });
     Route::group(['prefix' => 'membership-types'], function () {
         Route::get('/', [MembershipTypeController::class, 'index']);
@@ -816,3 +897,74 @@ Route::middleware('auth:sanctum')->group(function () {
     //     Route::post('/webhook', [StripeController::class, 'stripeHandleWebhook']);
     // });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Super Admin guard (secure by default)
+|--------------------------------------------------------------------------
+| Controllers in SuperAdmin\ and Ecommerce\ manage platform-wide data
+| (countries, currencies, packages, prices, billing, shop). Every route to
+| them is Super Admin only, except:
+|  - $sharedReads: lists and records organisations also need (lookups, and
+|    their own invoices/bills/receipts, which the controllers limit to the
+|    owner)
+|  - $orgWrites: changes organisations make to their own records
+| New routes to these controllers are protected automatically.
+*/
+$sharedReads = [
+        'SuperAdmin\Financial\InvoiceController@index',
+        'SuperAdmin\Financial\InvoiceController@show',
+        'SuperAdmin\Financial\Management\EverydayMemberCountAndBillingController@currentMonthBillCalculation',
+        'SuperAdmin\Financial\Management\EverydayMemberCountAndBillingController@subMonthBillCalculation',
+        'SuperAdmin\Financial\Management\ManagementAndStorageBillingController@index',
+        'SuperAdmin\Financial\Management\ManagementAndStorageBillingController@orgAllBill',
+        'SuperAdmin\Financial\Management\ManagementAndStorageBillingController@show',
+        'SuperAdmin\Financial\Management\ManagementPackageController@index',
+        'SuperAdmin\Financial\Management\ManagementPackageController@show',
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@currency',
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@index',
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@managementPackagePrices',
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@managementPriceRate',
+        'SuperAdmin\Financial\ReceiptController@orgIndex',
+        'SuperAdmin\Settings\AttendanceStatusController@index',
+        'SuperAdmin\Settings\AttendanceTypeController@index',
+        'SuperAdmin\Settings\ConductTypeController@index',
+        'SuperAdmin\Settings\CountryController@index',
+        'SuperAdmin\Settings\CountryRegionController@countryWiseRegionWithCurrency',
+        'SuperAdmin\Settings\CountryRegionController@index',
+        'SuperAdmin\Settings\CountryRegionController@show',
+        'SuperAdmin\Settings\CurrencyController@index',
+        'SuperAdmin\Settings\DesignationController@index',
+        'SuperAdmin\Settings\DialingCodeController@index',
+        'SuperAdmin\Settings\LanguageController@index',
+        'SuperAdmin\Settings\MembershipRenewalCycleController@index',
+        'SuperAdmin\Settings\MembershipTypeController@index',
+        'SuperAdmin\Settings\PrivacySetupController@index',
+        'SuperAdmin\Financial\ReceiptController@show',
+];
+$orgWrites = [
+        'SuperAdmin\Financial\Management\ManagementSubscriptionController@update',
+];
+// Platform-wide lookup lists that live under Org\: anyone signed in may read, only Super Admins change
+$platformLookups = [
+        'Org\\Membership\\MembershipStatusController',
+        'Org\\Membership\\MembershipTerminationReasonController',
+        'Common\\NotificationNameController',
+];
+foreach (Route::getRoutes()->getRoutes() as $route) {
+    $action = str_replace('App\\Http\\Controllers\\', '', $route->getActionName());
+    if (in_array(explode('@', $action)[0], $platformLookups, true)) {
+        if (!in_array('GET', $route->methods(), true)) {
+            $route->middleware('superadmin');
+        }
+        continue;
+    }
+    if (!str_starts_with($action, 'SuperAdmin\\') && !str_starts_with($action, 'Ecommerce\\')) {
+        continue;
+    }
+    $isRead = in_array('GET', $route->methods(), true);
+    $allowed = $isRead ? in_array($action, $sharedReads, true) : in_array($action, $orgWrites, true);
+    if (!$allowed) {
+        $route->middleware('superadmin');
+    }
+}

@@ -17,7 +17,7 @@ return new class extends Migration
                   ->constrained('users')
                   ->onDelete('cascade');
             $table->string('name');
-            $table->string('short_description')->nullable();
+            $table->longText('short_description')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->text('note')->nullable(); // Changed to text for potentially longer notes

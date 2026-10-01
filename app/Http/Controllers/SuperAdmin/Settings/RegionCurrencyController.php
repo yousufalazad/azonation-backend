@@ -11,7 +11,7 @@ class RegionCurrencyController extends Controller
 {
     public function index()
     {
-        $regionCurrency = RegionCurrency::select('region_currencies.*', 'regions.name as region_name', 'currencies.name as currency_name')
+        $regionCurrency = RegionCurrency::select('region_currencies.*', 'regions.name as region_name', 'currencies.currency_name as currency_name')
             ->leftJoin('regions', 'region_currencies.region_id', '=', 'regions.id')
             ->leftJoin('currencies', 'region_currencies.currency_id', '=', 'currencies.id')
             ->get();

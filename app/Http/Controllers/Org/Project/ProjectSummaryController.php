@@ -1,20 +1,32 @@
 <?php
 namespace App\Http\Controllers\Org\Project;
-// use App\Http\Controllers\Controller;
-use Illuminate\Routing\Controller;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
+use App\Http\Concerns\StoresAttachments;
+use Illuminate\Routing\Controller;
+use App\Models\Project;
+use App\Models\ProjectAttendance;
+use App\Models\ProjectGuestAttendance;
 use App\Models\ProjectSummary;
 use App\Models\ProjectSummaryFile;
 use App\Models\ProjectSummaryImage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
+/**
+ * The report on a project: what was achieved, who took part, who benefited, money, next steps.
+ * Participation totals default to the count from the project's attendance records.
+ */
 class ProjectSummaryController extends Controller
 {
+    use ResolvesCurrentOrg, StoresAttachments;
+
+    private const FILES = ['image' => ProjectSummaryImage::class, 'file' => ProjectSummaryFile::class];
+    private const TEXT_FIELDS = [
+        'summary', 'highlights', 'outcomes', 'feedback', 'challenges', 'suggestions', 'financial_overview', 'next_steps',
+    ];
+
     public function __construct()
     {
         $this->middleware('org.permission:project-summary.read')->only(['index', 'show']);
@@ -22,269 +34,147 @@ class ProjectSummaryController extends Controller
         $this->middleware('org.permission:project-summary.update')->only(['edit', 'update']);
         $this->middleware('org.permission:project-summary.delete')->only(['destroy']);
     }
+
     public function index()
     {
-        $projectSummaries = ProjectSummary::all();
-        return response()->json(['status' => true, 'data' => $projectSummaries], 200);
+        $summaries = $this->ownedVia(ProjectSummary::class, 'project_id', Project::class)
+            ->select('project_summaries.*', 'projects.title as project_title', 'projects.start_date as project_start_date', 'projects.end_date as project_end_date')
+            ->leftJoin('projects', 'project_summaries.project_id', '=', 'projects.id')
+            ->get();
+        return response()->json(['status' => true, 'data' => $summaries], 200);
     }
+
     public function show($id)
     {
-        $projectSummary =  ProjectSummary::select('project_summaries.*', 'privacy_setups.id as privacy_id', 'privacy_setups.name as privacy_setup_name')
+        $summary = $this->ownedVia(ProjectSummary::class, 'project_id', Project::class)
+            ->select(
+                'project_summaries.*',
+                'privacy_setups.name as privacy_setup_name',
+                'projects.title as project_title',
+                'projects.start_date as project_start_date',
+                'projects.end_date as project_end_date'
+            )
             ->leftJoin('privacy_setups', 'project_summaries.privacy_setup_id', '=', 'privacy_setups.id')
+            ->leftJoin('projects', 'project_summaries.project_id', '=', 'projects.id')
             ->with(['images', 'documents'])
-            ->where('project_summaries.id', $id)->first();
-        if (!$projectSummary) {
-            return response()->json(['status' => false, 'message' => 'Event Summary not found'], 404);
+            ->where('project_summaries.id', $id)
+            ->first();
+        if (!$summary) {
+            return response()->json(['status' => false, 'message' => 'Project summary not found'], 404);
         }
-         $projectSummary->images = $projectSummary->images->map(function ($image) {
-            $image->image_url = $image->file_path
-                ? url(Storage::url($image->file_path))
-                : null;
-            return $image;
-        });
-        $projectSummary->documents = $projectSummary->documents->map(function ($document) {
-            $document->document_url = $document->file_path
-                ? url(Storage::url($document->file_path))
-                : null;
-            return $document;
-        });
-        return response()->json(['status' => true, 'data' => $projectSummary], 200);
+        return response()->json(['status' => true, 'data' => $this->withAttachmentUrls($summary)], 200);
     }
-    
-    public function create() {}
+
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'project_id' => 'required|integer',
-            'total_member_participation' => 'nullable|integer',
-            'total_guest_participation' => 'nullable|integer',
-            'total_participation' => 'nullable|integer',
-            'total_beneficial_person' => 'nullable|integer',
-            'total_communities_impacted' => 'nullable|integer',
-            'total_expense' => 'nullable',
-            'summary' => 'nullable|string',
-            'highlights' => 'nullable|string',
-            'feedback' => 'nullable|string',
-            'challenges' => 'nullable|string',
-            'suggestions' => 'nullable|string',
-            'financial_overview' => 'nullable|string',
-            'image_attachment' => 'nullable|file|mimes:jpg,jpeg,png',
-            'file_attachment' => 'nullable|file|mimes:pdf,doc,docx',
-            'next_steps' => 'nullable|string',
-            'outcomes' => 'nullable|string',
-            'privacy_setup_id' => 'nullable|integer',
-            'is_active' => 'nullable',
-            'is_publish' => 'nullable',
-        ]);
+        $this->ensureOwnedParent(Project::class, $request->input('project_id'));
+
+        $validator = Validator::make($request->all(), $this->rules());
         if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors(),
-            ], 422);
+            return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
         }
         try {
-            $imageAttachmentPath = null;
-            if ($request->hasFile('image_attachment')) {
-                $image = $request->file('image_attachment');
-                $imageAttachmentPath = $image->storeAs(
-                    'project/images',
-                    now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                    'public'
-                );
-            }
-            $fileAttachmentPath = null;
-            if ($request->hasFile('file_attachment')) {
-                $file = $request->file('file_attachment');
-                $fileAttachmentPath = $file->storeAs(
-                    'project/files',
-                    now()->format('YmdHis') . '_' . $file->getClientOriginalName(),
-                    'public'
-                );
-            }
-            $projectSummary = new ProjectSummary();
-            $projectSummary->project_id = $request->project_id;
-            $projectSummary->total_member_participation = $request->total_member_participation;
-            $projectSummary->total_guest_participation = $request->total_guest_participation;
-            $projectSummary->total_participation = $request->total_participation;
-            $projectSummary->total_beneficial_person = $request->total_beneficial_person;
-            $projectSummary->total_communities_impacted = $request->total_communities_impacted;
-            $projectSummary->summary = $request->summary;
-            $projectSummary->highlights = $request->highlights;
-            $projectSummary->feedback = $request->feedback;
-            $projectSummary->challenges = $request->challenges;
-            $projectSummary->suggestions = $request->suggestions;
-            $projectSummary->financial_overview = $request->financial_overview;
-            $projectSummary->total_expense = $request->total_expense;
-            $projectSummary->image_attachment = $imageAttachmentPath;
-            $projectSummary->file_attachment = $fileAttachmentPath;
-            $projectSummary->next_steps = $request->next_steps;
-            $projectSummary->outcomes = $request->outcomes;
-            $projectSummary->privacy_setup_id = $request->privacy_setup_id;
-            $projectSummary->is_active = $request->is_active;
-            $projectSummary->is_publish = $request->is_publish;
-            $projectSummary->updated_by = $request->user()->id;
-            $projectSummary->save();
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/project-summary/file',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-                    ProjectSummaryFile::create([
-                        'project_summary_id' => $projectSummary->id,
-                        'file_path' => $documentPath,
-                        'file_name' => $document->getClientOriginalName(),
-                        'mime_type' => $document->getClientMimeType(),
-                        'file_size' => $document->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/project-summary/image',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-                    ProjectSummaryImage::create([
-                        'project_summary_id' => $projectSummary->id,
-                        'file_path' => $imagePath,
-                        'file_name' => $image->getClientOriginalName(),
-                        'mime_type' => $image->getClientMimeType(),
-                        'file_size' => $image->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            return response()->json([
-                'status' => true,
-                'data' => $projectSummary,
-                'message' => 'Project summary created successfully!',
-            ], 201);
+            $summary = new ProjectSummary();
+            $summary->project_id = $request->project_id;
+            $summary->created_by = $request->user()->id;
+            $this->fill($summary, $request);
+            $summary->save();
+            $this->saveAttachments($request, $summary, self::FILES, 'project_summary_id', 'org/project-summary');
+            return response()->json(['status' => true, 'data' => $summary, 'message' => 'Project summary created successfully.'], 201);
         } catch (\Exception $e) {
-            Log::error('Error creating Project Summary: ' . $e->getMessage());
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.',
-            ], 500);
+            Log::error('Error creating project summary: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
         }
     }
-    
-    public function edit(ProjectSummary $projectSummary) {}
+
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'project_id' => 'required|integer',
-            'total_member_participation' => 'nullable|integer',
-            'total_guest_participation' => 'nullable|integer',
-            'total_participation' => 'nullable|integer',
-            'total_beneficial_person' => 'nullable|integer',
-            'total_communities_impacted' => 'nullable|integer',
-            'total_expense' => 'nullable',
+        if ($request->has('project_id')) $this->ensureOwnedParent(Project::class, $request->input('project_id'));
+
+        $validator = Validator::make($request->all(), $this->rules());
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
+        }
+        $summary = $this->ownedVia(ProjectSummary::class, 'project_id', Project::class)->find($id);
+        if (!$summary) {
+            return response()->json(['status' => false, 'message' => 'Project summary not found'], 404);
+        }
+        try {
+            $summary->project_id = $request->project_id;
+            $this->fill($summary, $request);
+            $summary->save();
+            $this->saveAttachments($request, $summary, self::FILES, 'project_summary_id', 'org/project-summary');
+            return response()->json(['status' => true, 'data' => $summary, 'message' => 'Project summary updated successfully.'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error updating project summary: ' . $e->getMessage());
+            return response()->json(['status' => false, 'message' => 'An error occurred. Please try again.'], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $summary = $this->ownedVia(ProjectSummary::class, 'project_id', Project::class)->find($id);
+        if (!$summary) {
+            return response()->json(['status' => false, 'message' => 'Project summary not found'], 404);
+        }
+        $this->deleteAttachments($summary);
+        $summary->delete();
+        return response()->json(['status' => true, 'message' => 'Project summary deleted successfully.'], 200);
+    }
+
+    private function rules(): array
+    {
+        $count = 'nullable|integer|min:0|max:100000000';
+        return [
+            'project_id' => 'required|integer|exists:projects,id',
+            'privacy_setup_id' => 'required|integer|exists:privacy_setups,id',
             'summary' => 'nullable|string',
             'highlights' => 'nullable|string',
+            'outcomes' => 'nullable|string',
             'feedback' => 'nullable|string',
             'challenges' => 'nullable|string',
             'suggestions' => 'nullable|string',
             'financial_overview' => 'nullable|string',
-            'image_attachment' => 'nullable|file|mimes:jpg,jpeg,png',
-            'file_attachment' => 'nullable|file|mimes:pdf,doc,docx',
             'next_steps' => 'nullable|string',
-            'outcomes' => 'nullable|string',
-            'privacy_setup_id' => 'nullable|integer',
-            'is_active' => 'nullable',
-            'is_publish' => 'nullable',
-        ]);
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            $fieldErrors = [];
-            foreach ($errors->messages() as $field => $messages) {
-                $fieldErrors[$field] = $messages[0];
-            }
-            return response()->json([
-                'status' => false,
-                'errors' => $fieldErrors,
-            ], 422);
-        }
-        try {
-            $projectSummary = ProjectSummary::findOrFail($id);
-            $projectSummary->project_id = $request->project_id;
-            $projectSummary->total_member_participation = $request->total_member_participation;
-            $projectSummary->total_guest_participation = $request->total_guest_participation;
-            $projectSummary->total_participation = $request->total_participation;
-            $projectSummary->total_beneficial_person = $request->total_beneficial_person;
-            $projectSummary->total_communities_impacted = $request->total_communities_impacted;
-            $projectSummary->summary = $request->summary;
-            $projectSummary->highlights = $request->highlights;
-            $projectSummary->feedback = $request->feedback;
-            $projectSummary->challenges = $request->challenges;
-            $projectSummary->suggestions = $request->suggestions;
-            $projectSummary->financial_overview = $request->financial_overview;
-            $projectSummary->total_expense = $request->total_expense;
-            $projectSummary->next_steps = $request->next_steps;
-            $projectSummary->outcomes = $request->outcomes;
-            $projectSummary->privacy_setup_id = $request->privacy_setup_id;
-            $projectSummary->is_active = $request->is_active;
-            $projectSummary->is_publish = $request->is_publish;
-            $projectSummary->updated_by = $request->user()->id;
-            $projectSummary->save();
-            if ($request->hasFile('documents')) {
-                foreach ($request->file('documents') as $document) {
-                    $documentPath = $document->storeAs(
-                        'org/project-summary/file',
-                        Carbon::now()->format('YmdHis') . '_' . $document->getClientOriginalName(),
-                        'public'
-                    );
-                    ProjectSummaryFile::create([
-                        'project_summary_id' => $projectSummary->id,
-                        'file_path' => $documentPath,
-                        'file_name' => $document->getClientOriginalName(),
-                        'mime_type' => $document->getClientMimeType(),
-                        'file_size' => $document->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $imagePath = $image->storeAs(
-                        'org/project-summary/image',
-                        Carbon::now()->format('YmdHis') . '_' . $image->getClientOriginalName(),
-                        'public'
-                    );
-                    ProjectSummaryImage::create([
-                        'project_summary_id' => $projectSummary->id,
-                        'file_path' => $imagePath,
-                        'file_name' => $image->getClientOriginalName(),
-                        'mime_type' => $image->getClientMimeType(),
-                        'file_size' => $image->getSize(),
-                        'is_public' => true,
-                        'is_active' => true,
-                    ]);
-                }
-            }
-            return response()->json([
-                'status' => true,
-                'data' => $projectSummary,
-                'message' => 'Project summary updated successfully!',
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Error updating Project Summary: ' . $e->getMessage());
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred. Please try again.',
-            ], 500);
-        }
+            'total_member_participation' => $count,
+            'total_guest_participation' => $count,
+            'total_beneficial_person' => $count,
+            'total_communities_impacted' => $count,
+            'total_expense' => $count,
+            'is_publish' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
+        ] + $this->attachmentRules();
     }
-    public function destroy($id)
+
+    private function fill(ProjectSummary $summary, Request $request): void
     {
-        $projectSummary = ProjectSummary::findOrFail($id);
-        $projectSummary->delete();
-        return response()->json(['status' => true, 'message' => 'Meeting Attendance deleted successfully.'], 200);
+        foreach (self::TEXT_FIELDS as $field) {
+            $summary->{$field} = $request->input($field);
+        }
+        // Totals: what the person entered, otherwise the count of people marked as attended
+        [$members, $guests] = $this->attendanceTotals((int) $request->project_id);
+        $summary->total_member_participation = (int) ($request->input('total_member_participation') ?? $members);
+        $summary->total_guest_participation = (int) ($request->input('total_guest_participation') ?? $guests);
+        $summary->total_participation = $summary->total_member_participation + $summary->total_guest_participation;
+        $summary->total_beneficial_person = (int) ($request->input('total_beneficial_person') ?? 0);
+        $summary->total_communities_impacted = (int) ($request->input('total_communities_impacted') ?? 0);
+        $summary->total_expense = (int) ($request->input('total_expense') ?? 0);
+        $summary->privacy_setup_id = $request->privacy_setup_id;
+        $summary->is_publish = $request->boolean('is_publish');
+        $summary->is_active = $request->has('is_active') ? $request->boolean('is_active') : true;
+        $summary->updated_by = $request->user()->id;
+    }
+
+    private function attendanceTotals(int $projectId): array
+    {
+        $count = fn (string $model, string $table) => $model::query()
+            ->join('attendance_statuses', "$table.attendance_status_id", '=', 'attendance_statuses.id')
+            ->where("$table.project_id", $projectId)
+            ->where('attendance_statuses.is_attended', true)
+            ->count();
+        return [
+            $count(ProjectAttendance::class, 'project_attendances'),
+            $count(ProjectGuestAttendance::class, 'project_guest_attendances'),
+        ];
     }
 }

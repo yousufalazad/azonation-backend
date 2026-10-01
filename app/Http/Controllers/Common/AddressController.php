@@ -28,21 +28,19 @@ class AddressController extends Controller
             ->where('country_id', $countryId)
             ->first();
 
-        if (!$group) {
-            abort(404, 'Address group not found');
-        }
+        $format = $group
+            ? DB::table('address_group_formats')
+                ->where('address_group_id', $group->address_group_id)
+                ->where('is_active', 1)
+                ->first()
+            : null;
 
-        $format = DB::table('address_group_formats')
-            ->where('address_group_id', $group->address_group_id)
-            ->where('is_active', 1)
-            ->first();
-
-
+        // No layout for this country (or no country yet): format null = the page's standard fields
         return response()->json([
             'countryId' => $countryId,
             'group'       => $group,
-            'group_alias' => $group->address_group_alias,
-            'format'      => json_decode($format->format_components, true),
+            'group_alias' => $group?->address_group_alias,
+            'format'      => $format ? json_decode($format->format_components, true) : null,
         ]);
     }
 
@@ -53,18 +51,11 @@ class AddressController extends Controller
         // return $address = Cache::remember('user_address_' . $userId, 60, function () use ($userId) {
         //     Address::where('user_id', $userId)->first();
         // });
-        $address = Address::where('user_id', $userId)->first();
-        if ($address) {
-            return response()->json([
-                'status' => true,
-                'data' => $address
-            ]);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'Address not found'
-            ], 404);
-        }
+        // No address yet is a normal answer, not an error
+        return response()->json([
+            'status' => true,
+            'data' => Address::where('user_id', $userId)->first(),
+        ]);
     }
     /**
      * Shared save logic

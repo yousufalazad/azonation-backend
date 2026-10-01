@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\Org\Membership;
+
+use App\Http\Concerns\ResolvesCurrentOrg;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 use App\Models\UnlinkMemberImage;
@@ -12,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 
 class UnlinkMemberController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:unlink-member.read')->only(['index', 'show']);
@@ -23,7 +27,7 @@ class UnlinkMemberController extends Controller
     {
         Log::info('Inside index');
 
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
 
         $unlinkMembers = UnlinkMember::with(['image', 'membershipStatus', 'membershipType'])
             ->where('user_id', $userId)
@@ -52,6 +56,9 @@ class UnlinkMemberController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validatedData = $request->validate([
             'existing_membership_id' => 'nullable',
             'membership_type_id' => 'nullable',
@@ -64,10 +71,10 @@ class UnlinkMemberController extends Controller
             'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
             'is_active' => 'nullable|boolean',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        $validatedData['user_id'] = $request->user()->id;
+        $validatedData['user_id'] = $this->orgIdOrFail();
         $unlinkMember = UnlinkMember::create($validatedData);
 
         Log::info("unlinkMember updated");
@@ -101,8 +108,8 @@ class UnlinkMemberController extends Controller
     
     public function show($id)
     {
-        // $unlinkMember = UnlinkMember::with('image')->find($id);
-        $unlinkMember = UnlinkMember::with(['image', 'membershipStatus', 'membershipType'])
+        // $unlinkMember = $this->owned(UnlinkMember::class)->with('image')->find($id);
+        $unlinkMember = $this->owned(UnlinkMember::class)->with(['image', 'membershipStatus', 'membershipType'])
             ->where('id', $id)
             ->first();
 
@@ -126,7 +133,10 @@ class UnlinkMemberController extends Controller
 
     public function update(Request $request, $id)
     {
-        $unlinkMember = UnlinkMember::find($id);
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
+        $unlinkMember = $this->owned(UnlinkMember::class)->find($id);
         if (!$unlinkMember) {
             return response()->json(['status' => false, 'message' => 'Unlink Member not found.'], 404);
         }
@@ -143,10 +153,10 @@ class UnlinkMemberController extends Controller
             'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
             'is_active' => 'nullable|boolean',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        $validatedData['user_id'] = $request->user()->id;
+        $validatedData['user_id'] = $this->orgIdOrFail();
 
         // Handle new image upload
         if ($request->hasFile('image_path')) {
@@ -188,7 +198,7 @@ class UnlinkMemberController extends Controller
 
     public function destroy($id)
     {
-        $unlinkMember = UnlinkMember::find($id);
+        $unlinkMember = $this->owned(UnlinkMember::class)->find($id);
         if (!$unlinkMember) {
             return response()->json(['status' => false, 'message' => 'unlink Member not found.'], 404);
         }

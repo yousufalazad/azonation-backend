@@ -5,12 +5,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
+    // Roles an organisation can give its members. Plan roles (named after a plan's slug) give an
+    // organisation account its plan features and are only listed for Super Admins.
     public function index()
     {
-        return Role::with('permissions')->get();
+        $roles = Role::with('permissions:id,name')->orderBy('name')->get();
+        if (request()->user()?->type !== 'superadmin') {
+            $planSlugs = DB::table('management_packages')->pluck('slug')->all();
+            $roles = $roles->reject(fn ($r) => in_array($r->name, $planSlugs, true))->values();
+        }
+        return $roles;
     }
 
     // public function permissions()

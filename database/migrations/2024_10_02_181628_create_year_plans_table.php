@@ -22,14 +22,14 @@ return new class extends Migration
 
 
             // New field requested
-            $table->string('title', 200)->nullable()->after('user_id');
+            $table->string('title', 200)->nullable();
 
             // Start year of the plan (e.g., 2024)
-            $table->year('start_year')
+            $table->year('start_year')->nullable()
                 ->comment('The start year of the year plan.');
 
             // End year of the plan (e.g., 2025)
-            $table->year('end_year')
+            $table->year('end_year')->nullable()
                 ->comment('The end year of the year plan.');
 
             // Description of the yearly goals
@@ -49,6 +49,7 @@ return new class extends Migration
 
             // Status of the year plan (draft, approved, etc.)
             $table->enum('status', ['draft', 'approved', 'completed', 'archived'])
+                ->nullable()
                 ->default('draft')
                 ->comment('The status of the year plan.');
 
@@ -62,11 +63,12 @@ return new class extends Migration
 
             // Publication status (published or unpublished)
             $table->boolean('published')
+                ->nullable()
                 ->default(1)
                 ->comment('Publication status: 1 = published, 0 = unpublished.');
 
                 // Foreign key referencing the privacy setups table (privacy settings)
-            $table->foreignId('privacy_setup_id')
+            $table->foreignId('privacy_setup_id')->nullable()
             ->constrained('privacy_setups')
             ->onDelete('cascade')
             ->comment('Privacy level of the year plan (e.g., public, private, only members).');

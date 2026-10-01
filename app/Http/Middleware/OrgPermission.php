@@ -65,10 +65,9 @@ class OrgPermission
             ], 403);
         }
 
-        // ✅ Attach org
-        $request->merge([
-            'current_org' => $org
-        ]);
+        // Attach org for controllers ($request->attributes->get('current_org')).
+        // Kept out of the input so it never ends up in validation or saved data.
+        $request->attributes->set('current_org', $org);
 
         return $next($request);
     }

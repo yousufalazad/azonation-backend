@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Org\FundManagement;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
+
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 
@@ -14,11 +16,14 @@ use App\Models\FundManagementFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class FundManagementController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     public function __construct()
     {
         $this->middleware('org.permission:fund-management.read')->only(['index', 'show']);
@@ -29,7 +34,7 @@ class FundManagementController extends Controller
     public function index()
     {
         try {
-            $userId = Auth::id();
+            $userId = $this->orgIdOrFail();
             $transactions = FundManagement::where('user_id', $userId)
                 ->where('is_active', true)
                 ->with(['funds:id,name', 'images', 'documents'])
@@ -65,10 +70,10 @@ class FundManagementController extends Controller
     }
     public function store(Request $request)
     {
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
         $validatedData = $request->validate([
             // 'user_id' => 'required|exists:users,id',
-            'fund_id' => 'required|exists:funds,id',
+            'fund_id' => ['required', Rule::exists('funds', 'id')->where('user_id', $this->orgIdOrFail())], // only this organisation's funds
             'date' => 'required|date',
             'transaction_title' => 'required|string|max:100',
             'type' => 'required|in:income,expense',
@@ -133,14 +138,14 @@ class FundManagementController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while creating the transaction. Please try again.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'fund_id' => 'required|exists:funds,id',
+            'fund_id' => ['required', Rule::exists('funds', 'id')->where('user_id', $this->orgIdOrFail())], // only this organisation's funds
             'date' => 'required|date',
             'transaction_title' => 'required|string|max:100',
             'type' => 'required|in:income,expense',
@@ -149,8 +154,8 @@ class FundManagementController extends Controller
             'is_active' => 'nullable|boolean'
         ]);
         try {
-            $validatedData['user_id'] = Auth::id(); // Ensure user_id is set to the authenticated user
-            $transaction = FundManagement::where('id', $id)->first();
+            $validatedData['user_id'] = $this->orgIdOrFail(); // Ensure user_id is set to the authenticated user
+            $transaction = FundManagement::where('id', $id)->where('user_id', $this->orgIdOrFail())->first();
             if (!$transaction) {
                 return response()->json([
                     'status' => false,
@@ -210,7 +215,7 @@ class FundManagementController extends Controller
     public function destroy($id)
     {
         try {
-            $transaction = FundManagement::where('id', $id)->first();
+            $transaction = FundManagement::where('id', $id)->where('user_id', $this->orgIdOrFail())->first();
             if (!$transaction) {
                 return response()->json([
                     'status' => false,
@@ -238,7 +243,7 @@ class FundManagementController extends Controller
     public function getTransactionCurrency(Request $request)
     {
         try {
-            $user_id = Auth::id();
+            $user_id = $this->orgIdOrFail();
             $fundTransactionCurrency = FundTransactionCurrency::where('user_id', $user_id)
                 ->with(['currency'])
                 ->first();
@@ -259,7 +264,7 @@ class FundManagementController extends Controller
     public function storeTransactionCurrency(Request $request)
     {
         try {
-            $user_id = Auth::id();
+            $user_id = $this->orgIdOrFail();
 
             $validatedData = $request->validate([
                 'currency_id' => 'required|exists:currencies,id',
@@ -291,7 +296,7 @@ class FundManagementController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while creating the transaction currency.',
-                'error' => $e->getMessage() // optional for debugging
+                'error' => \App\Support\ErrorDetail::for($e) // optional for debugging
             ], 500);
         }
     }
@@ -303,7 +308,7 @@ class FundManagementController extends Controller
                 'currency_id' => 'required|exists:currencies,id',
                 'is_active' => 'boolean'
             ]);
-            $fundTransactionCurrency = FundTransactionCurrency::where('id', $id)->first();
+            $fundTransactionCurrency = FundTransactionCurrency::where('id', $id)->where('user_id', $this->orgIdOrFail())->first();
             if (!$fundTransactionCurrency) {
                 return response()->json([
                     'status' => false,

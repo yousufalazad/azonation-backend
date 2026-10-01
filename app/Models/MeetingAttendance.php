@@ -12,6 +12,7 @@ class MeetingAttendance extends Model
         'meeting_id',
         'user_id', 
         'attendance_type_id', 
+        'attendance_status_id',
         'date', 
         'time',
         'note', 

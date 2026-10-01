@@ -18,7 +18,10 @@ class ManagementAndStorageBillingController extends Controller
     {
         try {
             $userId = Auth::id();
-            $orgAllBill = ManagementAndStorageBilling::where('user_id', $userId)->get();
+            $orgAllBill = ManagementAndStorageBilling::where('user_id', $userId)
+                ->orderByDesc('period_start')->orderByDesc('id')
+                ->get()
+                ->makeHidden(['admin_note']);
             return response()->json([
                 'status' => true,
                 'data' => $orgAllBill,
@@ -34,7 +37,8 @@ class ManagementAndStorageBillingController extends Controller
     public function index(Request $request)
     {
         try {
-            $billingList = ManagementAndStorageBilling::all();
+            // Organisations see only their own bills; Super Admins see all
+            $billingList = ManagementAndStorageBilling::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->get();
             return response()->json([
                 'status' => true,
                 'data' => $billingList,
@@ -68,7 +72,7 @@ class ManagementAndStorageBillingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'An error occurred while retrieving the user currency.',
-                'details' => $e->getMessage(),
+                'details' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -139,7 +143,7 @@ class ManagementAndStorageBillingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -183,9 +187,12 @@ class ManagementAndStorageBillingController extends Controller
     }
     public function show($billingId)
     {
-        $billing = ManagementAndStorageBilling::find($billingId);
+        $billing = ManagementAndStorageBilling::when((auth()->user()?->type === 'superadmin' ? null : auth()->id()), fn ($q, $owner) => $q->where('user_id', $owner))->find($billingId);
         if (!$billing) {
-            return response()->json(['status' => false, 'message' => 'Project not found'], 404);
+            return response()->json(['status' => false, 'message' => 'Bill not found'], 404);
+        }
+        if (auth()->user()?->type !== 'superadmin') {
+            $billing->makeHidden(['admin_note']);
         }
         return response()->json(['status' => true, 'data' => $billing], 200);
     }

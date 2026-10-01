@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 use App\Models\OrgProfile;
 use Illuminate\Http\Request;
@@ -16,6 +17,14 @@ use Carbon\Carbon;
 
 class OrgProfileController extends Controller
 {
+    use ResolvesCurrentOrg;
+
+    // The organisation this request acts for (an admin acting for an org), otherwise the signed-in account
+    private function accountId(): int
+    {
+        return $this->currentOrgId() ?? (int) Auth::id();
+    }
+
     protected function success($message, $data = [], $status = 200)
     {
         return response()->json([
@@ -26,7 +35,7 @@ class OrgProfileController extends Controller
     }
     public function getLogo()
     {
-        $userId = Auth::id();
+        $userId = $this->accountId();
         $logo = ProfileImage::where('user_id', $userId)->orderBy('id', 'desc')->first();
         $imageUrl = $logo ? url(Storage::url($logo->image_path)) : null;
         return response()->json([
@@ -38,9 +47,12 @@ class OrgProfileController extends Controller
     public function updateLogo(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            // No SVG: it can carry scripts. 5 MB is plenty for a logo.
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
-        $userId = $request->user()->id;
+        // Only the organisation account itself changes its logo, not people working for it
+        abort_unless(Auth::user()?->type === 'organisation', 403, 'Only the organisation account can change its logo.');
+        $userId = (int) Auth::id();
         $user = User::find($userId);
         if (!$user) {
             return response()->json(['status' => false, 'message' => 'Organization not found'], 404);
@@ -100,8 +112,11 @@ class OrgProfileController extends Controller
     public function show(OrgProfile $orgProfile) {}
     public function edit(OrgProfile $orgProfile) {}
     
+    // The {userId} in the address is ignored: an organisation can only change its own profile
+    // (before, anyone signed in could overwrite any organisation's profile)
     public function update(Request $request, int $userId): JsonResponse
     {
+        $userId = $this->orgIdOrFail();
         $validatedData = $request->validate([
             'short_description'  => 'nullable|string|max:255',
             'detail_description' => 'nullable|string',

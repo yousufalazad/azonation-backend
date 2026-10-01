@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Billing\BillingService;
+use App\Models\ManagementAndStorageBilling;
+
 use Illuminate\Console\Command;
 use App\Http\Controllers\Ecommerce\Order\OrderController;
 use Illuminate\Console\Scheduling\Schedule;
@@ -12,19 +15,16 @@ class GenerateManagementAndStorageBillingOrder extends Command
     // Command name: php artisan generate:management-and-storage-billing-order
     protected $description = 'Generate management and storage billing order for all users'; // Command description
 
-    public function handle()
+    // Draft invoices (with their order lines) for last month's bills; generate:management-and-storage-bill does this too
+    public function handle(BillingService $billing)
     {
-        $controller = new OrderController();
-        $controller->generateOrdersFromBillings(request()); // Pass an empty request if no parameters needed
+        ManagementAndStorageBilling::whereDate('period_start', now()->subMonth()->startOfMonth()->toDateString())->get()
+            ->each(fn ($bill) => $billing->draftInvoice($bill));
 
-        $this->info('Management and storage billing order records generated successfully by System.');
+        $this->info('Draft invoices made for the bills of last month.');
         return 0;
     }
 
-    public function schedule(Schedule $schedule): void
-    {
-        $schedule->command(static::class)->monthly()->runInBackground();
-    }
     // You can adjust the frequency depending on your needs:
 	// •	->daily() — Runs daily.
 	// •	->weekly() — Runs weekly.

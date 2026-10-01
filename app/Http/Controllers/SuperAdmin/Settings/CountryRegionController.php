@@ -50,7 +50,7 @@ class CountryRegionController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to fetch regions and currencies',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }

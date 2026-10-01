@@ -2,36 +2,66 @@
 
 namespace App\Http\Controllers\Role;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 use App\Models\OrgRoleTitle;
 use Illuminate\Http\Request;
 
+/**
+ * Role titles ("Treasurer", "Secretary"...) belong to one organisation.
+ * Super Admins may work with any organisation (org_type_user_id in the
+ * request); everyone else only with their current organisation.
+ */
 class OrgRoleTitleController extends Controller
 {
+    use ResolvesCurrentOrg;
+
+    private function orgFor(Request $request): ?int
+    {
+        if ($request->user()?->type === 'superadmin') {
+            $requested = $request->input('org_type_user_id');
+            return ($requested && $requested !== 'null') ? (int) $requested : null;
+        }
+        return $this->currentOrgId($request);
+    }
+
+    private function findOwned(Request $request, $id): OrgRoleTitle
+    {
+        $query = OrgRoleTitle::where('id', $id);
+        if ($request->user()?->type !== 'superadmin') {
+            $query->where('org_type_user_id', $this->currentOrgId($request) ?? 0);
+        }
+        return $query->firstOrFail();
+    }
+
     /* ================= LIST ================= */
     public function index(Request $request)
     {
-        $orgId = $request->org_type_user_id;
-        $condition = [];
-        if ($orgId && $orgId !== 'null') {
-            $condition[] = ['org_type_user_id', $orgId];
+        $orgId = $this->orgFor($request);
+        $isSuperAdmin = $request->user()?->type === 'superadmin';
+        if (!$orgId && !$isSuperAdmin) {
+            return response()->json([]);
         }
-        $titles = OrgRoleTitle::where($condition)
+
+        return OrgRoleTitle::when($orgId, fn ($q) => $q->where('org_type_user_id', $orgId))
             ->orderBy('name')
             ->get();
-        return $titles;
     }
 
     /* ================= STORE ================= */
     public function store(Request $request)
     {
         $request->validate([
-            'org_type_user_id' => 'required|integer',
             'name' => 'required|string|max:255'
         ]);
 
+        $orgId = $this->orgFor($request);
+        if (!$orgId) {
+            return $this->noOrgResponse();
+        }
+
         $title = OrgRoleTitle::create([
-            'org_type_user_id' => $request->org_type_user_id,
+            'org_type_user_id' => $orgId,
             'name' => $request->name
         ]);
 
@@ -43,30 +73,25 @@ class OrgRoleTitleController extends Controller
     }
 
     /* ================= SHOW ================= */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $title = OrgRoleTitle::findOrFail($id);
-
         return response()->json([
             'status' => true,
-            'data' => $title
+            'data' => $this->findOwned($request, $id)
         ]);
     }
 
     /* ================= UPDATE ================= */
     public function update(Request $request, $id)
     {
-        $title = OrgRoleTitle::findOrFail($id);
+        $title = $this->findOwned($request, $id);
 
         $request->validate([
             'name' => 'required|string|max:255'
         ]);
 
-        $title->update([
-            'name' => $request->name,
-            'org_type_user_id' => $request->org_type_user_id,
-
-        ]);
+        // The title stays in its organisation
+        $title->update(['name' => $request->name]);
 
         return response()->json([
             'status' => true,
@@ -76,11 +101,9 @@ class OrgRoleTitleController extends Controller
     }
 
     /* ================= DELETE ================= */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $title = OrgRoleTitle::findOrFail($id);
-
-        $title->delete();
+        $this->findOwned($request, $id)->delete();
 
         return response()->json([
             'status' => true,

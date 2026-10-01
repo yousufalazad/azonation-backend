@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers\Common;
 
+use App\Http\Concerns\OwnsPersonalRecords;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\UserNotification;
@@ -9,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 
 class UserNotificationController extends Controller
 {
+    use OwnsPersonalRecords;
+
     /**
      * Display a listing of the resource.
      */
@@ -71,7 +75,9 @@ class UserNotificationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $userNotification = UserNotification::findOrFail($id);
+        // Whose record: always the signed-in person (Super Admins may name a user)
+        $request->merge(['user_id' => $this->personalOwnerId($request)]);
+        $userNotification = $this->mine(UserNotification::class)->findOrFail($id);
         $userNotification->update($request->all());
         return response()->json([
             'status' => true,
@@ -85,7 +91,7 @@ class UserNotificationController extends Controller
      */
     public function destroy( $id)
     {
-        $userNotification = UserNotification::findOrFail($id);
+        $userNotification = $this->mine(UserNotification::class)->findOrFail($id);
         $userNotification->delete();
         return response()->json([
             'status' => true,

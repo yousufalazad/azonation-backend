@@ -76,6 +76,7 @@ return new class extends Migration
             // Notes
             $table->string('org_note', 255)->nullable()
                 ->comment('Organisation note on reason/context');
+            $table->longText('more_info')->nullable();
 
             $table->timestamps();
 

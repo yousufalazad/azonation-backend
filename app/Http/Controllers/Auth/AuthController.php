@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\SuperAdminUserRegisteredMail;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
@@ -158,6 +159,8 @@ class AuthController extends Controller
 
             $data[] = [
                 'org_type_user_id' => $org->org_type_user_id,
+                // Shown when a member manages the organisation
+                'org_name' => DB::table('users')->where('id', $org->org_type_user_id)->value('org_name'),
                 'roles' => $roles,
                 'permissions' => $permissions
             ];
@@ -176,7 +179,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:100|unique:users',
             'country_id' => 'required|numeric|max:999',
             'type' => 'required|string|max:12|in:individual,organisation',
-            'password' => 'required|string|min:8',
+            'password' => ['required', 'string', PasswordRule::min(8)->mixedCase()->numbers()->symbols()],
             'referral' => 'nullable|string|max:100',
             'referral_source' => 'nullable|string|max:50',
         ]);
@@ -437,7 +440,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again.',
-                'error' => $e->getMessage()
+                'error' => \App\Support\ErrorDetail::for($e)
             ], 500);
         }
     }
@@ -528,7 +531,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while updating the name',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -557,7 +560,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while updating the last_name',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -586,7 +589,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while updating the name',
-                'error' => $e->getMessage(),
+                'error' => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -631,7 +634,7 @@ class AuthController extends Controller
 
             // Build validation rules dynamically:
             $rules = [
-                'password' => 'required|string|min:8|confirmed', // needs password_confirmation
+                'password' => ['required', 'string', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()->symbols()], // needs password_confirmation
             ];
 
             // If the user already has a local password, require the old one.
@@ -681,7 +684,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'An error occurred while updating the password: ' . $e->getMessage(),
+                'message' => 'An error occurred while updating the password: ' . \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }
@@ -708,7 +711,7 @@ class AuthController extends Controller
             // Explicitly forget cookies that can keep you logged in
             $cookiesToForget = [
                 config('session.cookie', 'laravel_session'),
-                Auth::getRecallerName(), // remember_web_xxx
+                Auth::guard('web')->getRecallerName(), // remember_web_xxx (the sanctum guard has no recaller)
                 'XSRF-TOKEN',            // optional, nice to reset
             ];
 
@@ -724,7 +727,7 @@ class AuthController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'message' => 'Logout failed',
-                'error'   => $e->getMessage(),
+                'error'   => \App\Support\ErrorDetail::for($e),
             ], 500);
         }
     }

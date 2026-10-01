@@ -33,7 +33,7 @@ class Meeting extends Model
         'rsvp_status',
         'participants',
         'description',
-        'address',
+        'venue',
         'agenda',
         'requirements',
         'note',

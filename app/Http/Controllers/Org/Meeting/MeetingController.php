@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\Meeting;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 // use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Routing\Controller;
 use App\Models\Meeting;
@@ -16,6 +17,8 @@ use Carbon\Carbon;
 // class MeetingController extends BaseController
 class MeetingController extends Controller
 {
+    use ResolvesCurrentOrg;
+
     // public function __construct()
     // {
     //     $this->middleware('permission:meeting.read')->only(['index', 'show', 'orgNextMeeting']);
@@ -34,7 +37,7 @@ class MeetingController extends Controller
 
     public function index(Request $request)
     {
-        $user_id = Auth::id();
+        $user_id = $this->orgIdOrFail();
         $meetings = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')
             ->leftJoin('conduct_types', 'meetings.conduct_type_id', '=', 'conduct_types.id')
             ->where('meetings.user_id', $user_id)
@@ -45,7 +48,7 @@ class MeetingController extends Controller
 
     public function orgNextMeeting(Request $request)
     {
-        $user_id = Auth::id();
+        $user_id = $this->orgIdOrFail();
 
         // Ensuring we're comparing against today in the same timezone
         $nextMeeting = Meeting::where('user_id', $user_id)
@@ -66,6 +69,9 @@ class MeetingController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'short_name' => 'nullable|string',
@@ -153,7 +159,7 @@ class MeetingController extends Controller
     }
     public function show($id)
     {
-        $meeting = Meeting::select('meetings.*', 'conduct_types.name as conduct_type_name')
+        $meeting = $this->owned(Meeting::class)->select('meetings.*', 'conduct_types.name as conduct_type_name')
             ->with(['images', 'documents'])
             ->leftJoin('conduct_types', 'meetings.conduct_type_id', '=', 'conduct_types.id')
             ->where('meetings.id', $id)
@@ -177,6 +183,9 @@ class MeetingController extends Controller
     }
     public function update(Request $request, $id)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'short_name' => 'nullable|string',
@@ -219,7 +228,7 @@ class MeetingController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 400);
         }
-        $meeting = Meeting::find($id);
+        $meeting = $this->owned(Meeting::class)->find($id);
         if (!$meeting) {
             return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
         }
@@ -267,7 +276,7 @@ class MeetingController extends Controller
     }
     public function destroy($id)
     {
-        $meeting = Meeting::find($id);
+        $meeting = $this->owned(Meeting::class)->find($id);
         if (!$meeting) {
             return response()->json(['status' => false, 'message' => 'Meeting not found'], 404);
         }

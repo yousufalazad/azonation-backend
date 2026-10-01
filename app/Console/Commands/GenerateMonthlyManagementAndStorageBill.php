@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Billing\BillingService;
+use App\Models\ManagementAndStorageBilling;
+
 use Illuminate\Console\Command;
 use App\Http\Controllers\SuperAdmin\Financial\Management\ManagementAndStorageBillingController;
 use Illuminate\Console\Scheduling\Schedule;
@@ -19,24 +22,18 @@ class GenerateMonthlyManagementAndStorageBill extends Command
     protected $description = 'Generated management and storage bill for all organizations';
 
     
-    public function handle()
+    // Last month's bill for every organisation, then a draft invoice for each (nothing is made twice)
+    public function handle(BillingService $billing)
     {
-        $controller = new ManagementAndStorageBillingController();
-        $controller->store(request()); // Pass an empty request if no parameters needed
+        $month = now()->subMonth()->startOfMonth();
+        $result = $billing->monthlyBills($month);
+        ManagementAndStorageBilling::whereDate('period_start', $month->toDateString())->get()
+            ->each(fn ($bill) => $billing->draftInvoice($bill));
 
-        // Log the command execution and the call to the store function
-        Log::info('Command executed and store function called');
-
-        $this->info('Management bill generated successfully by System.');
+        $this->info("Bills for {$result['month']}: {$result['created']} created, {$result['skipped']} skipped. Draft invoices made.");
         return 0;
     }
 
-    public function schedule(Schedule $schedule): void
-    {
-        // $schedule->command(static::class)->daily();
-        $schedule->command('generate:management-billing')->daily()->runInBackground();
-
-    }
     // You can adjust the frequency depending on your needs:
 	// •	->daily() — Runs daily.
 	// •	->weekly() — Runs weekly.

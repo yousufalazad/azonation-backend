@@ -32,6 +32,11 @@ return new class extends Migration
                 ->onDelete('cascade')
                 ->comment('Organisation membership renewal cycle');
 
+            // Platform renewal cycle (Monthly, Annual...) this price is for
+            $table->foreignId('member_renewal_cycle_id')->nullable()
+                ->constrained('membership_renewal_cycles')
+                ->onDelete('cascade');
+
             // Money (minor units) + currency
             $table->string('currency', 3)->comment('ISO 4217 (e.g., GBP)');
             $table->unsignedBigInteger('unit_amount_minor')->comment('Minor units, e.g., 999 = £9.99');

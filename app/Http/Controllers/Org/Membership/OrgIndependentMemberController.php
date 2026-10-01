@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Org\Membership;
 
+use App\Http\Concerns\ResolvesCurrentOrg;
 use App\Http\Controllers\Controller;
 use App\Models\IndependentMemberImage;
 use App\Models\OrgIndependentMember;
@@ -13,12 +14,14 @@ use Illuminate\Support\Facades\Auth;
 
 class OrgIndependentMemberController extends Controller
 {
+    use ResolvesCurrentOrg;
+
 
     public function index(Request $request)
     {
         Log::info('Inside index');
 
-        $userId = Auth::id();
+        $userId = $this->orgIdOrFail();
 
         $independentMembers = OrgIndependentMember::where('user_id', $userId)
             ->with('image') // assuming 'image' is a hasOne or belongsTo relationship
@@ -49,6 +52,9 @@ class OrgIndependentMemberController extends Controller
 
     public function store(Request $request)
     {
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
         // dd(request()->all()); exit;
 
         $validatedData = $request->validate([
@@ -59,10 +65,10 @@ class OrgIndependentMemberController extends Controller
             'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
             'is_active' => 'nullable|boolean',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        $validatedData['user_id'] = $request->user()->id;
+        $validatedData['user_id'] = $this->orgIdOrFail();
         $independentMember = OrgIndependentMember::create($validatedData);
 
         Log::info("independentMember updated");
@@ -95,7 +101,7 @@ class OrgIndependentMemberController extends Controller
     }
     public function show($id)
     {
-        $independentMember = OrgIndependentMember::with('image')->find($id);
+        $independentMember = $this->owned(OrgIndependentMember::class)->with('image')->find($id);
 
         if (!$independentMember) {
             return response()->json(['status' => false, 'message' => 'Independent Member not found.'], 404);
@@ -117,7 +123,10 @@ class OrgIndependentMemberController extends Controller
 
     public function update(Request $request, $id)
     {
-        $independentMember = OrgIndependentMember::find($id);
+        // The organisation always comes from the session, never from the form
+        $request->merge(['user_id' => $this->orgIdOrFail()]);
+
+        $independentMember = $this->owned(OrgIndependentMember::class)->find($id);
         if (!$independentMember) {
             return response()->json(['status' => false, 'message' => 'independentMember not found.'], 404);
         }
@@ -130,7 +139,7 @@ class OrgIndependentMemberController extends Controller
             'address' => 'nullable|string|max:100',
             'note' => 'nullable|string',
             'is_active' => 'nullable|boolean',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
         if ($request->hasFile('image_path')) {
             if ($independentMember->image_path) {
@@ -144,13 +153,13 @@ class OrgIndependentMemberController extends Controller
             $path = $image->storeAs('org/independent_member/image', $newFileName, 'public');
             $validatedData['image_path'] = $path;
         }
-        $validatedData['user_id'] = $request->user()->id;
+        $validatedData['user_id'] = $this->orgIdOrFail();
         $independentMember->update($validatedData);
         return response()->json(['status' => true, 'message' => 'independentMember updated successfully.', 'data' => $independentMember]);
     }
     public function destroy($id)
     {
-        $independentMember = OrgIndependentMember::find($id);
+        $independentMember = $this->owned(OrgIndependentMember::class)->find($id);
         if (!$independentMember) {
             return response()->json(['status' => false, 'message' => 'independentMember not found.'], 404);
         }
