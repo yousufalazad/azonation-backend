@@ -6,8 +6,8 @@
 
 Laravel 11 (PHP 8.2) + MariaDB/MySQL (XAMPP) + Sanctum + spatie/laravel-permission (teams).
 Frontend is the sibling repo `../azonation-frontend` (Vue). **Read
-`../azonation-frontend/docs/ROADMAP.md` first** (decisions, modules, pricing, build order)
-and the newest note in `../azonation-frontend/docs/handoff/`.
+`../../azonation-app/docs/ROADMAP.md` first** (decisions, modules, pricing, build order)
+and the newest note in `../../azonation-app/docs/handoff/` (the docs moved there on 2026-10-01).
 
 ## Run and check
 
