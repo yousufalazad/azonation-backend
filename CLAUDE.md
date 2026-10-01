@@ -1,4 +1,8 @@
-# Azonation — backend
+# Azonation — backend (frozen)
+
+> **This repo is frozen.** New work happens in `../../azonation-api` (Laravel) and
+> `../../azonation-app` (Vue). Use this repo only as the reference when moving
+> features (roadmap §2 parity rule). Fix something here only if it blocks the move.
 
 Laravel 11 (PHP 8.2) + MariaDB/MySQL (XAMPP) + Sanctum + spatie/laravel-permission (teams).
 Frontend is the sibling repo `../azonation-frontend` (Vue). **Read
